@@ -1,0 +1,44 @@
+.appbar-container {
+  &.MuiBox-root {
+    margin-top: 70px;
+    margin-left: 50px;
+    margin-right: 50px;
+    display: flex;
+    justify-content: center;
+  }
+}
+
+.appBar {
+  &.MuiAppBar-root {
+    min-height: 60px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding-right: 1rem;
+    padding-left: 1rem;
+    z-index: 2;
+  }
+
+  .menuBarBox {
+    &.MuiBox-root {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+  .menuBarBox.open {
+    &.MuiBox-root {
+      display: flex;
+      min-width: 460px;
+    }
+  }
+  .MuiSvgIcon-root {
+    font-size: 1.5rem;
+  }
+}
+
+.appBarLogo {
+  width: 140px;
+  margin: 10px;
+}

@@ -1,0 +1,154 @@
+.loginBox {
+  &.MuiBox-root {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-image: url("../../assets/Artboard4.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+  .loginLeft {
+    background-image: url("../../assets/Artboard5.png");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position-y: top;
+    filter: grayscale(60%);
+
+    height: 350px;
+    width: 450px;
+    position: relative;
+    left: 50px;
+    top: -100px;
+
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    .loginLogo {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      width: 80%;
+      height: 80%;
+      border-radius: 10px;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 10px 15px 10px #00000026;
+      background-color: #f4f2f241;
+
+      .logoImg {
+        width: 250px;
+        height: 250px;
+      }
+    }
+  }
+  .loginRight {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #c7c6c6;
+
+    height: 325px;
+    width: 450px;
+    overflow: hidden;
+    border-radius: 10px;
+    z-index: 1;
+    left: -50px;
+    top: 100px;
+  }
+}
+
+.loginText-Login {
+  &.MuiTypography-root {
+    font-family: "Roboto-Bold";
+    font-size: 1.9rem;
+    letter-spacing: 2px;
+  }
+}
+
+.loginText-Please {
+  &.MuiTypography-root {
+    font-family: "Roboto-Light";
+    margin-bottom: 1rem;
+    letter-spacing: 1px;
+  }
+}
+
+.login-textbox {
+  &.MuiFormControl-root {
+    min-height: 4rem;
+    .MuiFormLabel-root {
+      font-family: "Roboto-Light";
+      letter-spacing: 1px;
+    }
+    .MuiInputBase-root {
+      font-family: "Roboto-Light";
+      letter-spacing: 1px;
+    }
+    .MuiFormHelperText-root {
+      font-family: "Roboto-Light";
+      letter-spacing: 1px;
+    }
+  }
+}
+
+.login-Button {
+  &.MuiButtonBase-root {
+    text-transform: none;
+    font-family: "Roboto-Light";
+    letter-spacing: 1px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .loginBox {
+    .loginLeft {
+      display: none;
+    }
+    .loginRight {
+      position: static;
+    }
+  }
+}
+
+@media (max-width: 1024px) {
+  .loginBox {
+    .loginLeft {
+      display: none;
+    }
+    .loginRight {
+      position: static;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .loginBox {
+    .loginLeft {
+      display: none;
+    }
+    .loginRight {
+      position: static;
+      width: 380px;
+    }
+  }
+}
+
+@media (max-width: 425px) {
+  .loginBox {
+    .loginLeft {
+      display: none;
+    }
+    .loginRight {
+      position: static;
+      width: 200px;
+      overflow: auto;
+    }
+  }
+}
