@@ -83,12 +83,14 @@
 .login-textbox {
   &.MuiFormControl-root {
     min-height: 4rem;
+
     .MuiFormLabel-root {
-      font-family: "Roboto-Light";
+      font-family: "Roboto-Medium";
       letter-spacing: 1px;
     }
     .MuiInputBase-root {
-      font-family: "Roboto-Light";
+      border-radius: 10px;
+      font-family: "Roboto-Medium";
       letter-spacing: 1px;
     }
     .MuiFormHelperText-root {

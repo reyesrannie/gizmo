@@ -2,7 +2,7 @@ import React from "react";
 import { Box, Typography } from "@mui/material";
 
 import "../../components/styles/Dashboard.scss";
-import welcomeImage from "../../assets/svg/undraw_interior_design_re_7mvn.svg";
+import welcomeImage from "../../assets/svg/undraw_hello_re_3evm.svg";
 import { useSelector } from "react-redux";
 
 const Dashboard = () => {
@@ -21,7 +21,7 @@ const Dashboard = () => {
         <Box>
           <img
             src={welcomeImage}
-            alt="logo"
+            alt="Welcome Image"
             className="dashboard-welcome-image"
             draggable="false"
           />

@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 // const baseURL = process.env.REACT_APP_API_KEY;
 
-const baseURL = "http://10.10.13.11:8000/api";
+const baseURL = "http://10.10.10.17:8000/api";
 
 export const jsonServerAPI = createApi({
   reducerPath: "jsonServerAPI",
@@ -18,71 +18,31 @@ export const jsonServerAPI = createApi({
       return headers;
     },
   }),
-  tagTypes: ["Links"],
+  tagTypes: [""],
   endpoints: (builder) => ({
     login: builder.mutation({
       transformResponse: (response) => response.result,
-      query: (payload) => ({ url: `/login`, method: "POST", body: payload }),
-    }),
-    logout: builder.mutation({
-      transformResponse: (response) => response.result,
-      query: (payload) => ({ url: `/logout`, method: "POST", body: payload }),
-    }),
-    passwordChange: builder.mutation({
-      transformResponse: (response) => response,
       query: (payload) => ({
-        url: `/user/change_password`,
-        method: "PUT",
-        body: payload,
-      }),
-    }),
-    links: builder.query({
-      transformResponse: (response) => response.result,
-      query: (payload) => ({
-        url: `/link`,
-        method: "GET",
-        params: payload,
-      }),
-      providesTags: ["Links"],
-    }),
-    images: builder.query({
-      transformResponse: (response) => response.result,
-      query: (payload) => ({
-        url: `/cloudinary`,
-        method: "GET",
-        body: payload,
-      }),
-    }),
-    uploadImage: builder.mutation({
-      transformResponse: (response) => response,
-      query: (payload) => ({
-        url: `/image-upload`,
+        url: `/auth/login`,
         method: "POST",
         body: payload,
       }),
     }),
-    createLink: builder.mutation({
-      transformResponse: (response) => response,
-      query: (payload) => ({ url: `/link`, method: "POST", body: payload }),
-      invalidatesTags: ["Links"],
+    logout: builder.mutation({
+      transformResponse: (response) => response.result,
+      query: (payload) => ({
+        url: `/auth/logout`,
+        method: "POST",
+        body: payload,
+      }),
     }),
-    updateLink: builder.mutation({
+    passwordChange: builder.mutation({
       transformResponse: (response) => response,
       query: (payload) => ({
-        url: `/link/${payload.id}`,
+        url: `/change_password`,
         method: "PATCH",
         body: payload,
       }),
-      invalidatesTags: ["Links"],
-    }),
-    archiveLink: builder.mutation({
-      transformResponse: (response) => response,
-      query: (payload) => ({
-        url: `/link_archive/${payload.id}`,
-        method: "PATCH",
-        body: payload,
-      }),
-      invalidatesTags: ["Links"],
     }),
   }),
 });
@@ -91,10 +51,4 @@ export const {
   useLoginMutation,
   usePasswordChangeMutation,
   useLogoutMutation,
-  useCreateLinkMutation,
-  useLinksQuery,
-  useUpdateLinkMutation,
-  useImagesQuery,
-  useUploadImageMutation,
-  useArchiveLinkMutation,
 } = jsonServerAPI;

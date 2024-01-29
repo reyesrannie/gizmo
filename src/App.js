@@ -4,6 +4,7 @@ import Login from "./screen/login/Login";
 import Dashboard from "./screen/dashboard/Dashboard";
 import AppBar from "./components/customs/AppBar";
 import Routing from "./services/routes/Routing";
+import { SnackbarProvider } from "notistack";
 
 function App() {
   const theme = createTheme({
@@ -44,7 +45,12 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
-      <Routing />
+      <SnackbarProvider
+        maxSnack={3}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Routing />
+      </SnackbarProvider>
     </ThemeProvider>
   );
 }
