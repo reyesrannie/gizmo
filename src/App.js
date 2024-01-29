@@ -3,6 +3,7 @@ import "./App.scss";
 import Login from "./screen/login/Login";
 import Dashboard from "./screen/dashboard/Dashboard";
 import AppBar from "./components/customs/AppBar";
+import Routing from "./services/routes/Routing";
 
 function App() {
   const theme = createTheme({
@@ -10,7 +11,17 @@ function App() {
       MuiDrawer: {
         styleOverrides: {
           paper: {
-            backgroundColor: "#f4ce92",
+            backgroundColor: "#1a1d24",
+          },
+        },
+      },
+      MuiListItemButton: {
+        styleOverrides: {
+          root: {
+            backgroundColor: "#15253B",
+            "&:hover": {
+              backgroundColor: "#1C315F",
+            },
           },
         },
       },
@@ -33,7 +44,7 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
-      <AppBar />
+      <Routing />
     </ThemeProvider>
   );
 }

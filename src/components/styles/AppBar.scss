@@ -27,12 +27,7 @@
       justify-content: center;
     }
   }
-  .menuBarBox.open {
-    &.MuiBox-root {
-      display: flex;
-      min-width: 460px;
-    }
-  }
+
   .MuiSvgIcon-root {
     font-size: 1.5rem;
   }
@@ -41,4 +36,71 @@
 .appBarLogo {
   width: 140px;
   margin: 10px;
+}
+
+.body-container {
+  &.MuiPaper-root {
+    min-width: 94vw;
+    min-height: 90vh;
+    transition: all 0.2s ease;
+  }
+}
+
+.body-container.open {
+  &.MuiPaper-root {
+    min-width: 86vw;
+  }
+}
+
+@media (max-width: 1439px) {
+  .body-container {
+    &.MuiPaper-root {
+      min-width: 90vw;
+    }
+  }
+
+  .body-container.open {
+    &.MuiPaper-root {
+      min-width: 75vw;
+    }
+  }
+}
+
+@media (max-width: 1023px) {
+  .body-container {
+    &.MuiPaper-root {
+      min-width: 650px;
+    }
+  }
+}
+
+@media (max-width: 767px) {
+  .body-container {
+    &.MuiPaper-root {
+      min-width: 330px;
+    }
+  }
+}
+@media (max-width: 424px) {
+  .body-container {
+    &.MuiPaper-root {
+      min-width: 290px;
+    }
+  }
+}
+
+@media (max-width: 374px) {
+  .body-container {
+    &.MuiPaper-root {
+      min-width: 230px;
+    }
+  }
+}
+
+@media (max-width: 319px) {
+  .body-container {
+    &.MuiPaper-root {
+      min-width: 80px;
+    }
+  }
 }

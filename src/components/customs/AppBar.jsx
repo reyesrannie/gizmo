@@ -3,13 +3,13 @@ import {
   Box,
   IconButton,
   AppBar as MuiAppBar,
+  Paper,
   useMediaQuery,
 } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { setDrawer } from "../../services/slice/menuSlice";
 
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 
 import "../styles/AppBar.scss";
@@ -29,7 +29,7 @@ const AppBar = () => {
   return (
     <Box className="appbar-container open">
       <MuiAppBar className="appBar" color="secondary">
-        <Box className={`menuBarBox ${openDrawer ? "open" : ""}`}>
+        <Box className={`menuBarBox`}>
           {!openDrawer && (
             <IconButton
               onClick={() =>
@@ -41,15 +41,13 @@ const AppBar = () => {
               <MenuOutlinedIcon />
             </IconButton>
           )}
+          {openDrawer && (
+            <IconButton onClick={() => dispatch(setDrawer(false))}>
+              <MenuOutlinedIcon />
+            </IconButton>
+          )}
           <Box>
-            {!openDrawer && (
-              <img src={logo} alt="logo" className="appBarLogo" />
-            )}
-            {openDrawer && (
-              <IconButton onClick={() => dispatch(setDrawer(false))}>
-                <ChevronLeftIcon />
-              </IconButton>
-            )}
+            <img src={logo} alt="logo" className="appBarLogo" />
           </Box>
         </Box>
         <Box>
@@ -59,7 +57,12 @@ const AppBar = () => {
         </Box>
       </MuiAppBar>
       <MenuDrawer />
-      <Outlet />
+      <Paper
+        elevation={0}
+        className={`body-container ${openDrawer ? "open" : ""}`}
+      >
+        <Outlet />
+      </Paper>
     </Box>
   );
 };

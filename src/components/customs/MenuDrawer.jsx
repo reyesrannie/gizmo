@@ -1,5 +1,4 @@
 import {
-  Divider,
   Drawer,
   List,
   ListItemButton,
@@ -13,7 +12,6 @@ import React, { useEffect } from "react";
 import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
 import ListAltOutlinedIcon from "@mui/icons-material/ListAltOutlined";
 
-import logo from "../../assets/logo-name.png";
 import "../styles/MenuDrawer.scss";
 import { useDispatch, useSelector } from "react-redux";
 import { setDrawer } from "../../services/slice/menuSlice";
@@ -29,13 +27,19 @@ const MenuDrawer = () => {
     {
       desc: "Dashboard",
       icon: <DashboardOutlinedIcon />,
-      path: "/dashboard",
+      path: "/",
       children: [],
     },
     {
       desc: "Masterlist",
       icon: <ListAltOutlinedIcon />,
       path: "/masterlist",
+      children: [],
+    },
+    {
+      desc: "Items",
+      icon: <DashboardOutlinedIcon />,
+      path: "/item",
       children: [],
     },
   ];
@@ -52,25 +56,30 @@ const MenuDrawer = () => {
       variant="permanent"
       className={`menuDrawer ${openDrawer === true ? "open" : ""}`}
     >
-      <Toolbar className="toolBarMenu">
-        {openDrawer && <img src={logo} alt="logo" className="appBarLogo" />}
-      </Toolbar>
+      <Toolbar />
 
       <List className={`menuList ${openDrawer ? "open" : ""} `}>
         {menu.map((menus) => (
           <ListItemButton
-            className={`selectedList ${
-              location.pathname === menus.path ? "select" : ""
-            }`}
+            className={`selectedList`}
             key={menus.desc}
             onClick={() => {
               navigate(menus.path);
             }}
           >
-            <ListItemIcon>{menus.icon}</ListItemIcon>
-            {openDrawer && (
-              <ListItemText className="listText" primary={menus.desc} />
-            )}
+            <ListItemIcon
+              className={`list-icon ${
+                location.pathname === menus.path ? "selected" : ""
+              } `}
+            >
+              {menus.icon}
+            </ListItemIcon>
+            <ListItemText
+              className={`listText ${
+                location.pathname === menus.path ? "selected" : ""
+              }`}
+              primary={menus.desc}
+            />
           </ListItemButton>
         ))}
       </List>

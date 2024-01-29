@@ -1,0 +1,94 @@
+.page-text-indicator {
+  &.MuiTypography-root {
+    font-family: "Roboto-Black";
+    font-size: 24px;
+  }
+}
+
+.welcome-message {
+  &.MuiBox-root {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin: 30px;
+    margin-left: 40px;
+    margin-right: 40px;
+    background-color: azure;
+    border-radius: 30px;
+    max-height: 11vh;
+    overflow: visible !important;
+  }
+}
+.welcome-text {
+  &.MuiTypography-root {
+    font-family: "Roboto-bold";
+    letter-spacing: -1px;
+    font-size: 20px;
+  }
+}
+.welcome-username {
+  &.MuiTypography-root {
+    font-family: "Roboto-Black";
+    font-size: 25px;
+    letter-spacing: -1px;
+  }
+}
+
+.dashboard-welcome-image {
+  width: 170px;
+  margin-bottom: 3.5vw;
+  margin-right: 2vw;
+}
+
+.welcome-details {
+  &.MuiBox-root {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    margin-left: 3.5vw;
+  }
+}
+
+@media (max-width: 767px) {
+  .page-text-indicator {
+    &.MuiTypography-root {
+      font-family: "Roboto-Black";
+      font-size: 18px;
+    }
+  }
+
+  .welcome-message {
+    &.MuiBox-root {
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      margin: 30px;
+      margin-left: 5px;
+      margin-right: 5px;
+      border-radius: 20px;
+    }
+  }
+  .welcome-text {
+    &.MuiTypography-root {
+      font-size: 18px;
+    }
+  }
+  .welcome-username {
+    &.MuiTypography-root {
+      font-size: 24px;
+    }
+  }
+
+  .dashboard-welcome-image {
+    display: none;
+  }
+
+  .welcome-details {
+    &.MuiBox-root {
+      justify-content: center;
+      align-items: center;
+    }
+  }
+}
