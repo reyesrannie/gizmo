@@ -11,6 +11,7 @@ import React, { useEffect } from "react";
 
 import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
 import ListAltOutlinedIcon from "@mui/icons-material/ListAltOutlined";
+import SupervisorAccountOutlinedIcon from "@mui/icons-material/SupervisorAccountOutlined";
 
 import "../styles/MenuDrawer.scss";
 import { useDispatch, useSelector } from "react-redux";
@@ -28,6 +29,12 @@ const MenuDrawer = () => {
       desc: "Dashboard",
       icon: <DashboardOutlinedIcon />,
       path: "/",
+      children: [],
+    },
+    {
+      desc: "User Management",
+      icon: <SupervisorAccountOutlinedIcon />,
+      path: "/account",
       children: [],
     },
     {
@@ -49,7 +56,7 @@ const MenuDrawer = () => {
     if (isTablet) {
       dispatch(setDrawer(false));
     }
-  }, [isTablet]);
+  }, [isTablet, dispatch]);
 
   return (
     <Drawer
@@ -61,7 +68,9 @@ const MenuDrawer = () => {
       <List className={`menuList ${openDrawer ? "open" : ""} `}>
         {menu.map((menus) => (
           <ListItemButton
-            className={`selectedList`}
+            className={`selectedList ${
+              location.pathname === menus.path ? "selected" : ""
+            }`}
             key={menus.desc}
             onClick={() => {
               navigate(menus.path);

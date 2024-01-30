@@ -1,8 +1,6 @@
 import { ThemeProvider, createTheme } from "@mui/material";
 import "./App.scss";
-import Login from "./screen/login/Login";
-import Dashboard from "./screen/dashboard/Dashboard";
-import AppBar from "./components/customs/AppBar";
+
 import Routing from "./services/routes/Routing";
 import { SnackbarProvider } from "notistack";
 
@@ -12,17 +10,7 @@ function App() {
       MuiDrawer: {
         styleOverrides: {
           paper: {
-            backgroundColor: "#1a1d24",
-          },
-        },
-      },
-      MuiListItemButton: {
-        styleOverrides: {
-          root: {
-            backgroundColor: "#15253B",
-            "&:hover": {
-              backgroundColor: "#1C315F",
-            },
+            backgroundColor: "#fff",
           },
         },
       },

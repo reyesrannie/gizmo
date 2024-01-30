@@ -22,9 +22,13 @@ const authSlice = createSlice({
     setChangePass: (state, action) => {
       state.changePass = action.payload;
     },
+    resetAuth: () => {
+      return initialState;
+    },
   },
 });
 
-export const { setToken, setUserData, setChangePass } = authSlice.actions;
+export const { setToken, setUserData, setChangePass, resetAuth } =
+  authSlice.actions;
 
 export default authSlice.reducer;

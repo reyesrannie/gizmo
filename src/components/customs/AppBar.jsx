@@ -1,16 +1,18 @@
 import React from "react";
 import {
   Box,
+  Dialog,
   IconButton,
+  Menu,
   AppBar as MuiAppBar,
   Paper,
+  Typography,
   useMediaQuery,
 } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
-import { setDrawer } from "../../services/slice/menuSlice";
+import { setAccountMenu, setDrawer } from "../../services/slice/menuSlice";
 
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
-import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 
 import "../styles/AppBar.scss";
 
@@ -18,10 +20,16 @@ import logo from "../../assets/logo-appBar.png";
 import { useState } from "react";
 import MenuDrawer from "./MenuDrawer";
 import { Outlet } from "react-router-dom";
+import { decodeUser } from "../../services/functions/saveUser";
+import AccountMenu from "./AccountMenu";
+import ChangePassword from "./ChangePassword";
 
 const AppBar = () => {
   const dispatch = useDispatch();
+  const changePass = useSelector((state) => state.auth.changePass);
   const openDrawer = useSelector((state) => state.menu.drawer);
+  const openAccountMenu = useSelector((state) => state.menu.accountMenu);
+  const userData = decodeUser();
   const [anchorEl, setAnchorEl] = useState(null);
 
   const isTablet = useMediaQuery("(max-width:768px)");
@@ -51,8 +59,17 @@ const AppBar = () => {
           </Box>
         </Box>
         <Box>
-          <IconButton onClick={(e) => setAnchorEl(e.currentTarget)}>
-            <AccountCircleOutlinedIcon />
+          <IconButton
+            onClick={(e) => {
+              dispatch(setAccountMenu(true));
+              setAnchorEl(e.currentTarget);
+            }}
+          >
+            <Box className="appBar-account-settings">
+              <Typography className="account-first-letter" color="secondary">
+                {userData?.account?.first_name?.charAt(0)}
+              </Typography>
+            </Box>
           </IconButton>
         </Box>
       </MuiAppBar>
@@ -63,6 +80,25 @@ const AppBar = () => {
       >
         <Outlet />
       </Paper>
+
+      <Menu
+        anchorEl={anchorEl}
+        open={openAccountMenu}
+        onClose={() => {
+          dispatch(setAccountMenu(false));
+          setAnchorEl(null);
+        }}
+      >
+        <AccountMenu
+          onClose={() => {
+            dispatch(setAccountMenu(false));
+            setAnchorEl(null);
+          }}
+        />
+      </Menu>
+      <Dialog open={changePass}>
+        <ChangePassword />
+      </Dialog>
     </Box>
   );
 };

@@ -3,10 +3,10 @@ import { Box, Typography } from "@mui/material";
 
 import "../../components/styles/Dashboard.scss";
 import welcomeImage from "../../assets/svg/undraw_hello_re_3evm.svg";
-import { useSelector } from "react-redux";
+import { decodeUser } from "../../services/functions/saveUser";
 
 const Dashboard = () => {
-  const openDrawer = useSelector((state) => state.menu.drawer);
+  const userData = decodeUser();
 
   return (
     <Box>
@@ -16,12 +16,14 @@ const Dashboard = () => {
       <Box className="welcome-message">
         <Box className="welcome-details">
           <Typography className="welcome-text">Welcome back!</Typography>
-          <Typography className="welcome-username">RREYES!</Typography>
+          <Typography className="welcome-username">
+            {userData?.username?.toUpperCase()}!
+          </Typography>
         </Box>
         <Box>
           <img
             src={welcomeImage}
-            alt="Welcome Image"
+            alt="Welcome"
             className="dashboard-welcome-image"
             draggable="false"
           />

@@ -16,9 +16,9 @@
 
 .menuDrawer.open {
   &.MuiDrawer-root {
-    width: 225px;
+    width: 230px;
     .MuiPaper-root {
-      width: 225px;
+      width: 230px;
     }
   }
 }
@@ -46,22 +46,23 @@
     width: unset;
     .selectedList {
       &.MuiListItemButton-root {
-        width: 210px;
+        width: 220px;
       }
     }
   }
 }
 
-.selectedList.select {
+.selectedList.selected {
   &.MuiListItemButton-root {
-    background-color: rgb(238, 233, 218);
-    border-left: 10px solid rgba(211, 125, 63, 0.712);
-    border-radius: 20px;
+    background-color: #15253b;
+    gap: 0;
   }
 }
 .list-icon {
   &.MuiListItemIcon-root {
-    color: #fff;
+    color: #1a1d24;
+    font-size: 0.8rem;
+    min-width: 40px;
   }
 }
 .list-icon.selected {
@@ -72,10 +73,11 @@
 
 .listText {
   .MuiTypography-root {
-    font-family: "Roboto-light";
-    font-size: 1rem;
+    font-family: "Roboto-Medium";
+    white-space: nowrap;
+    font-size: 0.8rem;
     letter-spacing: 2px;
-    color: #fff;
+    color: #1a1d24;
   }
 }
 .listText.selected {

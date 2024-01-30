@@ -52,15 +52,15 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #c7c6c6;
+    background-color: #ffffff;
 
     height: 325px;
     width: 450px;
     overflow: hidden;
     border-radius: 10px;
     z-index: 1;
-    left: -50px;
-    top: 100px;
+    left: -60px;
+    top: 80px;
   }
 }
 
@@ -82,7 +82,7 @@
 
 .login-textbox {
   &.MuiFormControl-root {
-    min-height: 4rem;
+    min-height: 4.5rem;
 
     .MuiFormLabel-root {
       font-family: "Roboto-Medium";
@@ -103,7 +103,7 @@
 .login-Button {
   &.MuiButtonBase-root {
     text-transform: none;
-    font-family: "Roboto-Light";
+    font-family: "Roboto-light";
     letter-spacing: 1px;
   }
 }

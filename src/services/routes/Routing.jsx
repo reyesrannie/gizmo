@@ -4,6 +4,8 @@ import Login from "../../screen/login/Login";
 import AppBar from "../../components/customs/AppBar";
 import Dashboard from "../../screen/dashboard/Dashboard";
 import { decodeUser } from "../functions/saveUser";
+import UserAccounts from "../../screen/user/accounts/UserAccounts";
+import UserManagement from "../../screen/user/UserManagement";
 
 const Routing = () => {
   const user = decodeUser();
@@ -19,6 +21,16 @@ const Routing = () => {
         {
           path: "",
           element: <Dashboard />,
+        },
+        {
+          path: "account",
+          element: <UserManagement />,
+          children: [
+            {
+              path: "users",
+              element: <UserAccounts />,
+            },
+          ],
         },
       ],
     },

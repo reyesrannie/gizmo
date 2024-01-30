@@ -39,7 +39,7 @@ export const jsonServerAPI = createApi({
     passwordChange: builder.mutation({
       transformResponse: (response) => response,
       query: (payload) => ({
-        url: `/change_password`,
+        url: `/change_password/${payload.id}`,
         method: "PATCH",
         body: payload,
       }),

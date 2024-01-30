@@ -52,6 +52,24 @@
   }
 }
 
+.appBar-account-settings {
+  &.MuiBox-root {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #15253b;
+    border-radius: 100%;
+    width: 30px;
+    height: 30px;
+  }
+}
+
+.account-first-letter {
+  &.MuiTypography {
+    font-family: Roboto-Medium;
+  }
+}
+
 @media (max-width: 1439px) {
   .body-container {
     &.MuiPaper-root {

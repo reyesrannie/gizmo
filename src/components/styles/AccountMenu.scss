@@ -1,0 +1,26 @@
+.account-menu-container {
+  &.MuiList-root {
+    padding: 0;
+  }
+}
+
+.account-menu-icons {
+  &.MuiSvgIcon-root {
+    font-size: 20px;
+  }
+}
+
+.account-menu-text {
+  &.MuiTypography-root {
+    font-size: 14px;
+    font-family: Roboto-Medium;
+  }
+}
+
+.account-menu-name {
+  &.MuiTypography-root {
+    font-size: 14px;
+    font-family: Roboto-Medium;
+    text-transform: capitalize;
+  }
+}
