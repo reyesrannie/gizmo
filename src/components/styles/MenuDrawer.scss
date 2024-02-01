@@ -1,24 +1,35 @@
 .menuDrawer {
   overflow: hidden;
   &.MuiDrawer-root {
-    width: 70px;
-    transition: width 0.2s ease;
+    width: 75px;
+    transition: all 0.2s ease;
     .MuiPaper-root {
       z-index: 1;
       display: flex;
       align-items: center;
       width: 70px;
-      transition: width 0.2s ease;
+      transition: all 0.2s ease;
       overflow: hidden;
     }
   }
 }
 
+.accordion-drawer {
+  &.MuiPaper-root {
+    margin: 0;
+    border-radius: 10px;
+  }
+  &.MuiAccordion-root {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
 .menuDrawer.open {
   &.MuiDrawer-root {
-    width: 230px;
+    width: 220px;
     .MuiPaper-root {
-      width: 230px;
+      width: 240px;
     }
   }
 }
@@ -29,7 +40,6 @@
     align-items: center;
     justify-content: center;
     flex-direction: column;
-    gap: 5px;
 
     .selectedList {
       &.MuiListItemButton-root {
@@ -49,6 +59,21 @@
         width: 220px;
       }
     }
+    .selectedChildList {
+      &.MuiListItemButton-root {
+        width: 210px;
+        transition: width 0.2s ease;
+        border-radius: 10px;
+        margin-left: 11px;
+      }
+    }
+  }
+}
+
+.selectedChildList.selected {
+  &.MuiListItemButton-root {
+    background-color: #3a4c6b;
+    gap: 0;
   }
 }
 
@@ -60,14 +85,19 @@
 }
 .list-icon {
   &.MuiListItemIcon-root {
-    color: #1a1d24;
-    font-size: 0.8rem;
-    min-width: 40px;
+    .MuiSvgIcon-root {
+      color: #1a1d24;
+      font-size: 1.5rem;
+    }
+    min-width: 46px;
   }
 }
+
 .list-icon.selected {
   &.MuiListItemIcon-root {
-    color: #f4ce92;
+    .MuiSvgIcon-root {
+      color: #f4ce92;
+    }
   }
 }
 
@@ -86,8 +116,49 @@
   }
 }
 
-@media screen and (max-width: 786px) {
+@media (max-width: 575px) {
+  .menuDrawer {
+    &.MuiDrawer-root {
+      width: -0%;
+      .MuiPaper-root {
+        width: 0%;
+        box-shadow: none; /* Remove elevation */
+        border: none;
+      }
+    }
+  }
+
   .menuDrawer.open {
-    display: none;
+    &.MuiDrawer-root {
+      width: 0%;
+      .MuiPaper-root {
+        width: 200px;
+        box-shadow: 4px 0 8px rgba(0, 0, 0, 0.1);
+      }
+    }
+  }
+
+  .menuList.open {
+    &.MuiList-root {
+      .selectedList {
+        &.MuiListItemButton-root {
+          width: 180px;
+        }
+      }
+    }
+  }
+  .list-icon {
+    &.MuiListItemIcon-root {
+      .MuiSvgIcon-root {
+        font-size: 16px;
+      }
+      min-width: 36px;
+    }
+  }
+
+  .listText {
+    .MuiTypography-root {
+      font-size: 10px;
+    }
   }
 }

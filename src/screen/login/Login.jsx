@@ -66,7 +66,11 @@ const Login = () => {
   return (
     <Box className="loginBox">
       {isLoading ? (
-        <Lottie animationData={loading} loop={isLoading} />
+        <Lottie
+          animationData={loading}
+          loop={isLoading}
+          className="lottie-login-loading"
+        />
       ) : (
         <>
           <Box className="loginLeft">

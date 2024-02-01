@@ -4,7 +4,7 @@ import { decodeUser } from "../functions/saveUser";
 const userData = decodeUser();
 
 const initialState = {
-  token: localStorage.getItem("Gizmo_token"),
+  token: localStorage.getItem("GIZMO_token"),
   userData: userData,
   changePass: false,
 };

@@ -40,8 +40,8 @@
 
 .body-container {
   &.MuiPaper-root {
-    min-width: 94vw;
-    min-height: 90vh;
+    min-width: 93vw;
+    min-height: 91vh;
     transition: all 0.2s ease;
   }
 }
@@ -70,55 +70,105 @@
   }
 }
 
-@media (max-width: 1439px) {
+@media (min-width: 1440px) {
+  .body-container {
+    &.MuiPaper-root {
+      min-width: 93vw;
+    }
+  }
+  .body-container.open {
+    &.MuiPaper-root {
+      min-width: 80vw;
+    }
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
   .body-container {
     &.MuiPaper-root {
       min-width: 90vw;
+      min-height: 80vh;
     }
   }
-
   .body-container.open {
     &.MuiPaper-root {
-      min-width: 75vw;
+      min-width: 72vw;
     }
   }
 }
 
-@media (max-width: 1023px) {
+@media (min-width: 425px) and (max-width: 768px) {
   .body-container {
     &.MuiPaper-root {
-      min-width: 650px;
+      min-width: 82vw;
     }
   }
 }
 
-@media (max-width: 767px) {
+@media (min-width: 375px) and (max-width: 425px) {
   .body-container {
     &.MuiPaper-root {
-      min-width: 330px;
-    }
-  }
-}
-@media (max-width: 424px) {
-  .body-container {
-    &.MuiPaper-root {
-      min-width: 290px;
+      min-width: 71vw;
     }
   }
 }
 
-@media (max-width: 374px) {
-  .body-container {
-    &.MuiPaper-root {
-      min-width: 230px;
+// @media (min-width: 320px) and (max-width: 375px) {
+//   .body-container {
+//     &.MuiPaper-root {
+//       min-width: 70vw;
+//     }
+//   }
+// }
+
+@media (max-width: 575px) {
+  .appbar-container {
+    &.MuiBox-root {
+      margin-top: 60px;
+      margin-left: 40px;
+      margin-right: 30px;
     }
   }
-}
 
-@media (max-width: 319px) {
+  .appBar {
+    &.MuiAppBar-root {
+      min-height: 40px;
+      padding-right: 10px;
+      padding-left: 13px;
+    }
+
+    .MuiSvgIcon-root {
+      font-size: 18px;
+    }
+  }
+
+  .appBarLogo {
+    width: 120px;
+    margin: 8px;
+  }
   .body-container {
     &.MuiPaper-root {
-      min-width: 80px;
+      min-width: 93vw;
+      min-height: 91vh;
+      transition: all 0.2s ease;
+    }
+  }
+  .body-container.open {
+    &.MuiPaper-root {
+      min-width: 93vw;
+    }
+  }
+
+  .appBar-account-settings {
+    &.MuiBox-root {
+      width: 25px;
+      height: 25px;
+    }
+  }
+
+  .account-first-letter {
+    &.MuiTypography {
+      font-family: Roboto-Medium;
     }
   }
 }

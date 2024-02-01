@@ -1,8 +1,16 @@
-import { Paper } from "@mui/material";
+import { Box, Paper, Typography } from "@mui/material";
 import React from "react";
 
 const UserAccounts = () => {
-  return <Paper>1</Paper>;
+  return (
+    <Box>
+      <Box>
+        <Typography className="page-text-indicator-user">
+          User Accounts
+        </Typography>
+      </Box>
+    </Box>
+  );
 };
 
 export default UserAccounts;

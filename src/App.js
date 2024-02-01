@@ -1,8 +1,9 @@
-import { ThemeProvider, createTheme } from "@mui/material";
+import { IconButton, ThemeProvider, createTheme } from "@mui/material";
 import "./App.scss";
 
 import Routing from "./services/routes/Routing";
-import { SnackbarProvider } from "notistack";
+import CloseIcon from "@mui/icons-material/Close";
+import { SnackbarProvider, closeSnackbar } from "notistack";
 
 function App() {
   const theme = createTheme({
@@ -28,6 +29,9 @@ function App() {
       text: {
         primary: "#1a1d24",
       },
+      common: {
+        white: "#fff",
+      },
     },
   });
 
@@ -36,6 +40,11 @@ function App() {
       <SnackbarProvider
         maxSnack={3}
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        action={(key) => (
+          <IconButton onClick={() => closeSnackbar(key)}>
+            <CloseIcon className="icon-properties" />
+          </IconButton>
+        )}
       >
         <Routing />
       </SnackbarProvider>

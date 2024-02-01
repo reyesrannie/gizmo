@@ -38,7 +38,7 @@ const AppBar = () => {
     <Box className="appbar-container open">
       <MuiAppBar className="appBar" color="secondary">
         <Box className={`menuBarBox`}>
-          {!openDrawer && (
+          {/* {!openDrawer && (
             <IconButton
               onClick={() =>
                 isTablet
@@ -49,11 +49,11 @@ const AppBar = () => {
               <MenuOutlinedIcon />
             </IconButton>
           )}
-          {openDrawer && (
-            <IconButton onClick={() => dispatch(setDrawer(false))}>
-              <MenuOutlinedIcon />
-            </IconButton>
-          )}
+          {openDrawer && ( */}
+          <IconButton onClick={() => dispatch(setDrawer(!openDrawer))}>
+            <MenuOutlinedIcon />
+          </IconButton>
+          {/* )} */}
           <Box>
             <img src={logo} alt="logo" className="appBarLogo" />
           </Box>
@@ -97,7 +97,7 @@ const AppBar = () => {
         />
       </Menu>
       <Dialog open={changePass}>
-        <ChangePassword />
+        <ChangePassword logged />
       </Dialog>
     </Box>
   );

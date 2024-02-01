@@ -108,7 +108,141 @@
   }
 }
 
-@media (max-width: 1024px) {
+.lottie-login-loading {
+  width: 50vw;
+  height: 50vh;
+}
+
+@media (max-width: 320px) {
+  .loginBox {
+    .loginLeft {
+      display: none;
+    }
+    .loginRight {
+      position: static;
+      width: 300px;
+      overflow: hidden;
+    }
+  }
+
+  .loginText-Login {
+    &.MuiTypography-root {
+      font-size: 20px;
+    }
+  }
+
+  .loginText-Please {
+    &.MuiTypography-root {
+      font-family: "Roboto-Light";
+      font-size: 12px;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+    }
+  }
+
+  .login-textbox {
+    &.MuiFormControl-root {
+      min-height: 4rem;
+
+      .MuiFormLabel-root {
+        font-size: 12px;
+      }
+      .MuiInputBase-root {
+        font-size: 12px;
+      }
+      .MuiFormHelperText-root {
+        font-size: 10px;
+        text-wrap: nowrap;
+      }
+    }
+  }
+
+  .login-Button {
+    &.MuiButtonBase-root {
+      font-size: 10px;
+    }
+  }
+}
+
+@media (min-width: 321px) and (max-width: 425px) {
+  .loginBox {
+    .loginLeft {
+      display: none;
+    }
+    .loginRight {
+      position: static;
+      width: 300px;
+      overflow: hidden;
+    }
+  }
+
+  .loginText-Login {
+    &.MuiTypography-root {
+      font-size: 20px;
+    }
+  }
+
+  .loginText-Please {
+    &.MuiTypography-root {
+      font-family: "Roboto-Light";
+      font-size: 12px;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+    }
+  }
+
+  .login-textbox {
+    &.MuiFormControl-root {
+      min-height: 4rem;
+
+      .MuiFormLabel-root {
+        font-size: 12px;
+      }
+      .MuiInputBase-root {
+        font-size: 12px;
+      }
+      .MuiFormHelperText-root {
+        font-size: 10px;
+        text-wrap: nowrap;
+      }
+    }
+  }
+
+  .login-Button {
+    &.MuiButtonBase-root {
+      font-size: 10px;
+    }
+  }
+}
+
+@media (min-width: 425px) and (max-width: 768px) {
+  .loginBox {
+    .loginLeft {
+      display: none;
+    }
+    .loginRight {
+      position: static;
+      width: 400px;
+    }
+  }
+
+  .loginText-Login {
+    &.MuiTypography-root {
+      font-size: 25px;
+    }
+  }
+
+  .loginText-Please {
+    &.MuiTypography-root {
+      font-family: "Roboto-Light";
+      font-size: 14px;
+      margin-bottom: 12px;
+      letter-spacing: 1px;
+    }
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
   .loginBox {
     .loginLeft {
       display: none;
@@ -117,40 +251,19 @@
       position: static;
     }
   }
-}
 
-@media (max-width: 1024px) {
-  .loginBox {
-    .loginLeft {
-      display: none;
-    }
-    .loginRight {
-      position: static;
+  .loginText-Login {
+    &.MuiTypography-root {
+      font-size: 25px;
     }
   }
-}
 
-@media (max-width: 768px) {
-  .loginBox {
-    .loginLeft {
-      display: none;
-    }
-    .loginRight {
-      position: static;
-      width: 380px;
-    }
-  }
-}
-
-@media (max-width: 425px) {
-  .loginBox {
-    .loginLeft {
-      display: none;
-    }
-    .loginRight {
-      position: static;
-      width: 200px;
-      overflow: auto;
+  .loginText-Please {
+    &.MuiTypography-root {
+      font-family: "Roboto-Light";
+      font-size: 14px;
+      margin-bottom: 12px;
+      letter-spacing: 1px;
     }
   }
 }

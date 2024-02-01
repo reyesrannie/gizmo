@@ -1,7 +1,7 @@
 .page-text-indicator {
   &.MuiTypography-root {
     font-family: "Roboto-Black";
-    font-size: 24px;
+    font-size: 20px;
   }
 }
 
@@ -10,14 +10,23 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-
     margin: 30px;
     margin-left: 40px;
     margin-right: 40px;
     background-color: azure;
     border-radius: 30px;
-    max-height: 11vh;
+    max-height: 90px;
     overflow: visible !important;
+  }
+}
+
+.welcome-details {
+  &.MuiBox-root {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    margin-left: 60px;
   }
 }
 .welcome-text {
@@ -36,25 +45,14 @@
 }
 
 .dashboard-welcome-image {
-  width: 14vw;
-  margin-bottom: 0.5vw;
-  margin-right: 2vw;
+  width: 250px;
+  margin-right: 60px;
+  margin-bottom: 15px;
 }
 
-.welcome-details {
-  &.MuiBox-root {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: flex-start;
-    margin-left: 3.5vw;
-  }
-}
-
-@media (max-width: 767px) {
+@media (max-width: 320px) {
   .page-text-indicator {
     &.MuiTypography-root {
-      font-family: "Roboto-Black";
       font-size: 18px;
     }
   }
@@ -63,34 +61,113 @@
     &.MuiBox-root {
       justify-content: center;
       align-items: center;
+      margin: 10px;
+      margin-left: 10px;
+      margin-right: 10px;
+      border-radius: 30px;
       overflow: hidden;
-      margin: 30px;
-      margin-left: 5px;
-      margin-right: 5px;
-      border-radius: 20px;
     }
-  }
-  .welcome-text {
-    &.MuiTypography-root {
-      font-size: 18px;
-      font-family: Roboto-Medium;
-    }
-  }
-  .welcome-username {
-    &.MuiTypography-root {
-      font-family: Roboto-Black;
-      font-size: 24px;
-    }
-  }
-
-  .dashboard-welcome-image {
-    display: none;
   }
 
   .welcome-details {
     &.MuiBox-root {
       justify-content: center;
       align-items: center;
+      margin: 0;
+    }
+  }
+  .welcome-text {
+    &.MuiTypography-root {
+      font-size: 18px;
+    }
+  }
+  .welcome-username {
+    &.MuiTypography-root {
+      font-size: 20px;
+    }
+  }
+
+  .dashboard-welcome-image {
+    display: none;
+  }
+}
+
+@media (min-width: 321px) and (max-width: 425px) {
+  .page-text-indicator {
+    &.MuiTypography-root {
+      font-size: 18px;
+    }
+  }
+  .dashboard-welcome-image {
+    display: none;
+  }
+  .welcome-message {
+    &.MuiBox-root {
+      justify-content: center;
+      align-items: center;
+      margin: 10px;
+      margin-left: 10px;
+      margin-right: 10px;
+      border-radius: 30px;
+      overflow: hidden;
+    }
+  }
+
+  .welcome-details {
+    &.MuiBox-root {
+      justify-content: center;
+      align-items: center;
+      margin: 0;
+    }
+  }
+  .welcome-text {
+    &.MuiTypography-root {
+      font-size: 18px;
+    }
+  }
+  .welcome-username {
+    &.MuiTypography-root {
+      font-size: 20px;
+    }
+  }
+}
+
+@media (min-width: 425px) and (max-width: 768px) {
+  .page-text-indicator {
+    &.MuiTypography-root {
+      font-size: 18px;
+    }
+  }
+  .dashboard-welcome-image {
+    display: none;
+  }
+  .welcome-message {
+    &.MuiBox-root {
+      justify-content: center;
+      align-items: center;
+      margin: 10px;
+      margin-left: 10px;
+      margin-right: 10px;
+      border-radius: 30px;
+      overflow: hidden;
+    }
+  }
+
+  .welcome-details {
+    &.MuiBox-root {
+      justify-content: center;
+      align-items: center;
+      margin: 0;
+    }
+  }
+  .welcome-text {
+    &.MuiTypography-root {
+      font-size: 18px;
+    }
+  }
+  .welcome-username {
+    &.MuiTypography-root {
+      font-size: 20px;
     }
   }
 }
