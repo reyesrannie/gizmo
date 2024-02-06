@@ -3,6 +3,10 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   drawer: false,
   accountMenu: false,
+  roles: false,
+  rolesView: false,
+  rolesUpdate: false,
+  rolesData: null,
 };
 
 const menutSlice = createSlice({
@@ -15,12 +19,32 @@ const menutSlice = createSlice({
     setAccountMenu: (state, action) => {
       state.accountMenu = action.payload;
     },
+    setRolesMenu: (state, action) => {
+      state.roles = action.payload;
+    },
+    setRolesView: (state, action) => {
+      state.rolesView = action.payload;
+    },
+    setRolesUpdate: (state, action) => {
+      state.rolesUpdate = action.payload;
+    },
+    setRolesData: (state, action) => {
+      state.rolesData = action.payload;
+    },
     resetMenu: () => {
       return initialState;
     },
   },
 });
 
-export const { setDrawer, setAccountMenu, resetMenu } = menutSlice.actions;
+export const {
+  setDrawer,
+  setAccountMenu,
+  setRolesMenu,
+  setRolesView,
+  setRolesUpdate,
+  setRolesData,
+  resetMenu,
+} = menutSlice.actions;
 
 export default menutSlice.reducer;

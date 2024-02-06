@@ -18,7 +18,7 @@ export const jsonServerAPI = createApi({
       return headers;
     },
   }),
-  tagTypes: [""],
+  tagTypes: ["Role"],
   endpoints: (builder) => ({
     login: builder.mutation({
       transformResponse: (response) => response.result,
@@ -44,6 +44,42 @@ export const jsonServerAPI = createApi({
         body: payload,
       }),
     }),
+    role: builder.query({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/role`,
+        method: "GET",
+        params: payload,
+      }),
+      providesTags: ["Role"],
+    }),
+    createRole: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/role`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["Role"],
+    }),
+    updateRole: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/role/${payload.id}`,
+        method: "PUT",
+        body: payload,
+      }),
+      invalidatesTags: ["Role"],
+    }),
+    archiveRole: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/archive/role/${payload.id}`,
+        method: "PATCH",
+        body: payload,
+      }),
+      invalidatesTags: ["Role"],
+    }),
   }),
 });
 
@@ -51,4 +87,8 @@ export const {
   useLoginMutation,
   usePasswordChangeMutation,
   useLogoutMutation,
+  useRoleQuery,
+  useCreateRoleMutation,
+  useUpdateRoleMutation,
+  useArchiveRoleMutation,
 } = jsonServerAPI;

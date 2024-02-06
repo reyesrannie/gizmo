@@ -1,7 +1,26 @@
 .page-text-indicator-role {
   &.MuiTypography-root {
     font-family: "Roboto-Black";
-    font-size: 20px;
+    font-size: 24px;
+    margin-left: 20px;
+  }
+}
+
+.role-head-container {
+  &.MuiBox-root {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-right: 20px;
+  }
+}
+
+.role-button-container {
+  &.MuiBox-root {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
   }
 }
 
@@ -10,7 +29,135 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 100%;
-    background-color: bisque;
+    background-color: #fff;
+    margin: 20px;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+}
+
+.loading-roles {
+  height: 500px;
+}
+
+.no-data-roles {
+  height: 500px;
+  opacity: 0.7;
+  filter: grayscale(0.3);
+}
+
+.role-table-container {
+  &.MuiTableContainer-root {
+    max-height: 735px;
+    &::-webkit-scrollbar {
+      width: 14px;
+      border: 3px solid #fff;
+    }
+    &::-webkit-scrollbar-thumb {
+      background-color: #ccc;
+      border-radius: 20px;
+      border: 3px solid #fff;
+    }
+    &::-webkit-scrollbar-thumb:hover {
+      background-color: #f4ce92;
+    }
+    &::-webkit-scrollbar-track {
+      background-color: #fff;
+      border-radius: 20px;
+      border: 3px solid #fff;
+    }
+    &::-webkit-scrollbar-track:hover {
+      background-color: #eee;
+    }
+  }
+}
+
+.table-header1-cell {
+  &.MuiTableRow-root {
+    .MuiTableCell-root {
+      border: none;
+      font-family: Roboto-Bold;
+      letter-spacing: 1px;
+      padding: 10px;
+    }
+  }
+}
+
+.table-header-cell {
+  &.MuiTableRow-root {
+    .MuiTableCell-root {
+      border: none;
+      font-family: Roboto-Bold;
+      letter-spacing: 1px;
+      color: #f4ce92;
+      background-color: #15253b;
+      padding: 14px;
+    }
+  }
+}
+
+.table-body-cell {
+  &.MuiTableRow-root {
+    .MuiTableCell-root {
+      border-bottom: 4px solid #f2f2f2;
+      padding: 8px;
+      font-family: Roboto-Light;
+      letter-spacing: 1px;
+    }
+    &:hover {
+      background-color: #f2f2f2;
+    }
+  }
+}
+
+.table-footer-cell {
+  &.MuiTableRow-root {
+    .MuiTableCell-root {
+      border: none;
+      padding: 1px;
+      background-color: #fff;
+
+      .MuiTablePagination-root {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+
+        .MuiTablePagination-selectLabel {
+          font-family: Roboto-Light;
+        }
+        .MuiInputBase-root {
+          font-family: Roboto-Light;
+        }
+        .MuiTablePagination-displayedRows {
+          font-family: Roboto-Light;
+        }
+      }
+    }
+  }
+}
+
+.role-icon-actions {
+  &.MuiSvgIcon-root {
+    font-size: 20px;
+  }
+}
+
+.role-menu-icons {
+  &.MuiSvgIcon-root {
+    font-size: 20px;
+  }
+}
+
+.role-menu-text {
+  &.MuiTypography-root {
+    font-size: 14px;
+    font-family: Roboto-Medium;
+  }
+}
+
+.button-add-role {
+  &.MuiButtonBase-root {
+    text-transform: none;
+    font-family: Roboto-Medium;
   }
 }

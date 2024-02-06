@@ -1,15 +1,15 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  archive: false,
+  warning: false,
 };
 
 const promptSlice = createSlice({
   name: "prompt",
   initialState,
   reducers: {
-    setArchive: (state, action) => {
-      state.archive = action.payload;
+    setWarning: (state, action) => {
+      state.warning = action.payload;
     },
     resetPrompt: () => {
       return initialState;
@@ -17,6 +17,6 @@ const promptSlice = createSlice({
   },
 });
 
-export const { setArchive, resetPrompt } = promptSlice.actions;
+export const { setWarning, resetPrompt } = promptSlice.actions;
 
 export default promptSlice.reducer;

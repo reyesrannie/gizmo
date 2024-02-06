@@ -1,0 +1,19 @@
+.active-indicator {
+  &.MuiChip-root {
+    border-radius: 20px;
+    font-size: 10px;
+    font-family: Roboto-Medium;
+    color: #1a1d24;
+    background-color: #4caf4f75;
+  }
+}
+
+.inActive-indicator {
+  &.MuiChip-root {
+    border-radius: 20px;
+    font-size: 10px;
+    font-family: Roboto-Medium;
+    color: #1a1d24;
+    background-color: #af4c4c75;
+  }
+}

@@ -1,0 +1,22 @@
+.search-container {
+  &.MuiPaper-root {
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    border-radius: 10px;
+  }
+}
+
+.input-base {
+  &.MuiInputBase-root {
+    margin-left: 15px;
+    font-family: Roboto-Light;
+  }
+}
+
+.search-devider {
+  &.MuiDivider-root {
+    height: 30px;
+    margin-right: 3px;
+  }
+}

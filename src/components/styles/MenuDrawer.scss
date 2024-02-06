@@ -4,7 +4,7 @@
     width: 75px;
     transition: all 0.2s ease;
     .MuiPaper-root {
-      z-index: 1;
+      z-index: 3;
       display: flex;
       align-items: center;
       width: 70px;
@@ -22,6 +22,7 @@
   &.MuiAccordion-root {
     display: flex;
     flex-direction: column;
+    background-color: #f2f2f2;
   }
 }
 
@@ -64,6 +65,7 @@
         width: 210px;
         transition: width 0.2s ease;
         border-radius: 10px;
+        margin-top: 2px;
         margin-left: 11px;
       }
     }

@@ -11,11 +11,24 @@ function App() {
       MuiDrawer: {
         styleOverrides: {
           paper: {
-            backgroundColor: "#fff",
+            backgroundColor: "#f2f2f2",
+          },
+        },
+      },
+      MuiCard: {
+        styleOverrides: {
+          root: {
+            padding: "10px",
+            borderRadius: "15px",
+            "&:hover": {
+              backgroundColor: "#f2f2f2",
+              cursor: "pointer",
+            },
           },
         },
       },
     },
+
     palette: {
       primary: {
         main: "#15253B",

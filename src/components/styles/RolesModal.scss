@@ -1,0 +1,138 @@
+.role-modal-container {
+  &.MuiPaper-root {
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-direction: column;
+    gap: 10px;
+    overflow: hidden;
+  }
+}
+
+.roles-image {
+  width: 75px;
+}
+
+.roles-text {
+  &.MuiTypography-root {
+    font-family: Roboto-Black;
+    font-size: 25px;
+    letter-spacing: 1px;
+  }
+}
+
+.add-role-form-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.add-role-textbox {
+  &.MuiFormControl-root {
+    min-height: 60px;
+    .MuiInputBase-root {
+      border-radius: 10px;
+      font-family: Roboto-Medium;
+      letter-spacing: 1px;
+    }
+    .MuiFormLabel-root {
+      font-family: Roboto-Medium;
+      letter-spacing: 1px;
+    }
+    .MuiFormHelperText-root {
+      font-family: Roboto-Light;
+      letter-spacing: 1px;
+    }
+  }
+}
+
+.roles-devider {
+  &.MuiDivider-root {
+    width: 100%;
+    margin-right: 3px;
+  }
+}
+
+.role-checkbox-container {
+  &.MuiBox-root {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    max-width: 380px;
+    margin-top: 10px;
+    max-height: 300px;
+    overflow: auto;
+
+    &::-webkit-scrollbar {
+      width: 14px;
+      border: 3px solid #fff;
+    }
+    &::-webkit-scrollbar-thumb {
+      background-color: #ccc;
+      border-radius: 20px;
+      border: 3px solid #fff;
+    }
+    &::-webkit-scrollbar-thumb:hover {
+      background-color: #f4ce92;
+    }
+    &::-webkit-scrollbar-track {
+      background-color: #fff;
+      border-radius: 20px;
+      border: 3px solid #fff;
+    }
+    &::-webkit-scrollbar-track:hover {
+      background-color: #eee;
+    }
+  }
+}
+
+.checkbox-parent {
+  &.MuiBox-root {
+    padding: 10px;
+    border: thin solid #ccc;
+    border-radius: 10px;
+  }
+}
+
+.checkbox-role-access {
+  &.MuiFormControlLabel-root {
+    margin-left: 10px;
+  }
+}
+
+.children-box-container {
+  &.MuiBox-root {
+    padding: 10px;
+    max-width: 340px;
+    border: thin solid #ccc;
+    margin-top: 25px;
+    border-radius: 10px;
+  }
+}
+
+.add-role-button-container {
+  &.MuiBox-root {
+    margin-top: 10px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    gap: 10px;
+    min-width: 390px;
+  }
+}
+
+.add-role-button {
+  &.MuiButtonBase-root {
+    font-family: Roboto-Medium;
+    text-transform: none;
+  }
+}
+
+.loading-role-create {
+  .MuiPaper-root {
+    box-shadow: none;
+    background-color: transparent;
+  }
+}

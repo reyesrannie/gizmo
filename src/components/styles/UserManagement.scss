@@ -1,6 +1,16 @@
 .page-text-indicator-user {
   &.MuiTypography-root {
     font-family: "Roboto-Black";
-    font-size: 20px;
+    font-size: 24px;
+    margin-left: 20px;
+    margin-bottom: 100px;
+  }
+}
+
+.user-management-body {
+  &.MuiBox-root {
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }

@@ -10,7 +10,6 @@ import {
   ListItemIcon,
   ListItemText,
   Toolbar,
-  Typography,
   useMediaQuery,
 } from "@mui/material";
 import React from "react";
@@ -71,6 +70,7 @@ const MenuDrawer = () => {
   ];
 
   const isTablet = useMediaQuery("(max-width:768px)");
+
   return (
     <Drawer
       variant="permanent"

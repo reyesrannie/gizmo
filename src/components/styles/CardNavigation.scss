@@ -1,0 +1,55 @@
+.card-navigation-container {
+  &.MuiCard-root {
+    max-width: 200px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin: 10px;
+  }
+}
+
+.card-content {
+  &.MuiCardContent-root {
+    min-height: 170px;
+    max-height: 170px;
+  }
+}
+
+.icon-card-details {
+  &.MuiSvgIcon-root {
+    background-color: #1a1d24;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+  }
+}
+
+.card-title {
+  &.MuiTypography-root {
+    font-family: Roboto-Black;
+    font-size: 16px;
+    margin-bottom: 5px;
+  }
+}
+
+.card-details {
+  &.MuiTypography-root {
+    font-family: Roboto-Light;
+    font-size: 14px;
+  }
+}
+
+.card-last-icon {
+  &.MuiBox-root {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
+}
+
+.icon-last {
+  &.MuiSvgIcon-root {
+    background-color: #1a1d24;
+    padding: 10px;
+    border-radius: 10px;
+    transform: rotate(90deg);
+  }
+}

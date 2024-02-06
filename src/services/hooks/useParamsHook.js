@@ -5,8 +5,8 @@ const useParamsHook = () => {
   const [params, setParams] = useState({
     status: "active",
     page: 1,
-    rows: 10,
-    paginate: 0,
+    per_page: 10,
+    pagination: null,
   });
 
   const onPageChange = (_, page) => {
@@ -20,7 +20,7 @@ const useParamsHook = () => {
     setParams((currentValue) => ({
       ...currentValue,
       page: 1,
-      rows: rows.target.value,
+      per_page: rows.target.value,
     }));
   };
 

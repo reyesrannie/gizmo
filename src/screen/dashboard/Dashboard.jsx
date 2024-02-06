@@ -4,12 +4,16 @@ import { Box, Typography } from "@mui/material";
 import "../../components/styles/Dashboard.scss";
 import welcomeImage from "../../assets/svg/undraw_hello_re_3evm.svg";
 import { decodeUser } from "../../services/functions/saveUser";
+import Breadcrums from "../../components/customs/Breadcrums";
 
 const Dashboard = () => {
   const userData = decodeUser();
 
   return (
     <Box>
+      <Box>
+        <Breadcrums />
+      </Box>
       <Box>
         <Typography className="page-text-indicator">Dashboard</Typography>
       </Box>

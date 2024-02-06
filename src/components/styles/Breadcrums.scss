@@ -1,0 +1,14 @@
+.breadcrums-text {
+  &.MuiBreadcrumbs-root {
+    &.MuiTypography-root {
+      font-family: Roboto-Light;
+    }
+    margin-bottom: 10px;
+  }
+}
+
+.last-item-breadcrumbs {
+  &.MuiTypography-root {
+    font-family: Roboto-Medium;
+  }
+}
