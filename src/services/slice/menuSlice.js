@@ -7,6 +7,7 @@ const initialState = {
   rolesView: false,
   rolesUpdate: false,
   rolesData: null,
+  createMenu: false,
 };
 
 const menutSlice = createSlice({
@@ -31,6 +32,9 @@ const menutSlice = createSlice({
     setRolesData: (state, action) => {
       state.rolesData = action.payload;
     },
+    setCreateMenu: (state, action) => {
+      state.createMenu = action.payload;
+    },
     resetMenu: () => {
       return initialState;
     },
@@ -44,6 +48,7 @@ export const {
   setRolesView,
   setRolesUpdate,
   setRolesData,
+  setCreateMenu,
   resetMenu,
 } = menutSlice.actions;
 

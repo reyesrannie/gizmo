@@ -30,13 +30,10 @@ import loading from "../../../assets/lottie/Loading-2.json";
 import loadingLight from "../../../assets/lottie/Loading.json";
 
 import noData from "../../../assets/lottie/NoData.json";
-import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
-import ModeEditOutlineOutlinedIcon from "@mui/icons-material/ModeEditOutlineOutlined";
-import SettingsBackupRestoreOutlinedIcon from "@mui/icons-material/SettingsBackupRestoreOutlined";
+
 import RolesModal from "../../../components/customs/RolesModal";
 import warning from "../../../assets/svg/warning.svg";
 
-import AddToPhotosOutlinedIcon from "@mui/icons-material/AddToPhotosOutlined";
 import {
   useArchiveRoleMutation,
   useRoleQuery,
@@ -49,8 +46,13 @@ import {
   setRolesView,
 } from "../../../services/slice/menuSlice";
 
+import AddToPhotosOutlinedIcon from "@mui/icons-material/AddToPhotosOutlined";
 import StatusIndicator from "../../../components/customs/StatusIndicator";
 import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
+import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
+import ModeEditOutlineOutlinedIcon from "@mui/icons-material/ModeEditOutlineOutlined";
+import SettingsBackupRestoreOutlinedIcon from "@mui/icons-material/SettingsBackupRestoreOutlined";
+
 import { useState } from "react";
 import AppPrompt from "../../../components/customs/AppPrompt";
 import { resetPrompt, setWarning } from "../../../services/slice/promptSlice";
@@ -68,7 +70,13 @@ const RoleManagement = () => {
   const dispatch = useDispatch();
   const { params, onStatusChange, onPageChange, onRowChange, onSearchData } =
     useParamsHook();
-  const { data: roles, isLoading, isError, status } = useRoleQuery(params);
+  const {
+    data: roles,
+    isLoading,
+    isError,
+    status,
+    isFetching,
+  } = useRoleQuery(params);
 
   const [anchorE1, setAnchorE1] = useState(null);
 
@@ -197,21 +205,23 @@ const RoleManagement = () => {
                 ))
               )}
             </TableBody>
-            <TableFooter style={{ position: "sticky", bottom: 0 }}>
-              <TableRow className="table-footer-cell">
-                <TableCell colSpan={6}>
-                  <TablePagination
-                    rowsPerPageOptions={[5, 10, 25, 100]}
-                    count={roles?.result?.total || 0}
-                    rowsPerPage={roles?.result?.per_page || 10}
-                    page={roles?.result?.current_page - 1 || 0}
-                    onPageChange={onPageChange}
-                    onRowsPerPageChange={onRowChange}
-                    component="div"
-                  />
-                </TableCell>
-              </TableRow>
-            </TableFooter>
+            {!isFetching && (
+              <TableFooter style={{ position: "sticky", bottom: 0 }}>
+                <TableRow className="table-footer-cell">
+                  <TableCell colSpan={6}>
+                    <TablePagination
+                      rowsPerPageOptions={[5, 10, 25, 100]}
+                      count={roles?.result?.total || 0}
+                      rowsPerPage={roles?.result?.per_page || 10}
+                      page={roles?.result?.current_page - 1 || 0}
+                      onPageChange={onPageChange}
+                      onRowsPerPageChange={onRowChange}
+                      component="div"
+                    />
+                  </TableCell>
+                </TableRow>
+              </TableFooter>
+            )}
           </Table>
         </TableContainer>
       </Box>
