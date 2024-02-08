@@ -18,34 +18,6 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import React from "react";
-import moment from "moment";
-
-import "../../../components/styles/UserAccounts.scss";
-import Breadcrums from "../../../components/customs/Breadcrums";
-import SearchText from "../../../components/customs/SearchText";
-import useParamsHook from "../../../services/hooks/useParamsHook";
-import Lottie from "lottie-react";
-import loading from "../../../assets/lottie/Loading-2.json";
-import loadingLight from "../../../assets/lottie/Loading.json";
-
-import noData from "../../../assets/lottie/NoData.json";
-
-import RolesModal from "../../../components/customs/RolesModal";
-import warning from "../../../assets/svg/warning.svg";
-
-import {
-  useArchiveRoleMutation,
-  useUsersQuery,
-} from "../../../services/store/request";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  setCreateMenu,
-  setRolesData,
-  setRolesMenu,
-  setRolesUpdate,
-  setRolesView,
-} from "../../../services/slice/menuSlice";
 
 import AddToPhotosOutlinedIcon from "@mui/icons-material/AddToPhotosOutlined";
 import StatusIndicator from "../../../components/customs/StatusIndicator";
@@ -54,26 +26,57 @@ import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
 import ModeEditOutlineOutlinedIcon from "@mui/icons-material/ModeEditOutlineOutlined";
 import SettingsBackupRestoreOutlinedIcon from "@mui/icons-material/SettingsBackupRestoreOutlined";
 
+import Lottie from "lottie-react";
+import React from "react";
+import moment from "moment";
 import { useState } from "react";
-import AppPrompt from "../../../components/customs/AppPrompt";
-import { resetPrompt, setWarning } from "../../../services/slice/promptSlice";
+import { useDispatch, useSelector } from "react-redux";
 import { enqueueSnackbar } from "notistack";
-import { singleError } from "../../../services/functions/errorResponse";
+
+import Breadcrums from "../../../components/customs/Breadcrums";
+import SearchText from "../../../components/customs/SearchText";
+import useParamsHook from "../../../services/hooks/useParamsHook";
+import loading from "../../../assets/lottie/Loading-2.json";
+import loadingLight from "../../../assets/lottie/Loading.json";
+import noData from "../../../assets/lottie/NoData.json";
+import warning from "../../../assets/svg/warning.svg";
+import AppPrompt from "../../../components/customs/AppPrompt";
 import UserModal from "../../../components/customs/UserModal";
+
+import { singleError } from "../../../services/functions/errorResponse";
+
+import {
+  useArchiveUserMutation,
+  usePasswordResetMutation,
+  useUsersQuery,
+} from "../../../services/store/request";
+import {
+  resetMenu,
+  setCreateMenu,
+  setMenuData,
+  setUpdateMenu,
+} from "../../../services/slice/menuSlice";
+import {
+  resetPrompt,
+  setResetPassword,
+  setWarning,
+} from "../../../services/slice/promptSlice";
+
+import "../../../components/styles/UserAccounts.scss";
 
 const UserAccounts = () => {
   const createMenuOpen = useSelector((state) => state.menu.createMenu);
+  const resetPassword = useSelector((state) => state.prompt.resetPassword);
 
-  const roleOpen = useSelector((state) => state.menu.roles);
-  const roleOpenView = useSelector((state) => state.menu.rolesView);
-  const roleOpenUpdate = useSelector((state) => state.menu.rolesUpdate);
   const openWarning = useSelector((state) => state.prompt.warning);
-
-  const rolesData = useSelector((state) => state.menu.rolesData);
+  const menuData = useSelector((state) => state.menu.menuData);
+  const updateMenu = useSelector((state) => state.menu.updateMenu);
 
   const dispatch = useDispatch();
+
   const { params, onStatusChange, onPageChange, onRowChange, onSearchData } =
     useParamsHook();
+
   const {
     data: users,
     isLoading,
@@ -82,17 +85,30 @@ const UserAccounts = () => {
     isFetching,
   } = useUsersQuery(params);
 
+  const [passwordReset] = usePasswordResetMutation();
+
   const [anchorE1, setAnchorE1] = useState(null);
 
-  const [archiveRole, { isLoading: isLoadingArchive }] =
-    useArchiveRoleMutation();
+  const [archiveUser, { isLoading: isLoadingArchive }] =
+    useArchiveUserMutation();
 
   const handleArchive = async () => {
     try {
-      const res = await archiveRole(rolesData).unwrap();
+      const res = await archiveUser(menuData).unwrap();
       enqueueSnackbar(res.message, { variant: "success" });
       dispatch(resetPrompt());
-      dispatch(setRolesData(null));
+      dispatch(resetMenu());
+    } catch (error) {
+      singleError(error, enqueueSnackbar);
+    }
+  };
+
+  const handleReset = async () => {
+    try {
+      const res = await passwordReset(menuData).unwrap();
+      enqueueSnackbar(res.message, { variant: "success" });
+      dispatch(resetPrompt());
+      dispatch(resetMenu());
     } catch (error) {
       singleError(error, enqueueSnackbar);
     }
@@ -189,12 +205,12 @@ const UserAccounts = () => {
                     </TableCell>
                     <TableCell align="center">
                       <IconButton
-                      // onClick={(e) => {
-                      //   dispatch(setRolesData(role));
-                      //   setAnchorE1(e.currentTarget);
-                      // }}
+                        onClick={(e) => {
+                          dispatch(setMenuData(user));
+                          setAnchorE1(e.currentTarget);
+                        }}
                       >
-                        <MoreVertOutlinedIcon className="role-icon-actions" />
+                        <MoreVertOutlinedIcon className="user-icon-actions" />
                       </IconButton>
                     </TableCell>
                   </TableRow>
@@ -203,7 +219,7 @@ const UserAccounts = () => {
             </TableBody>
             {!isFetching && (
               <TableFooter style={{ position: "sticky", bottom: 0 }}>
-                <TableRow className="table-footer-cell">
+                <TableRow className="table-footer-user">
                   <TableCell colSpan={7}>
                     <TablePagination
                       rowsPerPageOptions={[5, 10, 25, 100]}
@@ -227,17 +243,32 @@ const UserAccounts = () => {
         open={Boolean(anchorE1)}
         onClose={() => setAnchorE1(null)}
       >
-        <MenuItem
-          onClick={() => {
-            dispatch(setRolesUpdate(true));
-            setAnchorE1(null);
-          }}
-        >
-          <ListItemIcon>
-            <ModeEditOutlineOutlinedIcon className="role-menu-icons" />
-          </ListItemIcon>
-          <Typography className="role-menu-text">Update Role</Typography>
-        </MenuItem>
+        {params.status === "active" && (
+          <MenuItem
+            onClick={() => {
+              setAnchorE1(null);
+              dispatch(setResetPassword(true));
+            }}
+          >
+            <ListItemIcon>
+              <SettingsBackupRestoreOutlinedIcon className="user-menu-icons" />
+            </ListItemIcon>
+            <Typography className="user-menu-text">Reset Password</Typography>
+          </MenuItem>
+        )}
+        {params.status === "active" && (
+          <MenuItem
+            onClick={() => {
+              dispatch(setUpdateMenu(true));
+              setAnchorE1(null);
+            }}
+          >
+            <ListItemIcon>
+              <ModeEditOutlineOutlinedIcon className="user-menu-icons" />
+            </ListItemIcon>
+            <Typography className="user-menu-text">Update Account</Typography>
+          </MenuItem>
+        )}
         <MenuItem
           onClick={() => {
             setAnchorE1(null);
@@ -246,18 +277,18 @@ const UserAccounts = () => {
         >
           <ListItemIcon>
             {params.status === "inactive" ? (
-              <SettingsBackupRestoreOutlinedIcon className="role-menu-icons" />
+              <SettingsBackupRestoreOutlinedIcon className="user-menu-icons" />
             ) : (
-              <DeleteForeverOutlinedIcon className="role-menu-icons" />
+              <DeleteForeverOutlinedIcon className="user-menu-icons" />
             )}
           </ListItemIcon>
-          <Typography className="role-menu-text">
+          <Typography className="user-menu-text">
             {params.status === "inactive" ? "Restore" : "Archive"}
           </Typography>
         </MenuItem>
       </Menu>
 
-      <Dialog open={isLoadingArchive} className="loading-role-create">
+      <Dialog open={isLoadingArchive} className="loading-user-create">
         <Lottie animationData={loadingLight} loop={isLoadingArchive} />
       </Dialog>
 
@@ -265,12 +296,8 @@ const UserAccounts = () => {
         <UserModal />
       </Dialog>
 
-      <Dialog open={roleOpenView}>
-        <RolesModal roleData={rolesData} view />
-      </Dialog>
-
-      <Dialog open={roleOpenUpdate}>
-        <RolesModal roleData={rolesData} update />
+      <Dialog open={updateMenu} className="user-modal-dialog">
+        <UserModal menuData={menuData} update />
       </Dialog>
 
       <Dialog open={openWarning}>
@@ -278,13 +305,13 @@ const UserAccounts = () => {
           image={warning}
           title={
             params.status === "active"
-              ? "Archive the role?"
-              : "Restore the role?"
+              ? "Archive the account?"
+              : "Restore the account?"
           }
           message={
             params.status === "active"
-              ? "You are about to archive this role"
-              : "You are about to restore this role"
+              ? "You are about to archive this account"
+              : "You are about to restore this account"
           }
           nextLineMessage={"Please confirm to continue"}
           confirmButton={
@@ -293,6 +320,19 @@ const UserAccounts = () => {
           cancelButton={"Cancel"}
           cancelOnClick={() => dispatch(resetPrompt())}
           confirmOnClick={() => handleArchive()}
+        />
+      </Dialog>
+
+      <Dialog open={resetPassword}>
+        <AppPrompt
+          image={warning}
+          title="Password Reset?"
+          message={"You are about to reset the password"}
+          nextLineMessage={"Please confirm to continue"}
+          confirmButton={"Yes, Reset it!"}
+          cancelButton={"Cancel"}
+          cancelOnClick={() => dispatch(resetPrompt())}
+          confirmOnClick={() => handleReset()}
         />
       </Dialog>
     </Box>

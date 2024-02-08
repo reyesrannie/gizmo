@@ -45,6 +45,14 @@ export const jsonServerAPI = createApi({
         body: payload,
       }),
     }),
+    passwordReset: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/reset_password/${payload.id}`,
+        method: "PATCH",
+        body: payload,
+      }),
+    }),
     users: builder.query({
       transformResponse: (response) => response,
       query: (payload) => ({
@@ -53,6 +61,33 @@ export const jsonServerAPI = createApi({
         params: payload,
       }),
       providesTags: ["Users"],
+    }),
+    createUser: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/auth`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["Users"],
+    }),
+    updateUser: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/auth/${payload.id}`,
+        method: "PUT",
+        body: payload,
+      }),
+      invalidatesTags: ["Users"],
+    }),
+    archiveUser: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/auth/archived/${payload.id}`,
+        method: "PATCH",
+        body: payload,
+      }),
+      invalidatesTags: ["Users"],
     }),
     role: builder.query({
       transformResponse: (response) => response,
@@ -133,7 +168,11 @@ export const {
   useLoginMutation,
   usePasswordChangeMutation,
   useLogoutMutation,
+  usePasswordResetMutation,
   useUsersQuery,
+  useCreateUserMutation,
+  useUpdateUserMutation,
+  useArchiveUserMutation,
   useRoleQuery,
   useCreateRoleMutation,
   useUpdateRoleMutation,

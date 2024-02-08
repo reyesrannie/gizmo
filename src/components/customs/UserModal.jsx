@@ -27,39 +27,70 @@ import ClearIcon from "@mui/icons-material/Clear";
 import {
   useApQuery,
   useCompanyQuery,
+  useCreateUserMutation,
   useDepartmentQuery,
   useLocationQuery,
   useRoleQuery,
+  useUpdateUserMutation,
 } from "../../services/store/request";
-import useParamsHook from "../../services/hooks/useParamsHook";
+import { useEffect } from "react";
+import { objectError } from "../../services/functions/errorResponse";
+import { enqueueSnackbar } from "notistack";
 
-const UserModal = ({ view, update }) => {
-  // view || update ? defaultData : defaultValues,
+const UserModal = ({ menuData, view, update }) => {
   const dispatch = useDispatch();
 
-  const { data: rdfEmployees, isLoading: sedarLoading } = useSedarQuery();
-  const { data: company, isLoading: companyLoading } = useCompanyQuery({
+  const {
+    data: rdfEmployees,
+    isLoading: sedarLoading,
+    isSuccess: successSedar,
+  } = useSedarQuery();
+  const {
+    data: company,
+    isLoading: companyLoading,
+    isSuccess: successCompany,
+  } = useCompanyQuery({
     status: "active",
     pagination: "none",
   });
-  const { data: department, isLoading: departmentLoading } = useDepartmentQuery(
-    {
-      status: "active",
-      pagination: "none",
-    }
-  );
-  const { data: location, isLoading: locationLoading } = useLocationQuery({
+  const {
+    data: department,
+    isLoading: departmentLoading,
+    isSuccess: successDepartment,
+  } = useDepartmentQuery({
     status: "active",
     pagination: "none",
   });
-  const { data: role, isLoading: loadingRole } = useRoleQuery({
+  const {
+    data: location,
+    isLoading: locationLoading,
+    isSuccess: successLocation,
+  } = useLocationQuery({
     status: "active",
     pagination: "none",
   });
-  const { data: ap, isLoading: loadingAP } = useApQuery({
+  const {
+    data: role,
+    isLoading: loadingRole,
+    isSuccess: successRole,
+  } = useRoleQuery({
     status: "active",
     pagination: "none",
   });
+  const {
+    data: ap,
+    isLoading: loadingAP,
+    isSuccess: successAP,
+  } = useApQuery({
+    status: "active",
+    pagination: "none",
+  });
+
+  const [createUser, { isLoading: loadingCreateUser }] =
+    useCreateUserMutation();
+
+  const [updateUser, { isLoading: loadingUpdateUser }] =
+    useUpdateUserMutation();
 
   const requiredFields = [
     "id_no",
@@ -76,7 +107,6 @@ const UserModal = ({ view, update }) => {
     setValue,
     setError,
     watch,
-    register,
     reset,
     formState: { errors },
   } = useForm({
@@ -93,9 +123,60 @@ const UserModal = ({ view, update }) => {
       middle_name: "",
       suffix: "",
       position: "",
-      ap_tagging: null,
+      ap_tagging: [],
     },
   });
+
+  useEffect(() => {
+    if (
+      successSedar &&
+      successAP &&
+      successCompany &&
+      successDepartment &&
+      successLocation &&
+      successRole
+    ) {
+      const valuesItem = {
+        id_no:
+          rdfEmployees?.find(
+            (item) => item?.general_info?.id_number === menuData?.account?.id_no
+          ) || null,
+        company:
+          company?.result?.find((item) => item.id === menuData?.company?.id) ||
+          null,
+        department:
+          department?.result?.find(
+            (item) => item.id === menuData?.department?.id
+          ) || null,
+        location:
+          location?.result?.find(
+            (item) => item.id === menuData?.location?.id
+          ) || null,
+        role_id:
+          role?.result?.find((item) => item.id === menuData?.role?.id) || null,
+        username: menuData?.username || "",
+        first_name: menuData?.account?.first_name || "",
+        last_name: menuData?.account?.last_name || "",
+        middle_name: menuData?.account?.middle_name || "",
+        suffix: menuData?.account?.suffix || "",
+        position: menuData?.account?.position || "",
+        ap_tagging:
+          menuData?.scope_tagging?.map((tags) =>
+            ap?.result?.find((item) => tags?.ap_id === item.id)
+          ) || [],
+      };
+      Object.entries(valuesItem).forEach(([key, value]) => {
+        setValue(key, value);
+      });
+    }
+  }, [
+    successSedar,
+    successAP,
+    successCompany,
+    successDepartment,
+    successLocation,
+    successRole,
+  ]);
 
   const isFormValid = requiredFields.every((field) => !!watch(field));
 
@@ -123,7 +204,63 @@ const UserModal = ({ view, update }) => {
   };
 
   const submitHandler = async (submitdata) => {
-    console.log(submitdata);
+    const obj = {
+      id: update || view ? menuData?.id : "",
+      id_no: submitdata?.id_no?.general_info?.id_number,
+      id_prefix: submitdata?.id_no?.general_info?.prefix_id,
+      personal_info: {
+        first_name: submitdata?.first_name,
+        middle_name: submitdata?.middle_name,
+        last_name: submitdata?.last_name,
+        suffix: submitdata?.suffix,
+      },
+      location: {
+        id: submitdata?.location?.id,
+        code: submitdata?.location?.code,
+        name: submitdata?.location?.name,
+      },
+      department: {
+        id: submitdata?.department?.id,
+        code: submitdata?.department?.code,
+        name: submitdata?.department?.name,
+      },
+      company: {
+        id: submitdata?.company?.id,
+        code: submitdata?.company?.code,
+        name: submitdata?.company?.name,
+      },
+      position: submitdata?.position,
+      role_id: submitdata?.role_id?.id,
+      username: submitdata?.username,
+      ap_tagging:
+        update || view
+          ? submitdata?.ap_tagging?.map((item) => ({
+              ap_id: item?.id,
+              ap_code: item?.company_code,
+            }))
+          : submitdata?.ap_tagging?.map((item) => ({
+              id: item?.id,
+              code: item?.company_code,
+            })),
+    };
+
+    if (update || view) {
+      try {
+        const res = await updateUser(obj).unwrap();
+        enqueueSnackbar(res.message, { variant: "success" });
+        dispatch(resetMenu());
+      } catch (error) {
+        objectError(error, setError, enqueueSnackbar);
+      }
+    } else {
+      try {
+        const res = await createUser(obj).unwrap();
+        enqueueSnackbar(res.message, { variant: "success" });
+        dispatch(resetMenu());
+      } catch (error) {
+        objectError(error, setError, enqueueSnackbar);
+      }
+    }
   };
 
   return (
@@ -170,7 +307,23 @@ const UserModal = ({ view, update }) => {
                     {params.InputProps.endAdornment}
                     {watch("id_no") && (
                       <IconButton
-                        onClick={() => reset()}
+                        onClick={() => {
+                          const defaultValue = {
+                            username: "",
+                            first_name: "",
+                            last_name: "",
+                            middle_name: "",
+                            suffix: "",
+                            position: "",
+                            id_no: null,
+                          };
+
+                          Object.entries(defaultValue).forEach(
+                            ([key, value]) => {
+                              setValue(key, value);
+                            }
+                          );
+                        }}
                         className="icon-clear-user"
                       >
                         <ClearIcon />
@@ -291,8 +444,6 @@ const UserModal = ({ view, update }) => {
               className="user-form-textBox"
             />
           )}
-          disablePortal
-          disableClearable
         />
         <Divider className="user-divider" />
         <Box className="form-title-user">
@@ -328,6 +479,7 @@ const UserModal = ({ view, update }) => {
           )}
         />
         <Autocomplete
+          multiple
           control={control}
           name={"ap_tagging"}
           options={ap?.result || []}
@@ -347,8 +499,6 @@ const UserModal = ({ view, update }) => {
               className="user-form-textBox"
             />
           )}
-          disablePortal
-          disableClearable
         />
         <Divider className="user-divider" />
         <Box className="form-button-user">
@@ -379,7 +529,9 @@ const UserModal = ({ view, update }) => {
           loadingRole ||
           locationLoading ||
           companyLoading ||
-          departmentLoading
+          departmentLoading ||
+          loadingCreateUser ||
+          loadingUpdateUser
         }
         className="loading-user-create"
       >

@@ -23,7 +23,7 @@ const usersSchema = Yup.object({
   suffix: Yup.string().nullable(),
   position: Yup.string().required("Position is required"),
 
-  ap_tagging: Yup.object().nullable(),
+  ap_tagging: Yup.array().nullable(),
 }).required();
 
 export default usersSchema;

@@ -12,8 +12,7 @@ const Autocomplete = ({
   helpertext,
   className,
   loading,
-  maxOptionsToShow,
-  filterBy,
+  limit,
   ...autocomplete
 }) => {
   const { multiple } = autocomplete;
@@ -30,24 +29,11 @@ const Autocomplete = ({
         : "";
       return labelA.localeCompare(labelB);
     });
-    // return defaultFilterOptions(options, state).slice(0, OPTIONS_LIMIT);
-    return sortedOptions;
-  };
+    const limitedOptions = limit
+      ? sortedOptions.slice(0, limit)
+      : sortedOptions;
 
-  const filterName = (options, state) => {
-    const filteredOptions = defaultFilterOptions(options, state).slice(0);
-    const sortedOptions = filteredOptions.sort((a, b) => {
-      const nameA = a?.name ? a.name.toLowerCase() : "";
-      const nameB = b?.name ? b.name.toLowerCase() : "";
-      return nameA.localeCompare(nameB);
-    });
-    return sortedOptions.slice(0, maxOptionsToShow);
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-    }
+    return limitedOptions;
   };
 
   return (
@@ -63,13 +49,13 @@ const Autocomplete = ({
             autoFocus={false}
             disabled={disabled}
             {...autocomplete}
-            filterOptions={filterBy === "name" ? filterName : filterOptions}
+            filterOptions={filterOptions}
+            className="select"
             error={error}
             helpertext={helpertext}
             value={value}
             disablePortal={false}
             onChange={(_, value) => onChange(value)}
-            onKeyDown={handleKeyDown}
           />
         );
       }}

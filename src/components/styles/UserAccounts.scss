@@ -110,7 +110,7 @@
   }
 }
 
-.table-footer-cell {
+.table-footer-user {
   &.MuiTableRow-root {
     .MuiTableCell-root {
       border: none;
@@ -165,5 +165,18 @@
 .user-modal-dialog {
   .MuiPaper-root {
     max-width: 810px;
+  }
+}
+
+.user-icon-actions {
+  &.MuiSvgIcon-root {
+    font-size: 20px;
+  }
+}
+
+.loading-user-create {
+  .MuiPaper-root {
+    box-shadow: none;
+    background-color: transparent;
   }
 }
