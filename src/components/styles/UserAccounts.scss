@@ -180,3 +180,163 @@
     background-color: transparent;
   }
 }
+
+@media (max-height: 681px) {
+  .page-text-indicator-user-accounts {
+    &.MuiTypography-root {
+      font-size: 18px;
+    }
+  }
+
+  .user-head-container {
+    &.MuiBox-root {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-right: 20px;
+    }
+  }
+
+  .user-body-container {
+    &.MuiBox-root {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #fff;
+      margin: 20px;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+  }
+
+  .check-box-archive-user {
+    &.MuiFormControlLabel-root {
+      .MuiSvgIcon-root {
+        font-size: 16px;
+      }
+      .MuiTypography-root {
+        font-size: 12px;
+      }
+    }
+  }
+
+  .loading-users {
+    height: 350px;
+  }
+
+  .no-data-users {
+    height: 350px;
+  }
+
+  .user-table-container {
+    &.MuiTableContainer-root {
+      max-height: 500px;
+    }
+  }
+
+  .table-header1-user {
+    &.MuiTableRow-root {
+      .MuiTableCell-root {
+        padding: 5px;
+      }
+    }
+  }
+
+  .table-header-user {
+    &.MuiTableRow-root {
+      .MuiTableCell-root {
+        padding: 10px;
+        font-size: 10px;
+      }
+    }
+  }
+
+  .table-body-user {
+    &.MuiTableRow-root {
+      .MuiTableCell-root {
+        padding: 4px;
+        font-size: 11px;
+      }
+    }
+  }
+
+  .table-footer-user {
+    &.MuiTableRow-root {
+      .MuiTableCell-root {
+        border: none;
+        padding: 1px;
+        background-color: #fff;
+
+        .MuiTablePagination-root {
+          display: flex;
+          justify-content: flex-end;
+          align-items: center;
+
+          .MuiTablePagination-selectLabel {
+            font-size: 12px;
+          }
+          .MuiInputBase-root {
+            font-size: 12px;
+          }
+          .MuiTablePagination-displayedRows {
+            font-size: 12px;
+          }
+          .MuiSvgIcon-root {
+            font-size: 18px;
+          }
+        }
+      }
+    }
+  }
+
+  .user-icon-actions {
+    &.MuiSvgIcon-root {
+      font-size: 18px;
+    }
+  }
+
+  .user-menu-icons {
+    &.MuiSvgIcon-root {
+      font-size: 18px;
+    }
+  }
+
+  .user-menu-text {
+    &.MuiTypography-root {
+      font-size: 12px;
+      font-family: Roboto-Medium;
+    }
+  }
+
+  .button-add-user {
+    &.MuiButtonBase-root {
+      text-transform: none;
+      font-family: Roboto-Medium;
+      font-size: 10px;
+      max-height: 25px;
+      max-width: 25px;
+      .MuiSvgIcon-root {
+        font-size: 14px;
+      }
+    }
+  }
+
+  .user-modal-dialog {
+    .MuiPaper-root {
+      max-width: 400px;
+    }
+  }
+
+  .user-icon-actions {
+    &.MuiSvgIcon-root {
+      font-size: 18px;
+    }
+  }
+
+  .loading-user-create {
+    .MuiPaper-root {
+      box-shadow: none;
+      background-color: transparent;
+    }
+  }
+}

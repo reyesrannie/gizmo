@@ -20,3 +20,31 @@
     margin-right: 3px;
   }
 }
+
+@media (max-height: 681px) {
+  .search-container {
+    &.MuiPaper-root {
+      padding: 1px;
+    }
+  }
+
+  .input-base {
+    &.MuiInputBase-root {
+      margin-left: 15px;
+      font-family: Roboto-Light;
+      font-size: 12px;
+    }
+  }
+
+  .search-devider {
+    &.MuiDivider-root {
+      height: 30px;
+      margin-right: 3px;
+    }
+  }
+  .icon-search {
+    &.MuiSvgIcon-root {
+      font-size: 14px;
+    }
+  }
+}

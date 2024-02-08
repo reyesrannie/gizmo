@@ -67,8 +67,9 @@
 }
 
 .account-first-letter {
-  &.MuiTypography {
+  &.MuiTypography-root {
     font-family: Roboto-Medium;
+    font-size: 14px;
   }
 }
 
@@ -114,14 +115,6 @@
     }
   }
 }
-
-// @media (min-width: 320px) and (max-width: 375px) {
-//   .body-container {
-//     &.MuiPaper-root {
-//       min-width: 70vw;
-//     }
-//   }
-// }
 
 @media (max-width: 575px) {
   .appbar-container {
@@ -171,6 +164,59 @@
   .account-first-letter {
     &.MuiTypography {
       font-family: Roboto-Medium;
+    }
+  }
+}
+
+@media (max-height: 681px) {
+  .appbar-container {
+    &.MuiBox-root {
+      margin-top: 60px;
+    }
+  }
+
+  .appBar {
+    &.MuiAppBar-root {
+      min-height: 40px;
+      padding-right: 20px;
+      padding-left: 15px;
+      z-index: 5;
+    }
+
+    .menuBarBox {
+      &.MuiBox-root {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    }
+
+    .MuiSvgIcon-root {
+      font-size: 18px;
+    }
+  }
+
+  .appBarLogo {
+    width: 120px;
+    margin: 10px;
+  }
+
+  .appBar-account-settings {
+    &.MuiBox-root {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #15253b;
+      border-radius: 100%;
+      width: 25px;
+      height: 25px;
+    }
+  }
+
+  .account-first-letter {
+    &.MuiTypography-root {
+      font-family: Roboto-Medium;
+      font-size: 14px;
     }
   }
 }

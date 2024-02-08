@@ -143,6 +143,7 @@ const UserAccounts = () => {
               <TableRow className="table-header1-user">
                 <TableCell colSpan={5}>
                   <FormControlLabel
+                    className="check-box-archive-user"
                     control={<Checkbox color="secondary" />}
                     label="Archive"
                     checked={params?.status === "inactive"}
@@ -217,7 +218,7 @@ const UserAccounts = () => {
                 ))
               )}
             </TableBody>
-            {!isFetching && (
+            {!isFetching && !isError && (
               <TableFooter style={{ position: "sticky", bottom: 0 }}>
                 <TableRow className="table-footer-user">
                   <TableCell colSpan={7}>

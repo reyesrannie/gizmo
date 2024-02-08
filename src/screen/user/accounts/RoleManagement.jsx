@@ -122,6 +122,7 @@ const RoleManagement = () => {
               <TableRow className="table-header1-cell">
                 <TableCell colSpan={5}>
                   <FormControlLabel
+                    className="check-box-archive-role"
                     control={<Checkbox color="secondary" />}
                     label="Archive"
                     checked={params?.status === "inactive"}
@@ -158,7 +159,7 @@ const RoleManagement = () => {
                 </TableRow>
               ) : (
                 roles?.result?.data?.map((role) => (
-                  <TableRow className="table-body-cell" key={role?.id}>
+                  <TableRow className="table-body-role" key={role?.id}>
                     <TableCell>{role?.id}</TableCell>
                     <TableCell>{role?.name}</TableCell>
                     <TableCell align="center">
@@ -205,7 +206,7 @@ const RoleManagement = () => {
                 ))
               )}
             </TableBody>
-            {!isFetching && (
+            {!isFetching && !isError && (
               <TableFooter style={{ position: "sticky", bottom: 0 }}>
                 <TableRow className="table-footer-cell">
                   <TableCell colSpan={6}>

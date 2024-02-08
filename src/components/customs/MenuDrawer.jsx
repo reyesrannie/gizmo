@@ -76,7 +76,7 @@ const MenuDrawer = () => {
       variant="permanent"
       className={`menuDrawer ${openDrawer === true ? "open" : ""}`}
     >
-      <Toolbar />
+      <Toolbar className="toolbar-menu-bar" />
 
       <List className={`menuList ${openDrawer === true ? "open" : ""} `}>
         {menu.map((menus) => (
