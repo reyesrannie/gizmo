@@ -11,6 +11,7 @@ import Masterlist from "../../screen/masterlist/Masterlist";
 import Company from "../../screen/masterlist/charging/Company";
 import Department from "../../screen/masterlist/charging/Department";
 import Location from "../../screen/masterlist/charging/Location";
+import AccountsPayable from "../../screen/masterlist/ap/AccountsPayable";
 
 const Routing = () => {
   const user = decodeUser();
@@ -66,6 +67,10 @@ const Routing = () => {
         {
           path: "location",
           element: <Location />,
+        },
+        {
+          path: "ap",
+          element: <AccountsPayable />,
         },
       ],
     },

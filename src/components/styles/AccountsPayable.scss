@@ -1,0 +1,343 @@
+.page-text-indicator-ap {
+  &.MuiTypography-root {
+    font-family: "Roboto-Black";
+    font-size: 24px;
+    margin-left: 20px;
+  }
+}
+
+.ap-head-container {
+  &.MuiBox-root {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-right: 20px;
+  }
+}
+
+.ap-button-container {
+  &.MuiBox-root {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+  }
+}
+
+.ap-body-container {
+  &.MuiBox-root {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #fff;
+    margin: 20px;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+}
+
+.loading-ap {
+  height: 500px;
+}
+
+.no-data-ap {
+  height: 500px;
+  opacity: 0.7;
+  filter: grayscale(0.3);
+}
+
+.ap-table-container {
+  &.MuiTableContainer-root {
+    max-height: 735px;
+    &::-webkit-scrollbar {
+      width: 14px;
+      border: 3px solid #fff;
+    }
+    &::-webkit-scrollbar-thumb {
+      background-color: #ccc;
+      border-radius: 20px;
+      border: 3px solid #fff;
+    }
+    &::-webkit-scrollbar-thumb:hover {
+      background-color: #f4ce92;
+    }
+    &::-webkit-scrollbar-track {
+      background-color: #fff;
+      border-radius: 20px;
+      border: 3px solid #fff;
+    }
+    &::-webkit-scrollbar-track:hover {
+      background-color: #eee;
+    }
+  }
+}
+
+.table-header1-ap {
+  &.MuiTableRow-root {
+    .MuiTableCell-root {
+      border: none;
+      font-family: Roboto-Bold;
+      letter-spacing: 1px;
+      padding: 10px;
+    }
+  }
+}
+
+.table-header-ap {
+  &.MuiTableRow-root {
+    .MuiTableCell-root {
+      border: none;
+      font-family: Roboto-Bold;
+      letter-spacing: 1px;
+      color: #f4ce92;
+      background-color: #15253b;
+      padding: 14px;
+    }
+  }
+}
+
+.table-body-ap {
+  &.MuiTableRow-root {
+    .MuiTableCell-root {
+      border-bottom: 4px solid #f2f2f2;
+      padding: 8px;
+      font-family: Roboto-Light;
+      letter-spacing: 1px;
+    }
+    &:hover {
+      background-color: #f2f2f2;
+    }
+  }
+}
+
+.table-footer-ap {
+  &.MuiTableRow-root {
+    .MuiTableCell-root {
+      border: none;
+      padding: 1px;
+      // background-color: #fff;
+
+      .MuiTablePagination-root {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+
+        .MuiTablePagination-selectLabel {
+          font-family: Roboto-Light;
+        }
+        .MuiInputBase-root {
+          font-family: Roboto-Light;
+        }
+        .MuiTablePagination-displayedRows {
+          font-family: Roboto-Light;
+        }
+      }
+    }
+  }
+}
+
+.ap-icon-actions {
+  &.MuiSvgIcon-root {
+    font-size: 20px;
+  }
+}
+
+.ap-menu-icons {
+  &.MuiSvgIcon-root {
+    font-size: 20px;
+  }
+}
+
+.ap-menu-text {
+  &.MuiTypography-root {
+    font-size: 14px;
+    font-family: Roboto-Medium;
+  }
+}
+
+.button-add-ap {
+  &.MuiButtonBase-root {
+    text-transform: none;
+    font-family: Roboto-Medium;
+  }
+}
+
+.ap-modal-dialog {
+  .MuiPaper-root {
+    max-width: 810px;
+  }
+}
+
+.ap-icon-actions {
+  &.MuiSvgIcon-root {
+    font-size: 20px;
+  }
+}
+
+.loading-ap-create {
+  .MuiPaper-root {
+    box-shadow: none;
+    background-color: transparent;
+  }
+}
+
+.button-export-ap {
+  &.MuiButtonBase-root {
+    text-transform: none;
+    font-family: Roboto-Medium;
+    margin-left: 15px;
+  }
+}
+
+@media (max-height: 681px) {
+  .page-text-indicator-ap {
+    &.MuiTypography-root {
+      font-size: 18px;
+    }
+  }
+
+  .ap-head-container {
+    &.MuiBox-root {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-right: 20px;
+    }
+  }
+
+  .check-box-archive-ap {
+    &.MuiFormControlLabel-root {
+      .MuiSvgIcon-root {
+        font-size: 16px;
+      }
+      .MuiTypography-root {
+        font-size: 12px;
+      }
+    }
+  }
+
+  .loading-ap {
+    height: 350px;
+  }
+
+  .no-data-ap {
+    height: 350px;
+  }
+
+  .ap-table-container {
+    &.MuiTableContainer-root {
+      max-height: 500px;
+    }
+  }
+
+  .table-header1-ap {
+    &.MuiTableRow-root {
+      .MuiTableCell-root {
+        padding: 5px;
+      }
+    }
+  }
+
+  .table-header-ap {
+    &.MuiTableRow-root {
+      .MuiTableCell-root {
+        padding: 10px;
+        font-size: 10px;
+      }
+    }
+  }
+
+  .table-body-ap {
+    &.MuiTableRow-root {
+      .MuiTableCell-root {
+        padding: 4px;
+        font-size: 11px;
+      }
+    }
+  }
+
+  .table-footer-ap {
+    &.MuiTableRow-root {
+      .MuiTableCell-root {
+        border: none;
+        padding: 1px;
+        background-color: #fff;
+
+        .MuiTablePagination-root {
+          display: flex;
+          justify-content: flex-end;
+          align-items: center;
+
+          .MuiTablePagination-selectLabel {
+            font-size: 12px;
+          }
+          .MuiInputBase-root {
+            font-size: 12px;
+          }
+          .MuiTablePagination-displayedRows {
+            font-size: 12px;
+          }
+          .MuiSvgIcon-root {
+            font-size: 18px;
+          }
+        }
+      }
+    }
+  }
+
+  .ap-icon-actions {
+    &.MuiSvgIcon-root {
+      font-size: 18px;
+    }
+  }
+
+  .ap-menu-icons {
+    &.MuiSvgIcon-root {
+      font-size: 18px;
+    }
+  }
+
+  .ap-menu-text {
+    &.MuiTypography-root {
+      font-size: 12px;
+      font-family: Roboto-Medium;
+    }
+  }
+
+  .button-add-ap {
+    &.MuiButtonBase-root {
+      text-transform: none;
+      font-family: Roboto-Medium;
+      font-size: 10px;
+      max-height: 25px;
+      max-width: 25px;
+      .MuiSvgIcon-root {
+        font-size: 14px;
+      }
+    }
+  }
+
+  .ap-modal-dialog {
+    .MuiPaper-root {
+      max-width: 400px;
+    }
+  }
+
+  .ap-icon-actions {
+    &.MuiSvgIcon-root {
+      font-size: 18px;
+    }
+  }
+
+  .loading-ap-create {
+    .MuiPaper-root {
+      box-shadow: none;
+      background-color: transparent;
+    }
+  }
+  .button-export-ap {
+    &.MuiButtonBase-root {
+      font-size: 11px;
+    }
+  }
+}

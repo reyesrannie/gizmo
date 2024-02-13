@@ -98,15 +98,7 @@ export const jsonServerAPI = createApi({
       }),
       providesTags: ["Role"],
     }),
-    ap: builder.query({
-      transformResponse: (response) => response,
-      query: (payload) => ({
-        url: `/ap_tagging`,
-        method: "GET",
-        params: payload,
-      }),
-      providesTags: ["AP"],
-    }),
+
     createRole: builder.mutation({
       transformResponse: (response) => response,
       query: (payload) => ({
@@ -242,6 +234,42 @@ export const jsonServerAPI = createApi({
       }),
       invalidatesTags: ["Location"],
     }),
+    ap: builder.query({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/ap_tagging`,
+        method: "GET",
+        params: payload,
+      }),
+      providesTags: ["AP"],
+    }),
+    createAP: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/ap_tagging`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["AP"],
+    }),
+    updateAP: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/ap_tagging/${payload.id}`,
+        method: "PUT",
+        body: payload,
+      }),
+      invalidatesTags: ["AP"],
+    }),
+    archiveAP: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/archive/ap/${payload.id}`,
+        method: "PATCH",
+        body: payload,
+      }),
+      invalidatesTags: ["AP"],
+    }),
   }),
 });
 
@@ -271,4 +299,7 @@ export const {
   useUpdateLocationMutation,
   useArchiveLocationMutation,
   useApQuery,
+  useCreateAPMutation,
+  useUpdateAPMutation,
+  useArchiveAPMutation,
 } = jsonServerAPI;

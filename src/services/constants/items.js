@@ -8,6 +8,7 @@ import SupervisorAccountOutlinedIcon from "@mui/icons-material/SupervisorAccount
 import EmojiTransportationOutlinedIcon from "@mui/icons-material/EmojiTransportationOutlined";
 import Diversity2OutlinedIcon from "@mui/icons-material/Diversity2Outlined";
 import ShareLocationOutlinedIcon from "@mui/icons-material/ShareLocationOutlined";
+import MonetizationOnOutlinedIcon from "@mui/icons-material/MonetizationOnOutlined";
 
 import "../../components/styles/CardNavigation.scss";
 const user = [
@@ -81,6 +82,20 @@ const masterlist = [
       <NavigationOutlinedIcon className="icon-last" color="secondary" />
     ),
   },
+  {
+    path: "/masterlist/ap",
+    desc: "A module for managing essential information about Accounts Payable .",
+    name: "Accounts Payable",
+    firstIcon: (
+      <MonetizationOnOutlinedIcon
+        color="secondary"
+        className="icon-card-details"
+      />
+    ),
+    lastIcon: (
+      <NavigationOutlinedIcon className="icon-last" color="secondary" />
+    ),
+  },
 ];
 
 const menu = [
@@ -127,6 +142,11 @@ const menu = [
         icon: <ShareLocationOutlinedIcon />,
         path: "/masterlist/location",
       },
+      {
+        desc: "Accounts Payable",
+        icon: <MonetizationOnOutlinedIcon />,
+        path: "/masterlist/ap",
+      },
     ],
   },
   {
@@ -167,6 +187,10 @@ const routes = [
       {
         path: "/masterlist/location",
         name: "Location",
+      },
+      {
+        path: "/masterlist/ap",
+        name: "Accounts Payable",
       },
     ],
   },
