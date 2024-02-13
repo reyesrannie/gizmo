@@ -16,6 +16,7 @@ const user = [
     path: "/account/roles",
     desc: "Assign specific permissions to roles to control access to various features.",
     name: "Role Management",
+    permission: ["role"],
     firstIcon: (
       <SettingsAccessibilityIcon
         color="secondary"
@@ -30,6 +31,7 @@ const user = [
     path: "/account/users",
     desc: " Stores and manages essential information about each user.",
     name: "User Management",
+    permission: ["user"],
     firstIcon: (
       <ManageAccountsOutlinedIcon
         color="secondary"
@@ -47,6 +49,7 @@ const masterlist = [
     path: "/masterlist/company",
     desc: "A centralized repository of information related to the management structure.",
     name: "Company",
+    permission: ["company"],
     firstIcon: (
       <EmojiTransportationOutlinedIcon
         color="secondary"
@@ -61,6 +64,8 @@ const masterlist = [
     path: "/masterlist/department",
     desc: "A module for  managing essential information about different departments.",
     name: "Department",
+    permission: ["department"],
+
     firstIcon: (
       <Diversity2OutlinedIcon color="secondary" className="icon-card-details" />
     ),
@@ -72,6 +77,8 @@ const masterlist = [
     path: "/masterlist/location",
     desc: "A module for storing information about locations or branches of the company.",
     name: "Location",
+    permission: ["location"],
+
     firstIcon: (
       <ShareLocationOutlinedIcon
         color="secondary"
@@ -86,6 +93,7 @@ const masterlist = [
     path: "/masterlist/ap",
     desc: "A module for managing essential information about Accounts Payable .",
     name: "Accounts Payable",
+    permission: ["ap"],
     firstIcon: (
       <MonetizationOnOutlinedIcon
         color="secondary"
@@ -103,22 +111,26 @@ const menu = [
     desc: "Dashboard",
     icon: <DashboardOutlinedIcon />,
     path: "/",
+    permission: ["dashboard"],
     children: [],
   },
   {
     desc: "User Management",
     icon: <SupervisorAccountOutlinedIcon />,
     path: "/account",
+    permission: ["role", "user"],
     children: [
       {
         desc: "Role Management",
         icon: <SettingsAccessibilityIcon />,
         path: "/account/roles",
+        permission: ["role"],
       },
       {
         desc: "User Accounts",
         icon: <ManageAccountsOutlinedIcon />,
         path: "/account/users",
+        permission: ["user"],
       },
     ],
   },
@@ -126,34 +138,33 @@ const menu = [
     desc: "Masterlist",
     icon: <ListAltOutlinedIcon />,
     path: "/masterlist",
+    permission: ["company", "location", "department", "ap"],
     children: [
       {
         desc: "Company",
         icon: <EmojiTransportationOutlinedIcon />,
         path: "/masterlist/company",
+        permission: ["company"],
       },
       {
         desc: "Department",
         icon: <Diversity2OutlinedIcon />,
         path: "/masterlist/department",
+        permission: ["department"],
       },
       {
         desc: "Location",
         icon: <ShareLocationOutlinedIcon />,
         path: "/masterlist/location",
+        permission: ["location"],
       },
       {
         desc: "Accounts Payable",
         icon: <MonetizationOnOutlinedIcon />,
         path: "/masterlist/ap",
+        permission: ["ap"],
       },
     ],
-  },
-  {
-    desc: "Items",
-    icon: <DashboardOutlinedIcon />,
-    path: "/item",
-    children: [],
   },
 ];
 

@@ -1,6 +1,16 @@
 const accessPermission = [
   {
     id: 1,
+    access: "Dashboard",
+    children: [
+      {
+        access_permission: "dashboard",
+        label: "Dashboard",
+      },
+    ],
+  },
+  {
+    id: 2,
     access: "User Management",
     children: [
       {
@@ -12,7 +22,7 @@ const accessPermission = [
     ],
   },
   {
-    id: 2,
+    id: 3,
     access: "Masterlist",
     children: [
       {
@@ -22,10 +32,11 @@ const accessPermission = [
 
       { access_permission: "location", label: "Location" },
       { access_permission: "department", label: "Department" },
+      { access_permission: "ap", label: "Accounts Payable" },
     ],
   },
   {
-    id: 3,
+    id: 4,
     access: "Report",
     children: [
       {

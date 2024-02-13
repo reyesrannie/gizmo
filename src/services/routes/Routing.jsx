@@ -12,6 +12,7 @@ import Company from "../../screen/masterlist/charging/Company";
 import Department from "../../screen/masterlist/charging/Department";
 import Location from "../../screen/masterlist/charging/Location";
 import AccountsPayable from "../../screen/masterlist/ap/AccountsPayable";
+import { hasAccess } from "../functions/access";
 
 const Routing = () => {
   const user = decodeUser();
@@ -26,7 +27,7 @@ const Routing = () => {
       children: [
         {
           path: "",
-          element: <Dashboard />,
+          element: hasAccess(["dashboard"]) ? <Dashboard /> : <></>,
         },
       ],
     },
@@ -36,15 +37,27 @@ const Routing = () => {
       children: [
         {
           path: "",
-          element: <UserManagement />,
+          element: hasAccess(["user", "role"]) ? (
+            <UserManagement />
+          ) : (
+            <Navigate to={"/"} />
+          ),
         },
         {
           path: "users",
-          element: <UserAccounts />,
+          element: hasAccess(["user"]) ? (
+            <UserAccounts />
+          ) : (
+            <Navigate to={"/account"} />
+          ),
         },
         {
           path: "roles",
-          element: <RoleManagement />,
+          element: hasAccess(["role"]) ? (
+            <RoleManagement />
+          ) : (
+            <Navigate to={"/account"} />
+          ),
         },
       ],
     },
@@ -54,23 +67,43 @@ const Routing = () => {
       children: [
         {
           path: "",
-          element: <Masterlist />,
+          element: hasAccess(["company", "department", "location", "ap"]) ? (
+            <Masterlist />
+          ) : (
+            <Navigate to={"/"} />
+          ),
         },
         {
           path: "company",
-          element: <Company />,
+          element: hasAccess(["company"]) ? (
+            <Company />
+          ) : (
+            <Navigate to={"/masterlist"} />
+          ),
         },
         {
           path: "department",
-          element: <Department />,
+          element: hasAccess(["department"]) ? (
+            <Department />
+          ) : (
+            <Navigate to={"/masterlist"} />
+          ),
         },
         {
           path: "location",
-          element: <Location />,
+          element: hasAccess(["location"]) ? (
+            <Location />
+          ) : (
+            <Navigate to={"/masterlist"} />
+          ),
         },
         {
           path: "ap",
-          element: <AccountsPayable />,
+          element: hasAccess(["ap"]) ? (
+            <AccountsPayable />
+          ) : (
+            <Navigate to={"/masterlist"} />
+          ),
         },
       ],
     },
