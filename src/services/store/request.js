@@ -215,6 +215,33 @@ export const jsonServerAPI = createApi({
       }),
       providesTags: ["Location"],
     }),
+    createLocation: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/location`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["Location"],
+    }),
+    updateLocation: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/location/${payload.id}`,
+        method: "PUT",
+        body: payload,
+      }),
+      invalidatesTags: ["Location"],
+    }),
+    archiveLocation: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/archive/location/${payload.id}`,
+        method: "PATCH",
+        body: payload,
+      }),
+      invalidatesTags: ["Location"],
+    }),
   }),
 });
 
@@ -240,5 +267,8 @@ export const {
   useUpdateDepartmentMutation,
   useArchiveDepartmentMutation,
   useLocationQuery,
+  useCreateLocationMutation,
+  useUpdateLocationMutation,
+  useArchiveLocationMutation,
   useApQuery,
 } = jsonServerAPI;

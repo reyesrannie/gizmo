@@ -1,24 +1,24 @@
 import { Box, Button, Dialog, Divider, Paper, Typography } from "@mui/material";
 import React from "react";
 
-import "../styles/CompanyModal.scss";
-import company from "../../assets/svg/company.svg";
-import companySchema from "../../schemas/companySchema";
-import AppTextBox from "./AppTextBox";
-import loading from "../../assets/lottie/Loading-2.json";
+import "../../styles/CompanyModal.scss";
+import company from "../../../assets/svg/company.svg";
+import companySchema from "../../../schemas/companySchema";
+import AppTextBox from "../AppTextBox";
+import loading from "../../../assets/lottie/Loading-2.json";
 import Lottie from "lottie-react";
 
 import { LoadingButton } from "@mui/lab";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useDispatch } from "react-redux";
-import { resetMenu } from "../../services/slice/menuSlice";
+import { resetMenu } from "../../../services/slice/menuSlice";
 import {
   useCreateCompanyMutation,
   useUpdateCompanyMutation,
-} from "../../services/store/request";
+} from "../../../services/store/request";
 import { useSnackbar } from "notistack";
-import { objectError } from "../../services/functions/errorResponse";
+import { objectError } from "../../../services/functions/errorResponse";
 
 const CompanyModal = ({ companyData, view, update }) => {
   const dispatch = useDispatch();

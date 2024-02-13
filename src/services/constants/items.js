@@ -70,7 +70,7 @@ const masterlist = [
   {
     path: "/masterlist/location",
     desc: "A module for storing information about locations or branches of the company.",
-    name: "User Management",
+    name: "Location",
     firstIcon: (
       <ShareLocationOutlinedIcon
         color="secondary"

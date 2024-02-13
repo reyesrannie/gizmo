@@ -54,7 +54,7 @@ import moment from "moment";
 import { useState } from "react";
 import { resetPrompt, setWarning } from "../../../services/slice/promptSlice";
 import AppPrompt from "../../../components/customs/AppPrompt";
-import DepartmentModal from "../../../components/customs/DepartmentModal";
+import DepartmentModal from "../../../components/customs/modal/DepartmentModal";
 import { useSnackbar } from "notistack";
 import { singleError } from "../../../services/functions/errorResponse";
 

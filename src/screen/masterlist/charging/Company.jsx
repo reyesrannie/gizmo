@@ -50,6 +50,8 @@ import "../../../components/styles/Company.scss";
 
 import { useState } from "react";
 import { resetPrompt, setWarning } from "../../../services/slice/promptSlice";
+import { useSnackbar } from "notistack";
+import { singleError } from "../../../services/functions/errorResponse";
 import AppPrompt from "../../../components/customs/AppPrompt";
 import {
   resetMenu,
@@ -57,9 +59,7 @@ import {
   setMenuData,
   setUpdateMenu,
 } from "../../../services/slice/menuSlice";
-import CompanyModal from "../../../components/customs/CompanyModal";
-import { useSnackbar } from "notistack";
-import { singleError } from "../../../services/functions/errorResponse";
+import CompanyModal from "../../../components/customs/modal/CompanyModal";
 
 const Company = () => {
   const [anchorE1, setAnchorE1] = useState(null);

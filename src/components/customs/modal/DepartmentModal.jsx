@@ -9,27 +9,27 @@ import {
 } from "@mui/material";
 import React from "react";
 
-import "../styles/DepartmentModal.scss";
-import department from "../../assets/svg/department.svg";
+import "../../styles/DepartmentModal.scss";
+import department from "../../../assets/svg/department.svg";
 
-import AppTextBox from "./AppTextBox";
-import loading from "../../assets/lottie/Loading-2.json";
+import AppTextBox from "../AppTextBox";
+import loading from "../../../assets/lottie/Loading-2.json";
 import Lottie from "lottie-react";
 
 import { LoadingButton } from "@mui/lab";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useDispatch } from "react-redux";
-import { resetMenu } from "../../services/slice/menuSlice";
+import { resetMenu } from "../../../services/slice/menuSlice";
 import {
   useCreateDepartmentMutation,
   useLocationQuery,
   useUpdateDepartmentMutation,
-} from "../../services/store/request";
+} from "../../../services/store/request";
 import { useSnackbar } from "notistack";
-import { objectError } from "../../services/functions/errorResponse";
-import departmentSchema from "../../schemas/departmentSchema";
-import Autocomplete from "./AutoComplete";
+import { objectError } from "../../../services/functions/errorResponse";
+import departmentSchema from "../../../schemas/departmentSchema";
+import Autocomplete from "../AutoComplete";
 import { useEffect } from "react";
 
 const DepartmentModal = ({ departmentData, view, update }) => {

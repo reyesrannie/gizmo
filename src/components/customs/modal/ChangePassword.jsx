@@ -1,26 +1,26 @@
 import { Box, Button, Dialog, Paper, Typography } from "@mui/material";
 import React from "react";
 
-import password from "../../assets/svg/password.svg";
-import changePasswordSchema from "../../schemas/changePasswordSchema";
-import AppTextBox from "./AppTextBox";
+import password from "../../../assets/svg/password.svg";
+import changePasswordSchema from "../../../schemas/changePasswordSchema";
+import AppTextBox from "../AppTextBox";
 import Lottie from "lottie-react";
-import loading from "../../assets/lottie/Loading.json";
+import loading from "../../../assets/lottie/Loading.json";
 
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 
 import { LoadingButton } from "@mui/lab";
 import { useDispatch, useSelector } from "react-redux";
-import { resetAuth, setChangePass } from "../../services/slice/authSlice";
-import { usePasswordChangeMutation } from "../../services/store/request";
+import { resetAuth, setChangePass } from "../../../services/slice/authSlice";
+import { usePasswordChangeMutation } from "../../../services/store/request";
 import { useSnackbar } from "notistack";
-import { objectError } from "../../services/functions/errorResponse";
+import { objectError } from "../../../services/functions/errorResponse";
 
-import { loginUser } from "../../services/functions/loginServices";
+import { loginUser } from "../../../services/functions/loginServices";
 import { useNavigate } from "react-router-dom";
 
-import "../styles/ChangePassword.scss";
+import "../../styles/ChangePassword.scss";
 
 const ChangePassword = ({ logged = false }) => {
   const { enqueueSnackbar } = useSnackbar();

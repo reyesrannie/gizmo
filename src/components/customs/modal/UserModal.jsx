@@ -9,19 +9,19 @@ import {
   IconButton,
 } from "@mui/material";
 import React from "react";
-import user from "../../assets/svg/add-user.svg";
+import user from "../../../assets/svg/add-user.svg";
 
-import "../styles/UserModal.scss";
-import AppTextBox from "./AppTextBox";
+import "../../styles/UserModal.scss";
+import AppTextBox from "../AppTextBox";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import usersSchema from "../../schemas/usersSchema";
-import Autocomplete from "./AutoComplete";
+import usersSchema from "../../../schemas/usersSchema";
+import Autocomplete from "../AutoComplete";
 import { useDispatch } from "react-redux";
-import { resetMenu } from "../../services/slice/menuSlice";
-import { useSedarQuery } from "../../services/store/sedarRequest";
+import { resetMenu } from "../../../services/slice/menuSlice";
+import { useSedarQuery } from "../../../services/store/sedarRequest";
 import Lottie from "lottie-react";
-import loading from "../../assets/lottie/Loading.json";
+import loading from "../../../assets/lottie/Loading.json";
 
 import ClearIcon from "@mui/icons-material/Clear";
 import {
@@ -32,9 +32,9 @@ import {
   useLocationQuery,
   useRoleQuery,
   useUpdateUserMutation,
-} from "../../services/store/request";
+} from "../../../services/store/request";
 import { useEffect } from "react";
-import { objectError } from "../../services/functions/errorResponse";
+import { objectError } from "../../../services/functions/errorResponse";
 import { enqueueSnackbar } from "notistack";
 
 const UserModal = ({ menuData, view, update }) => {

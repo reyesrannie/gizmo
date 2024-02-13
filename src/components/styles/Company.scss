@@ -205,18 +205,6 @@
     }
   }
 
-  .company-body-container {
-    &.MuiBox-root {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-color: #fff;
-      margin: 20px;
-      border-radius: 10px;
-      overflow: hidden;
-    }
-  }
-
   .check-box-archive-company {
     &.MuiFormControlLabel-root {
       .MuiSvgIcon-root {
@@ -229,7 +217,7 @@
   }
 
   .loading-company {
-    width: 350px;
+    height: 350px;
   }
 
   .no-data-company {
@@ -345,6 +333,11 @@
     .MuiPaper-root {
       box-shadow: none;
       background-color: transparent;
+    }
+  }
+  .button-export-company {
+    &.MuiButtonBase-root {
+      font-size: 11px;
     }
   }
 }

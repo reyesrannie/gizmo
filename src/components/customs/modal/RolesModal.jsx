@@ -12,27 +12,27 @@ import { LoadingButton } from "@mui/lab";
 
 import React from "react";
 
-import "../styles/RolesModal.scss";
-import roles from "../../assets/svg/role.svg";
+import "../../styles/RolesModal.scss";
+import roles from "../../../assets/svg/role.svg";
 import Lottie from "lottie-react";
-import loading from "../../assets/lottie/Loading.json";
+import loading from "../../../assets/lottie/Loading.json";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import rolesSchema from "../../schemas/rolesSchema";
-import AppTextBox from "./AppTextBox";
-import accessPermission from "../../services/constants/accessPermission";
+import rolesSchema from "../../../schemas/rolesSchema";
+import AppTextBox from "../AppTextBox";
+import accessPermission from "../../../services/constants/accessPermission";
 import { useDispatch } from "react-redux";
 import {
   setRolesData,
   setRolesMenu,
   setRolesUpdate,
   setRolesView,
-} from "../../services/slice/menuSlice";
+} from "../../../services/slice/menuSlice";
 import {
   useCreateRoleMutation,
   useUpdateRoleMutation,
-} from "../../services/store/request";
-import { objectError } from "../../services/functions/errorResponse";
+} from "../../../services/store/request";
+import { objectError } from "../../../services/functions/errorResponse";
 import { useSnackbar } from "notistack";
 
 const RolesModal = ({ roleData, view, update }) => {

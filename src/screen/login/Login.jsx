@@ -23,7 +23,7 @@ import {
 } from "../../services/slice/authSlice";
 import { loginUser } from "../../services/functions/loginServices";
 import { useNavigate } from "react-router-dom";
-import ChangePassword from "../../components/customs/ChangePassword";
+import ChangePassword from "../../components/customs/modal/ChangePassword";
 
 const Login = () => {
   const { enqueueSnackbar } = useSnackbar();

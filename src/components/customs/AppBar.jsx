@@ -21,7 +21,7 @@ import MenuDrawer from "./MenuDrawer";
 import { Outlet } from "react-router-dom";
 import { decodeUser } from "../../services/functions/saveUser";
 import AccountMenu from "./AccountMenu";
-import ChangePassword from "./ChangePassword";
+import ChangePassword from "./modal/ChangePassword";
 
 const AppBar = () => {
   const dispatch = useDispatch();

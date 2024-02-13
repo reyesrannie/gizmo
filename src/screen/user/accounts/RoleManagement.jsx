@@ -31,7 +31,7 @@ import loadingLight from "../../../assets/lottie/Loading.json";
 
 import noData from "../../../assets/lottie/NoData.json";
 
-import RolesModal from "../../../components/customs/RolesModal";
+import RolesModal from "../../../components/customs/modal/RolesModal";
 import warning from "../../../assets/svg/warning.svg";
 
 import {

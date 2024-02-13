@@ -28,15 +28,9 @@ const useParamsHook = () => {
     setParams((currentValue) => ({
       ...currentValue,
       status: status,
+      page: 1,
     }));
   };
-  // const onDateRange = (date) => {
-  //   setParams((currentValue) => ({
-  //     ...currentValue,
-  //     from: date?.from ? moment(date?.from).format("YYYY/MM/DD") : null,
-  //     to: date?.to ? moment(date?.to).format("YYYY/MM/DD") : null,
-  //   }));
-  // };
 
   const onSearchData = (search) => {
     setParams((currentValue) => ({

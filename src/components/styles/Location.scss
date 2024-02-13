@@ -1,4 +1,4 @@
-.page-text-indicator-department {
+.page-text-indicator-location {
   &.MuiTypography-root {
     font-family: "Roboto-Black";
     font-size: 24px;
@@ -6,7 +6,7 @@
   }
 }
 
-.department-head-container {
+.location-head-container {
   &.MuiBox-root {
     display: flex;
     align-items: center;
@@ -15,7 +15,7 @@
   }
 }
 
-.department-button-container {
+.location-button-container {
   &.MuiBox-root {
     display: flex;
     align-items: center;
@@ -24,7 +24,7 @@
   }
 }
 
-.department-body-container {
+.location-body-container {
   &.MuiBox-root {
     display: flex;
     align-items: center;
@@ -36,17 +36,17 @@
   }
 }
 
-.loading-department {
+.loading-location {
   height: 500px;
 }
 
-.no-data-department {
+.no-data-location {
   height: 500px;
   opacity: 0.7;
   filter: grayscale(0.3);
 }
 
-.department-table-container {
+.location-table-container {
   &.MuiTableContainer-root {
     max-height: 735px;
     &::-webkit-scrollbar {
@@ -72,7 +72,7 @@
   }
 }
 
-.table-header1-department {
+.table-header1-location {
   &.MuiTableRow-root {
     .MuiTableCell-root {
       border: none;
@@ -83,7 +83,7 @@
   }
 }
 
-.table-header-department {
+.table-header-location {
   &.MuiTableRow-root {
     .MuiTableCell-root {
       border: none;
@@ -96,7 +96,7 @@
   }
 }
 
-.table-body-department {
+.table-body-location {
   &.MuiTableRow-root {
     .MuiTableCell-root {
       border-bottom: 4px solid #f2f2f2;
@@ -110,7 +110,7 @@
   }
 }
 
-.table-footer-department {
+.table-footer-location {
   &.MuiTableRow-root {
     .MuiTableCell-root {
       border: none;
@@ -136,52 +136,52 @@
   }
 }
 
-.department-icon-actions {
+.location-icon-actions {
   &.MuiSvgIcon-root {
     font-size: 20px;
   }
 }
 
-.department-menu-icons {
+.location-menu-icons {
   &.MuiSvgIcon-root {
     font-size: 20px;
   }
 }
 
-.department-menu-text {
+.location-menu-text {
   &.MuiTypography-root {
     font-size: 14px;
     font-family: Roboto-Medium;
   }
 }
 
-.button-add-department {
+.button-add-location {
   &.MuiButtonBase-root {
     text-transform: none;
     font-family: Roboto-Medium;
   }
 }
 
-.department-modal-dialog {
+.location-modal-dialog {
   .MuiPaper-root {
     max-width: 810px;
   }
 }
 
-.department-icon-actions {
+.location-icon-actions {
   &.MuiSvgIcon-root {
     font-size: 20px;
   }
 }
 
-.loading-department-create {
+.loading-location-create {
   .MuiPaper-root {
     box-shadow: none;
     background-color: transparent;
   }
 }
 
-.button-export-department {
+.button-export-location {
   &.MuiButtonBase-root {
     text-transform: none;
     font-family: Roboto-Medium;
@@ -190,13 +190,13 @@
 }
 
 @media (max-height: 681px) {
-  .page-text-indicator-department {
+  .page-text-indicator-location {
     &.MuiTypography-root {
       font-size: 18px;
     }
   }
 
-  .department-head-container {
+  .location-head-container {
     &.MuiBox-root {
       display: flex;
       align-items: center;
@@ -205,7 +205,7 @@
     }
   }
 
-  .check-box-archive-department {
+  .check-box-archive-location {
     &.MuiFormControlLabel-root {
       .MuiSvgIcon-root {
         font-size: 16px;
@@ -216,21 +216,21 @@
     }
   }
 
-  .loading-department {
+  .loading-location {
     height: 350px;
   }
 
-  .no-data-department {
+  .no-data-location {
     height: 350px;
   }
 
-  .department-table-container {
+  .location-table-container {
     &.MuiTableContainer-root {
       max-height: 500px;
     }
   }
 
-  .table-header1-department {
+  .table-header1-location {
     &.MuiTableRow-root {
       .MuiTableCell-root {
         padding: 5px;
@@ -238,7 +238,7 @@
     }
   }
 
-  .table-header-department {
+  .table-header-location {
     &.MuiTableRow-root {
       .MuiTableCell-root {
         padding: 10px;
@@ -247,7 +247,7 @@
     }
   }
 
-  .table-body-department {
+  .table-body-location {
     &.MuiTableRow-root {
       .MuiTableCell-root {
         padding: 4px;
@@ -256,7 +256,7 @@
     }
   }
 
-  .table-footer-department {
+  .table-footer-location {
     &.MuiTableRow-root {
       .MuiTableCell-root {
         border: none;
@@ -285,26 +285,26 @@
     }
   }
 
-  .department-icon-actions {
+  .location-icon-actions {
     &.MuiSvgIcon-root {
       font-size: 18px;
     }
   }
 
-  .department-menu-icons {
+  .location-menu-icons {
     &.MuiSvgIcon-root {
       font-size: 18px;
     }
   }
 
-  .department-menu-text {
+  .location-menu-text {
     &.MuiTypography-root {
       font-size: 12px;
       font-family: Roboto-Medium;
     }
   }
 
-  .button-add-department {
+  .button-add-location {
     &.MuiButtonBase-root {
       text-transform: none;
       font-family: Roboto-Medium;
@@ -317,25 +317,25 @@
     }
   }
 
-  .department-modal-dialog {
+  .location-modal-dialog {
     .MuiPaper-root {
       max-width: 400px;
     }
   }
 
-  .department-icon-actions {
+  .location-icon-actions {
     &.MuiSvgIcon-root {
       font-size: 18px;
     }
   }
 
-  .loading-department-create {
+  .loading-location-create {
     .MuiPaper-root {
       box-shadow: none;
       background-color: transparent;
     }
   }
-  .button-export-department {
+  .button-export-location {
     &.MuiButtonBase-root {
       font-size: 11px;
     }

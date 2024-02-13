@@ -10,6 +10,7 @@ import RoleManagement from "../../screen/user/accounts/RoleManagement";
 import Masterlist from "../../screen/masterlist/Masterlist";
 import Company from "../../screen/masterlist/charging/Company";
 import Department from "../../screen/masterlist/charging/Department";
+import Location from "../../screen/masterlist/charging/Location";
 
 const Routing = () => {
   const user = decodeUser();
@@ -61,6 +62,10 @@ const Routing = () => {
         {
           path: "department",
           element: <Department />,
+        },
+        {
+          path: "location",
+          element: <Location />,
         },
       ],
     },
