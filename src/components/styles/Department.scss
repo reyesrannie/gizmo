@@ -1,0 +1,350 @@
+.page-text-indicator-department {
+  &.MuiTypography-root {
+    font-family: "Roboto-Black";
+    font-size: 24px;
+    margin-left: 20px;
+  }
+}
+
+.department-head-container {
+  &.MuiBox-root {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-right: 20px;
+  }
+}
+
+.department-button-container {
+  &.MuiBox-root {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+  }
+}
+
+.department-body-container {
+  &.MuiBox-root {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #fff;
+    margin: 20px;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+}
+
+.loading-department {
+  height: 500px;
+}
+
+.no-data-department {
+  height: 500px;
+  opacity: 0.7;
+  filter: grayscale(0.3);
+}
+
+.department-table-container {
+  &.MuiTableContainer-root {
+    max-height: 735px;
+    &::-webkit-scrollbar {
+      width: 14px;
+      border: 3px solid #fff;
+    }
+    &::-webkit-scrollbar-thumb {
+      background-color: #ccc;
+      border-radius: 20px;
+      border: 3px solid #fff;
+    }
+    &::-webkit-scrollbar-thumb:hover {
+      background-color: #f4ce92;
+    }
+    &::-webkit-scrollbar-track {
+      background-color: #fff;
+      border-radius: 20px;
+      border: 3px solid #fff;
+    }
+    &::-webkit-scrollbar-track:hover {
+      background-color: #eee;
+    }
+  }
+}
+
+.table-header1-department {
+  &.MuiTableRow-root {
+    .MuiTableCell-root {
+      border: none;
+      font-family: Roboto-Bold;
+      letter-spacing: 1px;
+      padding: 10px;
+    }
+  }
+}
+
+.table-header-department {
+  &.MuiTableRow-root {
+    .MuiTableCell-root {
+      border: none;
+      font-family: Roboto-Bold;
+      letter-spacing: 1px;
+      color: #f4ce92;
+      background-color: #15253b;
+      padding: 14px;
+    }
+  }
+}
+
+.table-body-department {
+  &.MuiTableRow-root {
+    .MuiTableCell-root {
+      border-bottom: 4px solid #f2f2f2;
+      padding: 8px;
+      font-family: Roboto-Light;
+      letter-spacing: 1px;
+    }
+    &:hover {
+      background-color: #f2f2f2;
+    }
+  }
+}
+
+.table-footer-department {
+  &.MuiTableRow-root {
+    .MuiTableCell-root {
+      border: none;
+      padding: 1px;
+      // background-color: #fff;
+
+      .MuiTablePagination-root {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+
+        .MuiTablePagination-selectLabel {
+          font-family: Roboto-Light;
+        }
+        .MuiInputBase-root {
+          font-family: Roboto-Light;
+        }
+        .MuiTablePagination-displayedRows {
+          font-family: Roboto-Light;
+        }
+      }
+    }
+  }
+}
+
+.department-icon-actions {
+  &.MuiSvgIcon-root {
+    font-size: 20px;
+  }
+}
+
+.department-menu-icons {
+  &.MuiSvgIcon-root {
+    font-size: 20px;
+  }
+}
+
+.department-menu-text {
+  &.MuiTypography-root {
+    font-size: 14px;
+    font-family: Roboto-Medium;
+  }
+}
+
+.button-add-department {
+  &.MuiButtonBase-root {
+    text-transform: none;
+    font-family: Roboto-Medium;
+  }
+}
+
+.department-modal-dialog {
+  .MuiPaper-root {
+    max-width: 810px;
+  }
+}
+
+.department-icon-actions {
+  &.MuiSvgIcon-root {
+    font-size: 20px;
+  }
+}
+
+.loading-department-create {
+  .MuiPaper-root {
+    box-shadow: none;
+    background-color: transparent;
+  }
+}
+
+.button-export-department {
+  &.MuiButtonBase-root {
+    text-transform: none;
+    font-family: Roboto-Medium;
+    margin-left: 15px;
+  }
+}
+
+@media (max-height: 681px) {
+  .page-text-indicator-department {
+    &.MuiTypography-root {
+      font-size: 18px;
+    }
+  }
+
+  .department-head-container {
+    &.MuiBox-root {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-right: 20px;
+    }
+  }
+
+  .department-body-container {
+    &.MuiBox-root {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #fff;
+      margin: 20px;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+  }
+
+  .check-box-archive-department {
+    &.MuiFormControlLabel-root {
+      .MuiSvgIcon-root {
+        font-size: 16px;
+      }
+      .MuiTypography-root {
+        font-size: 12px;
+      }
+    }
+  }
+
+  .loading-department {
+    width: 350px;
+  }
+
+  .no-data-department {
+    height: 350px;
+  }
+
+  .department-table-container {
+    &.MuiTableContainer-root {
+      max-height: 500px;
+    }
+  }
+
+  .table-header1-department {
+    &.MuiTableRow-root {
+      .MuiTableCell-root {
+        padding: 5px;
+      }
+    }
+  }
+
+  .table-header-department {
+    &.MuiTableRow-root {
+      .MuiTableCell-root {
+        padding: 10px;
+        font-size: 10px;
+      }
+    }
+  }
+
+  .table-body-department {
+    &.MuiTableRow-root {
+      .MuiTableCell-root {
+        padding: 4px;
+        font-size: 11px;
+      }
+    }
+  }
+
+  .table-footer-department {
+    &.MuiTableRow-root {
+      .MuiTableCell-root {
+        border: none;
+        padding: 1px;
+        background-color: #fff;
+
+        .MuiTablePagination-root {
+          display: flex;
+          justify-content: flex-end;
+          align-items: center;
+
+          .MuiTablePagination-selectLabel {
+            font-size: 12px;
+          }
+          .MuiInputBase-root {
+            font-size: 12px;
+          }
+          .MuiTablePagination-displayedRows {
+            font-size: 12px;
+          }
+          .MuiSvgIcon-root {
+            font-size: 18px;
+          }
+        }
+      }
+    }
+  }
+
+  .department-icon-actions {
+    &.MuiSvgIcon-root {
+      font-size: 18px;
+    }
+  }
+
+  .department-menu-icons {
+    &.MuiSvgIcon-root {
+      font-size: 18px;
+    }
+  }
+
+  .department-menu-text {
+    &.MuiTypography-root {
+      font-size: 12px;
+      font-family: Roboto-Medium;
+    }
+  }
+
+  .button-add-department {
+    &.MuiButtonBase-root {
+      text-transform: none;
+      font-family: Roboto-Medium;
+      font-size: 10px;
+      max-height: 25px;
+      max-width: 25px;
+      .MuiSvgIcon-root {
+        font-size: 14px;
+      }
+    }
+  }
+
+  .department-modal-dialog {
+    .MuiPaper-root {
+      max-width: 400px;
+    }
+  }
+
+  .department-icon-actions {
+    &.MuiSvgIcon-root {
+      font-size: 18px;
+    }
+  }
+
+  .loading-department-create {
+    .MuiPaper-root {
+      box-shadow: none;
+      background-color: transparent;
+    }
+  }
+}

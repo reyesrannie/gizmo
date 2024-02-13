@@ -50,7 +50,7 @@ const Autocomplete = ({
             disabled={disabled}
             {...autocomplete}
             filterOptions={filterOptions}
-            className="select"
+            className={className}
             error={error}
             helpertext={helpertext}
             value={value}

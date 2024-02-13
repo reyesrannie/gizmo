@@ -7,6 +7,9 @@ import { decodeUser } from "../functions/saveUser";
 import UserAccounts from "../../screen/user/accounts/UserAccounts";
 import UserManagement from "../../screen/user/UserManagement";
 import RoleManagement from "../../screen/user/accounts/RoleManagement";
+import Masterlist from "../../screen/masterlist/Masterlist";
+import Company from "../../screen/masterlist/charging/Company";
+import Department from "../../screen/masterlist/charging/Department";
 
 const Routing = () => {
   const user = decodeUser();
@@ -40,6 +43,24 @@ const Routing = () => {
         {
           path: "roles",
           element: <RoleManagement />,
+        },
+      ],
+    },
+    {
+      path: "/masterlist",
+      element: user ? <AppBar /> : <Navigate to={"/login"} />,
+      children: [
+        {
+          path: "",
+          element: <Masterlist />,
+        },
+        {
+          path: "company",
+          element: <Company />,
+        },
+        {
+          path: "department",
+          element: <Department />,
         },
       ],
     },

@@ -1,8 +1,5 @@
 import {
   Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Button,
   Divider,
   Drawer,
   List,
@@ -13,62 +10,17 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import React from "react";
-
-import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
-import ListAltOutlinedIcon from "@mui/icons-material/ListAltOutlined";
-import SupervisorAccountOutlinedIcon from "@mui/icons-material/SupervisorAccountOutlined";
-import SettingsAccessibilityIcon from "@mui/icons-material/SettingsAccessibility";
-import ManageAccountsOutlinedIcon from "@mui/icons-material/ManageAccountsOutlined";
-
 import "../styles/MenuDrawer.scss";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router";
 import { setDrawer } from "../../services/slice/menuSlice";
+import { menu } from "../../services/constants/items";
 
 const MenuDrawer = () => {
   const openDrawer = useSelector((state) => state.menu.drawer);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-
-  const menu = [
-    {
-      desc: "Dashboard",
-      icon: <DashboardOutlinedIcon />,
-      path: "/",
-      children: [],
-    },
-    {
-      desc: "User Management",
-      icon: <SupervisorAccountOutlinedIcon />,
-      path: "/account",
-      children: [
-        {
-          desc: "Role Management",
-          icon: <SettingsAccessibilityIcon />,
-          path: "/account/roles",
-        },
-        {
-          desc: "User Accounts",
-          icon: <ManageAccountsOutlinedIcon />,
-          path: "/account/users",
-        },
-      ],
-    },
-    {
-      desc: "Masterlist",
-      icon: <ListAltOutlinedIcon />,
-      path: "/masterlist",
-      children: [],
-    },
-    {
-      desc: "Items",
-      icon: <DashboardOutlinedIcon />,
-      path: "/item",
-      children: [],
-    },
-  ];
-
   const isTablet = useMediaQuery("(max-width:768px)");
 
   return (

@@ -18,97 +18,77 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-
-import AddToPhotosOutlinedIcon from "@mui/icons-material/AddToPhotosOutlined";
-import StatusIndicator from "../../../components/customs/StatusIndicator";
-import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
-import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
-import ModeEditOutlineOutlinedIcon from "@mui/icons-material/ModeEditOutlineOutlined";
-import SettingsBackupRestoreOutlinedIcon from "@mui/icons-material/SettingsBackupRestoreOutlined";
-
-import Lottie from "lottie-react";
-import React from "react";
-import moment from "moment";
-import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { enqueueSnackbar } from "notistack";
+import {
+  resetMenu,
+  setCreateMenu,
+  setMenuData,
+  setUpdateMenu,
+  setViewMenu,
+} from "../../../services/slice/menuSlice";
 
+import React from "react";
 import Breadcrums from "../../../components/customs/Breadcrums";
 import SearchText from "../../../components/customs/SearchText";
 import useParamsHook from "../../../services/hooks/useParamsHook";
 import loading from "../../../assets/lottie/Loading-2.json";
 import loadingLight from "../../../assets/lottie/Loading.json";
 import noData from "../../../assets/lottie/NoData.json";
+import StatusIndicator from "../../../components/customs/StatusIndicator";
 import warning from "../../../assets/svg/warning.svg";
-import AppPrompt from "../../../components/customs/AppPrompt";
-import UserModal from "../../../components/customs/UserModal";
 
+import AddToPhotosOutlinedIcon from "@mui/icons-material/AddToPhotosOutlined";
+import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
+import ModeEditOutlineOutlinedIcon from "@mui/icons-material/ModeEditOutlineOutlined";
+import SettingsBackupRestoreOutlinedIcon from "@mui/icons-material/SettingsBackupRestoreOutlined";
+import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
+import GetAppOutlinedIcon from "@mui/icons-material/GetAppOutlined";
+
+import "../../../components/styles/Department.scss";
+import {
+  useArchiveDepartmentMutation,
+  useDepartmentQuery,
+} from "../../../services/store/request";
+import Lottie from "lottie-react";
+import moment from "moment";
+import { useState } from "react";
+import { resetPrompt, setWarning } from "../../../services/slice/promptSlice";
+import AppPrompt from "../../../components/customs/AppPrompt";
+import DepartmentModal from "../../../components/customs/DepartmentModal";
+import { useSnackbar } from "notistack";
 import { singleError } from "../../../services/functions/errorResponse";
 
-import {
-  useArchiveUserMutation,
-  usePasswordResetMutation,
-  useUsersQuery,
-} from "../../../services/store/request";
-import {
-  resetMenu,
-  setCreateMenu,
-  setMenuData,
-  setUpdateMenu,
-} from "../../../services/slice/menuSlice";
-import {
-  resetPrompt,
-  setResetPassword,
-  setWarning,
-} from "../../../services/slice/promptSlice";
-
-import "../../../components/styles/UserAccounts.scss";
-
-const UserAccounts = () => {
-  const createMenuOpen = useSelector((state) => state.menu.createMenu);
-  const resetPassword = useSelector((state) => state.prompt.resetPassword);
-
-  const openWarning = useSelector((state) => state.prompt.warning);
-  const menuData = useSelector((state) => state.menu.menuData);
-  const updateMenu = useSelector((state) => state.menu.updateMenu);
-
+const Department = () => {
   const dispatch = useDispatch();
+  const { enqueueSnackbar } = useSnackbar();
+  const [anchorE1, setAnchorE1] = useState(null);
+
+  const menuData = useSelector((state) => state.menu.menuData);
+  const openWarning = useSelector((state) => state.prompt.warning);
+  const createMenu = useSelector((state) => state.menu.createMenu);
+  const updateMenu = useSelector((state) => state.menu.updateMenu);
+  const viewMenu = useSelector((state) => state.menu.viewMenu);
 
   const { params, onStatusChange, onPageChange, onRowChange, onSearchData } =
     useParamsHook();
 
   const {
-    data: users,
+    data: department,
     isLoading,
     isError,
-    status,
     isFetching,
-  } = useUsersQuery(params);
+    status,
+  } = useDepartmentQuery(params);
 
-  const [passwordReset] = usePasswordResetMutation();
-
-  const [anchorE1, setAnchorE1] = useState(null);
-
-  const [archiveUser, { isLoading: isLoadingArchive }] =
-    useArchiveUserMutation();
+  const [archiveDepartment, { isLoading: archiveLoading }] =
+    useArchiveDepartmentMutation();
 
   const handleArchive = async () => {
     try {
-      const res = await archiveUser(menuData).unwrap();
-      enqueueSnackbar(res.message, { variant: "success" });
-      dispatch(resetPrompt());
+      const res = await archiveDepartment(menuData).unwrap();
+      enqueueSnackbar(res?.message, { variant: "success" });
       dispatch(resetMenu());
-    } catch (error) {
-      singleError(error, enqueueSnackbar);
-    }
-  };
-
-  const handleReset = async () => {
-    try {
-      const res = await passwordReset(menuData).unwrap();
-      enqueueSnackbar(res.message, { variant: "success" });
       dispatch(resetPrompt());
-      dispatch(resetMenu());
     } catch (error) {
       singleError(error, enqueueSnackbar);
     }
@@ -119,16 +99,16 @@ const UserAccounts = () => {
       <Box>
         <Breadcrums />
       </Box>
-      <Box className="user-head-container">
-        <Typography className="page-text-indicator-user-accounts">
-          User Accounts
+      <Box className="department-head-container">
+        <Typography className="page-text-indicator-department">
+          Department
         </Typography>
-        <Box className="user-button-container">
+        <Box className="department-button-container">
           <SearchText onSearchData={onSearchData} />
           <Button
             variant="contained"
             color="secondary"
-            className="button-add-user"
+            className="button-add-department"
             startIcon={<AddToPhotosOutlinedIcon />}
             onClick={() => dispatch(setCreateMenu(true))}
           >
@@ -136,14 +116,14 @@ const UserAccounts = () => {
           </Button>
         </Box>
       </Box>
-      <Box className="user-body-container">
-        <TableContainer className="user-table-container">
+      <Box className="department-body-container">
+        <TableContainer className="department-table-container">
           <Table stickyHeader>
             <TableHead>
-              <TableRow className="table-header1-user">
+              <TableRow className="table-header1-department">
                 <TableCell colSpan={5}>
                   <FormControlLabel
-                    className="check-box-archive-user"
+                    className="check-box-archive-department"
                     control={<Checkbox color="secondary" />}
                     label="Archive"
                     checked={params?.status === "inactive"}
@@ -155,11 +135,11 @@ const UserAccounts = () => {
                   />
                 </TableCell>
               </TableRow>
-              <TableRow className="table-header-user">
+              <TableRow className="table-header-department">
                 <TableCell>ID No.</TableCell>
-                <TableCell>Username</TableCell>
+                <TableCell>Code</TableCell>
                 <TableCell>Name</TableCell>
-                <TableCell>Role</TableCell>
+                <TableCell align="center">Location</TableCell>
                 <TableCell align="center"> Status</TableCell>
                 <TableCell align="center">Date Modified</TableCell>
                 <TableCell align="center">Action</TableCell>
@@ -170,23 +150,41 @@ const UserAccounts = () => {
               {isLoading || status === "pending" ? (
                 <TableRow>
                   <TableCell colSpan={7} align="center">
-                    <Lottie animationData={loading} className="loading-users" />
+                    <Lottie
+                      animationData={loading}
+                      className="loading-department"
+                    />
                   </TableCell>
                 </TableRow>
               ) : isError ? (
                 <TableRow>
                   <TableCell colSpan={7} align="center">
-                    <Lottie animationData={noData} className="no-data-users" />
+                    <Lottie
+                      animationData={noData}
+                      className="no-data-department"
+                    />
                   </TableCell>
                 </TableRow>
               ) : (
-                users?.result?.data?.map((user) => (
-                  <TableRow className="table-body-user" key={user?.id}>
-                    <TableCell>{user?.id}</TableCell>
-                    <TableCell>{user?.username}</TableCell>
-                    <TableCell>{`${user?.account?.first_name} ${user?.account?.last_name}`}</TableCell>
+                department?.result?.data?.map((dept) => (
+                  <TableRow className="table-body-department" key={dept?.id}>
+                    <TableCell>{dept?.id}</TableCell>
+                    <TableCell>{dept?.code}</TableCell>
 
-                    <TableCell>{user?.role?.name}</TableCell>
+                    <TableCell>{dept?.name}</TableCell>
+                    <TableCell align="center">
+                      <Button
+                        size="small"
+                        color="info"
+                        className="button-add-department"
+                        onClick={() => {
+                          dispatch(setViewMenu(true));
+                          dispatch(setMenuData(dept));
+                        }}
+                      >
+                        View
+                      </Button>
+                    </TableCell>
                     <TableCell align="center">
                       {params.status === "active" && (
                         <StatusIndicator
@@ -202,16 +200,16 @@ const UserAccounts = () => {
                       )}
                     </TableCell>
                     <TableCell align="center">
-                      {moment(user?.updated_at).format("MMM DD YYYY")}
+                      {moment(dept?.updated_at).format("MMM DD YYYY")}
                     </TableCell>
                     <TableCell align="center">
                       <IconButton
                         onClick={(e) => {
-                          dispatch(setMenuData(user));
+                          dispatch(setMenuData(dept));
                           setAnchorE1(e.currentTarget);
                         }}
                       >
-                        <MoreVertOutlinedIcon className="user-icon-actions" />
+                        <MoreVertOutlinedIcon className="department-icon-actions" />
                       </IconButton>
                     </TableCell>
                   </TableRow>
@@ -220,13 +218,24 @@ const UserAccounts = () => {
             </TableBody>
             {!isFetching && !isError && (
               <TableFooter style={{ position: "sticky", bottom: 0 }}>
-                <TableRow className="table-footer-user">
-                  <TableCell colSpan={7}>
+                <TableRow className="table-footer-department">
+                  <TableCell colSpan={2}>
+                    <Button
+                      variant="contained"
+                      color="warning"
+                      className="button-export-department"
+                      startIcon={<GetAppOutlinedIcon />}
+                      // onClick={() => dispatch(setCreateMenu(true))}
+                    >
+                      Export
+                    </Button>
+                  </TableCell>
+                  <TableCell colSpan={5}>
                     <TablePagination
                       rowsPerPageOptions={[5, 10, 25, 100]}
-                      count={users?.result?.total || 0}
-                      rowsPerPage={users?.result?.per_page || 10}
-                      page={users?.result?.current_page - 1 || 0}
+                      count={department?.result?.total || 0}
+                      rowsPerPage={department?.result?.per_page || 10}
+                      page={department?.result?.current_page - 1 || 0}
                       onPageChange={onPageChange}
                       onRowsPerPageChange={onRowChange}
                       component="div"
@@ -242,22 +251,11 @@ const UserAccounts = () => {
       <Menu
         anchorEl={anchorE1}
         open={Boolean(anchorE1)}
-        onClose={() => setAnchorE1(null)}
+        onClose={() => {
+          setAnchorE1(null);
+        }}
       >
-        {params.status === "active" && (
-          <MenuItem
-            onClick={() => {
-              setAnchorE1(null);
-              dispatch(setResetPassword(true));
-            }}
-          >
-            <ListItemIcon>
-              <SettingsBackupRestoreOutlinedIcon className="user-menu-icons" />
-            </ListItemIcon>
-            <Typography className="user-menu-text">Reset Password</Typography>
-          </MenuItem>
-        )}
-        {params.status === "active" && (
+        {params?.status === "active" && (
           <MenuItem
             onClick={() => {
               dispatch(setUpdateMenu(true));
@@ -265,9 +263,11 @@ const UserAccounts = () => {
             }}
           >
             <ListItemIcon>
-              <ModeEditOutlineOutlinedIcon className="user-menu-icons" />
+              <ModeEditOutlineOutlinedIcon className="department-menu-icons" />
             </ListItemIcon>
-            <Typography className="user-menu-text">Update Account</Typography>
+            <Typography className="department-menu-text">
+              Update Department
+            </Typography>
           </MenuItem>
         )}
         <MenuItem
@@ -278,27 +278,31 @@ const UserAccounts = () => {
         >
           <ListItemIcon>
             {params.status === "inactive" ? (
-              <SettingsBackupRestoreOutlinedIcon className="user-menu-icons" />
+              <SettingsBackupRestoreOutlinedIcon className="department-menu-icons" />
             ) : (
-              <DeleteForeverOutlinedIcon className="user-menu-icons" />
+              <DeleteForeverOutlinedIcon className="department-menu-icons" />
             )}
           </ListItemIcon>
-          <Typography className="user-menu-text">
+          <Typography className="department-menu-text">
             {params.status === "inactive" ? "Restore" : "Archive"}
           </Typography>
         </MenuItem>
       </Menu>
 
-      <Dialog open={isLoadingArchive} className="loading-user-create">
-        <Lottie animationData={loadingLight} loop={isLoadingArchive} />
+      <Dialog open={archiveLoading} className="loading-role-create">
+        <Lottie animationData={loadingLight} loop={archiveLoading} />
       </Dialog>
 
-      <Dialog open={createMenuOpen} className="user-modal-dialog">
-        <UserModal />
+      <Dialog open={createMenu}>
+        <DepartmentModal />
       </Dialog>
 
-      <Dialog open={updateMenu} className="user-modal-dialog">
-        <UserModal menuData={menuData} update />
+      <Dialog open={updateMenu}>
+        <DepartmentModal departmentData={menuData} update />
+      </Dialog>
+
+      <Dialog open={viewMenu}>
+        <DepartmentModal departmentData={menuData} view />
       </Dialog>
 
       <Dialog open={openWarning}>
@@ -306,13 +310,13 @@ const UserAccounts = () => {
           image={warning}
           title={
             params.status === "active"
-              ? "Archive the account?"
-              : "Restore the account?"
+              ? "Archive the department?"
+              : "Restore the department?"
           }
           message={
             params.status === "active"
-              ? "You are about to archive this account"
-              : "You are about to restore this account"
+              ? "You are about to archive this department"
+              : "You are about to restore this department"
           }
           nextLineMessage={"Please confirm to continue"}
           confirmButton={
@@ -320,27 +324,14 @@ const UserAccounts = () => {
           }
           cancelButton={"Cancel"}
           cancelOnClick={() => {
-            dispatch(resetMenu());
             dispatch(resetPrompt());
+            dispatch(resetMenu());
           }}
           confirmOnClick={() => handleArchive()}
-        />
-      </Dialog>
-
-      <Dialog open={resetPassword}>
-        <AppPrompt
-          image={warning}
-          title="Password Reset?"
-          message={"You are about to reset the password"}
-          nextLineMessage={"Please confirm to continue"}
-          confirmButton={"Yes, Reset it!"}
-          cancelButton={"Cancel"}
-          cancelOnClick={() => dispatch(resetPrompt())}
-          confirmOnClick={() => handleReset()}
         />
       </Dialog>
     </Box>
   );
 };
 
-export default UserAccounts;
+export default Department;

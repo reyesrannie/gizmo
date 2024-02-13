@@ -7,7 +7,6 @@ import {
   AppBar as MuiAppBar,
   Paper,
   Typography,
-  useMediaQuery,
 } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { setAccountMenu, setDrawer } from "../../services/slice/menuSlice";
@@ -31,8 +30,6 @@ const AppBar = () => {
   const openAccountMenu = useSelector((state) => state.menu.accountMenu);
   const userData = decodeUser();
   const [anchorEl, setAnchorEl] = useState(null);
-
-  const isTablet = useMediaQuery("(max-width:768px)");
 
   return (
     <Box className="appbar-container open">

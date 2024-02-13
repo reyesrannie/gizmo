@@ -1,4 +1,9 @@
-import { IconButton, ThemeProvider, createTheme } from "@mui/material";
+import {
+  IconButton,
+  ThemeProvider,
+  createTheme,
+  useMediaQuery,
+} from "@mui/material";
 import "./App.scss";
 
 import Routing from "./services/routes/Routing";
@@ -6,6 +11,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { SnackbarProvider, closeSnackbar } from "notistack";
 
 function App() {
+  const screenHS = useMediaQuery("(max-height:681px)");
   const theme = createTheme({
     components: {
       MuiDrawer: {
@@ -24,6 +30,15 @@ function App() {
               backgroundColor: "#f2f2f2",
               cursor: "pointer",
             },
+          },
+        },
+      },
+      MuiAutocomplete: {
+        styleOverrides: {
+          listbox: {
+            fontFamily: "Roboto-Light",
+            letterSpacing: "1px",
+            fontSize: screenHS ? "12px" : "16px",
           },
         },
       },

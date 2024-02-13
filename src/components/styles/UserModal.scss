@@ -105,3 +105,74 @@
     }
   }
 }
+
+@media (max-height: 681px) {
+  .user-image {
+    width: 45px;
+  }
+
+  .user-text {
+    &.MuiTypography-root {
+      font-size: 16px;
+    }
+  }
+
+  .form-title-text-user {
+    &.MuiTypography-root {
+      font-size: 12px;
+    }
+  }
+
+  .user-form-textBox {
+    &.MuiFormControl-root {
+      min-height: 55px;
+      .MuiInputBase-root {
+        font-size: 12px;
+      }
+      .MuiFormLabel-root {
+        font-size: 12px;
+      }
+      .MuiFormHelperText-root {
+        font-size: 10px;
+      }
+      .MuiAutocomplete-popper {
+        font-family: Roboto-Light;
+        background-color: aqua;
+      }
+    }
+  }
+
+  .form-button-user {
+    &.MuiBox-root {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      width: 100%;
+      gap: 10px;
+    }
+  }
+
+  .add-user-button {
+    &.MuiButtonBase-root {
+      font-family: Roboto-Medium;
+      text-transform: none;
+    }
+  }
+
+  .loading-user-create {
+    .MuiPaper-root {
+      box-shadow: none;
+      background-color: transparent;
+    }
+  }
+
+  .icon-clear-user {
+    &.MuiIconButton-root {
+      width: 20px;
+      height: 20px;
+      .MuiSvgIcon-root {
+        font-size: 14px;
+      }
+    }
+  }
+}

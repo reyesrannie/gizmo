@@ -24,3 +24,32 @@
     text-transform: capitalize;
   }
 }
+
+@media (max-height: 681px) {
+  .account-menu-container {
+    &.MuiList-root {
+      padding: 0;
+    }
+  }
+
+  .account-menu-icons {
+    &.MuiSvgIcon-root {
+      font-size: 16px;
+    }
+  }
+
+  .account-menu-text {
+    &.MuiTypography-root {
+      font-size: 12px;
+      font-family: Roboto-Medium;
+    }
+  }
+
+  .account-menu-name {
+    &.MuiTypography-root {
+      font-size: 12px;
+      font-family: Roboto-Medium;
+      text-transform: capitalize;
+    }
+  }
+}

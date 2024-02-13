@@ -1,25 +1,20 @@
 import { Box, Typography } from "@mui/material";
 import React from "react";
-
-import "../../components/styles/UserManagement.scss";
-
 import Breadcrums from "../../components/customs/Breadcrums";
+import { masterlist } from "../../services/constants/items";
 import CardNavigation from "../../components/customs/CardNavigation";
-import { user } from "../../services/constants/items";
 
-const UserManagement = () => {
+const Masterlist = () => {
   return (
     <Box>
       <Box>
         <Breadcrums />
       </Box>
       <Box>
-        <Typography className="page-text-indicator-user">
-          User Management
-        </Typography>
+        <Typography className="page-text-indicator-user">Masterlist</Typography>
       </Box>
       <Box className="user-management-body">
-        {user?.map((card, index) => (
+        {masterlist?.map((card, index) => (
           <CardNavigation
             key={index}
             path={card.path}
@@ -34,4 +29,4 @@ const UserManagement = () => {
   );
 };
 
-export default UserManagement;
+export default Masterlist;

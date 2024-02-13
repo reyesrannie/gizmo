@@ -1,0 +1,82 @@
+.company-modal-container {
+  &.MuiPaper-root {
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-direction: column;
+    gap: 10px;
+    overflow: hidden;
+  }
+}
+
+.company-image {
+  width: 75px;
+}
+
+.company-text {
+  &.MuiTypography-root {
+    font-family: Roboto-Black;
+    font-size: 25px;
+    letter-spacing: 1px;
+  }
+}
+
+.add-company-form-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.company-devider {
+  &.MuiDivider-root {
+    width: 100%;
+    margin-right: 3px;
+  }
+}
+
+.add-company-textbox {
+  &.MuiFormControl-root {
+    min-height: 60px;
+    .MuiInputBase-root {
+      border-radius: 10px;
+      font-family: Roboto-Medium;
+      letter-spacing: 1px;
+    }
+    .MuiFormLabel-root {
+      font-family: Roboto-Medium;
+      letter-spacing: 1px;
+    }
+    .MuiFormHelperText-root {
+      font-family: Roboto-Light;
+      letter-spacing: 1px;
+    }
+  }
+}
+
+.add-company-button-container {
+  &.MuiBox-root {
+    margin-top: 10px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    gap: 10px;
+    min-width: 350px;
+  }
+}
+
+.add-company-button {
+  &.MuiButtonBase-root {
+    font-family: Roboto-Medium;
+    text-transform: none;
+  }
+}
+
+.loading-company-create {
+  .MuiPaper-root {
+    box-shadow: none;
+    background-color: transparent;
+    width: 325px;
+  }
+}

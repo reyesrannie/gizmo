@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 // const baseURL = process.env.REACT_APP_API_KEY;
 
-// const baseURL = "http://10.10.10.17:8000/api";
+// const baseURL = "http://10.10.13.17:8000/api";
 const baseURL = "http://127.0.0.1:8000/api";
 
 export const jsonServerAPI = createApi({
@@ -143,6 +143,33 @@ export const jsonServerAPI = createApi({
       }),
       providesTags: ["Company"],
     }),
+    createCompany: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/company`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["Company"],
+    }),
+    updateCompany: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/company/${payload.id}`,
+        method: "PUT",
+        body: payload,
+      }),
+      invalidatesTags: ["Company"],
+    }),
+    archiveCompany: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/archive/company/${payload.id}`,
+        method: "PATCH",
+        body: payload,
+      }),
+      invalidatesTags: ["Company"],
+    }),
     department: builder.query({
       transformResponse: (response) => response,
       query: (payload) => ({
@@ -151,6 +178,33 @@ export const jsonServerAPI = createApi({
         params: payload,
       }),
       providesTags: ["Department"],
+    }),
+    createDepartment: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/department`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["Department"],
+    }),
+    updateDepartment: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/department/${payload.id}`,
+        method: "PUT",
+        body: payload,
+      }),
+      invalidatesTags: ["Department"],
+    }),
+    archiveDepartment: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/archive/department/${payload.id}`,
+        method: "PATCH",
+        body: payload,
+      }),
+      invalidatesTags: ["Department"],
     }),
     location: builder.query({
       transformResponse: (response) => response,
@@ -178,7 +232,13 @@ export const {
   useUpdateRoleMutation,
   useArchiveRoleMutation,
   useCompanyQuery,
+  useCreateCompanyMutation,
+  useUpdateCompanyMutation,
+  useArchiveCompanyMutation,
   useDepartmentQuery,
+  useCreateDepartmentMutation,
+  useUpdateDepartmentMutation,
+  useArchiveDepartmentMutation,
   useLocationQuery,
   useApQuery,
 } = jsonServerAPI;

@@ -93,6 +93,12 @@
     padding: 10px;
     border: thin solid #ccc;
     border-radius: 10px;
+    .MuiFormControlLabel-root {
+      .MuiTypography-root {
+        font-family: Roboto-Light;
+        letter-spacing: 1px;
+      }
+    }
   }
 }
 
@@ -134,5 +140,326 @@
   .MuiPaper-root {
     box-shadow: none;
     background-color: transparent;
+  }
+}
+
+@media (max-width: 320px) {
+  .roles-image {
+    width: 40px;
+  }
+
+  .roles-text {
+    &.MuiTypography-root {
+      font-size: 16px;
+    }
+  }
+
+  .add-role-form-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+
+  .add-role-textbox {
+    &.MuiFormControl-root {
+      min-height: 60px;
+      .MuiInputBase-root {
+        font-size: 12px;
+      }
+      .MuiFormLabel-root {
+        font-size: 12px;
+      }
+      .MuiFormHelperText-root {
+        font-size: 10px;
+      }
+    }
+  }
+
+  .role-checkbox-container {
+    &.MuiBox-root {
+      max-width: 230px;
+      max-height: 300px;
+    }
+  }
+
+  .checkbox-parent {
+    &.MuiBox-root {
+      .MuiFormControlLabel-root {
+        .MuiTypography-root {
+          font-size: 10px;
+        }
+        .MuiSvgIcon-root {
+          font-size: 18px;
+        }
+      }
+    }
+  }
+
+  .children-box-container {
+    &.MuiBox-root {
+      max-width: 300px;
+    }
+  }
+
+  .add-role-button-container {
+    &.MuiBox-root {
+      min-width: 200px;
+    }
+  }
+
+  .add-role-button {
+    &.MuiButtonBase-root {
+      font-size: 11px;
+    }
+  }
+
+  .loading-role-create {
+    .MuiPaper-root {
+      width: 250px;
+    }
+  }
+}
+
+@media (min-width: 321px) and (max-width: 425px) {
+  .roles-image {
+    width: 40px;
+  }
+
+  .roles-text {
+    &.MuiTypography-root {
+      font-size: 16px;
+    }
+  }
+
+  .add-role-form-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+
+  .add-role-textbox {
+    &.MuiFormControl-root {
+      min-height: 60px;
+      .MuiInputBase-root {
+        font-size: 12px;
+      }
+      .MuiFormLabel-root {
+        font-size: 12px;
+      }
+      .MuiFormHelperText-root {
+        font-size: 10px;
+      }
+    }
+  }
+
+  .role-checkbox-container {
+    &.MuiBox-root {
+      max-width: 230px;
+      max-height: 300px;
+    }
+  }
+
+  .checkbox-parent {
+    &.MuiBox-root {
+      .MuiFormControlLabel-root {
+        .MuiTypography-root {
+          font-size: 10px;
+        }
+        .MuiSvgIcon-root {
+          font-size: 18px;
+        }
+      }
+    }
+  }
+
+  .children-box-container {
+    &.MuiBox-root {
+      max-width: 300px;
+    }
+  }
+
+  .add-role-button-container {
+    &.MuiBox-root {
+      min-width: 200px;
+    }
+  }
+
+  .add-role-button {
+    &.MuiButtonBase-root {
+      font-size: 11px;
+    }
+  }
+
+  .loading-role-create {
+    .MuiPaper-root {
+      width: 250px;
+    }
+  }
+}
+
+@media (min-width: 425px) and (max-width: 768px) {
+  .roles-image {
+    width: 50px;
+  }
+
+  .roles-text {
+    &.MuiTypography-root {
+      font-size: 18px;
+    }
+  }
+
+  .add-role-form-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+
+  .add-role-textbox {
+    &.MuiFormControl-root {
+      min-height: 60px;
+      .MuiInputBase-root {
+        font-size: 12px;
+      }
+      .MuiFormLabel-root {
+        font-size: 12px;
+      }
+      .MuiFormHelperText-root {
+        font-size: 10px;
+      }
+    }
+  }
+
+  .role-checkbox-container {
+    &.MuiBox-root {
+      max-width: 230px;
+      max-height: 300px;
+    }
+  }
+
+  .checkbox-parent {
+    &.MuiBox-root {
+      .MuiFormControlLabel-root {
+        .MuiTypography-root {
+          font-size: 10px;
+        }
+        .MuiSvgIcon-root {
+          font-size: 18px;
+        }
+      }
+    }
+  }
+
+  .children-box-container {
+    &.MuiBox-root {
+      max-width: 300px;
+    }
+  }
+
+  .add-role-button-container {
+    &.MuiBox-root {
+      min-width: 230px;
+    }
+  }
+
+  .add-role-button {
+    &.MuiButtonBase-root {
+      font-size: 11px;
+    }
+  }
+
+  .loading-role-create {
+    .MuiPaper-root {
+      width: 250px;
+    }
+  }
+}
+
+@media (max-height: 681px) {
+  .roles-image {
+    width: 60px;
+  }
+
+  .roles-text {
+    &.MuiTypography-root {
+      font-size: 18px;
+    }
+  }
+
+  .add-role-textbox {
+    &.MuiFormControl-root {
+      min-height: 60px;
+      .MuiInputBase-root {
+        font-size: 12px;
+      }
+      .MuiFormLabel-root {
+        font-size: 12px;
+      }
+      .MuiFormHelperText-root {
+        font-size: 10px;
+      }
+    }
+  }
+
+  .roles-devider {
+    &.MuiDivider-root {
+      width: 100%;
+      margin-right: 3px;
+    }
+  }
+
+  .role-checkbox-container {
+    &.MuiBox-root {
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+      max-width: 280px;
+    }
+  }
+
+  .checkbox-parent {
+    &.MuiBox-root {
+      padding: 10px;
+      border: thin solid #ccc;
+      border-radius: 10px;
+      .MuiFormControlLabel-root {
+        .MuiSvgIcon-root {
+          font-size: 18px;
+        }
+        .MuiTypography-root {
+          font-size: 13px;
+        }
+      }
+    }
+  }
+
+  .children-box-container {
+    &.MuiBox-root {
+      padding: 10px;
+      max-width: 340px;
+      border: thin solid #ccc;
+      margin-top: 25px;
+      border-radius: 10px;
+    }
+  }
+
+  .add-role-button-container {
+    &.MuiBox-root {
+      min-width: 300px;
+    }
+  }
+
+  .add-role-button {
+    &.MuiButtonBase-root {
+      font-size: 11px;
+    }
+  }
+
+  .loading-role-create {
+    .MuiPaper-root {
+      width: 300px;
+    }
   }
 }

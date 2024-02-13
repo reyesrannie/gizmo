@@ -107,7 +107,6 @@ const UserModal = ({ menuData, view, update }) => {
     setValue,
     setError,
     watch,
-    reset,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(usersSchema),
@@ -176,6 +175,14 @@ const UserModal = ({ menuData, view, update }) => {
     successDepartment,
     successLocation,
     successRole,
+    ap,
+    company,
+    department,
+    location,
+    menuData,
+    rdfEmployees,
+    role,
+    setValue,
   ]);
 
   const isFormValid = requiredFields.every((field) => !!watch(field));
@@ -280,6 +287,7 @@ const UserModal = ({ menuData, view, update }) => {
         onSubmit={handleSubmit(submitHandler)}
       >
         <Autocomplete
+          className="user-form-autocomplete"
           loading={sedarLoading}
           control={control}
           name="id_no"

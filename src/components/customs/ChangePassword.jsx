@@ -5,7 +5,7 @@ import password from "../../assets/svg/password.svg";
 import changePasswordSchema from "../../schemas/changePasswordSchema";
 import AppTextBox from "./AppTextBox";
 import Lottie from "lottie-react";
-import loading from "../../assets/lottie/Loading-2.json";
+import loading from "../../assets/lottie/Loading.json";
 
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";

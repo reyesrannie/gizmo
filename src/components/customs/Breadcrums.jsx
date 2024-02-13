@@ -3,26 +3,11 @@ import React from "react";
 
 import { useLocation, useNavigate } from "react-router";
 import "../styles/Breadcrums.scss";
+import { routes } from "../../services/constants/items";
 
 const Breadcrums = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const routes = [
-    {
-      path: "/account",
-      name: "User Management",
-      children: [
-        {
-          path: "/account/roles",
-          name: "Role Management",
-        },
-        {
-          path: "/account/users",
-          name: "User Accounts",
-        },
-      ],
-    },
-  ];
 
   const renderBreadcrumbLinks = (route) => {
     const breadcrumbLinks = [
