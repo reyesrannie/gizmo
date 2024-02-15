@@ -37,11 +37,11 @@ const accessPermission = [
   },
   {
     id: 4,
-    access: "Report",
+    access: "Approver",
     children: [
       {
-        access_permission: "report",
-        label: "Report",
+        access_permission: "approver",
+        label: "Approver",
       },
     ],
   },

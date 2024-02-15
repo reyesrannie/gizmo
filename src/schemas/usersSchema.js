@@ -22,7 +22,8 @@ const usersSchema = Yup.object({
   middle_name: Yup.string().required("Middle name is required"),
   suffix: Yup.string().nullable(),
   position: Yup.string().required("Position is required"),
-
+  min_amount: Yup.number().nullable(),
+  max_amount: Yup.number().nullable(),
   ap_tagging: Yup.array().nullable(),
 }).required();
 

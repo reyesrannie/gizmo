@@ -10,6 +10,7 @@ import {
 } from "@mui/material";
 import React from "react";
 import user from "../../../assets/svg/add-user.svg";
+import peso from "../../../assets/peso.png";
 
 import "../../styles/UserModal.scss";
 import AppTextBox from "../AppTextBox";
@@ -122,6 +123,8 @@ const UserModal = ({ menuData, view, update }) => {
       middle_name: "",
       suffix: "",
       position: "",
+      min_amount: null,
+      max_amount: null,
       ap_tagging: [],
     },
   });
@@ -159,6 +162,8 @@ const UserModal = ({ menuData, view, update }) => {
         middle_name: menuData?.account?.middle_name || "",
         suffix: menuData?.account?.suffix || "",
         position: menuData?.account?.position || "",
+        min_amount: menuData?.amount?.min_amount || "",
+        max_amount: menuData?.amount?.max_amount || "",
         ap_tagging:
           menuData?.scope_tagging?.map((tags) =>
             ap?.result?.find((item) => tags?.ap_id === item.id)
@@ -239,6 +244,10 @@ const UserModal = ({ menuData, view, update }) => {
       position: submitdata?.position,
       role_id: submitdata?.role_id?.id,
       username: submitdata?.username,
+      amount: {
+        min_amount: submitdata?.min_amount,
+        max_amount: submitdata?.max_amount,
+      },
       ap_tagging:
         update || view
           ? submitdata?.ap_tagging?.map((item) => ({
@@ -509,6 +518,50 @@ const UserModal = ({ menuData, view, update }) => {
           )}
         />
         <Divider className="user-divider" />
+        {watch("role_id")?.access_permission?.includes("approver") &&
+          watch("role_id") !== null && (
+            <>
+              <Box className="form-title-user">
+                <Typography className="form-title-text-user">
+                  Approver Amount
+                </Typography>
+              </Box>
+              <AppTextBox
+                control={control}
+                name={"min_amount"}
+                className="user-form-textBox"
+                label="Minimum Amount"
+                type="number"
+                error={Boolean(errors.min_amount)}
+                helperText={errors.min_amount?.message}
+                icon={
+                  <img
+                    src={peso}
+                    alt="peso"
+                    className="peso-image"
+                    draggable="false"
+                  />
+                }
+              />
+              <AppTextBox
+                control={control}
+                name={"max_amount"}
+                className="user-form-textBox"
+                label="Maximum Amount"
+                type="number"
+                error={Boolean(errors.max_amount)}
+                helperText={errors.max_amount?.message}
+                icon={
+                  <img
+                    src={peso}
+                    alt="peso"
+                    className="peso-image"
+                    draggable="false"
+                  />
+                }
+              />
+            </>
+          )}
         <Box className="form-button-user">
           <Button
             color="warning"
