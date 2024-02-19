@@ -40,6 +40,8 @@ import ModeEditOutlineOutlinedIcon from "@mui/icons-material/ModeEditOutlineOutl
 import SettingsBackupRestoreOutlinedIcon from "@mui/icons-material/SettingsBackupRestoreOutlined";
 import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
 import GetAppOutlinedIcon from "@mui/icons-material/GetAppOutlined";
+import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
+import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 
 import loading from "../../../assets/lottie/Loading-2.json";
 import loadingLight from "../../../assets/lottie/Loading.json";
@@ -60,8 +62,10 @@ import {
   setUpdateMenu,
 } from "../../../services/slice/menuSlice";
 import CompanyModal from "../../../components/customs/modal/CompanyModal";
+import generateExcel from "../../../services/functions/exportFile";
 
 const Company = () => {
+  const excelItems = ["ID", "CODE", "NAME", "CREATED AT", "DATE MODIFIED"];
   const [anchorE1, setAnchorE1] = useState(null);
   const { enqueueSnackbar } = useSnackbar();
   const dispatch = useDispatch();
@@ -120,7 +124,7 @@ const Company = () => {
           <Table stickyHeader>
             <TableHead>
               <TableRow className="table-header1-company">
-                <TableCell colSpan={5}>
+                <TableCell colSpan={3}>
                   <FormControlLabel
                     className="check-box-archive-company"
                     control={<Checkbox color="secondary" />}
@@ -132,6 +136,30 @@ const Company = () => {
                       )
                     }
                   />
+                </TableCell>
+                <TableCell colSpan={3} align="right">
+                  <Button
+                    variant="contained"
+                    className="button-export-company"
+                    startIcon={<FileUploadOutlinedIcon />}
+                    onClick={() =>
+                      generateExcel(
+                        "Company",
+                        company?.result?.data,
+                        excelItems
+                      )
+                    }
+                  >
+                    Export
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="secondary"
+                    className="button-export-company"
+                    startIcon={<FileDownloadOutlinedIcon />}
+                  >
+                    Import
+                  </Button>
                 </TableCell>
               </TableRow>
               <TableRow className="table-header-company">
@@ -204,18 +232,7 @@ const Company = () => {
             {!isFetching && !isError && (
               <TableFooter style={{ position: "sticky", bottom: 0 }}>
                 <TableRow className="table-footer-company">
-                  <TableCell colSpan={2}>
-                    <Button
-                      variant="contained"
-                      color="warning"
-                      className="button-export-company"
-                      startIcon={<GetAppOutlinedIcon />}
-                      // onClick={() => dispatch(setCreateMenu(true))}
-                    >
-                      Export
-                    </Button>
-                  </TableCell>
-                  <TableCell colSpan={5}>
+                  <TableCell colSpan={6}>
                     <TablePagination
                       rowsPerPageOptions={[5, 10, 25, 100]}
                       count={company?.result?.total || 0}

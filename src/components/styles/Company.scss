@@ -189,6 +189,12 @@
   }
 }
 
+.header-options-company {
+  &.MuiBox-root {
+    background-color: #15253b;
+  }
+}
+
 @media (max-height: 681px) {
   .page-text-indicator-company {
     &.MuiTypography-root {

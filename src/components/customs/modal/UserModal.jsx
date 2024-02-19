@@ -38,6 +38,8 @@ import { useEffect } from "react";
 import { objectError } from "../../../services/functions/errorResponse";
 import { enqueueSnackbar } from "notistack";
 
+import { NumericFormat } from "react-number-format";
+
 const UserModal = ({ menuData, view, update }) => {
   const dispatch = useDispatch();
 
@@ -123,8 +125,8 @@ const UserModal = ({ menuData, view, update }) => {
       middle_name: "",
       suffix: "",
       position: "",
-      min_amount: null,
-      max_amount: null,
+      min_amount: "",
+      max_amount: "",
       ap_tagging: [],
     },
   });
@@ -527,23 +529,19 @@ const UserModal = ({ menuData, view, update }) => {
                 </Typography>
               </Box>
               <AppTextBox
+                money
                 control={control}
                 name={"min_amount"}
                 className="user-form-textBox"
                 label="Minimum Amount"
-                type="number"
-                error={Boolean(errors.min_amount)}
-                helperText={errors.min_amount?.message}
-                icon={
-                  <img
-                    src={peso}
-                    alt="peso"
-                    className="peso-image"
-                    draggable="false"
-                  />
-                }
+                error={Boolean(errors.max_amount)}
+                helperText={errors.max_amount?.message}
+                InputProps={{
+                  startAdornment: <span style={{ marginRight: 8 }}>P</span>,
+                }}
               />
               <AppTextBox
+                money
                 control={control}
                 name={"max_amount"}
                 className="user-form-textBox"
@@ -551,14 +549,9 @@ const UserModal = ({ menuData, view, update }) => {
                 type="number"
                 error={Boolean(errors.max_amount)}
                 helperText={errors.max_amount?.message}
-                icon={
-                  <img
-                    src={peso}
-                    alt="peso"
-                    className="peso-image"
-                    draggable="false"
-                  />
-                }
+                InputProps={{
+                  startAdornment: <span style={{ marginRight: 8 }}>P</span>,
+                }}
               />
             </>
           )}
