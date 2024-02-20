@@ -29,6 +29,7 @@ export const jsonServerAPI = createApi({
     "VAT",
     "ATC",
     "SupplierType",
+    "Supplier",
   ],
   endpoints: (builder) => ({
     login: builder.mutation({
@@ -388,6 +389,42 @@ export const jsonServerAPI = createApi({
       }),
       invalidatesTags: ["SupplierType"],
     }),
+    supplier: builder.query({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/supplier`,
+        method: "GET",
+        params: payload,
+      }),
+      providesTags: ["Supplier"],
+    }),
+    createSupplier: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/supplier`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["Supplier"],
+    }),
+    updateSupplier: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/supplier/${payload.id}`,
+        method: "PUT",
+        body: payload,
+      }),
+      invalidatesTags: ["Supplier"],
+    }),
+    archiveSupplier: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/archive/supplier/${payload.id}`,
+        method: "PATCH",
+        body: payload,
+      }),
+      invalidatesTags: ["Supplier"],
+    }),
   }),
 });
 
@@ -432,4 +469,8 @@ export const {
   useCreateSupplierTypeMutation,
   useUpdateSupplierTypeMutation,
   useArchiveSupplierTypeMutation,
+  useSupplierQuery,
+  useCreateSupplierMutation,
+  useUpdateSupplierMutation,
+  useArchiveSupplierMutation,
 } = jsonServerAPI;

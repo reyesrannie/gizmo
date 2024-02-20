@@ -12,6 +12,7 @@ import MonetizationOnOutlinedIcon from "@mui/icons-material/MonetizationOnOutlin
 import InventoryOutlinedIcon from "@mui/icons-material/InventoryOutlined";
 import HubOutlinedIcon from "@mui/icons-material/HubOutlined";
 import PowerInputOutlinedIcon from "@mui/icons-material/PowerInputOutlined";
+import PrecisionManufacturingOutlinedIcon from "@mui/icons-material/PrecisionManufacturingOutlined";
 
 import "../../components/styles/CardNavigation.scss";
 const user = [
@@ -99,6 +100,21 @@ const masterlist = [
     permission: ["ap"],
     firstIcon: (
       <MonetizationOnOutlinedIcon
+        color="secondary"
+        className="icon-card-details"
+      />
+    ),
+    lastIcon: (
+      <NavigationOutlinedIcon className="icon-last" color="secondary" />
+    ),
+  },
+  {
+    path: "/masterlist/supplier",
+    desc: "A module for managing Suppliers .",
+    name: "Supplier",
+    permission: ["supplier"],
+    firstIcon: (
+      <PrecisionManufacturingOutlinedIcon
         color="secondary"
         className="icon-card-details"
       />
@@ -204,6 +220,13 @@ const menu = [
         permission: ["ap"],
       },
       {
+        desc: "Supplier",
+        icon: <PrecisionManufacturingOutlinedIcon />,
+        path: "/masterlist/supplier",
+        permission: ["supplier"],
+      },
+
+      {
         desc: "VAT",
         icon: <InventoryOutlinedIcon />,
         path: "/masterlist/vat",
@@ -261,8 +284,12 @@ const routes = [
         name: "Accounts Payable",
       },
       {
-        path: "/masterlist/vat",
-        name: "VAT",
+        path: "/masterlist/suppliertype",
+        name: "Supplier Type",
+      },
+      {
+        path: "/masterlist/supplier",
+        name: "Supplier",
       },
       {
         path: "/masterlist/atc",

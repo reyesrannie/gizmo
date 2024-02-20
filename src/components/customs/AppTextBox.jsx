@@ -23,6 +23,7 @@ function AppTextBox({
   mobile = false,
   inputProps,
   money,
+  address,
   ...textField
 }) {
   const [showPassword, setShowPassword] = useState(false);
@@ -41,10 +42,12 @@ function AppTextBox({
 
         return (
           <>
-            {money ? (
+            {money || address ? (
               <NumericFormat
                 customInput={TextField}
-                thousandSeparator=","
+                thousandSeparator={address ? "-" : ","}
+                decimalScale={0} // set decimal scale to 0
+                allowLeadingZeros={true}
                 autoFocus={false}
                 autoComplete="off"
                 className={className}
@@ -64,6 +67,7 @@ function AppTextBox({
               />
             ) : (
               <TextField
+                maxRows={6}
                 autoFocus={false}
                 autoComplete="off"
                 className={className}

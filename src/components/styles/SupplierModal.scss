@@ -1,0 +1,227 @@
+.supplier-modal-container {
+  &.MuiPaper-root {
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
+.supplier-image {
+  width: 55px;
+}
+
+.supplier-image {
+  &.MuiTypography-root {
+    font-family: Roboto-Black;
+    font-size: 20px;
+    letter-spacing: 1px;
+  }
+}
+
+.form-title-supplier {
+  &.MuiBox-root {
+    display: flex;
+    width: 100%;
+  }
+}
+
+.form-title-text-supplier {
+  &.MuiTypography-root {
+    font-family: Roboto-Black;
+    font-size: 14px;
+    letter-spacing: 1px;
+  }
+}
+
+.supplier-divider {
+  &.MuiDivider-root {
+    width: 100%;
+  }
+}
+
+.form-container-supplier {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+
+  gap: 10px;
+}
+
+.supplier-form-textBox {
+  &.MuiFormControl-root {
+    border-radius: 10px;
+    min-width: 250px;
+    width: min-content;
+    min-height: 63px;
+
+    .MuiInputBase-root {
+      border-radius: 10px;
+      font-family: Roboto-Medium;
+      letter-spacing: 1px;
+    }
+    .MuiFormLabel-root {
+      font-family: Roboto-Medium;
+      letter-spacing: 1px;
+    }
+    .MuiFormHelperText-root {
+      font-family: Roboto-Light;
+      letter-spacing: 1px;
+    }
+  }
+}
+
+.supplier-form-field-textBox {
+  &.MuiFormControl-root {
+    border-radius: 10px;
+    min-height: 63px;
+
+    .MuiInputBase-root {
+      border-radius: 10px;
+      font-family: Roboto-Medium;
+      letter-spacing: 1px;
+    }
+    .MuiFormLabel-root {
+      font-family: Roboto-Medium;
+      letter-spacing: 1px;
+    }
+    .MuiFormHelperText-root {
+      font-family: Roboto-Light;
+      letter-spacing: 1px;
+    }
+  }
+}
+
+.supplier-form-field-autocomplete {
+  &.MuiFormControl-root {
+    border-radius: 10px;
+    min-height: 63px;
+    min-width: 765px;
+
+    .MuiInputBase-root {
+      border-radius: 10px;
+      font-family: Roboto-Medium;
+      letter-spacing: 1px;
+    }
+    .MuiFormLabel-root {
+      font-family: Roboto-Medium;
+      letter-spacing: 1px;
+    }
+    .MuiFormHelperText-root {
+      font-family: Roboto-Light;
+      letter-spacing: 1px;
+    }
+  }
+}
+
+.form-button-supplier {
+  &.MuiBox-root {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    width: 100%;
+    gap: 10px;
+  }
+}
+
+.add-supplier-button {
+  &.MuiButtonBase-root {
+    font-family: Roboto-Medium;
+    text-transform: none;
+  }
+}
+
+.loading-supplier-create {
+  .MuiPaper-root {
+    box-shadow: none;
+    background-color: transparent;
+  }
+}
+
+.icon-clear-supplier {
+  &.MuiIconButton-root {
+    width: 20px;
+    height: 20px;
+    .MuiSvgIcon-root {
+      font-size: 14px;
+    }
+  }
+}
+
+.peso-image {
+  width: 12px;
+}
+
+// @media (max-height: 681px) {
+//   .supplier-image {
+//     width: 45px;
+//   }
+
+//   .supplier-text {
+//     &.MuiTypography-root {
+//       font-size: 16px;
+//     }
+//   }
+
+//   .form-title-text-supplier {
+//     &.MuiTypography-root {
+//       font-size: 12px;
+//     }
+//   }
+
+//   .supplier-form-textBox {
+//     &.MuiFormControl-root {
+//       min-height: 55px;
+//       .MuiInputBase-root {
+//         font-size: 12px;
+//       }
+//       .MuiFormLabel-root {
+//         font-size: 12px;
+//       }
+//       .MuiFormHelperText-root {
+//         font-size: 10px;
+//       }
+//       .MuiAutocomplete-popper {
+//         font-family: Roboto-Light;
+//         background-color: aqua;
+//       }
+//     }
+//   }
+
+//   .form-button-supplier {
+//     &.MuiBox-root {
+//       display: flex;
+//       align-items: center;
+//       justify-content: flex-end;
+//       width: 100%;
+//       gap: 10px;
+//     }
+//   }
+
+//   .add-supplier-button {
+//     &.MuiButtonBase-root {
+//       font-family: Roboto-Medium;
+//       text-transform: none;
+//     }
+//   }
+
+//   .loading-supplier-create {
+//     .MuiPaper-root {
+//       box-shadow: none;
+//       background-color: transparent;
+//     }
+//   }
+
+//   .icon-clear-supplier {
+//     &.MuiIconButton-root {
+//       width: 20px;
+//       height: 20px;
+//       .MuiSvgIcon-root {
+//         font-size: 14px;
+//       }
+//     }
+//   }
+// }

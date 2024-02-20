@@ -16,6 +16,7 @@ import { hasAccess } from "../functions/access";
 import Vat from "../../screen/masterlist/vat/Vat";
 import Atc from "../../screen/masterlist/atc/Atc";
 import SupplierType from "../../screen/masterlist/supplier/SupplierType";
+import Supplier from "../../screen/masterlist/supplier/Supplier";
 
 const Routing = () => {
   const user = decodeUser();
@@ -104,6 +105,14 @@ const Routing = () => {
           path: "ap",
           element: hasAccess(["ap"]) ? (
             <AccountsPayable />
+          ) : (
+            <Navigate to={"/masterlist"} />
+          ),
+        },
+        {
+          path: "supplier",
+          element: hasAccess(["supplier"]) ? (
+            <Supplier />
           ) : (
             <Navigate to={"/masterlist"} />
           ),
