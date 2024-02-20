@@ -22,6 +22,7 @@ import {
   TableHead,
   TablePagination,
   TableRow,
+  TableSortLabel,
   Typography,
 } from "@mui/material";
 
@@ -73,8 +74,14 @@ const Vat = () => {
   const createMenu = useSelector((state) => state.menu.createMenu);
   const updateMenu = useSelector((state) => state.menu.updateMenu);
 
-  const { params, onStatusChange, onPageChange, onRowChange, onSearchData } =
-    useParamsHook();
+  const {
+    params,
+    onStatusChange,
+    onPageChange,
+    onRowChange,
+    onSearchData,
+    onSortTable,
+  } = useParamsHook();
 
   const [archiveVat, { isLoading: archiveLoading }] = useArchiveVATMutation();
 
@@ -103,7 +110,7 @@ const Vat = () => {
         <Breadcrums />
       </Box>
       <Box className="vat-head-container">
-        <Typography className="page-text-indicator-vat">Vat</Typography>
+        <Typography className="page-text-indicator-vat">VAT</Typography>
         <Box className="vat-button-container">
           <SearchText onSearchData={onSearchData} />
           <Button
@@ -157,11 +164,58 @@ const Vat = () => {
                 </TableCell>
               </TableRow>
               <TableRow className="table-header-vat">
-                <TableCell>ID No.</TableCell>
-                <TableCell>Code</TableCell>
-                <TableCell>Name</TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={params.sorts === "id" || params.sorts === "-id"}
+                    onClick={() =>
+                      onSortTable(params.sorts === "id" ? "-id" : "id")
+                    }
+                    direction={params.sorts === "id" ? "asc" : "desc"}
+                  >
+                    ID No.
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={params.sorts === "code" || params.sorts === "-code"}
+                    onClick={() =>
+                      onSortTable(params.sorts === "code" ? "-code" : "code")
+                    }
+                    direction={params.sorts === "code" ? "asc" : "desc"}
+                  >
+                    Code
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={params.sorts === "name" || params.sorts === "-name"}
+                    onClick={() =>
+                      onSortTable(params.sorts === "name" ? "-name" : "name")
+                    }
+                    direction={params.sorts === "name" ? "asc" : "desc"}
+                  >
+                    Name
+                  </TableSortLabel>
+                </TableCell>
                 <TableCell align="center"> Status</TableCell>
-                <TableCell align="center">Date Modified</TableCell>
+                <TableCell align="center">
+                  <TableSortLabel
+                    active={
+                      params.sorts === "updated_at" ||
+                      params.sorts === "-updated_at"
+                    }
+                    onClick={() =>
+                      onSortTable(
+                        params.sorts === "updated_at"
+                          ? "-updated_at"
+                          : "updated_at"
+                      )
+                    }
+                    direction={params.sorts === "updated_at" ? "asc" : "desc"}
+                  >
+                    Date Modified
+                  </TableSortLabel>
+                </TableCell>
                 <TableCell align="center">Action</TableCell>
               </TableRow>
             </TableHead>
@@ -255,7 +309,7 @@ const Vat = () => {
             <ListItemIcon>
               <ModeEditOutlineOutlinedIcon className="vat-menu-icons" />
             </ListItemIcon>
-            <Typography className="vat-menu-text">Update Vat</Typography>
+            <Typography className="vat-menu-text">Update VAT</Typography>
           </MenuItem>
         )}
         <MenuItem
@@ -293,7 +347,7 @@ const Vat = () => {
         <AppPrompt
           image={warning}
           title={
-            params.status === "active" ? "Archive the vat?" : "Restore the vat?"
+            params.status === "active" ? "Archive the VAT?" : "Restore the VAT?"
           }
           message={
             params.status === "active"

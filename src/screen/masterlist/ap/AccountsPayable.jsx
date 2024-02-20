@@ -16,6 +16,7 @@ import {
   TableHead,
   TablePagination,
   TableRow,
+  TableSortLabel,
   Typography,
 } from "@mui/material";
 import React, { useState } from "react";
@@ -66,8 +67,14 @@ const AccountsPayable = () => {
   const createMenu = useSelector((state) => state.menu.createMenu);
   const updateMenu = useSelector((state) => state.menu.updateMenu);
 
-  const { params, onStatusChange, onPageChange, onRowChange, onSearchData } =
-    useParamsHook();
+  const {
+    params,
+    onStatusChange,
+    onPageChange,
+    onRowChange,
+    onSearchData,
+    onSortTable,
+  } = useParamsHook();
 
   const [archiveCompany, { isLoading: archiveLoading }] =
     useArchiveAPMutation();
@@ -133,11 +140,58 @@ const AccountsPayable = () => {
                 </TableCell>
               </TableRow>
               <TableRow className="table-header-ap">
-                <TableCell>ID No.</TableCell>
-                <TableCell>Code</TableCell>
-                <TableCell>Name</TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={params.sorts === "id" || params.sorts === "-id"}
+                    onClick={() =>
+                      onSortTable(params.sorts === "id" ? "-id" : "id")
+                    }
+                    direction={params.sorts === "id" ? "asc" : "desc"}
+                  >
+                    ID No.
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={params.sorts === "code" || params.sorts === "-code"}
+                    onClick={() =>
+                      onSortTable(params.sorts === "code" ? "-code" : "code")
+                    }
+                    direction={params.sorts === "code" ? "asc" : "desc"}
+                  >
+                    Code
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={params.sorts === "name" || params.sorts === "-name"}
+                    onClick={() =>
+                      onSortTable(params.sorts === "name" ? "-name" : "name")
+                    }
+                    direction={params.sorts === "name" ? "asc" : "desc"}
+                  >
+                    Name
+                  </TableSortLabel>
+                </TableCell>
                 <TableCell align="center"> Status</TableCell>
-                <TableCell align="center">Date Modified</TableCell>
+                <TableCell align="center">
+                  <TableSortLabel
+                    active={
+                      params.sorts === "updated_at" ||
+                      params.sorts === "-updated_at"
+                    }
+                    onClick={() =>
+                      onSortTable(
+                        params.sorts === "updated_at"
+                          ? "-updated_at"
+                          : "updated_at"
+                      )
+                    }
+                    direction={params.sorts === "updated_at" ? "asc" : "desc"}
+                  >
+                    Date Modified
+                  </TableSortLabel>
+                </TableCell>
                 <TableCell align="center">Action</TableCell>
               </TableRow>
             </TableHead>

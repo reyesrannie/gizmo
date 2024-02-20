@@ -1,3 +1,9 @@
+import React from "react";
+
+import Breadcrums from "../../../components/customs/Breadcrums";
+import SearchText from "../../../components/customs/SearchText";
+import useParamsHook from "../../../services/hooks/useParamsHook";
+
 import {
   Box,
   Button,
@@ -20,46 +26,46 @@ import {
   Typography,
 } from "@mui/material";
 
-import React from "react";
-import Breadcrums from "../../../components/customs/Breadcrums";
-import SearchText from "../../../components/customs/SearchText";
-import useParamsHook from "../../../services/hooks/useParamsHook";
-import loading from "../../../assets/lottie/Loading-2.json";
-import loadingLight from "../../../assets/lottie/Loading.json";
-import noData from "../../../assets/lottie/NoData.json";
-import StatusIndicator from "../../../components/customs/StatusIndicator";
-import warning from "../../../assets/svg/warning.svg";
-import AppPrompt from "../../../components/customs/AppPrompt";
-import "../../../components/styles/Location.scss";
+import moment from "moment";
+import Lottie from "lottie-react";
+
+import { useDispatch, useSelector } from "react-redux";
+import {
+  useArchiveATCMutation,
+  useAtcQuery,
+} from "../../../services/store/request";
 
 import AddToPhotosOutlinedIcon from "@mui/icons-material/AddToPhotosOutlined";
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
 import ModeEditOutlineOutlinedIcon from "@mui/icons-material/ModeEditOutlineOutlined";
 import SettingsBackupRestoreOutlinedIcon from "@mui/icons-material/SettingsBackupRestoreOutlined";
 import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
-import GetAppOutlinedIcon from "@mui/icons-material/GetAppOutlined";
+import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
+import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 
-import Lottie from "lottie-react";
-import moment from "moment";
+import loading from "../../../assets/lottie/Loading-2.json";
+import loadingLight from "../../../assets/lottie/Loading.json";
+import noData from "../../../assets/lottie/NoData.json";
+import StatusIndicator from "../../../components/customs/StatusIndicator";
+import warning from "../../../assets/svg/warning.svg";
+import "../../../components/styles/Atc.scss";
 
-import { useDispatch, useSelector } from "react-redux";
 import { useState } from "react";
-import { useSnackbar } from "notistack";
 import { resetPrompt, setWarning } from "../../../services/slice/promptSlice";
+import { useSnackbar } from "notistack";
+import { singleError } from "../../../services/functions/errorResponse";
+import AppPrompt from "../../../components/customs/AppPrompt";
 import {
   resetMenu,
   setCreateMenu,
   setMenuData,
   setUpdateMenu,
 } from "../../../services/slice/menuSlice";
-import {
-  useArchiveLocationMutation,
-  useLocationQuery,
-} from "../../../services/store/request";
-import LocationModal from "../../../components/customs/modal/LocationModal";
-import { singleError } from "../../../services/functions/errorResponse";
+import generateExcel from "../../../services/functions/exportFile";
+import AtcModal from "../../../components/customs/modal/AtcModal";
 
-const Location = () => {
+const Atc = () => {
+  const excelItems = ["ID", "CODE", "NAME", "CREATED AT", "DATE MODIFIED"];
   const [anchorE1, setAnchorE1] = useState(null);
   const { enqueueSnackbar } = useSnackbar();
   const dispatch = useDispatch();
@@ -67,9 +73,6 @@ const Location = () => {
   const openWarning = useSelector((state) => state.prompt.warning);
   const createMenu = useSelector((state) => state.menu.createMenu);
   const updateMenu = useSelector((state) => state.menu.updateMenu);
-
-  const [archiveLocation, { isLoading: archiveLoading }] =
-    useArchiveLocationMutation();
 
   const {
     params,
@@ -80,17 +83,19 @@ const Location = () => {
     onSortTable,
   } = useParamsHook();
 
+  const [archiveAtc, { isLoading: archiveLoading }] = useArchiveATCMutation();
+
   const {
-    data: location,
+    data: atc,
     isLoading,
     isError,
     isFetching,
     status,
-  } = useLocationQuery(params);
+  } = useAtcQuery(params);
 
   const handleArchive = async () => {
     try {
-      const res = await archiveLocation(menuData).unwrap();
+      const res = await archiveAtc(menuData).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
       dispatch(resetMenu());
       dispatch(resetPrompt());
@@ -104,16 +109,14 @@ const Location = () => {
       <Box>
         <Breadcrums />
       </Box>
-      <Box className="location-head-container">
-        <Typography className="page-text-indicator-location">
-          Location
-        </Typography>
-        <Box className="location-button-container">
+      <Box className="atc-head-container">
+        <Typography className="page-text-indicator-atc">ATC</Typography>
+        <Box className="atc-button-container">
           <SearchText onSearchData={onSearchData} />
           <Button
             variant="contained"
             color="secondary"
-            className="button-add-location"
+            className="button-add-atc"
             startIcon={<AddToPhotosOutlinedIcon />}
             onClick={() => dispatch(setCreateMenu(true))}
           >
@@ -121,14 +124,14 @@ const Location = () => {
           </Button>
         </Box>
       </Box>
-      <Box className="location-body-container">
-        <TableContainer className="location-table-container">
+      <Box className="atc-body-container">
+        <TableContainer className="atc-table-container">
           <Table stickyHeader>
             <TableHead>
-              <TableRow className="table-header1-location">
-                <TableCell colSpan={5}>
+              <TableRow className="table-header1-atc">
+                <TableCell colSpan={3}>
                   <FormControlLabel
-                    className="check-box-archive-location"
+                    className="check-box-archive-atc"
                     control={<Checkbox color="secondary" />}
                     label="Archive"
                     checked={params?.status === "inactive"}
@@ -139,8 +142,28 @@ const Location = () => {
                     }
                   />
                 </TableCell>
+                <TableCell colSpan={3} align="right">
+                  <Button
+                    variant="contained"
+                    className="button-export-atc"
+                    startIcon={<FileUploadOutlinedIcon />}
+                    onClick={() =>
+                      generateExcel("Atc", atc?.result?.data, excelItems)
+                    }
+                  >
+                    Export
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="secondary"
+                    className="button-export-atc"
+                    startIcon={<FileDownloadOutlinedIcon />}
+                  >
+                    Import
+                  </Button>
+                </TableCell>
               </TableRow>
-              <TableRow className="table-header-location">
+              <TableRow className="table-header-atc">
                 <TableCell>
                   <TableSortLabel
                     active={params.sorts === "id" || params.sorts === "-id"}
@@ -201,28 +224,22 @@ const Location = () => {
               {isLoading || status === "pending" ? (
                 <TableRow>
                   <TableCell colSpan={6} align="center">
-                    <Lottie
-                      animationData={loading}
-                      className="loading-location"
-                    />
+                    <Lottie animationData={loading} className="loading-atc" />
                   </TableCell>
                 </TableRow>
               ) : isError ? (
                 <TableRow>
                   <TableCell colSpan={6} align="center">
-                    <Lottie
-                      animationData={noData}
-                      className="no-data-location"
-                    />
+                    <Lottie animationData={noData} className="no-data-atc" />
                   </TableCell>
                 </TableRow>
               ) : (
-                location?.result?.data?.map((loc) => (
-                  <TableRow className="table-body-location" key={loc?.id}>
-                    <TableCell>{loc?.id}</TableCell>
-                    <TableCell>{loc?.code}</TableCell>
+                atc?.result?.data?.map((comp) => (
+                  <TableRow className="table-body-atc" key={comp?.id}>
+                    <TableCell>{comp?.id}</TableCell>
+                    <TableCell>{comp?.code}</TableCell>
 
-                    <TableCell>{loc?.name}</TableCell>
+                    <TableCell>{comp?.name}</TableCell>
                     <TableCell align="center">
                       {params.status === "active" && (
                         <StatusIndicator
@@ -238,16 +255,16 @@ const Location = () => {
                       )}
                     </TableCell>
                     <TableCell align="center">
-                      {moment(loc?.updated_at).format("MMM DD YYYY")}
+                      {moment(comp?.updated_at).format("MMM DD YYYY")}
                     </TableCell>
                     <TableCell align="center">
                       <IconButton
                         onClick={(e) => {
-                          dispatch(setMenuData(loc));
+                          dispatch(setMenuData(comp));
                           setAnchorE1(e.currentTarget);
                         }}
                       >
-                        <MoreVertOutlinedIcon className="location-icon-actions" />
+                        <MoreVertOutlinedIcon className="atc-icon-actions" />
                       </IconButton>
                     </TableCell>
                   </TableRow>
@@ -256,24 +273,13 @@ const Location = () => {
             </TableBody>
             {!isFetching && !isError && (
               <TableFooter style={{ position: "sticky", bottom: 0 }}>
-                <TableRow className="table-footer-location">
-                  <TableCell colSpan={2}>
-                    <Button
-                      variant="contained"
-                      color="warning"
-                      className="button-export-location"
-                      startIcon={<GetAppOutlinedIcon />}
-                      // onClick={() => dispatch(setCreateMenu(true))}
-                    >
-                      Export
-                    </Button>
-                  </TableCell>
-                  <TableCell colSpan={5}>
+                <TableRow className="table-footer-atc">
+                  <TableCell colSpan={6}>
                     <TablePagination
                       rowsPerPageOptions={[5, 10, 25, 100]}
-                      count={location?.result?.total || 0}
-                      rowsPerPage={location?.result?.per_page || 10}
-                      page={location?.result?.current_page - 1 || 0}
+                      count={atc?.result?.total || 0}
+                      rowsPerPage={atc?.result?.per_page || 10}
+                      page={atc?.result?.current_page - 1 || 0}
                       onPageChange={onPageChange}
                       onRowsPerPageChange={onRowChange}
                       component="div"
@@ -301,11 +307,9 @@ const Location = () => {
             }}
           >
             <ListItemIcon>
-              <ModeEditOutlineOutlinedIcon className="location-menu-icons" />
+              <ModeEditOutlineOutlinedIcon className="atc-menu-icons" />
             </ListItemIcon>
-            <Typography className="location-menu-text">
-              Update location
-            </Typography>
+            <Typography className="atc-menu-text">Update ATC</Typography>
           </MenuItem>
         )}
         <MenuItem
@@ -316,41 +320,39 @@ const Location = () => {
         >
           <ListItemIcon>
             {params.status === "inactive" ? (
-              <SettingsBackupRestoreOutlinedIcon className="location-menu-icons" />
+              <SettingsBackupRestoreOutlinedIcon className="atc-menu-icons" />
             ) : (
-              <DeleteForeverOutlinedIcon className="location-menu-icons" />
+              <DeleteForeverOutlinedIcon className="atc-menu-icons" />
             )}
           </ListItemIcon>
-          <Typography className="location-menu-text">
+          <Typography className="atc-menu-text">
             {params.status === "inactive" ? "Restore" : "Archive"}
           </Typography>
         </MenuItem>
       </Menu>
 
-      {/* <Dialog open={archiveLoading} className="loading-role-create">
+      <Dialog open={archiveLoading} className="loading-role-create">
         <Lottie animationData={loadingLight} loop={archiveLoading} />
-      </Dialog> */}
+      </Dialog>
 
       <Dialog open={createMenu}>
-        <LocationModal />
+        <AtcModal />
       </Dialog>
 
       <Dialog open={updateMenu}>
-        <LocationModal locationData={menuData} update />
+        <AtcModal atcData={menuData} update />
       </Dialog>
 
       <Dialog open={openWarning}>
         <AppPrompt
           image={warning}
           title={
-            params.status === "active"
-              ? "Archive the location?"
-              : "Restore the location?"
+            params.status === "active" ? "Archive the ATC?" : "Restore the ATC?"
           }
           message={
             params.status === "active"
-              ? "You are about to archive this location"
-              : "You are about to restore this location"
+              ? "You are about to archive this atc"
+              : "You are about to restore this atc"
           }
           nextLineMessage={"Please confirm to continue"}
           confirmButton={
@@ -368,4 +370,4 @@ const Location = () => {
   );
 };
 
-export default Location;
+export default Atc;

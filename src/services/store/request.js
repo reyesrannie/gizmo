@@ -19,7 +19,17 @@ export const jsonServerAPI = createApi({
       return headers;
     },
   }),
-  tagTypes: ["Users", "Role", "Company", "Department", "Location", "AP", "VAT"],
+  tagTypes: [
+    "Users",
+    "Role",
+    "Company",
+    "Department",
+    "Location",
+    "AP",
+    "VAT",
+    "ATC",
+    "SupplierType",
+  ],
   endpoints: (builder) => ({
     login: builder.mutation({
       transformResponse: (response) => response.result,
@@ -306,6 +316,78 @@ export const jsonServerAPI = createApi({
       }),
       invalidatesTags: ["VAT"],
     }),
+    atc: builder.query({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/atc`,
+        method: "GET",
+        params: payload,
+      }),
+      providesTags: ["ATC"],
+    }),
+    createATC: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/atc`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["ATC"],
+    }),
+    updateATC: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/atc/${payload.id}`,
+        method: "PUT",
+        body: payload,
+      }),
+      invalidatesTags: ["ATC"],
+    }),
+    archiveATC: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/archive/atc/${payload.id}`,
+        method: "PATCH",
+        body: payload,
+      }),
+      invalidatesTags: ["ATC"],
+    }),
+    supplierType: builder.query({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/supplier-type`,
+        method: "GET",
+        params: payload,
+      }),
+      providesTags: ["SupplierType"],
+    }),
+    createSupplierType: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/supplier-type`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["SupplierType"],
+    }),
+    updateSupplierType: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/supplier-type/${payload.id}`,
+        method: "PUT",
+        body: payload,
+      }),
+      invalidatesTags: ["SupplierType"],
+    }),
+    archiveSupplierType: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/archive/supplier-type/${payload.id}`,
+        method: "PATCH",
+        body: payload,
+      }),
+      invalidatesTags: ["SupplierType"],
+    }),
   }),
 });
 
@@ -342,4 +424,12 @@ export const {
   useCreateVATMutation,
   useUpdateVATMutation,
   useArchiveVATMutation,
+  useAtcQuery,
+  useCreateATCMutation,
+  useUpdateATCMutation,
+  useArchiveATCMutation,
+  useSupplierTypeQuery,
+  useCreateSupplierTypeMutation,
+  useUpdateSupplierTypeMutation,
+  useArchiveSupplierTypeMutation,
 } = jsonServerAPI;

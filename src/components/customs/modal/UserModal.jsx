@@ -10,7 +10,6 @@ import {
 } from "@mui/material";
 import React from "react";
 import user from "../../../assets/svg/add-user.svg";
-import peso from "../../../assets/peso.png";
 
 import "../../styles/UserModal.scss";
 import AppTextBox from "../AppTextBox";
@@ -37,8 +36,6 @@ import {
 import { useEffect } from "react";
 import { objectError } from "../../../services/functions/errorResponse";
 import { enqueueSnackbar } from "notistack";
-
-import { NumericFormat } from "react-number-format";
 
 const UserModal = ({ menuData, view, update }) => {
   const dispatch = useDispatch();

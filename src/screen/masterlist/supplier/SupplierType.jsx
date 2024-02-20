@@ -1,3 +1,9 @@
+import React from "react";
+
+import Breadcrums from "../../../components/customs/Breadcrums";
+import SearchText from "../../../components/customs/SearchText";
+import useParamsHook from "../../../services/hooks/useParamsHook";
+
 import {
   Box,
   Button,
@@ -20,46 +26,46 @@ import {
   Typography,
 } from "@mui/material";
 
-import React from "react";
-import Breadcrums from "../../../components/customs/Breadcrums";
-import SearchText from "../../../components/customs/SearchText";
-import useParamsHook from "../../../services/hooks/useParamsHook";
-import loading from "../../../assets/lottie/Loading-2.json";
-import loadingLight from "../../../assets/lottie/Loading.json";
-import noData from "../../../assets/lottie/NoData.json";
-import StatusIndicator from "../../../components/customs/StatusIndicator";
-import warning from "../../../assets/svg/warning.svg";
-import AppPrompt from "../../../components/customs/AppPrompt";
-import "../../../components/styles/Location.scss";
+import moment from "moment";
+import Lottie from "lottie-react";
+
+import { useDispatch, useSelector } from "react-redux";
+import {
+  useArchiveSupplierTypeMutation,
+  useSupplierTypeQuery,
+} from "../../../services/store/request";
 
 import AddToPhotosOutlinedIcon from "@mui/icons-material/AddToPhotosOutlined";
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
 import ModeEditOutlineOutlinedIcon from "@mui/icons-material/ModeEditOutlineOutlined";
 import SettingsBackupRestoreOutlinedIcon from "@mui/icons-material/SettingsBackupRestoreOutlined";
 import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
-import GetAppOutlinedIcon from "@mui/icons-material/GetAppOutlined";
+import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
+import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 
-import Lottie from "lottie-react";
-import moment from "moment";
+import loading from "../../../assets/lottie/Loading-2.json";
+import loadingLight from "../../../assets/lottie/Loading.json";
+import noData from "../../../assets/lottie/NoData.json";
+import StatusIndicator from "../../../components/customs/StatusIndicator";
+import warning from "../../../assets/svg/warning.svg";
+import "../../../components/styles/SupplierType.scss";
 
-import { useDispatch, useSelector } from "react-redux";
 import { useState } from "react";
-import { useSnackbar } from "notistack";
 import { resetPrompt, setWarning } from "../../../services/slice/promptSlice";
+import { useSnackbar } from "notistack";
+import { singleError } from "../../../services/functions/errorResponse";
+import AppPrompt from "../../../components/customs/AppPrompt";
 import {
   resetMenu,
   setCreateMenu,
   setMenuData,
   setUpdateMenu,
 } from "../../../services/slice/menuSlice";
-import {
-  useArchiveLocationMutation,
-  useLocationQuery,
-} from "../../../services/store/request";
-import LocationModal from "../../../components/customs/modal/LocationModal";
-import { singleError } from "../../../services/functions/errorResponse";
+import generateExcel from "../../../services/functions/exportFile";
+import SupplierTypeModal from "../../../components/customs/modal/SupplierTypeModal";
 
-const Location = () => {
+const SupplierType = () => {
+  const excelItems = ["ID", "CODE", "NAME", "CREATED AT", "DATE MODIFIED"];
   const [anchorE1, setAnchorE1] = useState(null);
   const { enqueueSnackbar } = useSnackbar();
   const dispatch = useDispatch();
@@ -67,9 +73,6 @@ const Location = () => {
   const openWarning = useSelector((state) => state.prompt.warning);
   const createMenu = useSelector((state) => state.menu.createMenu);
   const updateMenu = useSelector((state) => state.menu.updateMenu);
-
-  const [archiveLocation, { isLoading: archiveLoading }] =
-    useArchiveLocationMutation();
 
   const {
     params,
@@ -80,17 +83,20 @@ const Location = () => {
     onSortTable,
   } = useParamsHook();
 
+  const [archiveSupplierType, { isLoading: archiveLoading }] =
+    useArchiveSupplierTypeMutation();
+
   const {
-    data: location,
+    data: supplierType,
     isLoading,
     isError,
     isFetching,
     status,
-  } = useLocationQuery(params);
+  } = useSupplierTypeQuery(params);
 
   const handleArchive = async () => {
     try {
-      const res = await archiveLocation(menuData).unwrap();
+      const res = await archiveSupplierType(menuData).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
       dispatch(resetMenu());
       dispatch(resetPrompt());
@@ -104,16 +110,16 @@ const Location = () => {
       <Box>
         <Breadcrums />
       </Box>
-      <Box className="location-head-container">
-        <Typography className="page-text-indicator-location">
-          Location
+      <Box className="supplierType-head-container">
+        <Typography className="page-text-indicator-supplierType">
+          Supplier Type
         </Typography>
-        <Box className="location-button-container">
+        <Box className="supplierType-button-container">
           <SearchText onSearchData={onSearchData} />
           <Button
             variant="contained"
             color="secondary"
-            className="button-add-location"
+            className="button-add-supplierType"
             startIcon={<AddToPhotosOutlinedIcon />}
             onClick={() => dispatch(setCreateMenu(true))}
           >
@@ -121,14 +127,14 @@ const Location = () => {
           </Button>
         </Box>
       </Box>
-      <Box className="location-body-container">
-        <TableContainer className="location-table-container">
+      <Box className="supplierType-body-container">
+        <TableContainer className="supplierType-table-container">
           <Table stickyHeader>
             <TableHead>
-              <TableRow className="table-header1-location">
-                <TableCell colSpan={5}>
+              <TableRow className="table-header1-supplierType">
+                <TableCell colSpan={3}>
                   <FormControlLabel
-                    className="check-box-archive-location"
+                    className="check-box-archive-supplierType"
                     control={<Checkbox color="secondary" />}
                     label="Archive"
                     checked={params?.status === "inactive"}
@@ -139,8 +145,32 @@ const Location = () => {
                     }
                   />
                 </TableCell>
+                <TableCell colSpan={3} align="right">
+                  <Button
+                    variant="contained"
+                    className="button-export-supplierType"
+                    startIcon={<FileUploadOutlinedIcon />}
+                    onClick={() =>
+                      generateExcel(
+                        "SupplierType",
+                        supplierType?.result?.data,
+                        excelItems
+                      )
+                    }
+                  >
+                    Export
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="secondary"
+                    className="button-export-supplierType"
+                    startIcon={<FileDownloadOutlinedIcon />}
+                  >
+                    Import
+                  </Button>
+                </TableCell>
               </TableRow>
-              <TableRow className="table-header-location">
+              <TableRow className="table-header-supplierType">
                 <TableCell>
                   <TableSortLabel
                     active={params.sorts === "id" || params.sorts === "-id"}
@@ -165,13 +195,13 @@ const Location = () => {
                 </TableCell>
                 <TableCell>
                   <TableSortLabel
-                    active={params.sorts === "name" || params.sorts === "-name"}
+                    active={params.sorts === "wtax" || params.sorts === "-wtax"}
                     onClick={() =>
-                      onSortTable(params.sorts === "name" ? "-name" : "name")
+                      onSortTable(params.sorts === "wtax" ? "-wtax" : "wtax")
                     }
-                    direction={params.sorts === "name" ? "asc" : "desc"}
+                    direction={params.sorts === "wtax" ? "asc" : "desc"}
                   >
-                    Name
+                    W-Tax
                   </TableSortLabel>
                 </TableCell>
                 <TableCell align="center"> Status</TableCell>
@@ -203,7 +233,7 @@ const Location = () => {
                   <TableCell colSpan={6} align="center">
                     <Lottie
                       animationData={loading}
-                      className="loading-location"
+                      className="loading-supplierType"
                     />
                   </TableCell>
                 </TableRow>
@@ -212,17 +242,17 @@ const Location = () => {
                   <TableCell colSpan={6} align="center">
                     <Lottie
                       animationData={noData}
-                      className="no-data-location"
+                      className="no-data-supplierType"
                     />
                   </TableCell>
                 </TableRow>
               ) : (
-                location?.result?.data?.map((loc) => (
-                  <TableRow className="table-body-location" key={loc?.id}>
-                    <TableCell>{loc?.id}</TableCell>
-                    <TableCell>{loc?.code}</TableCell>
+                supplierType?.result?.data?.map((comp) => (
+                  <TableRow className="table-body-supplierType" key={comp?.id}>
+                    <TableCell>{comp?.id}</TableCell>
+                    <TableCell>{comp?.code}</TableCell>
 
-                    <TableCell>{loc?.name}</TableCell>
+                    <TableCell>{comp?.wtax}</TableCell>
                     <TableCell align="center">
                       {params.status === "active" && (
                         <StatusIndicator
@@ -238,16 +268,16 @@ const Location = () => {
                       )}
                     </TableCell>
                     <TableCell align="center">
-                      {moment(loc?.updated_at).format("MMM DD YYYY")}
+                      {moment(comp?.updated_at).format("MMM DD YYYY")}
                     </TableCell>
                     <TableCell align="center">
                       <IconButton
                         onClick={(e) => {
-                          dispatch(setMenuData(loc));
+                          dispatch(setMenuData(comp));
                           setAnchorE1(e.currentTarget);
                         }}
                       >
-                        <MoreVertOutlinedIcon className="location-icon-actions" />
+                        <MoreVertOutlinedIcon className="supplierType-icon-actions" />
                       </IconButton>
                     </TableCell>
                   </TableRow>
@@ -256,24 +286,13 @@ const Location = () => {
             </TableBody>
             {!isFetching && !isError && (
               <TableFooter style={{ position: "sticky", bottom: 0 }}>
-                <TableRow className="table-footer-location">
-                  <TableCell colSpan={2}>
-                    <Button
-                      variant="contained"
-                      color="warning"
-                      className="button-export-location"
-                      startIcon={<GetAppOutlinedIcon />}
-                      // onClick={() => dispatch(setCreateMenu(true))}
-                    >
-                      Export
-                    </Button>
-                  </TableCell>
-                  <TableCell colSpan={5}>
+                <TableRow className="table-footer-supplierType">
+                  <TableCell colSpan={6}>
                     <TablePagination
                       rowsPerPageOptions={[5, 10, 25, 100]}
-                      count={location?.result?.total || 0}
-                      rowsPerPage={location?.result?.per_page || 10}
-                      page={location?.result?.current_page - 1 || 0}
+                      count={supplierType?.result?.total || 0}
+                      rowsPerPage={supplierType?.result?.per_page || 10}
+                      page={supplierType?.result?.current_page - 1 || 0}
                       onPageChange={onPageChange}
                       onRowsPerPageChange={onRowChange}
                       component="div"
@@ -301,10 +320,10 @@ const Location = () => {
             }}
           >
             <ListItemIcon>
-              <ModeEditOutlineOutlinedIcon className="location-menu-icons" />
+              <ModeEditOutlineOutlinedIcon className="supplierType-menu-icons" />
             </ListItemIcon>
-            <Typography className="location-menu-text">
-              Update location
+            <Typography className="supplierType-menu-text">
+              Update Type
             </Typography>
           </MenuItem>
         )}
@@ -316,27 +335,27 @@ const Location = () => {
         >
           <ListItemIcon>
             {params.status === "inactive" ? (
-              <SettingsBackupRestoreOutlinedIcon className="location-menu-icons" />
+              <SettingsBackupRestoreOutlinedIcon className="supplierType-menu-icons" />
             ) : (
-              <DeleteForeverOutlinedIcon className="location-menu-icons" />
+              <DeleteForeverOutlinedIcon className="supplierType-menu-icons" />
             )}
           </ListItemIcon>
-          <Typography className="location-menu-text">
+          <Typography className="supplierType-menu-text">
             {params.status === "inactive" ? "Restore" : "Archive"}
           </Typography>
         </MenuItem>
       </Menu>
 
-      {/* <Dialog open={archiveLoading} className="loading-role-create">
+      <Dialog open={archiveLoading} className="loading-role-create">
         <Lottie animationData={loadingLight} loop={archiveLoading} />
-      </Dialog> */}
+      </Dialog>
 
       <Dialog open={createMenu}>
-        <LocationModal />
+        <SupplierTypeModal />
       </Dialog>
 
       <Dialog open={updateMenu}>
-        <LocationModal locationData={menuData} update />
+        <SupplierTypeModal stypeData={menuData} update />
       </Dialog>
 
       <Dialog open={openWarning}>
@@ -344,13 +363,13 @@ const Location = () => {
           image={warning}
           title={
             params.status === "active"
-              ? "Archive the location?"
-              : "Restore the location?"
+              ? "Archive the Type?"
+              : "Restore the Type?"
           }
           message={
             params.status === "active"
-              ? "You are about to archive this location"
-              : "You are about to restore this location"
+              ? "You are about to archive this type"
+              : "You are about to restore this type"
           }
           nextLineMessage={"Please confirm to continue"}
           confirmButton={
@@ -368,4 +387,4 @@ const Location = () => {
   );
 };
 
-export default Location;
+export default SupplierType;

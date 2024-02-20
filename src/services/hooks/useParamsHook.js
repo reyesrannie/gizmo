@@ -7,6 +7,7 @@ const useParamsHook = () => {
     page: 1,
     per_page: 10,
     pagination: null,
+    sorts: null,
   });
 
   const onPageChange = (_, page) => {
@@ -40,6 +41,13 @@ const useParamsHook = () => {
     }));
   };
 
+  const onSortTable = (sorts) => {
+    setParams((currentValue) => ({
+      ...currentValue,
+      sorts: sorts,
+    }));
+  };
+
   return {
     params,
     onPageChange,
@@ -47,6 +55,7 @@ const useParamsHook = () => {
     // onDateRange,
     onSearchData,
     onStatusChange,
+    onSortTable,
   };
 };
 

@@ -16,6 +16,7 @@ import {
   TableHead,
   TablePagination,
   TableRow,
+  TableSortLabel,
   Typography,
 } from "@mui/material";
 import React from "react";
@@ -68,8 +69,14 @@ const RoleManagement = () => {
   const rolesData = useSelector((state) => state.menu.rolesData);
 
   const dispatch = useDispatch();
-  const { params, onStatusChange, onPageChange, onRowChange, onSearchData } =
-    useParamsHook();
+  const {
+    params,
+    onStatusChange,
+    onPageChange,
+    onRowChange,
+    onSearchData,
+    onSortTable,
+  } = useParamsHook();
   const {
     data: roles,
     isLoading,
@@ -135,11 +142,48 @@ const RoleManagement = () => {
                 </TableCell>
               </TableRow>
               <TableRow className="table-header-cell">
-                <TableCell>ID No.</TableCell>
-                <TableCell>Name</TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={params.sorts === "id" || params.sorts === "-id"}
+                    onClick={() =>
+                      onSortTable(params.sorts === "id" ? "-id" : "id")
+                    }
+                    direction={params.sorts === "id" ? "asc" : "desc"}
+                  >
+                    ID No.
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={params.sorts === "name" || params.sorts === "-name"}
+                    onClick={() =>
+                      onSortTable(params.sorts === "name" ? "-name" : "name")
+                    }
+                    direction={params.sorts === "name" ? "asc" : "desc"}
+                  >
+                    Name
+                  </TableSortLabel>
+                </TableCell>
                 <TableCell align="center">Access Permission</TableCell>
                 <TableCell align="center"> Status</TableCell>
-                <TableCell align="center">Date Modified</TableCell>
+                <TableCell align="center">
+                  <TableSortLabel
+                    active={
+                      params.sorts === "updated_at" ||
+                      params.sorts === "-updated_at"
+                    }
+                    onClick={() =>
+                      onSortTable(
+                        params.sorts === "updated_at"
+                          ? "-updated_at"
+                          : "updated_at"
+                      )
+                    }
+                    direction={params.sorts === "updated_at" ? "asc" : "desc"}
+                  >
+                    Date Modified
+                  </TableSortLabel>
+                </TableCell>
                 <TableCell align="center">Action</TableCell>
               </TableRow>
             </TableHead>

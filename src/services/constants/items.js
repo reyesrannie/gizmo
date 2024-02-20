@@ -10,6 +10,8 @@ import Diversity2OutlinedIcon from "@mui/icons-material/Diversity2Outlined";
 import ShareLocationOutlinedIcon from "@mui/icons-material/ShareLocationOutlined";
 import MonetizationOnOutlinedIcon from "@mui/icons-material/MonetizationOnOutlined";
 import InventoryOutlinedIcon from "@mui/icons-material/InventoryOutlined";
+import HubOutlinedIcon from "@mui/icons-material/HubOutlined";
+import PowerInputOutlinedIcon from "@mui/icons-material/PowerInputOutlined";
 
 import "../../components/styles/CardNavigation.scss";
 const user = [
@@ -108,10 +110,34 @@ const masterlist = [
   {
     path: "/masterlist/vat",
     desc: "A module for managing value added Tax .",
-    name: "Vat",
+    name: "VAT",
     permission: ["vat"],
     firstIcon: (
       <InventoryOutlinedIcon color="secondary" className="icon-card-details" />
+    ),
+    lastIcon: (
+      <NavigationOutlinedIcon className="icon-last" color="secondary" />
+    ),
+  },
+  {
+    path: "/masterlist/atc",
+    desc: "A module for managing ATC .",
+    name: "ATC",
+    permission: ["atc"],
+    firstIcon: (
+      <HubOutlinedIcon color="secondary" className="icon-card-details" />
+    ),
+    lastIcon: (
+      <NavigationOutlinedIcon className="icon-last" color="secondary" />
+    ),
+  },
+  {
+    path: "/masterlist/suppliertype",
+    desc: "A module for managing Supplier Type .",
+    name: "Supplier Type",
+    permission: ["s-type"],
+    firstIcon: (
+      <PowerInputOutlinedIcon color="secondary" className="icon-card-details" />
     ),
     lastIcon: (
       <NavigationOutlinedIcon className="icon-last" color="secondary" />
@@ -178,10 +204,22 @@ const menu = [
         permission: ["ap"],
       },
       {
-        desc: "Vat",
+        desc: "VAT",
         icon: <InventoryOutlinedIcon />,
         path: "/masterlist/vat",
         permission: ["ap"],
+      },
+      {
+        desc: "ATC",
+        icon: <HubOutlinedIcon />,
+        path: "/masterlist/atc",
+        permission: ["atc"],
+      },
+      {
+        desc: "Supplier Type",
+        icon: <PowerInputOutlinedIcon />,
+        path: "/masterlist/suppliertype",
+        permission: ["s-type"],
       },
     ],
   },
@@ -224,7 +262,15 @@ const routes = [
       },
       {
         path: "/masterlist/vat",
-        name: "Vat",
+        name: "VAT",
+      },
+      {
+        path: "/masterlist/atc",
+        name: "ATC",
+      },
+      {
+        path: "/masterlist/suppliertype",
+        name: "Supplier Type",
       },
     ],
   },

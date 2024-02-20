@@ -3,7 +3,7 @@
     font-family: "Roboto-Black";
     font-size: 24px;
     margin-left: 20px;
-    margin-bottom: 100px;
+    margin-bottom: 50px;
   }
 }
 
@@ -13,6 +13,26 @@
     align-items: center;
     justify-content: center;
     flex-wrap: wrap;
+    overflow: hidden;
+    overflow-y: auto;
+    max-height: 800px;
+    &::-webkit-scrollbar {
+      width: 12px;
+    }
+    &::-webkit-scrollbar-thumb {
+      background-color: #ccc;
+      border-radius: 20px;
+      border: 1px solid #fff;
+    }
+    &::-webkit-scrollbar-thumb:hover {
+      background-color: #f4ce92;
+    }
+    &::-webkit-scrollbar-track {
+      border-radius: 20px;
+    }
+    &::-webkit-scrollbar-track:hover {
+      background-color: #eee;
+    }
   }
 }
 

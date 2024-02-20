@@ -14,6 +14,8 @@ import Location from "../../screen/masterlist/charging/Location";
 import AccountsPayable from "../../screen/masterlist/ap/AccountsPayable";
 import { hasAccess } from "../functions/access";
 import Vat from "../../screen/masterlist/vat/Vat";
+import Atc from "../../screen/masterlist/atc/Atc";
+import SupplierType from "../../screen/masterlist/supplier/SupplierType";
 
 const Routing = () => {
   const user = decodeUser();
@@ -110,6 +112,22 @@ const Routing = () => {
           path: "vat",
           element: hasAccess(["ap"]) ? (
             <Vat />
+          ) : (
+            <Navigate to={"/masterlist"} />
+          ),
+        },
+        {
+          path: "atc",
+          element: hasAccess(["atc"]) ? (
+            <Atc />
+          ) : (
+            <Navigate to={"/masterlist"} />
+          ),
+        },
+        {
+          path: "suppliertype",
+          element: hasAccess(["s-type"]) ? (
+            <SupplierType />
           ) : (
             <Navigate to={"/masterlist"} />
           ),

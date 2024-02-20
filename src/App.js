@@ -42,6 +42,17 @@ function App() {
           },
         },
       },
+      MuiTableSortLabel: {
+        styleOverrides: {
+          root: {
+            color: "#f4ce92 !important", // Change text color
+            fontFamily: "Roboto-Bold !important",
+          },
+          icon: {
+            color: "#f4ce92 !important",
+          },
+        },
+      },
     },
 
     palette: {

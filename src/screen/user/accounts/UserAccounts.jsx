@@ -16,6 +16,7 @@ import {
   TableHead,
   TablePagination,
   TableRow,
+  TableSortLabel,
   Typography,
 } from "@mui/material";
 
@@ -74,8 +75,14 @@ const UserAccounts = () => {
 
   const dispatch = useDispatch();
 
-  const { params, onStatusChange, onPageChange, onRowChange, onSearchData } =
-    useParamsHook();
+  const {
+    params,
+    onStatusChange,
+    onPageChange,
+    onRowChange,
+    onSearchData,
+    onSortTable,
+  } = useParamsHook();
 
   const {
     data: users,
@@ -156,12 +163,71 @@ const UserAccounts = () => {
                 </TableCell>
               </TableRow>
               <TableRow className="table-header-user">
-                <TableCell>ID No.</TableCell>
-                <TableCell>Username</TableCell>
-                <TableCell>Name</TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={params.sorts === "id" || params.sorts === "-id"}
+                    onClick={() =>
+                      onSortTable(params.sorts === "id" ? "-id" : "id")
+                    }
+                    direction={params.sorts === "id" ? "asc" : "desc"}
+                  >
+                    ID No.
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={
+                      params.sorts === "username" ||
+                      params.sorts === "-username"
+                    }
+                    onClick={() =>
+                      onSortTable(
+                        params.sorts === "username" ? "-username" : "username"
+                      )
+                    }
+                    direction={params.sorts === "username" ? "asc" : "desc"}
+                  >
+                    Username
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={
+                      params.sorts === "first_name" ||
+                      params.sorts === "-first_name"
+                    }
+                    onClick={() =>
+                      onSortTable(
+                        params.sorts === "first_name"
+                          ? "-first_name"
+                          : "first_name"
+                      )
+                    }
+                    direction={params.sorts === "first_name" ? "asc" : "desc"}
+                  >
+                    Name
+                  </TableSortLabel>
+                </TableCell>
                 <TableCell>Role</TableCell>
                 <TableCell align="center"> Status</TableCell>
-                <TableCell align="center">Date Modified</TableCell>
+                <TableCell align="center">
+                  <TableSortLabel
+                    active={
+                      params.sorts === "updated_at" ||
+                      params.sorts === "-updated_at"
+                    }
+                    onClick={() =>
+                      onSortTable(
+                        params.sorts === "updated_at"
+                          ? "-updated_at"
+                          : "updated_at"
+                      )
+                    }
+                    direction={params.sorts === "updated_at" ? "asc" : "desc"}
+                  >
+                    Date Modified
+                  </TableSortLabel>
+                </TableCell>
                 <TableCell align="center">Action</TableCell>
               </TableRow>
             </TableHead>
@@ -202,7 +268,7 @@ const UserAccounts = () => {
                       )}
                     </TableCell>
                     <TableCell align="center">
-                      {moment(user?.updated_at).format("MMM DD YYYY")}
+                      {moment(user?.updated_at).format("MMM DD, YYYY")}
                     </TableCell>
                     <TableCell align="center">
                       <IconButton
