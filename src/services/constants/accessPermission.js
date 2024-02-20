@@ -29,10 +29,13 @@ const accessPermission = [
         access_permission: "company",
         label: "Company",
       },
-
       { access_permission: "location", label: "Location" },
       { access_permission: "department", label: "Department" },
       { access_permission: "ap", label: "Accounts Payable" },
+      { access_permission: "supplier", label: "Supplier" },
+      { access_permission: "s-type", label: "Supplier Type" },
+      { access_permission: "vat", label: "Vat" },
+      { access_permission: "atc", label: "ATC" },
     ],
   },
   {

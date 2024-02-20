@@ -1,9 +1,8 @@
 import { Box, Button, Dialog, Divider, Paper, Typography } from "@mui/material";
 import React from "react";
 
-import "../../styles/CompanyModal.scss";
-import company from "../../../assets/svg/company.svg";
-import companySchema from "../../../schemas/companySchema";
+import "../../styles/VatModal.scss";
+import vat from "../../../assets/svg/vat.svg";
 import AppTextBox from "../AppTextBox";
 import loading from "../../../assets/lottie/Loading-2.json";
 import Lottie from "lottie-react";
@@ -14,19 +13,19 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useDispatch } from "react-redux";
 import { resetMenu } from "../../../services/slice/menuSlice";
 import {
-  useCreateCompanyMutation,
-  useUpdateCompanyMutation,
+  useCreateVATMutation,
+  useUpdateVATMutation,
 } from "../../../services/store/request";
 import { useSnackbar } from "notistack";
 import { objectError } from "../../../services/functions/errorResponse";
+import vatSchema from "../../../schemas/vatSchema";
 
-const CompanyModal = ({ companyData, view, update }) => {
+const VatModal = ({ vatData, view, update }) => {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
 
-  const [createCompany, { isLoading }] = useCreateCompanyMutation();
-  const [updateCompany, { isLoading: updateLoading }] =
-    useUpdateCompanyMutation();
+  const [createVat, { isLoading }] = useCreateVATMutation();
+  const [updateVat, { isLoading: updateLoading }] = useUpdateVATMutation();
 
   const defaultValues = {
     name: "",
@@ -34,8 +33,8 @@ const CompanyModal = ({ companyData, view, update }) => {
   };
 
   const defaultData = {
-    code: companyData?.code,
-    name: companyData?.name,
+    code: vatData?.code,
+    name: vatData?.name,
   };
 
   const {
@@ -45,19 +44,19 @@ const CompanyModal = ({ companyData, view, update }) => {
     watch,
     formState: { errors },
   } = useForm({
-    resolver: yupResolver(companySchema),
+    resolver: yupResolver(vatSchema),
     defaultValues: view || update ? defaultData : defaultValues,
   });
 
   const submitHandler = async (submitData) => {
     const obj = {
       ...submitData,
-      id: view || update ? companyData?.id : null,
+      id: view || update ? vatData?.id : null,
     };
 
     if (update) {
       try {
-        const res = await updateCompany(obj).unwrap();
+        const res = await updateVat(obj).unwrap();
         enqueueSnackbar(res?.message, { variant: "success" });
         dispatch(resetMenu());
       } catch (error) {
@@ -65,7 +64,7 @@ const CompanyModal = ({ companyData, view, update }) => {
       }
     } else {
       try {
-        const res = await createCompany(obj).unwrap();
+        const res = await createVat(obj).unwrap();
         enqueueSnackbar(res?.message, { variant: "success" });
         dispatch(resetMenu());
       } catch (error) {
@@ -75,21 +74,16 @@ const CompanyModal = ({ companyData, view, update }) => {
   };
 
   return (
-    <Paper className="company-modal-container">
-      <img
-        src={company}
-        alt="company"
-        className="company-image"
-        draggable="false"
-      />
+    <Paper className="vat-modal-container">
+      <img src={vat} alt="vat" className="vat-image" draggable="false" />
 
-      <Typography className="company-text">
-        {view ? "Company" : update ? "Update Company" : "Add Company"}
+      <Typography className="vat-text">
+        {view ? "Vat" : update ? "Update Vat" : "Add Vat"}
       </Typography>
-      <Divider orientation="horizontal" className="company-devider" />
+      <Divider orientation="horizontal" className="vat-devider" />
 
       <form
-        className="add-company-form-container"
+        className="add-vat-form-container"
         onSubmit={handleSubmit(submitHandler)}
       >
         <AppTextBox
@@ -98,7 +92,7 @@ const CompanyModal = ({ companyData, view, update }) => {
           name={"code"}
           label={"Code *"}
           color="primary"
-          className="add-company-textbox"
+          className="add-vat-textbox"
           error={Boolean(errors?.code)}
           helperText={errors?.code?.message}
         />
@@ -108,18 +102,18 @@ const CompanyModal = ({ companyData, view, update }) => {
           name={"name"}
           label={"Name *"}
           color="primary"
-          className="add-company-textbox"
+          className="add-vat-textbox"
           error={Boolean(errors?.name)}
           helperText={errors?.name?.message}
         />
 
-        <Box className="add-company-button-container">
+        <Box className="add-vat-button-container">
           {!view && (
             <LoadingButton
               variant="contained"
               color="warning"
               type="submit"
-              className="add-company-button"
+              className="add-vat-button"
               disabled={!watch("name") || !watch("code")}
             >
               {update ? "Update" : "Add"}
@@ -129,21 +123,18 @@ const CompanyModal = ({ companyData, view, update }) => {
             variant="contained"
             color="primary"
             onClick={() => dispatch(resetMenu())}
-            className="add-company-button"
+            className="add-vat-button"
           >
             {view ? "Close" : update ? "Cancel" : "Cancel"}
           </Button>
         </Box>
       </form>
 
-      <Dialog
-        open={isLoading || updateLoading}
-        className="loading-company-create"
-      >
+      <Dialog open={isLoading || updateLoading} className="loading-vat-create">
         <Lottie animationData={loading} loop={isLoading || updateLoading} />
       </Dialog>
     </Paper>
   );
 };
 
-export default CompanyModal;
+export default VatModal;

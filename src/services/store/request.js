@@ -19,7 +19,7 @@ export const jsonServerAPI = createApi({
       return headers;
     },
   }),
-  tagTypes: ["Users", "Role", "Company", "Department", "Location", "AP"],
+  tagTypes: ["Users", "Role", "Company", "Department", "Location", "AP", "VAT"],
   endpoints: (builder) => ({
     login: builder.mutation({
       transformResponse: (response) => response.result,
@@ -270,6 +270,42 @@ export const jsonServerAPI = createApi({
       }),
       invalidatesTags: ["AP"],
     }),
+    vat: builder.query({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/vat`,
+        method: "GET",
+        params: payload,
+      }),
+      providesTags: ["VAT"],
+    }),
+    createVAT: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/vat`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["VAT"],
+    }),
+    updateVAT: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/vat/${payload.id}`,
+        method: "PUT",
+        body: payload,
+      }),
+      invalidatesTags: ["VAT"],
+    }),
+    archiveVAT: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/archive/vat/${payload.id}`,
+        method: "PATCH",
+        body: payload,
+      }),
+      invalidatesTags: ["VAT"],
+    }),
   }),
 });
 
@@ -302,4 +338,8 @@ export const {
   useCreateAPMutation,
   useUpdateAPMutation,
   useArchiveAPMutation,
+  useVatQuery,
+  useCreateVATMutation,
+  useUpdateVATMutation,
+  useArchiveVATMutation,
 } = jsonServerAPI;

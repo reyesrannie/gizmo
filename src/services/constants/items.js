@@ -9,6 +9,7 @@ import EmojiTransportationOutlinedIcon from "@mui/icons-material/EmojiTransporta
 import Diversity2OutlinedIcon from "@mui/icons-material/Diversity2Outlined";
 import ShareLocationOutlinedIcon from "@mui/icons-material/ShareLocationOutlined";
 import MonetizationOnOutlinedIcon from "@mui/icons-material/MonetizationOnOutlined";
+import InventoryOutlinedIcon from "@mui/icons-material/InventoryOutlined";
 
 import "../../components/styles/CardNavigation.scss";
 const user = [
@@ -104,6 +105,18 @@ const masterlist = [
       <NavigationOutlinedIcon className="icon-last" color="secondary" />
     ),
   },
+  {
+    path: "/masterlist/vat",
+    desc: "A module for managing value added Tax .",
+    name: "Vat",
+    permission: ["vat"],
+    firstIcon: (
+      <InventoryOutlinedIcon color="secondary" className="icon-card-details" />
+    ),
+    lastIcon: (
+      <NavigationOutlinedIcon className="icon-last" color="secondary" />
+    ),
+  },
 ];
 
 const menu = [
@@ -164,6 +177,12 @@ const menu = [
         path: "/masterlist/ap",
         permission: ["ap"],
       },
+      {
+        desc: "Vat",
+        icon: <InventoryOutlinedIcon />,
+        path: "/masterlist/vat",
+        permission: ["ap"],
+      },
     ],
   },
 ];
@@ -202,6 +221,10 @@ const routes = [
       {
         path: "/masterlist/ap",
         name: "Accounts Payable",
+      },
+      {
+        path: "/masterlist/vat",
+        name: "Vat",
       },
     ],
   },

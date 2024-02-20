@@ -13,6 +13,7 @@ import Department from "../../screen/masterlist/charging/Department";
 import Location from "../../screen/masterlist/charging/Location";
 import AccountsPayable from "../../screen/masterlist/ap/AccountsPayable";
 import { hasAccess } from "../functions/access";
+import Vat from "../../screen/masterlist/vat/Vat";
 
 const Routing = () => {
   const user = decodeUser();
@@ -101,6 +102,14 @@ const Routing = () => {
           path: "ap",
           element: hasAccess(["ap"]) ? (
             <AccountsPayable />
+          ) : (
+            <Navigate to={"/masterlist"} />
+          ),
+        },
+        {
+          path: "vat",
+          element: hasAccess(["ap"]) ? (
+            <Vat />
           ) : (
             <Navigate to={"/masterlist"} />
           ),
