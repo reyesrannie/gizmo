@@ -113,7 +113,7 @@ const RolesModal = ({ roleData, view, update }) => {
         onSubmit={handleSubmit(submitHandler)}
       >
         <AppTextBox
-          disabled={view}
+          disabled={view || update}
           control={control}
           name={"name"}
           label={"Role name *"}

@@ -298,6 +298,7 @@ const UserModal = ({ menuData, view, update }) => {
         onSubmit={handleSubmit(submitHandler)}
       >
         <Autocomplete
+          disabled={update}
           className="user-form-autocomplete"
           loading={sedarLoading}
           control={control}
@@ -471,6 +472,7 @@ const UserModal = ({ menuData, view, update }) => {
           </Typography>
         </Box>
         <AppTextBox
+          disabled={update}
           control={control}
           name={"username"}
           className="user-form-textBox"

@@ -133,7 +133,7 @@ const DepartmentModal = ({ departmentData, view, update }) => {
         onSubmit={handleSubmit(submitHandler)}
       >
         <AppTextBox
-          disabled={view}
+          disabled={view || update}
           control={control}
           name={"code"}
           label={"Code *"}

@@ -87,7 +87,7 @@ const AccountsPayableModal = ({ apData, view, update }) => {
         onSubmit={handleSubmit(submitHandler)}
       >
         <AppTextBox
-          disabled={view}
+          disabled={view || update}
           control={control}
           name={"company_code"}
           label={"Code *"}
