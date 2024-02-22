@@ -23,7 +23,7 @@ function AppTextBox({
   mobile = false,
   inputProps,
   money,
-  address,
+  tin,
   ...textField
 }) {
   const [showPassword, setShowPassword] = useState(false);
@@ -33,21 +33,28 @@ function AppTextBox({
     event.preventDefault();
   };
 
+  const formatValue = (inputValue) => {
+    const numericValue = inputValue.replace(/\D/g, ""); // Remove non-numeric characters
+    const parts = numericValue.match(/.{1,3}/g); // Split into groups of 3 digits
+    return parts ? parts.join("-") : ""; // Join with hyphens
+  };
+
   return (
     <Controller
       control={control}
       name={name}
       render={({ field }) => {
         const { ref, value, onChange } = field;
-
+        const handleChange = (e) => {
+          const formattedValue = formatValue(e.target.value);
+          onChange(formattedValue);
+        };
         return (
           <>
-            {money || address ? (
+            {money ? (
               <NumericFormat
                 customInput={TextField}
-                thousandSeparator={address ? "-" : ","}
-                decimalScale={0} // set decimal scale to 0
-                allowLeadingZeros={true}
+                thousandSeparator={","}
                 autoFocus={false}
                 autoComplete="off"
                 className={className}
@@ -77,7 +84,7 @@ function AppTextBox({
                 name={name}
                 {...textField}
                 error={error}
-                onChange={onChange} // send value to hook form
+                onChange={tin ? handleChange : onChange} // send value to hook form
                 inputRef={ref}
                 value={value}
                 size="small"

@@ -103,6 +103,7 @@
       padding: 8px;
       font-family: Roboto-Light;
       letter-spacing: 1px;
+      max-width: 500px;
     }
     &:hover {
       background-color: #f2f2f2;
@@ -228,7 +229,7 @@
   }
 }
 
-@media (max-height: 681px) {
+@media (max-height: 768px) {
   .page-text-indicator-supplier {
     &.MuiTypography-root {
       font-size: 18px;

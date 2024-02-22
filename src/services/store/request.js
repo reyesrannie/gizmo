@@ -155,6 +155,15 @@ export const jsonServerAPI = createApi({
       }),
       invalidatesTags: ["Company"],
     }),
+    importCompany: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/import/company`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["Company"],
+    }),
     updateCompany: builder.mutation({
       transformResponse: (response) => response,
       query: (payload) => ({
@@ -442,6 +451,7 @@ export const {
   useUpdateRoleMutation,
   useArchiveRoleMutation,
   useCompanyQuery,
+  useImportCompanyMutation,
   useCreateCompanyMutation,
   useUpdateCompanyMutation,
   useArchiveCompanyMutation,

@@ -134,42 +134,44 @@ const Supplier = () => {
           <Table stickyHeader>
             <TableHead>
               <TableRow className="table-header1-supplier">
-                <TableCell colSpan={3}>
-                  <FormControlLabel
-                    className="check-box-archive-supplier"
-                    control={<Checkbox color="secondary" />}
-                    label="Archive"
-                    checked={params?.status === "inactive"}
-                    onChange={() =>
-                      onStatusChange(
-                        params?.status === "active" ? "inactive" : "active"
-                      )
-                    }
-                  />
-                </TableCell>
-                <TableCell colSpan={3} align="right">
-                  <Button
-                    variant="contained"
-                    className="button-export-supplier"
-                    startIcon={<FileUploadOutlinedIcon />}
-                    onClick={() =>
-                      generateExcel(
-                        "Supplier",
-                        supplier?.result?.data,
-                        excelItems
-                      )
-                    }
-                  >
-                    Export
-                  </Button>
-                  <Button
-                    variant="contained"
-                    color="secondary"
-                    className="button-export-supplier"
-                    startIcon={<FileDownloadOutlinedIcon />}
-                  >
-                    Import
-                  </Button>
+                <TableCell colSpan={5}>
+                  <Stack flexDirection={"row"} justifyContent="space-between">
+                    <FormControlLabel
+                      className="check-box-archive-supplier"
+                      control={<Checkbox color="secondary" />}
+                      label="Archive"
+                      checked={params?.status === "inactive"}
+                      onChange={() =>
+                        onStatusChange(
+                          params?.status === "active" ? "inactive" : "active"
+                        )
+                      }
+                    />
+                    <Box>
+                      <Button
+                        variant="contained"
+                        className="button-export-supplier"
+                        startIcon={<FileUploadOutlinedIcon />}
+                        onClick={() =>
+                          generateExcel(
+                            "Supplier",
+                            supplier?.result?.data,
+                            excelItems
+                          )
+                        }
+                      >
+                        Export
+                      </Button>
+                      <Button
+                        variant="contained"
+                        color="secondary"
+                        className="button-export-supplier"
+                        startIcon={<FileDownloadOutlinedIcon />}
+                      >
+                        Import
+                      </Button>
+                    </Box>
+                  </Stack>
                 </TableCell>
               </TableRow>
               <TableRow className="table-header-supplier">
@@ -186,11 +188,18 @@ const Supplier = () => {
                 </TableCell>
                 <TableCell>
                   <TableSortLabel
-                    active={params.sorts === "code" || params.sorts === "-code"}
-                    onClick={() =>
-                      onSortTable(params.sorts === "code" ? "-code" : "code")
+                    active={
+                      params.sorts === "company_name" ||
+                      params.sorts === "-company_name"
                     }
-                    direction={params.sorts === "code" ? "asc" : "desc"}
+                    onClick={() =>
+                      onSortTable(
+                        params.sorts === "company_name"
+                          ? "-company_name"
+                          : "company_name"
+                      )
+                    }
+                    direction={params.sorts === "company_name" ? "asc" : "desc"}
                   >
                     Company
                   </TableSortLabel>
@@ -360,7 +369,7 @@ const Supplier = () => {
         <SupplierModal />
       </Dialog>
 
-      <Dialog open={updateMenu}>
+      <Dialog open={updateMenu} className="supplier-modal-dialog">
         <SupplierModal supplierData={menuData} update />
       </Dialog>
 

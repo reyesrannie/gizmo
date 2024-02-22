@@ -72,18 +72,7 @@
   }
 }
 
-.table-header1-company {
-  &.MuiTableRow-root {
-    .MuiTableCell-root {
-      border: none;
-      font-family: Roboto-Bold;
-      letter-spacing: 1px;
-      padding: 10px;
-    }
-  }
-}
-
-.table-header-company {
+.table-header1-import {
   &.MuiTableRow-root {
     .MuiTableCell-root {
       border: none;
@@ -195,7 +184,7 @@
   }
 }
 
-@media (max-height: 681px) {
+@media (max-height: 768px) {
   .page-text-indicator-company {
     &.MuiTypography-root {
       font-size: 18px;

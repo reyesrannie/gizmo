@@ -18,42 +18,58 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import Autocomplete from "../AutoComplete";
 import { useDispatch } from "react-redux";
 import { resetMenu } from "../../../services/slice/menuSlice";
-import { useSedarQuery } from "../../../services/store/sedarRequest";
 import Lottie from "lottie-react";
 import loading from "../../../assets/lottie/Loading.json";
 
-import ClearIcon from "@mui/icons-material/Clear";
 import {
-  useApQuery,
-  useCompanyQuery,
-  useCreatesupplierMutation,
-  useDepartmentQuery,
-  useLocationQuery,
-  supplieroleQuery,
-  useUpdatesupplierMutation,
   useSupplierTypeQuery,
   useAtcQuery,
   useVatQuery,
+  useCreateSupplierMutation,
+  useUpdateSupplierMutation,
 } from "../../../services/store/request";
 import { useEffect } from "react";
 import { objectError } from "../../../services/functions/errorResponse";
 import { enqueueSnackbar } from "notistack";
 import supplierSchema from "../../../schemas/supplierSchema";
 
-const SupplierModal = ({ view, update }) => {
-  const { data: sTypes } = useSupplierTypeQuery({
+const SupplierModal = ({ supplierData, view, update }) => {
+  const dispatch = useDispatch();
+
+  const {
+    data: sTypes,
+    isLoading: loadingTypes,
+    isSuccess: successType,
+  } = useSupplierTypeQuery({
     status: "active",
     pagination: "none",
   });
-  const { data: atc } = useAtcQuery({
+  const {
+    data: atc,
+    isLoading: loadingAtc,
+    isSuccess: successAtc,
+  } = useAtcQuery({
     status: "active",
     pagination: "none",
   });
 
-  const { data: vat } = useVatQuery({
+  const {
+    data: vat,
+    isLoading: loadingVat,
+    isSuccess: successVat,
+  } = useVatQuery({
     status: "active",
     pagination: "none",
   });
+
+  const [createSupplier, { isLoading: loadingCreate }] =
+    useCreateSupplierMutation();
+
+  const [updateSupplier, { isLoading: loadingUpdate }] =
+    useUpdateSupplierMutation();
+
+  const requiredFields = ["tin", "company_name", "company_address"];
+  const requiredArray = ["supplier_types", "supplier_atcs", "supplier_vats"];
 
   const {
     control,
@@ -75,8 +91,89 @@ const SupplierModal = ({ view, update }) => {
     },
   });
 
+  useEffect(() => {
+    if (successType && successAtc && successVat) {
+      const valuesItem = {
+        tin: supplierData?.tin || "",
+        company_name: supplierData?.company_name || "",
+        company_address: supplierData?.company_address || "",
+        proprietor: supplierData?.proprietor || "",
+        supplier_types:
+          supplierData?.supplier_types?.map((tags) =>
+            sTypes?.result?.find((item) => tags?.type_code === item.code)
+          ) || [],
+        supplier_atcs:
+          supplierData?.supplier_atcs?.map((tags) =>
+            atc?.result?.find((item) => tags?.atc_code === item?.code)
+          ) || [],
+        supplier_vats:
+          supplierData?.supplier_vats?.map((tags) =>
+            vat?.result?.find((item) => tags?.vat_code === item?.code)
+          ) || [],
+      };
+      Object.entries(valuesItem).forEach(([key, value]) => {
+        setValue(key, value);
+      });
+    }
+  }, [successType, successAtc, successVat]);
+
+  const isFormValid = requiredFields.every((field) => !!watch(field));
+  const isArrayValid = requiredArray.every(
+    (field) => Array.isArray(watch(field)) && watch(field).length > 0
+  );
+
   const submitHandler = async (submitData) => {
-    console.log(submitData);
+    const obj = {
+      ...submitData,
+      supplier_types: update
+        ? submitData?.supplier_types?.map((type) => ({
+            type_id: type?.id,
+            type_code: type?.code,
+          }))
+        : submitData?.supplier_types?.map((type) => ({
+            id: type?.id,
+            code: type?.code,
+          })),
+      supplier_atcs: update
+        ? submitData?.supplier_atcs?.map((atc) => ({
+            atc_id: atc?.id,
+            atc_code: atc?.code,
+          }))
+        : submitData?.supplier_atcs?.map((atc) => ({
+            id: atc?.id,
+            code: atc?.code,
+          })),
+      supplier_vats: update
+        ? submitData?.supplier_vats?.map((vat) => ({
+            vat_id: vat?.id,
+            vat_code: vat?.code,
+          }))
+        : submitData?.supplier_vats?.map((vat) => ({
+            id: vat?.id,
+            code: vat?.code,
+          })),
+      id: update ? supplierData?.id : null,
+    };
+
+    if (update || view) {
+      try {
+        const res = await updateSupplier(obj).unwrap();
+        enqueueSnackbar(res.message, { variant: "success" });
+        dispatch(resetMenu());
+      } catch (error) {
+        objectError(error, setError, enqueueSnackbar);
+      }
+    } else {
+      try {
+        const res = await createSupplier(obj).unwrap();
+        enqueueSnackbar(res.message, { variant: "success" });
+        dispatch(resetMenu());
+      } catch (error) {
+        objectError(error, setError, enqueueSnackbar);
+      }
+    }
+
+    console.log(obj);
   };
 
   return (
@@ -115,7 +212,7 @@ const SupplierModal = ({ view, update }) => {
           label="TIN"
           error={Boolean(errors.tin)}
           helperText={errors.tin?.message}
-          address
+          tin
           onKeyDown={(e) => {
             if (e?.target?.value?.length >= "15" && e.key !== "Backspace") {
               e.preventDefault();
@@ -216,7 +313,7 @@ const SupplierModal = ({ view, update }) => {
             variant="contained"
             className="add-supplier-button"
             type="submit"
-            // disabled={!isFormValid}
+            disabled={!isFormValid || !isArrayValid}
           >
             Submit
           </Button>
@@ -224,28 +321,34 @@ const SupplierModal = ({ view, update }) => {
             color="primary"
             variant="contained"
             className="add-supplier-button"
-            // onClick={() => dispatch(resetMenu())}
+            onClick={() => dispatch(resetMenu())}
           >
             Cancel
           </Button>
         </Box>
       </form>
 
-      {/* <Dialog
+      <Dialog
         open={
-          sedarLoading ||
-          loadingAP ||
-          loadingRole ||
-          locationLoading ||
-          companyLoading ||
-          departmentLoading ||
-          loadingCreatesupplier ||
-          loadingUpdatesupplier
+          loadingTypes ||
+          loadingCreate ||
+          loadingAtc ||
+          loadingVat ||
+          loadingUpdate
         }
         className="loading-supplier-create"
       >
-        <Lottie animationData={loading} loop={sedarLoading} />
-      </Dialog> */}
+        <Lottie
+          animationData={loading}
+          loop={
+            loadingTypes ||
+            loadingCreate ||
+            loadingAtc ||
+            loadingVat ||
+            loadingUpdate
+          }
+        />
+      </Dialog>
     </Paper>
   );
 };

@@ -1,0 +1,154 @@
+.import-container {
+  &.MuiPaper-root {
+    padding: 15px;
+  }
+}
+
+.import-title {
+  &.MuiTypography-root {
+    font-family: Roboto-Black;
+    font-size: 20px;
+    letter-spacing: 1px;
+  }
+}
+
+.import-desc {
+  &.MuiTypography-root {
+    font-family: Roboto-Light;
+    font-size: 16px;
+  }
+}
+
+.import-drag-drop {
+  &.MuiTypography-root {
+    font-family: Roboto-Light;
+    font-size: 14px;
+    letter-spacing: 1px;
+  }
+}
+
+.import-support {
+  &.MuiTypography-root {
+    font-family: Roboto-Light;
+    font-size: 10px;
+    margin-top: 10px;
+  }
+}
+
+.import-drop-or-load {
+  &.MuiBox-root {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    height: 200px;
+    border: 2px dashed #f4ce92;
+    cursor: pointer;
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+}
+
+.import-list {
+  width: 50px;
+}
+
+.button-import-modal {
+  &.MuiButtonBase-root {
+    font-family: Roboto-Medium;
+    letter-spacing: 1px;
+    text-transform: none;
+  }
+}
+
+.import-button-container {
+  &.MuiBox-root {
+    display: flex;
+    justify-content: flex-end;
+    width: 570px;
+    gap: 10px;
+  }
+}
+
+.loading-import {
+  .MuiPaper-root {
+    box-shadow: none;
+    background-color: transparent;
+  }
+}
+
+.import-box-container {
+  &.MuiBox-root {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #fff;
+    margin: 20px;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+}
+
+.import-table-container {
+  &.MuiTableContainer-root {
+    max-height: 735px;
+    &::-webkit-scrollbar {
+      width: 14px;
+      border: 3px solid #fff;
+    }
+    &::-webkit-scrollbar-thumb {
+      background-color: #ccc;
+      border-radius: 20px;
+      border: 3px solid #fff;
+    }
+    &::-webkit-scrollbar-thumb:hover {
+      background-color: #f4ce92;
+    }
+    &::-webkit-scrollbar-track {
+      background-color: #fff;
+      border-radius: 20px;
+      border: 3px solid #fff;
+    }
+    &::-webkit-scrollbar-track:hover {
+      background-color: #eee;
+    }
+  }
+}
+
+.table-header1-import {
+  &.MuiTableRow-root {
+    .MuiTableCell-root {
+      border: none;
+      font-family: Roboto-Bold;
+      letter-spacing: 1px;
+      padding: 10px;
+    }
+  }
+}
+
+.table-header-company {
+  &.MuiTableRow-root {
+    .MuiTableCell-root {
+      border: none;
+      font-family: Roboto-Bold;
+      letter-spacing: 1px;
+      color: #f4ce92;
+      background-color: #15253b;
+      padding: 14px;
+    }
+  }
+}
+
+.table-body-company {
+  &.MuiTableRow-root {
+    .MuiTableCell-root {
+      border-bottom: 4px solid #f2f2f2;
+      padding: 8px;
+      font-family: Roboto-Light;
+      letter-spacing: 1px;
+    }
+    &:hover {
+      background-color: #f2f2f2;
+    }
+  }
+}

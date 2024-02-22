@@ -9,6 +9,12 @@ const initialState = {
   rolesData: null,
   createMenu: false,
   updateMenu: false,
+  importMenu: false,
+  importHasData: false,
+  importTitle: "",
+  importLoading: false,
+  importError: null,
+
   viewMenu: false,
   menuData: null,
 };
@@ -44,6 +50,21 @@ const menutSlice = createSlice({
     setViewMenu: (state, action) => {
       state.viewMenu = action.payload;
     },
+    setImportMenu: (state, action) => {
+      state.importMenu = action.payload;
+    },
+    setImportHasData: (state, action) => {
+      state.importHasData = action.payload;
+    },
+    setImportTitle: (state, action) => {
+      state.importTitle = action.payload;
+    },
+    setImportLoading: (state, action) => {
+      state.importLoading = action.payload;
+    },
+    setImportError: (state, action) => {
+      state.importError = action.payload;
+    },
     setMenuData: (state, action) => {
       state.menuData = action.payload;
     },
@@ -64,6 +85,11 @@ export const {
   setCreateMenu,
   setUpdateMenu,
   setViewMenu,
+  setImportMenu,
+  setImportHasData,
+  setImportTitle,
+  setImportLoading,
+  setImportError,
   resetMenu,
   setMenuData,
 } = menutSlice.actions;

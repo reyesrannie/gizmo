@@ -14,6 +14,7 @@ import {
   ListItemIcon,
   Menu,
   MenuItem,
+  Stack,
   Table,
   TableBody,
   TableCell,
@@ -33,6 +34,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   useArchiveCompanyMutation,
   useCompanyQuery,
+  useImportCompanyMutation,
 } from "../../../services/store/request";
 
 import AddToPhotosOutlinedIcon from "@mui/icons-material/AddToPhotosOutlined";
@@ -59,11 +61,14 @@ import AppPrompt from "../../../components/customs/AppPrompt";
 import {
   resetMenu,
   setCreateMenu,
+  setImportError,
+  setImportMenu,
   setMenuData,
   setUpdateMenu,
 } from "../../../services/slice/menuSlice";
 import CompanyModal from "../../../components/customs/modal/CompanyModal";
 import generateExcel from "../../../services/functions/exportFile";
+import ImportModal from "../../../components/customs/modal/ImportModal";
 
 const Company = () => {
   const excelItems = ["ID", "CODE", "NAME", "CREATED AT", "DATE MODIFIED"];
@@ -74,6 +79,7 @@ const Company = () => {
   const openWarning = useSelector((state) => state.prompt.warning);
   const createMenu = useSelector((state) => state.menu.createMenu);
   const updateMenu = useSelector((state) => state.menu.updateMenu);
+  const importMenu = useSelector((state) => state.menu.importMenu);
 
   const {
     params,
@@ -86,6 +92,9 @@ const Company = () => {
 
   const [archiveCompany, { isLoading: archiveLoading }] =
     useArchiveCompanyMutation();
+
+  const [importCompany, { isLoading: loadingImport }] =
+    useImportCompanyMutation();
 
   const {
     data: company,
@@ -102,6 +111,19 @@ const Company = () => {
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
+      singleError(error, enqueueSnackbar);
+    }
+  };
+
+  const importCompanyHandler = async (submitData) => {
+    try {
+      const res = await importCompany(submitData).unwrap();
+      enqueueSnackbar(res?.message, { variant: "success" });
+      dispatch(resetMenu());
+      dispatch(resetPrompt());
+    } catch (error) {
+      console.log(error?.data?.errors);
+      dispatch(setImportError(error?.data?.errors));
       singleError(error, enqueueSnackbar);
     }
   };
@@ -131,42 +153,45 @@ const Company = () => {
           <Table stickyHeader>
             <TableHead>
               <TableRow className="table-header1-company">
-                <TableCell colSpan={3}>
-                  <FormControlLabel
-                    className="check-box-archive-company"
-                    control={<Checkbox color="secondary" />}
-                    label="Archive"
-                    checked={params?.status === "inactive"}
-                    onChange={() =>
-                      onStatusChange(
-                        params?.status === "active" ? "inactive" : "active"
-                      )
-                    }
-                  />
-                </TableCell>
-                <TableCell colSpan={3} align="right">
-                  <Button
-                    variant="contained"
-                    className="button-export-company"
-                    startIcon={<FileUploadOutlinedIcon />}
-                    onClick={() =>
-                      generateExcel(
-                        "Company",
-                        company?.result?.data,
-                        excelItems
-                      )
-                    }
-                  >
-                    Export
-                  </Button>
-                  <Button
-                    variant="contained"
-                    color="secondary"
-                    className="button-export-company"
-                    startIcon={<FileDownloadOutlinedIcon />}
-                  >
-                    Import
-                  </Button>
+                <TableCell colSpan={6}>
+                  <Stack flexDirection={"row"} justifyContent="space-between">
+                    <FormControlLabel
+                      className="check-box-archive-company"
+                      control={<Checkbox color="secondary" />}
+                      label="Archive"
+                      checked={params?.status === "inactive"}
+                      onChange={() =>
+                        onStatusChange(
+                          params?.status === "active" ? "inactive" : "active"
+                        )
+                      }
+                    />
+                    <Box>
+                      <Button
+                        variant="contained"
+                        className="button-export-company"
+                        startIcon={<FileUploadOutlinedIcon />}
+                        onClick={() =>
+                          generateExcel(
+                            "Company",
+                            company?.result?.data,
+                            excelItems
+                          )
+                        }
+                      >
+                        Export
+                      </Button>
+                      <Button
+                        variant="contained"
+                        color="secondary"
+                        className="button-export-company"
+                        startIcon={<FileDownloadOutlinedIcon />}
+                        onClick={() => dispatch(setImportMenu(true))}
+                      >
+                        Import
+                      </Button>
+                    </Box>
+                  </Stack>
                 </TableCell>
               </TableRow>
               <TableRow className="table-header-company">
@@ -355,6 +380,14 @@ const Company = () => {
 
       <Dialog open={updateMenu}>
         <CompanyModal companyData={menuData} update />
+      </Dialog>
+
+      <Dialog open={importMenu}>
+        <ImportModal
+          title="Company"
+          importData={importCompanyHandler}
+          isLoading={loadingImport}
+        />
       </Dialog>
 
       <Dialog open={openWarning}>
