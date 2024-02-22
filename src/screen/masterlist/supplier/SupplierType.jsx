@@ -390,7 +390,7 @@ const SupplierType = () => {
 
       <Dialog open={importMenu}>
         <ImportModal
-          title="Supplie type"
+          title="Supplier type"
           importData={importCompanyHandler}
           isLoading={loadingImport}
         />

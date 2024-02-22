@@ -172,8 +172,6 @@ const SupplierModal = ({ supplierData, view, update }) => {
         objectError(error, setError, enqueueSnackbar);
       }
     }
-
-    console.log(obj);
   };
 
   return (

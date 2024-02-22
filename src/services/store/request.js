@@ -470,6 +470,15 @@ export const jsonServerAPI = createApi({
       }),
       invalidatesTags: ["Supplier"],
     }),
+    importSupplier: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/import/supplier`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["Supplier"],
+    }),
     updateSupplier: builder.mutation({
       transformResponse: (response) => response,
       query: (payload) => ({
@@ -551,6 +560,7 @@ export const {
 
   useSupplierQuery,
   useCreateSupplierMutation,
+  useImportSupplierMutation,
   useUpdateSupplierMutation,
   useArchiveSupplierMutation,
 } = jsonServerAPI;

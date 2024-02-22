@@ -33,6 +33,7 @@ import Lottie from "lottie-react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   useArchiveSupplierMutation,
+  useImportSupplierMutation,
   useSupplierQuery,
 } from "../../../services/store/request";
 
@@ -59,15 +60,24 @@ import AppPrompt from "../../../components/customs/AppPrompt";
 import {
   resetMenu,
   setCreateMenu,
+  setImportError,
+  setImportMenu,
   setMenuData,
   setUpdateMenu,
 } from "../../../services/slice/menuSlice";
-import { generateExcel } from "../../../services/functions/exportFile";
-import SupplierTypeModal from "../../../components/customs/modal/SupplierTypeModal";
+import { generateExcelwSupplier } from "../../../services/functions/exportFile";
 import SupplierModal from "../../../components/customs/modal/SupplierModal";
+import ImportModal from "../../../components/customs/modal/ImportModal";
 
 const Supplier = () => {
-  const excelItems = ["ID", "CODE", "NAME", "CREATED AT", "DATE MODIFIED"];
+  const excelItems = [
+    "ID",
+    "COMPANY",
+    "ADDRESS",
+    "TIN",
+    "PROPRIETOR",
+    "DATE MODIFIED",
+  ];
   const [anchorE1, setAnchorE1] = useState(null);
   const { enqueueSnackbar } = useSnackbar();
   const dispatch = useDispatch();
@@ -75,6 +85,7 @@ const Supplier = () => {
   const openWarning = useSelector((state) => state.prompt.warning);
   const createMenu = useSelector((state) => state.menu.createMenu);
   const updateMenu = useSelector((state) => state.menu.updateMenu);
+  const importMenu = useSelector((state) => state.menu.importMenu);
 
   const {
     params,
@@ -87,6 +98,9 @@ const Supplier = () => {
 
   const [archiveSupplier, { isLoading: archiveLoading }] =
     useArchiveSupplierMutation();
+
+  const [importSupplier, { isLoading: loadingImport }] =
+    useImportSupplierMutation();
 
   const {
     data: supplier,
@@ -103,6 +117,18 @@ const Supplier = () => {
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
+      singleError(error, enqueueSnackbar);
+    }
+  };
+
+  const importCompanyHandler = async (submitData) => {
+    try {
+      const res = await importSupplier(submitData).unwrap();
+      enqueueSnackbar(res?.message, { variant: "success" });
+      dispatch(resetMenu());
+      dispatch(resetPrompt());
+    } catch (error) {
+      dispatch(setImportError(error?.data?.errors));
       singleError(error, enqueueSnackbar);
     }
   };
@@ -153,7 +179,7 @@ const Supplier = () => {
                         className="button-export-supplier"
                         startIcon={<FileUploadOutlinedIcon />}
                         onClick={() =>
-                          generateExcel(
+                          generateExcelwSupplier(
                             "Supplier",
                             supplier?.result?.data,
                             excelItems
@@ -167,6 +193,7 @@ const Supplier = () => {
                         color="secondary"
                         className="button-export-supplier"
                         startIcon={<FileDownloadOutlinedIcon />}
+                        onClick={() => dispatch(setImportMenu(true))}
                       >
                         Import
                       </Button>
@@ -371,6 +398,16 @@ const Supplier = () => {
 
       <Dialog open={updateMenu} className="supplier-modal-dialog">
         <SupplierModal supplierData={menuData} update />
+      </Dialog>
+
+      <Dialog open={importMenu}>
+        <ImportModal
+          title="Supplier"
+          importData={importCompanyHandler}
+          isLoading={loadingImport}
+          supplier
+          withTag
+        />
       </Dialog>
 
       <Dialog open={openWarning}>

@@ -30,12 +30,19 @@ import {
 } from "../../../services/slice/menuSlice";
 import {
   readExcelFile,
+  readExcelFileSupplier,
   readExcelFilewTag,
 } from "../../../services/functions/excelRead";
 import { useRef } from "react";
 import Lottie from "lottie-react";
 
-const ImportModal = ({ title, importData, isLoading, withTag = false }) => {
+const ImportModal = ({
+  title,
+  importData,
+  isLoading,
+  withTag = false,
+  supplier = false,
+}) => {
   const dispatch = useDispatch();
   const hasDataImport = useSelector((state) => state.menu.importHasData);
   const importTitle = useSelector((state) => state.menu.importTitle);
@@ -86,35 +93,61 @@ const ImportModal = ({ title, importData, isLoading, withTag = false }) => {
     e.preventDefault();
     const files = e?.dataTransfer?.files;
     dispatch(setImportLoading(true));
-    try {
-      const read = await readExcelFilewTag(files);
-      dispatch(setImportHasData(true));
-      dispatch(setImportTitle(files[0]?.name));
-      dispatch(setMenuData(read));
-    } catch (error) {
-      dispatch(setImportHasData("error"));
-      dispatch(setImportTitle("error"));
+    if (supplier) {
+      try {
+        const read = await readExcelFileSupplier(files);
+        dispatch(setImportHasData(true));
+        dispatch(setImportTitle(files[0]?.name));
+        dispatch(setMenuData(read));
+      } catch (error) {
+        dispatch(setImportHasData("error"));
+        dispatch(setImportTitle("error"));
+      }
+      dispatch(setImportLoading(false));
+    } else {
+      try {
+        const read = await readExcelFilewTag(files);
+        dispatch(setImportHasData(true));
+        dispatch(setImportTitle(files[0]?.name));
+        dispatch(setMenuData(read));
+      } catch (error) {
+        dispatch(setImportHasData("error"));
+        dispatch(setImportTitle("error"));
+      }
+      dispatch(setImportLoading(false));
     }
-    dispatch(setImportLoading(false));
   };
 
   const handleInputFilewTag = async (e) => {
     dispatch(setImportError(null));
-
     const filesArray = Array.from(e.target.files);
-
-    try {
-      dispatch(setImportLoading(true));
-      const read = await readExcelFilewTag(filesArray);
-      dispatch(setImportHasData(true));
-      dispatch(setImportTitle(filesArray[0]?.name));
-      dispatch(setMenuData(read));
-      fileInputRef.current.value = null;
-    } catch (error) {
-      dispatch(setImportHasData("error"));
-      dispatch(setImportTitle("error"));
+    if (supplier) {
+      try {
+        dispatch(setImportLoading(true));
+        const read = await readExcelFileSupplier(filesArray);
+        dispatch(setImportHasData(true));
+        dispatch(setImportTitle(filesArray[0]?.name));
+        dispatch(setMenuData(read));
+        fileInputRef.current.value = null;
+      } catch (error) {
+        dispatch(setImportHasData("error"));
+        dispatch(setImportTitle("error"));
+      }
+      dispatch(setImportLoading(false));
+    } else {
+      try {
+        dispatch(setImportLoading(true));
+        const read = await readExcelFilewTag(filesArray);
+        dispatch(setImportHasData(true));
+        dispatch(setImportTitle(filesArray[0]?.name));
+        dispatch(setMenuData(read));
+        fileInputRef.current.value = null;
+      } catch (error) {
+        dispatch(setImportHasData("error"));
+        dispatch(setImportTitle("error"));
+      }
+      dispatch(setImportLoading(false));
     }
-    dispatch(setImportLoading(false));
   };
 
   const handleDragOver = (e) => {
