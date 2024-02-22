@@ -8,6 +8,7 @@ import {
   ListItemIcon,
   Menu,
   MenuItem,
+  Stack,
   Table,
   TableBody,
   TableCell,
@@ -23,6 +24,8 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   resetMenu,
   setCreateMenu,
+  setImportError,
+  setImportMenu,
   setMenuData,
   setUpdateMenu,
   setViewMenu,
@@ -43,12 +46,14 @@ import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
 import ModeEditOutlineOutlinedIcon from "@mui/icons-material/ModeEditOutlineOutlined";
 import SettingsBackupRestoreOutlinedIcon from "@mui/icons-material/SettingsBackupRestoreOutlined";
 import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
-import GetAppOutlinedIcon from "@mui/icons-material/GetAppOutlined";
+import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
+import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 
 import "../../../components/styles/Department.scss";
 import {
   useArchiveDepartmentMutation,
   useDepartmentQuery,
+  useImportDepartmentMutation,
 } from "../../../services/store/request";
 import Lottie from "lottie-react";
 import moment from "moment";
@@ -58,8 +63,19 @@ import AppPrompt from "../../../components/customs/AppPrompt";
 import DepartmentModal from "../../../components/customs/modal/DepartmentModal";
 import { useSnackbar } from "notistack";
 import { singleError } from "../../../services/functions/errorResponse";
+import { generateExcelwTag } from "../../../services/functions/exportFile";
+import ImportModal from "../../../components/customs/modal/ImportModal";
 
 const Department = () => {
+  const excelItems = ["ID", "CODE", "NAME", "CREATED AT", "DATE MODIFIED"];
+  const locations = [
+    "ID",
+    "Department ID",
+    "Location ID",
+    "Location Code",
+    "Updated At",
+  ];
+
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const [anchorE1, setAnchorE1] = useState(null);
@@ -69,6 +85,7 @@ const Department = () => {
   const createMenu = useSelector((state) => state.menu.createMenu);
   const updateMenu = useSelector((state) => state.menu.updateMenu);
   const viewMenu = useSelector((state) => state.menu.viewMenu);
+  const importMenu = useSelector((state) => state.menu.importMenu);
 
   const {
     params,
@@ -87,6 +104,9 @@ const Department = () => {
     status,
   } = useDepartmentQuery(params);
 
+  const [importDepartment, { isLoading: loadingImport }] =
+    useImportDepartmentMutation();
+
   const [archiveDepartment, { isLoading: archiveLoading }] =
     useArchiveDepartmentMutation();
 
@@ -97,6 +117,18 @@ const Department = () => {
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
+      singleError(error, enqueueSnackbar);
+    }
+  };
+
+  const importCompanyHandler = async (submitData) => {
+    try {
+      const res = await importDepartment(submitData).unwrap();
+      enqueueSnackbar(res?.message, { variant: "success" });
+      dispatch(resetMenu());
+      dispatch(resetPrompt());
+    } catch (error) {
+      dispatch(setImportError(error?.data?.errors));
       singleError(error, enqueueSnackbar);
     }
   };
@@ -128,18 +160,47 @@ const Department = () => {
           <Table stickyHeader>
             <TableHead>
               <TableRow className="table-header1-department">
-                <TableCell colSpan={5}>
-                  <FormControlLabel
-                    className="check-box-archive-department"
-                    control={<Checkbox color="secondary" />}
-                    label="Archive"
-                    checked={params?.status === "inactive"}
-                    onChange={() =>
-                      onStatusChange(
-                        params?.status === "active" ? "inactive" : "active"
-                      )
-                    }
-                  />
+                <TableCell colSpan={7}>
+                  <Stack flexDirection={"row"} justifyContent="space-between">
+                    <FormControlLabel
+                      className="check-box-archive-department"
+                      control={<Checkbox color="secondary" />}
+                      label="Archive"
+                      checked={params?.status === "inactive"}
+                      onChange={() =>
+                        onStatusChange(
+                          params?.status === "active" ? "inactive" : "active"
+                        )
+                      }
+                    />
+                    <Box>
+                      <Button
+                        variant="contained"
+                        className="button-export-department"
+                        startIcon={<FileUploadOutlinedIcon />}
+                        onClick={() =>
+                          generateExcelwTag(
+                            "Department",
+                            department?.result?.data,
+                            excelItems,
+                            locations,
+                            "Tagged Locations"
+                          )
+                        }
+                      >
+                        Export
+                      </Button>
+                      <Button
+                        variant="contained"
+                        color="secondary"
+                        className="button-export-department"
+                        startIcon={<FileDownloadOutlinedIcon />}
+                        onClick={() => dispatch(setImportMenu(true))}
+                      >
+                        Import
+                      </Button>
+                    </Box>
+                  </Stack>
                 </TableCell>
               </TableRow>
               <TableRow className="table-header-department">
@@ -270,21 +331,11 @@ const Department = () => {
                 ))
               )}
             </TableBody>
+
             {!isFetching && !isError && (
               <TableFooter style={{ position: "sticky", bottom: 0 }}>
                 <TableRow className="table-footer-department">
-                  <TableCell colSpan={2}>
-                    <Button
-                      variant="contained"
-                      color="warning"
-                      className="button-export-department"
-                      startIcon={<GetAppOutlinedIcon />}
-                      // onClick={() => dispatch(setCreateMenu(true))}
-                    >
-                      Export
-                    </Button>
-                  </TableCell>
-                  <TableCell colSpan={5}>
+                  <TableCell colSpan={7}>
                     <TablePagination
                       rowsPerPageOptions={[5, 10, 25, 100]}
                       count={department?.result?.total || 0}
@@ -357,6 +408,15 @@ const Department = () => {
 
       <Dialog open={viewMenu}>
         <DepartmentModal departmentData={menuData} view />
+      </Dialog>
+
+      <Dialog open={importMenu}>
+        <ImportModal
+          title="Department"
+          importData={importCompanyHandler}
+          isLoading={loadingImport}
+          withTag
+        />
       </Dialog>
 
       <Dialog open={openWarning}>

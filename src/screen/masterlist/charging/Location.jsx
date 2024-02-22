@@ -8,6 +8,7 @@ import {
   ListItemIcon,
   Menu,
   MenuItem,
+  Stack,
   Table,
   TableBody,
   TableCell,
@@ -37,7 +38,8 @@ import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
 import ModeEditOutlineOutlinedIcon from "@mui/icons-material/ModeEditOutlineOutlined";
 import SettingsBackupRestoreOutlinedIcon from "@mui/icons-material/SettingsBackupRestoreOutlined";
 import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
-import GetAppOutlinedIcon from "@mui/icons-material/GetAppOutlined";
+import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
+import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 
 import Lottie from "lottie-react";
 import moment from "moment";
@@ -49,17 +51,23 @@ import { resetPrompt, setWarning } from "../../../services/slice/promptSlice";
 import {
   resetMenu,
   setCreateMenu,
+  setImportError,
+  setImportMenu,
   setMenuData,
   setUpdateMenu,
 } from "../../../services/slice/menuSlice";
 import {
   useArchiveLocationMutation,
+  useImportLocationMutation,
   useLocationQuery,
 } from "../../../services/store/request";
 import LocationModal from "../../../components/customs/modal/LocationModal";
 import { singleError } from "../../../services/functions/errorResponse";
+import { generateExcel } from "../../../services/functions/exportFile";
+import ImportModal from "../../../components/customs/modal/ImportModal";
 
 const Location = () => {
+  const excelItems = ["ID", "CODE", "NAME", "CREATED AT", "DATE MODIFIED"];
   const [anchorE1, setAnchorE1] = useState(null);
   const { enqueueSnackbar } = useSnackbar();
   const dispatch = useDispatch();
@@ -67,9 +75,13 @@ const Location = () => {
   const openWarning = useSelector((state) => state.prompt.warning);
   const createMenu = useSelector((state) => state.menu.createMenu);
   const updateMenu = useSelector((state) => state.menu.updateMenu);
+  const importMenu = useSelector((state) => state.menu.importMenu);
 
   const [archiveLocation, { isLoading: archiveLoading }] =
     useArchiveLocationMutation();
+
+  const [importLocation, { isLoading: loadingImport }] =
+    useImportLocationMutation();
 
   const {
     params,
@@ -95,6 +107,18 @@ const Location = () => {
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
+      singleError(error, enqueueSnackbar);
+    }
+  };
+
+  const importCompanyHandler = async (submitData) => {
+    try {
+      const res = await importLocation(submitData).unwrap();
+      enqueueSnackbar(res?.message, { variant: "success" });
+      dispatch(resetMenu());
+      dispatch(resetPrompt());
+    } catch (error) {
+      dispatch(setImportError(error?.data?.errors));
       singleError(error, enqueueSnackbar);
     }
   };
@@ -126,18 +150,45 @@ const Location = () => {
           <Table stickyHeader>
             <TableHead>
               <TableRow className="table-header1-location">
-                <TableCell colSpan={5}>
-                  <FormControlLabel
-                    className="check-box-archive-location"
-                    control={<Checkbox color="secondary" />}
-                    label="Archive"
-                    checked={params?.status === "inactive"}
-                    onChange={() =>
-                      onStatusChange(
-                        params?.status === "active" ? "inactive" : "active"
-                      )
-                    }
-                  />
+                <TableCell colSpan={6}>
+                  <Stack flexDirection={"row"} justifyContent="space-between">
+                    <FormControlLabel
+                      className="check-box-archive-location"
+                      control={<Checkbox color="secondary" />}
+                      label="Archive"
+                      checked={params?.status === "inactive"}
+                      onChange={() =>
+                        onStatusChange(
+                          params?.status === "active" ? "inactive" : "active"
+                        )
+                      }
+                    />
+                    <Box>
+                      <Button
+                        variant="contained"
+                        className="button-export-location"
+                        startIcon={<FileUploadOutlinedIcon />}
+                        onClick={() =>
+                          generateExcel(
+                            "Location",
+                            location?.result?.data,
+                            excelItems
+                          )
+                        }
+                      >
+                        Export
+                      </Button>
+                      <Button
+                        variant="contained"
+                        color="secondary"
+                        className="button-export-location"
+                        startIcon={<FileDownloadOutlinedIcon />}
+                        onClick={() => dispatch(setImportMenu(true))}
+                      >
+                        Import
+                      </Button>
+                    </Box>
+                  </Stack>
                 </TableCell>
               </TableRow>
               <TableRow className="table-header-location">
@@ -254,21 +305,11 @@ const Location = () => {
                 ))
               )}
             </TableBody>
+
             {!isFetching && !isError && (
               <TableFooter style={{ position: "sticky", bottom: 0 }}>
                 <TableRow className="table-footer-location">
-                  <TableCell colSpan={2}>
-                    <Button
-                      variant="contained"
-                      color="warning"
-                      className="button-export-location"
-                      startIcon={<GetAppOutlinedIcon />}
-                      // onClick={() => dispatch(setCreateMenu(true))}
-                    >
-                      Export
-                    </Button>
-                  </TableCell>
-                  <TableCell colSpan={5}>
+                  <TableCell colSpan={6}>
                     <TablePagination
                       rowsPerPageOptions={[5, 10, 25, 100]}
                       count={location?.result?.total || 0}
@@ -327,9 +368,9 @@ const Location = () => {
         </MenuItem>
       </Menu>
 
-      {/* <Dialog open={archiveLoading} className="loading-role-create">
+      <Dialog open={archiveLoading} className="loading-location-create">
         <Lottie animationData={loadingLight} loop={archiveLoading} />
-      </Dialog> */}
+      </Dialog>
 
       <Dialog open={createMenu}>
         <LocationModal />
@@ -337,6 +378,14 @@ const Location = () => {
 
       <Dialog open={updateMenu}>
         <LocationModal locationData={menuData} update />
+      </Dialog>
+
+      <Dialog open={importMenu}>
+        <ImportModal
+          title="Location"
+          importData={importCompanyHandler}
+          isLoading={loadingImport}
+        />
       </Dialog>
 
       <Dialog open={openWarning}>

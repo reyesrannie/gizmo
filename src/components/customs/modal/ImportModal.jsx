@@ -28,11 +28,14 @@ import {
   setImportTitle,
   setMenuData,
 } from "../../../services/slice/menuSlice";
-import { readExcelFile } from "../../../services/functions/excelRead";
+import {
+  readExcelFile,
+  readExcelFilewTag,
+} from "../../../services/functions/excelRead";
 import { useRef } from "react";
 import Lottie from "lottie-react";
 
-const ImportModal = ({ title, importData, isLoading }) => {
+const ImportModal = ({ title, importData, isLoading, withTag = false }) => {
   const dispatch = useDispatch();
   const hasDataImport = useSelector((state) => state.menu.importHasData);
   const importTitle = useSelector((state) => state.menu.importTitle);
@@ -78,6 +81,42 @@ const ImportModal = ({ title, importData, isLoading }) => {
     dispatch(setImportLoading(false));
   };
 
+  const dropCheckwTag = async (e) => {
+    dispatch(setImportError(null));
+    e.preventDefault();
+    const files = e?.dataTransfer?.files;
+    dispatch(setImportLoading(true));
+    try {
+      const read = await readExcelFilewTag(files);
+      dispatch(setImportHasData(true));
+      dispatch(setImportTitle(files[0]?.name));
+      dispatch(setMenuData(read));
+    } catch (error) {
+      dispatch(setImportHasData("error"));
+      dispatch(setImportTitle("error"));
+    }
+    dispatch(setImportLoading(false));
+  };
+
+  const handleInputFilewTag = async (e) => {
+    dispatch(setImportError(null));
+
+    const filesArray = Array.from(e.target.files);
+
+    try {
+      dispatch(setImportLoading(true));
+      const read = await readExcelFilewTag(filesArray);
+      dispatch(setImportHasData(true));
+      dispatch(setImportTitle(filesArray[0]?.name));
+      dispatch(setMenuData(read));
+      fileInputRef.current.value = null;
+    } catch (error) {
+      dispatch(setImportHasData("error"));
+      dispatch(setImportTitle("error"));
+    }
+    dispatch(setImportLoading(false));
+  };
+
   const handleDragOver = (e) => {
     e.preventDefault();
   };
@@ -95,7 +134,7 @@ const ImportModal = ({ title, importData, isLoading }) => {
         </Typography>
         <Box
           className="import-drop-or-load"
-          onDrop={dropCheck}
+          onDrop={withTag ? dropCheckwTag : dropCheck}
           onDragOver={handleDragOver}
           onClick={() => fileInputRef?.current?.click()}
         >
@@ -124,7 +163,7 @@ const ImportModal = ({ title, importData, isLoading }) => {
             type="file"
             ref={fileInputRef}
             style={{ display: "none" }}
-            onChange={handleInputFile}
+            onChange={withTag ? handleInputFilewTag : handleInputFile}
           />
         </Box>
       </Box>
@@ -163,7 +202,12 @@ const ImportModal = ({ title, importData, isLoading }) => {
           variant="contained"
           color="warning"
           className="button-import-modal"
-          disabled={!hasDataImport || !importTitle || Boolean(importError)}
+          disabled={
+            !hasDataImport ||
+            !importTitle ||
+            Boolean(importError) ||
+            hasDataImport === "error"
+          }
           onClick={handleSubmit}
         >
           Upload

@@ -14,6 +14,7 @@ import {
   ListItemIcon,
   Menu,
   MenuItem,
+  Stack,
   Table,
   TableBody,
   TableCell,
@@ -32,6 +33,7 @@ import Lottie from "lottie-react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   useArchiveVATMutation,
+  useImportVATMutation,
   useVatQuery,
 } from "../../../services/store/request";
 
@@ -58,11 +60,14 @@ import AppPrompt from "../../../components/customs/AppPrompt";
 import {
   resetMenu,
   setCreateMenu,
+  setImportError,
+  setImportMenu,
   setMenuData,
   setUpdateMenu,
 } from "../../../services/slice/menuSlice";
-import generateExcel from "../../../services/functions/exportFile";
+import { generateExcel } from "../../../services/functions/exportFile";
 import VatModal from "../../../components/customs/modal/VatModal";
+import ImportModal from "../../../components/customs/modal/ImportModal";
 
 const Vat = () => {
   const excelItems = ["ID", "CODE", "NAME", "CREATED AT", "DATE MODIFIED"];
@@ -73,6 +78,7 @@ const Vat = () => {
   const openWarning = useSelector((state) => state.prompt.warning);
   const createMenu = useSelector((state) => state.menu.createMenu);
   const updateMenu = useSelector((state) => state.menu.updateMenu);
+  const importMenu = useSelector((state) => state.menu.importMenu);
 
   const {
     params,
@@ -84,6 +90,7 @@ const Vat = () => {
   } = useParamsHook();
 
   const [archiveVat, { isLoading: archiveLoading }] = useArchiveVATMutation();
+  const [importVat, { isLoading: loadingImport }] = useImportVATMutation();
 
   const {
     data: vat,
@@ -100,6 +107,18 @@ const Vat = () => {
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
+      singleError(error, enqueueSnackbar);
+    }
+  };
+
+  const importCompanyHandler = async (submitData) => {
+    try {
+      const res = await importVat(submitData).unwrap();
+      enqueueSnackbar(res?.message, { variant: "success" });
+      dispatch(resetMenu());
+      dispatch(resetPrompt());
+    } catch (error) {
+      dispatch(setImportError(error?.data?.errors));
       singleError(error, enqueueSnackbar);
     }
   };
@@ -129,38 +148,41 @@ const Vat = () => {
           <Table stickyHeader>
             <TableHead>
               <TableRow className="table-header1-vat">
-                <TableCell colSpan={3}>
-                  <FormControlLabel
-                    className="check-box-archive-vat"
-                    control={<Checkbox color="secondary" />}
-                    label="Archive"
-                    checked={params?.status === "inactive"}
-                    onChange={() =>
-                      onStatusChange(
-                        params?.status === "active" ? "inactive" : "active"
-                      )
-                    }
-                  />
-                </TableCell>
-                <TableCell colSpan={3} align="right">
-                  <Button
-                    variant="contained"
-                    className="button-export-vat"
-                    startIcon={<FileUploadOutlinedIcon />}
-                    onClick={() =>
-                      generateExcel("Vat", vat?.result?.data, excelItems)
-                    }
-                  >
-                    Export
-                  </Button>
-                  <Button
-                    variant="contained"
-                    color="secondary"
-                    className="button-export-vat"
-                    startIcon={<FileDownloadOutlinedIcon />}
-                  >
-                    Import
-                  </Button>
+                <TableCell colSpan={6}>
+                  <Stack flexDirection={"row"} justifyContent="space-between">
+                    <FormControlLabel
+                      className="check-box-archive-vat"
+                      control={<Checkbox color="secondary" />}
+                      label="Archive"
+                      checked={params?.status === "inactive"}
+                      onChange={() =>
+                        onStatusChange(
+                          params?.status === "active" ? "inactive" : "active"
+                        )
+                      }
+                    />
+                    <Box>
+                      <Button
+                        variant="contained"
+                        className="button-export-vat"
+                        startIcon={<FileUploadOutlinedIcon />}
+                        onClick={() =>
+                          generateExcel("Vat", vat?.result?.data, excelItems)
+                        }
+                      >
+                        Export
+                      </Button>
+                      <Button
+                        variant="contained"
+                        color="secondary"
+                        className="button-export-vat"
+                        startIcon={<FileDownloadOutlinedIcon />}
+                        onClick={() => dispatch(setImportMenu(true))}
+                      >
+                        Import
+                      </Button>
+                    </Box>
+                  </Stack>
                 </TableCell>
               </TableRow>
               <TableRow className="table-header-vat">
@@ -341,6 +363,14 @@ const Vat = () => {
 
       <Dialog open={updateMenu}>
         <VatModal vatData={menuData} update />
+      </Dialog>
+
+      <Dialog open={importMenu}>
+        <ImportModal
+          title="Vat"
+          importData={importCompanyHandler}
+          isLoading={loadingImport}
+        />
       </Dialog>
 
       <Dialog open={openWarning}>

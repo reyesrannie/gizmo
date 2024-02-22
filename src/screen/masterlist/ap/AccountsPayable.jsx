@@ -8,6 +8,7 @@ import {
   ListItemIcon,
   Menu,
   MenuItem,
+  Stack,
   Table,
   TableBody,
   TableCell,
@@ -25,6 +26,8 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   resetMenu,
   setCreateMenu,
+  setImportError,
+  setImportMenu,
   setMenuData,
   setUpdateMenu,
 } from "../../../services/slice/menuSlice";
@@ -50,15 +53,22 @@ import ModeEditOutlineOutlinedIcon from "@mui/icons-material/ModeEditOutlineOutl
 import SettingsBackupRestoreOutlinedIcon from "@mui/icons-material/SettingsBackupRestoreOutlined";
 import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
 import GetAppOutlinedIcon from "@mui/icons-material/GetAppOutlined";
+import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
+import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 
 import useParamsHook from "../../../services/hooks/useParamsHook";
 import {
   useApQuery,
   useArchiveAPMutation,
+  useImportAPMutation,
 } from "../../../services/store/request";
 import AccountsPayableModal from "../../../components/customs/modal/AccountsPayableModal";
+import { generateExcel } from "../../../services/functions/exportFile";
+import ImportModal from "../../../components/customs/modal/ImportModal";
 
 const AccountsPayable = () => {
+  const excelItems = ["ID", "CODE", "NAME", "CREATED AT", "DATE MODIFIED"];
+
   const [anchorE1, setAnchorE1] = useState(null);
   const { enqueueSnackbar } = useSnackbar();
   const dispatch = useDispatch();
@@ -66,6 +76,7 @@ const AccountsPayable = () => {
   const openWarning = useSelector((state) => state.prompt.warning);
   const createMenu = useSelector((state) => state.menu.createMenu);
   const updateMenu = useSelector((state) => state.menu.updateMenu);
+  const importMenu = useSelector((state) => state.menu.importMenu);
 
   const {
     params,
@@ -76,8 +87,9 @@ const AccountsPayable = () => {
     onSortTable,
   } = useParamsHook();
 
-  const [archiveCompany, { isLoading: archiveLoading }] =
-    useArchiveAPMutation();
+  const [archiveAp, { isLoading: archiveLoading }] = useArchiveAPMutation();
+
+  const [importAp, { isLoading: loadingImport }] = useImportAPMutation();
 
   const {
     data: ap,
@@ -89,11 +101,28 @@ const AccountsPayable = () => {
 
   const handleArchive = async () => {
     try {
-      const res = await archiveCompany(menuData).unwrap();
+      const res = await archiveAp(menuData).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
+      singleError(error, enqueueSnackbar);
+    }
+  };
+
+  const importCompanyHandler = async (submitData) => {
+    const obj = submitData?.map((items) => ({
+      company_code: items.code,
+      description: items.name,
+    }));
+
+    try {
+      const res = await importAp(obj).unwrap();
+      enqueueSnackbar(res?.message, { variant: "success" });
+      dispatch(resetMenu());
+      dispatch(resetPrompt());
+    } catch (error) {
+      dispatch(setImportError(error?.data?.errors));
       singleError(error, enqueueSnackbar);
     }
   };
@@ -125,18 +154,46 @@ const AccountsPayable = () => {
           <Table stickyHeader>
             <TableHead>
               <TableRow className="table-header1-ap">
-                <TableCell colSpan={5}>
-                  <FormControlLabel
-                    className="check-box-archive-ap"
-                    control={<Checkbox color="secondary" />}
-                    label="Archive"
-                    checked={params?.status === "inactive"}
-                    onChange={() =>
-                      onStatusChange(
-                        params?.status === "active" ? "inactive" : "active"
-                      )
-                    }
-                  />
+                <TableCell colSpan={6}>
+                  <Stack flexDirection={"row"} justifyContent="space-between">
+                    <FormControlLabel
+                      className="check-box-archive-ap"
+                      control={<Checkbox color="secondary" />}
+                      label="Archive"
+                      checked={params?.status === "inactive"}
+                      onChange={() =>
+                        onStatusChange(
+                          params?.status === "active" ? "inactive" : "active"
+                        )
+                      }
+                    />
+                    <Box>
+                      <Button
+                        variant="contained"
+                        className="button-export-ap"
+                        startIcon={<FileUploadOutlinedIcon />}
+                        onClick={() =>
+                          generateExcel(
+                            "Accounts Payable",
+                            ap?.result?.data,
+                            excelItems,
+                            "AP"
+                          )
+                        }
+                      >
+                        Export
+                      </Button>
+                      <Button
+                        variant="contained"
+                        color="secondary"
+                        className="button-export-ap"
+                        startIcon={<FileDownloadOutlinedIcon />}
+                        onClick={() => dispatch(setImportMenu(true))}
+                      >
+                        Import
+                      </Button>
+                    </Box>
+                  </Stack>
                 </TableCell>
               </TableRow>
               <TableRow className="table-header-ap">
@@ -247,21 +304,11 @@ const AccountsPayable = () => {
                 ))
               )}
             </TableBody>
+
             {!isFetching && !isError && (
               <TableFooter style={{ position: "sticky", bottom: 0 }}>
                 <TableRow className="table-footer-ap">
-                  <TableCell colSpan={2}>
-                    <Button
-                      variant="contained"
-                      color="warning"
-                      className="button-export-ap"
-                      startIcon={<GetAppOutlinedIcon />}
-                      // onClick={() => dispatch(setCreateMenu(true))}
-                    >
-                      Export
-                    </Button>
-                  </TableCell>
-                  <TableCell colSpan={5}>
+                  <TableCell colSpan={6}>
                     <TablePagination
                       rowsPerPageOptions={[5, 10, 25, 100]}
                       count={ap?.result?.total || 0}
@@ -328,6 +375,14 @@ const AccountsPayable = () => {
 
       <Dialog open={updateMenu}>
         <AccountsPayableModal apData={menuData} update />
+      </Dialog>
+
+      <Dialog open={importMenu}>
+        <ImportModal
+          title="Accounts Payable"
+          importData={importCompanyHandler}
+          isLoading={loadingImport}
+        />
       </Dialog>
 
       <Dialog open={openWarning}>

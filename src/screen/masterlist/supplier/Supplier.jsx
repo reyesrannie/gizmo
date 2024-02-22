@@ -62,7 +62,7 @@ import {
   setMenuData,
   setUpdateMenu,
 } from "../../../services/slice/menuSlice";
-import generateExcel from "../../../services/functions/exportFile";
+import { generateExcel } from "../../../services/functions/exportFile";
 import SupplierTypeModal from "../../../components/customs/modal/SupplierTypeModal";
 import SupplierModal from "../../../components/customs/modal/SupplierModal";
 

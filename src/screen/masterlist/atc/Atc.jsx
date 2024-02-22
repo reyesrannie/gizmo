@@ -14,6 +14,7 @@ import {
   ListItemIcon,
   Menu,
   MenuItem,
+  Stack,
   Table,
   TableBody,
   TableCell,
@@ -33,6 +34,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   useArchiveATCMutation,
   useAtcQuery,
+  useImportATCMutation,
 } from "../../../services/store/request";
 
 import AddToPhotosOutlinedIcon from "@mui/icons-material/AddToPhotosOutlined";
@@ -58,11 +60,14 @@ import AppPrompt from "../../../components/customs/AppPrompt";
 import {
   resetMenu,
   setCreateMenu,
+  setImportError,
+  setImportMenu,
   setMenuData,
   setUpdateMenu,
 } from "../../../services/slice/menuSlice";
-import generateExcel from "../../../services/functions/exportFile";
+import { generateExcel } from "../../../services/functions/exportFile";
 import AtcModal from "../../../components/customs/modal/AtcModal";
+import ImportModal from "../../../components/customs/modal/ImportModal";
 
 const Atc = () => {
   const excelItems = ["ID", "CODE", "NAME", "CREATED AT", "DATE MODIFIED"];
@@ -73,6 +78,7 @@ const Atc = () => {
   const openWarning = useSelector((state) => state.prompt.warning);
   const createMenu = useSelector((state) => state.menu.createMenu);
   const updateMenu = useSelector((state) => state.menu.updateMenu);
+  const importMenu = useSelector((state) => state.menu.importMenu);
 
   const {
     params,
@@ -84,6 +90,7 @@ const Atc = () => {
   } = useParamsHook();
 
   const [archiveAtc, { isLoading: archiveLoading }] = useArchiveATCMutation();
+  const [importATC, { isLoading: loadingImport }] = useImportATCMutation();
 
   const {
     data: atc,
@@ -100,6 +107,18 @@ const Atc = () => {
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
+      singleError(error, enqueueSnackbar);
+    }
+  };
+
+  const importCompanyHandler = async (submitData) => {
+    try {
+      const res = await importATC(submitData).unwrap();
+      enqueueSnackbar(res?.message, { variant: "success" });
+      dispatch(resetMenu());
+      dispatch(resetPrompt());
+    } catch (error) {
+      dispatch(setImportError(error?.data?.errors));
       singleError(error, enqueueSnackbar);
     }
   };
@@ -129,38 +148,41 @@ const Atc = () => {
           <Table stickyHeader>
             <TableHead>
               <TableRow className="table-header1-atc">
-                <TableCell colSpan={3}>
-                  <FormControlLabel
-                    className="check-box-archive-atc"
-                    control={<Checkbox color="secondary" />}
-                    label="Archive"
-                    checked={params?.status === "inactive"}
-                    onChange={() =>
-                      onStatusChange(
-                        params?.status === "active" ? "inactive" : "active"
-                      )
-                    }
-                  />
-                </TableCell>
-                <TableCell colSpan={3} align="right">
-                  <Button
-                    variant="contained"
-                    className="button-export-atc"
-                    startIcon={<FileUploadOutlinedIcon />}
-                    onClick={() =>
-                      generateExcel("Atc", atc?.result?.data, excelItems)
-                    }
-                  >
-                    Export
-                  </Button>
-                  <Button
-                    variant="contained"
-                    color="secondary"
-                    className="button-export-atc"
-                    startIcon={<FileDownloadOutlinedIcon />}
-                  >
-                    Import
-                  </Button>
+                <TableCell colSpan={6}>
+                  <Stack flexDirection={"row"} justifyContent="space-between">
+                    <FormControlLabel
+                      className="check-box-archive-atc"
+                      control={<Checkbox color="secondary" />}
+                      label="Archive"
+                      checked={params?.status === "inactive"}
+                      onChange={() =>
+                        onStatusChange(
+                          params?.status === "active" ? "inactive" : "active"
+                        )
+                      }
+                    />
+                    <Box>
+                      <Button
+                        variant="contained"
+                        className="button-export-atc"
+                        startIcon={<FileUploadOutlinedIcon />}
+                        onClick={() =>
+                          generateExcel("Atc", atc?.result?.data, excelItems)
+                        }
+                      >
+                        Export
+                      </Button>
+                      <Button
+                        variant="contained"
+                        color="secondary"
+                        className="button-export-atc"
+                        startIcon={<FileDownloadOutlinedIcon />}
+                        onClick={() => dispatch(setImportMenu(true))}
+                      >
+                        Import
+                      </Button>
+                    </Box>
+                  </Stack>
                 </TableCell>
               </TableRow>
               <TableRow className="table-header-atc">
@@ -341,6 +363,14 @@ const Atc = () => {
 
       <Dialog open={updateMenu}>
         <AtcModal atcData={menuData} update />
+      </Dialog>
+
+      <Dialog open={importMenu}>
+        <ImportModal
+          title="ATC"
+          importData={importCompanyHandler}
+          isLoading={loadingImport}
+        />
       </Dialog>
 
       <Dialog open={openWarning}>

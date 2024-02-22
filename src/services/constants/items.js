@@ -288,6 +288,10 @@ const routes = [
         name: "Supplier Type",
       },
       {
+        path: "/masterlist/vat",
+        name: "VAT",
+      },
+      {
         path: "/masterlist/supplier",
         name: "Supplier",
       },

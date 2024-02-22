@@ -42,7 +42,6 @@ import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
 import ModeEditOutlineOutlinedIcon from "@mui/icons-material/ModeEditOutlineOutlined";
 import SettingsBackupRestoreOutlinedIcon from "@mui/icons-material/SettingsBackupRestoreOutlined";
 import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
-import GetAppOutlinedIcon from "@mui/icons-material/GetAppOutlined";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 
@@ -67,7 +66,7 @@ import {
   setUpdateMenu,
 } from "../../../services/slice/menuSlice";
 import CompanyModal from "../../../components/customs/modal/CompanyModal";
-import generateExcel from "../../../services/functions/exportFile";
+import { generateExcel } from "../../../services/functions/exportFile";
 import ImportModal from "../../../components/customs/modal/ImportModal";
 
 const Company = () => {
@@ -122,7 +121,6 @@ const Company = () => {
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
-      console.log(error?.data?.errors);
       dispatch(setImportError(error?.data?.errors));
       singleError(error, enqueueSnackbar);
     }

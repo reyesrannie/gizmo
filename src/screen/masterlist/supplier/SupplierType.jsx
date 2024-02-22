@@ -14,6 +14,7 @@ import {
   ListItemIcon,
   Menu,
   MenuItem,
+  Stack,
   Table,
   TableBody,
   TableCell,
@@ -32,6 +33,7 @@ import Lottie from "lottie-react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   useArchiveSupplierTypeMutation,
+  useImportSupplierTypeMutation,
   useSupplierTypeQuery,
 } from "../../../services/store/request";
 
@@ -58,11 +60,14 @@ import AppPrompt from "../../../components/customs/AppPrompt";
 import {
   resetMenu,
   setCreateMenu,
+  setImportError,
+  setImportMenu,
   setMenuData,
   setUpdateMenu,
 } from "../../../services/slice/menuSlice";
-import generateExcel from "../../../services/functions/exportFile";
+import { generateExcel } from "../../../services/functions/exportFile";
 import SupplierTypeModal from "../../../components/customs/modal/SupplierTypeModal";
+import ImportModal from "../../../components/customs/modal/ImportModal";
 
 const SupplierType = () => {
   const excelItems = ["ID", "CODE", "NAME", "CREATED AT", "DATE MODIFIED"];
@@ -73,6 +78,7 @@ const SupplierType = () => {
   const openWarning = useSelector((state) => state.prompt.warning);
   const createMenu = useSelector((state) => state.menu.createMenu);
   const updateMenu = useSelector((state) => state.menu.updateMenu);
+  const importMenu = useSelector((state) => state.menu.importMenu);
 
   const {
     params,
@@ -85,6 +91,9 @@ const SupplierType = () => {
 
   const [archiveSupplierType, { isLoading: archiveLoading }] =
     useArchiveSupplierTypeMutation();
+
+  const [importSupplierType, { isLoading: loadingImport }] =
+    useImportSupplierTypeMutation();
 
   const {
     data: supplierType,
@@ -101,6 +110,23 @@ const SupplierType = () => {
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
+      singleError(error, enqueueSnackbar);
+    }
+  };
+
+  const importCompanyHandler = async (submitData) => {
+    const obj = submitData?.map((items) => ({
+      code: items.code,
+      wtax: items.name,
+    }));
+
+    try {
+      const res = await importSupplierType(obj).unwrap();
+      enqueueSnackbar(res?.message, { variant: "success" });
+      dispatch(resetMenu());
+      dispatch(resetPrompt());
+    } catch (error) {
+      dispatch(setImportError(error?.data?.errors));
       singleError(error, enqueueSnackbar);
     }
   };
@@ -132,42 +158,46 @@ const SupplierType = () => {
           <Table stickyHeader>
             <TableHead>
               <TableRow className="table-header1-supplierType">
-                <TableCell colSpan={3}>
-                  <FormControlLabel
-                    className="check-box-archive-supplierType"
-                    control={<Checkbox color="secondary" />}
-                    label="Archive"
-                    checked={params?.status === "inactive"}
-                    onChange={() =>
-                      onStatusChange(
-                        params?.status === "active" ? "inactive" : "active"
-                      )
-                    }
-                  />
-                </TableCell>
-                <TableCell colSpan={3} align="right">
-                  <Button
-                    variant="contained"
-                    className="button-export-supplierType"
-                    startIcon={<FileUploadOutlinedIcon />}
-                    onClick={() =>
-                      generateExcel(
-                        "SupplierType",
-                        supplierType?.result?.data,
-                        excelItems
-                      )
-                    }
-                  >
-                    Export
-                  </Button>
-                  <Button
-                    variant="contained"
-                    color="secondary"
-                    className="button-export-supplierType"
-                    startIcon={<FileDownloadOutlinedIcon />}
-                  >
-                    Import
-                  </Button>
+                <TableCell colSpan={6}>
+                  <Stack flexDirection={"row"} justifyContent="space-between">
+                    <FormControlLabel
+                      className="check-box-archive-supplierType"
+                      control={<Checkbox color="secondary" />}
+                      label="Archive"
+                      checked={params?.status === "inactive"}
+                      onChange={() =>
+                        onStatusChange(
+                          params?.status === "active" ? "inactive" : "active"
+                        )
+                      }
+                    />
+                    <Box>
+                      <Button
+                        variant="contained"
+                        className="button-export-supplierType"
+                        startIcon={<FileUploadOutlinedIcon />}
+                        onClick={() =>
+                          generateExcel(
+                            "Supplier Type",
+                            supplierType?.result?.data,
+                            excelItems,
+                            "Tax"
+                          )
+                        }
+                      >
+                        Export
+                      </Button>
+                      <Button
+                        variant="contained"
+                        color="secondary"
+                        className="button-export-supplierType"
+                        startIcon={<FileDownloadOutlinedIcon />}
+                        onClick={() => dispatch(setImportMenu(true))}
+                      >
+                        Import
+                      </Button>
+                    </Box>
+                  </Stack>
                 </TableCell>
               </TableRow>
               <TableRow className="table-header-supplierType">
@@ -356,6 +386,14 @@ const SupplierType = () => {
 
       <Dialog open={updateMenu}>
         <SupplierTypeModal stypeData={menuData} update />
+      </Dialog>
+
+      <Dialog open={importMenu}>
+        <ImportModal
+          title="Supplie type"
+          importData={importCompanyHandler}
+          isLoading={loadingImport}
+        />
       </Dialog>
 
       <Dialog open={openWarning}>

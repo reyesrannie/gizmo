@@ -200,6 +200,15 @@ export const jsonServerAPI = createApi({
       }),
       invalidatesTags: ["Department"],
     }),
+    importDepartment: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/import/department`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["Department"],
+    }),
     updateDepartment: builder.mutation({
       transformResponse: (response) => response,
       query: (payload) => ({
@@ -231,6 +240,15 @@ export const jsonServerAPI = createApi({
       transformResponse: (response) => response,
       query: (payload) => ({
         url: `/location`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["Location"],
+    }),
+    importLocation: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/import/location`,
         method: "POST",
         body: payload,
       }),
@@ -272,6 +290,15 @@ export const jsonServerAPI = createApi({
       }),
       invalidatesTags: ["AP"],
     }),
+    importAP: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/import/ap`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["AP"],
+    }),
     updateAP: builder.mutation({
       transformResponse: (response) => response,
       query: (payload) => ({
@@ -303,6 +330,15 @@ export const jsonServerAPI = createApi({
       transformResponse: (response) => response,
       query: (payload) => ({
         url: `/vat`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["VAT"],
+    }),
+    importVAT: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/import/vat`,
         method: "POST",
         body: payload,
       }),
@@ -344,6 +380,15 @@ export const jsonServerAPI = createApi({
       }),
       invalidatesTags: ["ATC"],
     }),
+    importATC: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/import/atc`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["ATC"],
+    }),
     updateATC: builder.mutation({
       transformResponse: (response) => response,
       query: (payload) => ({
@@ -375,6 +420,15 @@ export const jsonServerAPI = createApi({
       transformResponse: (response) => response,
       query: (payload) => ({
         url: `/supplier-type`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["SupplierType"],
+    }),
+    importSupplierType: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `import/supplier-type`,
         method: "POST",
         body: payload,
       }),
@@ -442,43 +496,59 @@ export const {
   usePasswordChangeMutation,
   useLogoutMutation,
   usePasswordResetMutation,
+
   useUsersQuery,
   useCreateUserMutation,
   useUpdateUserMutation,
   useArchiveUserMutation,
+
   useRoleQuery,
   useCreateRoleMutation,
   useUpdateRoleMutation,
   useArchiveRoleMutation,
+
   useCompanyQuery,
   useImportCompanyMutation,
   useCreateCompanyMutation,
   useUpdateCompanyMutation,
   useArchiveCompanyMutation,
+
   useDepartmentQuery,
   useCreateDepartmentMutation,
+  useImportDepartmentMutation,
   useUpdateDepartmentMutation,
   useArchiveDepartmentMutation,
+
   useLocationQuery,
   useCreateLocationMutation,
+  useImportLocationMutation,
   useUpdateLocationMutation,
   useArchiveLocationMutation,
+
   useApQuery,
   useCreateAPMutation,
+  useImportAPMutation,
   useUpdateAPMutation,
   useArchiveAPMutation,
+
   useVatQuery,
   useCreateVATMutation,
+  useImportVATMutation,
   useUpdateVATMutation,
   useArchiveVATMutation,
+
   useAtcQuery,
   useCreateATCMutation,
+  useImportATCMutation,
   useUpdateATCMutation,
   useArchiveATCMutation,
+
   useSupplierTypeQuery,
   useCreateSupplierTypeMutation,
+  useImportSupplierTypeMutation,
   useUpdateSupplierTypeMutation,
   useArchiveSupplierTypeMutation,
+
   useSupplierQuery,
   useCreateSupplierMutation,
   useUpdateSupplierMutation,
