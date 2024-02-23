@@ -13,6 +13,8 @@ import InventoryOutlinedIcon from "@mui/icons-material/InventoryOutlined";
 import HubOutlinedIcon from "@mui/icons-material/HubOutlined";
 import PowerInputOutlinedIcon from "@mui/icons-material/PowerInputOutlined";
 import PrecisionManufacturingOutlinedIcon from "@mui/icons-material/PrecisionManufacturingOutlined";
+import StyleOutlinedIcon from "@mui/icons-material/StyleOutlined";
+import LocalOfferOutlinedIcon from "@mui/icons-material/LocalOfferOutlined";
 
 import "../../components/styles/CardNavigation.scss";
 const user = [
@@ -161,6 +163,21 @@ const masterlist = [
   },
 ];
 
+const tagging = [
+  {
+    path: "/tagging/tagtransact",
+    desc: "Tagging of transaction to appropriate Account Payable.",
+    name: "Tag Transaction",
+    permission: ["tagging"],
+    firstIcon: (
+      <LocalOfferOutlinedIcon color="secondary" className="icon-card-details" />
+    ),
+    lastIcon: (
+      <NavigationOutlinedIcon className="icon-last" color="secondary" />
+    ),
+  },
+];
+
 const menu = [
   {
     desc: "Dashboard",
@@ -193,7 +210,16 @@ const menu = [
     desc: "Masterlist",
     icon: <ListAltOutlinedIcon />,
     path: "/masterlist",
-    permission: ["company", "location", "department", "ap"],
+    permission: [
+      "company",
+      "location",
+      "department",
+      "ap",
+      "supplier",
+      "vat",
+      "atc",
+      "s-type",
+    ],
     children: [
       {
         desc: "Company",
@@ -230,7 +256,7 @@ const menu = [
         desc: "VAT",
         icon: <InventoryOutlinedIcon />,
         path: "/masterlist/vat",
-        permission: ["ap"],
+        permission: ["vat"],
       },
       {
         desc: "ATC",
@@ -243,6 +269,20 @@ const menu = [
         icon: <PowerInputOutlinedIcon />,
         path: "/masterlist/suppliertype",
         permission: ["s-type"],
+      },
+    ],
+  },
+  {
+    desc: "Tagging",
+    icon: <StyleOutlinedIcon />,
+    path: "/tagging",
+    permission: ["tagging"],
+    children: [
+      {
+        desc: "Tag Transaction",
+        icon: <LocalOfferOutlinedIcon />,
+        path: "/tagging/tagtransact",
+        permission: ["tagging"],
       },
     ],
   },
@@ -284,10 +324,6 @@ const routes = [
         name: "Accounts Payable",
       },
       {
-        path: "/masterlist/suppliertype",
-        name: "Supplier Type",
-      },
-      {
         path: "/masterlist/vat",
         name: "VAT",
       },
@@ -305,6 +341,16 @@ const routes = [
       },
     ],
   },
+  {
+    path: "/tagging",
+    name: "Tagging",
+    children: [
+      {
+        path: "/tagging/transaction",
+        name: "Tag Transaction",
+      },
+    ],
+  },
 ];
 
-export { user, masterlist, menu, routes };
+export { user, masterlist, tagging, menu, routes };

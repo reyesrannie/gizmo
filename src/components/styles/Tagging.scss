@@ -1,0 +1,75 @@
+.page-text-indicator-tagging {
+  &.MuiTypography-root {
+    font-family: "Roboto-Black";
+    font-size: 24px;
+    margin-left: 20px;
+    margin-bottom: 50px;
+  }
+}
+
+.tagging-management-body {
+  &.MuiBox-root {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    overflow: hidden;
+    overflow-y: auto;
+    max-height: 800px;
+    &::-webkit-scrollbar {
+      width: 12px;
+    }
+    &::-webkit-scrollbar-thumb {
+      background-color: #ccc;
+      border-radius: 20px;
+      border: 1px solid #fff;
+    }
+    &::-webkit-scrollbar-thumb:hover {
+      background-color: #f4ce92;
+    }
+    &::-webkit-scrollbar-track {
+      border-radius: 20px;
+    }
+    &::-webkit-scrollbar-track:hover {
+      background-color: #eee;
+    }
+  }
+}
+
+@media (max-width: 320px) {
+  .page-text-indicator-tagging {
+    &.MuiTypography-root {
+      font-size: 16px;
+      margin-left: 0px;
+      margin-bottom: 0px;
+    }
+  }
+}
+@media (min-width: 321px) and (max-width: 425px) {
+  .page-text-indicator-tagging {
+    &.MuiTypography-root {
+      font-size: 16px;
+      margin-left: 0px;
+      margin-bottom: 0px;
+    }
+  }
+}
+@media (min-width: 425px) and (max-width: 768px) {
+  .page-text-indicator-tagging {
+    &.MuiTypography-root {
+      font-size: 16px;
+      margin-left: 0px;
+      margin-bottom: 0px;
+    }
+  }
+}
+
+@media (max-height: 768px) {
+  .page-text-indicator-tagging {
+    &.MuiTypography-root {
+      font-size: 18px;
+      margin-left: 18px;
+      margin-bottom: 50px;
+    }
+  }
+}

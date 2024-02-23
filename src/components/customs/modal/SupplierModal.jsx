@@ -6,7 +6,6 @@ import {
   Box,
   Button,
   Dialog,
-  IconButton,
 } from "@mui/material";
 import React from "react";
 import supplier from "../../../assets/svg/supplier.svg";
@@ -115,7 +114,16 @@ const SupplierModal = ({ supplierData, view, update }) => {
         setValue(key, value);
       });
     }
-  }, [successType, successAtc, successVat]);
+  }, [
+    successType,
+    successAtc,
+    successVat,
+    atc,
+    sTypes,
+    setValue,
+    supplierData,
+    vat,
+  ]);
 
   const isFormValid = requiredFields.every((field) => !!watch(field));
   const isArrayValid = requiredArray.every(

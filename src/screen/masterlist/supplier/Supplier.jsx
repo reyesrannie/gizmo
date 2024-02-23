@@ -124,6 +124,7 @@ const Supplier = () => {
   const importCompanyHandler = async (submitData) => {
     try {
       const res = await importSupplier(submitData).unwrap();
+
       enqueueSnackbar(res?.message, { variant: "success" });
       dispatch(resetMenu());
       dispatch(resetPrompt());

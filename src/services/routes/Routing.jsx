@@ -17,6 +17,8 @@ import Vat from "../../screen/masterlist/vat/Vat";
 import Atc from "../../screen/masterlist/atc/Atc";
 import SupplierType from "../../screen/masterlist/supplier/SupplierType";
 import Supplier from "../../screen/masterlist/supplier/Supplier";
+import Tagging from "../../screen/tagging/Tagging";
+import PageNotFound from "../../screen/PageNotFound";
 
 const Routing = () => {
   const user = decodeUser();
@@ -71,7 +73,16 @@ const Routing = () => {
       children: [
         {
           path: "",
-          element: hasAccess(["company", "department", "location", "ap"]) ? (
+          element: hasAccess([
+            "company",
+            "location",
+            "department",
+            "ap",
+            "supplier",
+            "vat",
+            "atc",
+            "s-type",
+          ]) ? (
             <Masterlist />
           ) : (
             <Navigate to={"/"} />
@@ -140,6 +151,26 @@ const Routing = () => {
           ) : (
             <Navigate to={"/masterlist"} />
           ),
+        },
+      ],
+    },
+    {
+      path: "/tagging",
+      element: user ? <AppBar /> : <Navigate to={"/login"} />,
+      children: [
+        {
+          path: "",
+          element: hasAccess(["tagging"]) ? <Tagging /> : <Navigate to={"/"} />,
+        },
+      ],
+    },
+    {
+      path: "*",
+      element: <AppBar />,
+      children: [
+        {
+          path: "*",
+          element: <PageNotFound />,
         },
       ],
     },

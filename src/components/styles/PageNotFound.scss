@@ -1,0 +1,34 @@
+.page-not-found-container {
+  &.MuiBox-root {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+}
+
+.page-not-found {
+  width: 600px;
+  height: 600px;
+}
+
+.page-not-found-404 {
+  &.MuiTypography-root {
+    font-size: 30px;
+    font-family: Roboto-Black;
+  }
+}
+
+.page-not-found-desc {
+  &.MuiTypography-root {
+    font-size: 25px;
+    font-family: Roboto-Medium;
+    margin-bottom: 20px;
+  }
+}
+
+.page-not-found-button {
+  &.MuiButtonBase-root {
+    text-transform: none;
+  }
+}

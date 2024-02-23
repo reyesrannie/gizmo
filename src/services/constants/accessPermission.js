@@ -40,6 +40,16 @@ const accessPermission = [
   },
   {
     id: 4,
+    access: "Tagging",
+    children: [
+      {
+        access_permission: "tagging",
+        label: "Tagging",
+      },
+    ],
+  },
+  {
+    id: 5,
     access: "Approver",
     children: [
       {
