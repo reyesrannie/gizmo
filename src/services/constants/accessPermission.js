@@ -36,6 +36,7 @@ const accessPermission = [
       { access_permission: "s-type", label: "Supplier Type" },
       { access_permission: "vat", label: "Vat" },
       { access_permission: "atc", label: "ATC" },
+      { access_permission: "d-type", label: "Document Type" },
     ],
   },
   {

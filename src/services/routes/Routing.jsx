@@ -19,6 +19,8 @@ import SupplierType from "../../screen/masterlist/supplier/SupplierType";
 import Supplier from "../../screen/masterlist/supplier/Supplier";
 import Tagging from "../../screen/tagging/Tagging";
 import PageNotFound from "../../screen/PageNotFound";
+import TagTransaction from "../../screen/tagging/TagTransaction";
+import DocumentType from "../../screen/masterlist/document/DocumentType";
 
 const Routing = () => {
   const user = decodeUser();
@@ -152,6 +154,14 @@ const Routing = () => {
             <Navigate to={"/masterlist"} />
           ),
         },
+        {
+          path: "documenttype",
+          element: hasAccess(["d-type"]) ? (
+            <DocumentType />
+          ) : (
+            <Navigate to={"/masterlist"} />
+          ),
+        },
       ],
     },
     {
@@ -161,6 +171,14 @@ const Routing = () => {
         {
           path: "",
           element: hasAccess(["tagging"]) ? <Tagging /> : <Navigate to={"/"} />,
+        },
+        {
+          path: "tagtransact",
+          element: hasAccess(["tagging"]) ? (
+            <TagTransaction />
+          ) : (
+            <Navigate to={"/"} />
+          ),
         },
       ],
     },

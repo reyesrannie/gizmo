@@ -15,6 +15,7 @@ import PowerInputOutlinedIcon from "@mui/icons-material/PowerInputOutlined";
 import PrecisionManufacturingOutlinedIcon from "@mui/icons-material/PrecisionManufacturingOutlined";
 import StyleOutlinedIcon from "@mui/icons-material/StyleOutlined";
 import LocalOfferOutlinedIcon from "@mui/icons-material/LocalOfferOutlined";
+import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
 
 import "../../components/styles/CardNavigation.scss";
 const user = [
@@ -161,6 +162,18 @@ const masterlist = [
       <NavigationOutlinedIcon className="icon-last" color="secondary" />
     ),
   },
+  {
+    path: "/masterlist/documenttype",
+    desc: "A module for managing Document Type .",
+    name: "Document Type",
+    permission: ["d-type"],
+    firstIcon: (
+      <ArticleOutlinedIcon color="secondary" className="icon-card-details" />
+    ),
+    lastIcon: (
+      <NavigationOutlinedIcon className="icon-last" color="secondary" />
+    ),
+  },
 ];
 
 const tagging = [
@@ -219,6 +232,7 @@ const menu = [
       "vat",
       "atc",
       "s-type",
+      "d-type",
     ],
     children: [
       {
@@ -269,6 +283,12 @@ const menu = [
         icon: <PowerInputOutlinedIcon />,
         path: "/masterlist/suppliertype",
         permission: ["s-type"],
+      },
+      {
+        desc: "Document Type",
+        icon: <ArticleOutlinedIcon />,
+        path: "/masterlist/documenttype",
+        permission: ["d-type"],
       },
     ],
   },
@@ -339,6 +359,10 @@ const routes = [
         path: "/masterlist/suppliertype",
         name: "Supplier Type",
       },
+      {
+        path: "/masterlist/documenttype",
+        name: "Document Type",
+      },
     ],
   },
   {
@@ -346,7 +370,7 @@ const routes = [
     name: "Tagging",
     children: [
       {
-        path: "/tagging/transaction",
+        path: "/tagging/tagtransact",
         name: "Tag Transaction",
       },
     ],

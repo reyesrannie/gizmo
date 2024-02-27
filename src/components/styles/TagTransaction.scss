@@ -1,4 +1,4 @@
-.page-text-indicator-vat {
+.page-text-indicator-tag-transaction {
   &.MuiTypography-root {
     font-family: "Roboto-Black";
     font-size: 24px;
@@ -6,7 +6,7 @@
   }
 }
 
-.vat-head-container {
+.tag-transaction-head-container {
   &.MuiBox-root {
     display: flex;
     align-items: center;
@@ -15,7 +15,7 @@
   }
 }
 
-.vat-button-container {
+.tag-transaction-button-container {
   &.MuiBox-root {
     display: flex;
     align-items: center;
@@ -24,7 +24,7 @@
   }
 }
 
-.vat-body-container {
+.tag-transaction-body-container {
   &.MuiBox-root {
     display: flex;
     align-items: center;
@@ -36,17 +36,17 @@
   }
 }
 
-.loading-vat {
+.loading-tag-transaction {
   height: 500px;
 }
 
-.no-data-vat {
+.no-data-tag-transaction {
   height: 500px;
   opacity: 0.7;
   filter: grayscale(0.3);
 }
 
-.vat-table-container {
+.tag-transaction-table-container {
   &.MuiTableContainer-root {
     max-height: 735px;
     &::-webkit-scrollbar {
@@ -72,18 +72,7 @@
   }
 }
 
-.table-header1-vat {
-  &.MuiTableRow-root {
-    .MuiTableCell-root {
-      border: none;
-      font-family: Roboto-Bold;
-      letter-spacing: 1px;
-      padding: 10px;
-    }
-  }
-}
-
-.table-header-vat {
+.table-header1-import-tag-transaction {
   &.MuiTableRow-root {
     .MuiTableCell-root {
       border: none;
@@ -91,12 +80,11 @@
       letter-spacing: 1px;
       color: #f4ce92;
       background-color: #15253b;
-      padding: 14px;
     }
   }
 }
 
-.table-body-vat {
+.table-body-tag-transaction {
   &.MuiTableRow-root {
     .MuiTableCell-root {
       border-bottom: 4px solid #f2f2f2;
@@ -110,7 +98,7 @@
   }
 }
 
-.table-footer-vat {
+.table-footer-tag-transaction {
   &.MuiTableRow-root {
     .MuiTableCell-root {
       border: none;
@@ -136,52 +124,52 @@
   }
 }
 
-.vat-icon-actions {
+.tag-transaction-icon-actions {
   &.MuiSvgIcon-root {
     font-size: 20px;
   }
 }
 
-.vat-menu-icons {
+.tag-transaction-menu-icons {
   &.MuiSvgIcon-root {
     font-size: 20px;
   }
 }
 
-.vat-menu-text {
+.tag-transaction-menu-text {
   &.MuiTypography-root {
     font-size: 14px;
     font-family: Roboto-Medium;
   }
 }
 
-.button-add-vat {
+.button-add-tag-transaction {
   &.MuiButtonBase-root {
     text-transform: none;
     font-family: Roboto-Medium;
   }
 }
 
-.vat-modal-dialog {
+.tag-transaction-modal-dialog {
   .MuiPaper-root {
     max-width: 810px;
   }
 }
 
-.vat-icon-actions {
+.tag-transaction-icon-actions {
   &.MuiSvgIcon-root {
     font-size: 20px;
   }
 }
 
-.loading-vat-create {
+.loading-tag-transaction-create {
   .MuiPaper-root {
     box-shadow: none;
     background-color: transparent;
   }
 }
 
-.button-export-vat {
+.button-export-tag-transaction {
   &.MuiButtonBase-root {
     text-transform: none;
     font-family: Roboto-Medium;
@@ -189,20 +177,20 @@
   }
 }
 
-.header-options-vat {
+.header-options-tag-transaction {
   &.MuiBox-root {
     background-color: #15253b;
   }
 }
 
 @media (max-height: 768px) {
-  .page-text-indicator-vat {
+  .page-text-indicator-tag-transaction {
     &.MuiTypography-root {
       font-size: 18px;
     }
   }
 
-  .vat-head-container {
+  .tag-transaction-head-container {
     &.MuiBox-root {
       display: flex;
       align-items: center;
@@ -211,7 +199,7 @@
     }
   }
 
-  .check-box-archive-vat {
+  .check-box-archive-tag-transaction {
     &.MuiFormControlLabel-root {
       .MuiSvgIcon-root {
         font-size: 16px;
@@ -222,21 +210,21 @@
     }
   }
 
-  .loading-vat {
+  .loading-tag-transaction {
     height: 350px;
   }
 
-  .no-data-vat {
+  .no-data-tag-transaction {
     height: 350px;
   }
 
-  .vat-table-container {
+  .tag-transaction-table-container {
     &.MuiTableContainer-root {
       max-height: 500px;
     }
   }
 
-  .table-header1-vat {
+  .table-header1-tag-transaction {
     &.MuiTableRow-root {
       .MuiTableCell-root {
         padding: 5px;
@@ -244,7 +232,7 @@
     }
   }
 
-  .table-header-vat {
+  .table-header-tag-transaction {
     &.MuiTableRow-root {
       .MuiTableCell-root {
         padding: 10px;
@@ -253,7 +241,7 @@
     }
   }
 
-  .table-body-vat {
+  .table-body-tag-transaction {
     &.MuiTableRow-root {
       .MuiTableCell-root {
         padding: 4px;
@@ -262,7 +250,7 @@
     }
   }
 
-  .table-footer-vat {
+  .table-footer-tag-transaction {
     &.MuiTableRow-root {
       .MuiTableCell-root {
         border: none;
@@ -291,26 +279,26 @@
     }
   }
 
-  .vat-icon-actions {
+  .tag-transaction-icon-actions {
     &.MuiSvgIcon-root {
       font-size: 18px;
     }
   }
 
-  .vat-menu-icons {
+  .tag-transaction-menu-icons {
     &.MuiSvgIcon-root {
       font-size: 18px;
     }
   }
 
-  .vat-menu-text {
+  .tag-transaction-menu-text {
     &.MuiTypography-root {
       font-size: 12px;
       font-family: Roboto-Medium;
     }
   }
 
-  .button-add-vat {
+  .button-add-tag-transaction {
     &.MuiButtonBase-root {
       text-transform: none;
       font-family: Roboto-Medium;
@@ -323,25 +311,25 @@
     }
   }
 
-  .vat-modal-dialog {
+  .tag-transaction-modal-dialog {
     .MuiPaper-root {
       max-width: 400px;
     }
   }
 
-  .vat-icon-actions {
+  .tag-transaction-icon-actions {
     &.MuiSvgIcon-root {
       font-size: 18px;
     }
   }
 
-  .loading-vat-create {
+  .loading-tag-transaction-create {
     .MuiPaper-root {
       box-shadow: none;
       background-color: transparent;
     }
   }
-  .button-export-vat {
+  .button-export-tag-transaction {
     &.MuiButtonBase-root {
       font-size: 11px;
     }

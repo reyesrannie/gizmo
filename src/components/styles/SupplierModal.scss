@@ -10,7 +10,7 @@
 }
 
 .supplier-image {
-  width: 55px;
+  width: 70px;
 }
 
 .supplier-image {
@@ -21,9 +21,17 @@
   }
 }
 
+.supplier-text {
+  &.MuiTypography-root {
+    font-family: Roboto-Black;
+    font-size: 25px;
+    letter-spacing: 1px;
+  }
+}
 .form-title-supplier {
   &.MuiBox-root {
     display: flex;
+    flex-direction: column;
     width: 100%;
   }
 }
@@ -91,6 +99,18 @@
     .MuiFormHelperText-root {
       font-family: Roboto-Light;
       letter-spacing: 1px;
+    }
+  }
+}
+
+.check-box-no-tin-supplier {
+  &.MuiFormControlLabel-root {
+    .MuiSvgIcon-root {
+      font-size: 20px;
+    }
+    .MuiTypography-root {
+      font-size: 14px;
+      font-family: Roboto-Light;
     }
   }
 }

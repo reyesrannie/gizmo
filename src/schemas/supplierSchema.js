@@ -1,7 +1,15 @@
 import * as Yup from "yup";
 
 const supplierSchema = Yup.object({
-  tin: Yup.string().required("Tin is required").min(15, "Invalid TIN format"),
+  noTin: Yup.boolean(),
+  tin: Yup.string()
+    .required("Tin is required")
+    .test("tin-length", "Invalid TIN format", function (value) {
+      if (this.parent.noTin) {
+        return true;
+      }
+      return value?.length === 15;
+    }),
   company_name: Yup.string().required("Company name is required"),
   company_address: Yup.string().required("Company address is required"),
   proprietor: Yup.string().nullable(),

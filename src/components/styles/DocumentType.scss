@@ -1,4 +1,4 @@
-.page-text-indicator-vat {
+.page-text-indicator-documentType {
   &.MuiTypography-root {
     font-family: "Roboto-Black";
     font-size: 24px;
@@ -6,7 +6,7 @@
   }
 }
 
-.vat-head-container {
+.documentType-head-container {
   &.MuiBox-root {
     display: flex;
     align-items: center;
@@ -15,7 +15,7 @@
   }
 }
 
-.vat-button-container {
+.documentType-button-container {
   &.MuiBox-root {
     display: flex;
     align-items: center;
@@ -24,7 +24,7 @@
   }
 }
 
-.vat-body-container {
+.documentType-body-container {
   &.MuiBox-root {
     display: flex;
     align-items: center;
@@ -36,17 +36,17 @@
   }
 }
 
-.loading-vat {
+.loading-documentType {
   height: 500px;
 }
 
-.no-data-vat {
+.no-data-documentType {
   height: 500px;
   opacity: 0.7;
   filter: grayscale(0.3);
 }
 
-.vat-table-container {
+.documentType-table-container {
   &.MuiTableContainer-root {
     max-height: 735px;
     &::-webkit-scrollbar {
@@ -72,7 +72,7 @@
   }
 }
 
-.table-header1-vat {
+.table-header1-documentType {
   &.MuiTableRow-root {
     .MuiTableCell-root {
       border: none;
@@ -83,7 +83,7 @@
   }
 }
 
-.table-header-vat {
+.table-header-documentType {
   &.MuiTableRow-root {
     .MuiTableCell-root {
       border: none;
@@ -96,7 +96,7 @@
   }
 }
 
-.table-body-vat {
+.table-body-documentType {
   &.MuiTableRow-root {
     .MuiTableCell-root {
       border-bottom: 4px solid #f2f2f2;
@@ -110,7 +110,7 @@
   }
 }
 
-.table-footer-vat {
+.table-footer-documentType {
   &.MuiTableRow-root {
     .MuiTableCell-root {
       border: none;
@@ -136,52 +136,52 @@
   }
 }
 
-.vat-icon-actions {
+.documentType-icon-actions {
   &.MuiSvgIcon-root {
     font-size: 20px;
   }
 }
 
-.vat-menu-icons {
+.documentType-menu-icons {
   &.MuiSvgIcon-root {
     font-size: 20px;
   }
 }
 
-.vat-menu-text {
+.documentType-menu-text {
   &.MuiTypography-root {
     font-size: 14px;
     font-family: Roboto-Medium;
   }
 }
 
-.button-add-vat {
+.button-add-documentType {
   &.MuiButtonBase-root {
     text-transform: none;
     font-family: Roboto-Medium;
   }
 }
 
-.vat-modal-dialog {
+.documentType-modal-dialog {
   .MuiPaper-root {
     max-width: 810px;
   }
 }
 
-.vat-icon-actions {
+.documentType-icon-actions {
   &.MuiSvgIcon-root {
     font-size: 20px;
   }
 }
 
-.loading-vat-create {
+.loading-documentType-create {
   .MuiPaper-root {
     box-shadow: none;
     background-color: transparent;
   }
 }
 
-.button-export-vat {
+.button-export-documentType {
   &.MuiButtonBase-root {
     text-transform: none;
     font-family: Roboto-Medium;
@@ -189,20 +189,20 @@
   }
 }
 
-.header-options-vat {
+.header-options-documentType {
   &.MuiBox-root {
     background-color: #15253b;
   }
 }
 
 @media (max-height: 768px) {
-  .page-text-indicator-vat {
+  .page-text-indicator-documentType {
     &.MuiTypography-root {
       font-size: 18px;
     }
   }
 
-  .vat-head-container {
+  .documentType-head-container {
     &.MuiBox-root {
       display: flex;
       align-items: center;
@@ -211,7 +211,7 @@
     }
   }
 
-  .check-box-archive-vat {
+  .check-box-archive-documentType {
     &.MuiFormControlLabel-root {
       .MuiSvgIcon-root {
         font-size: 16px;
@@ -222,21 +222,21 @@
     }
   }
 
-  .loading-vat {
+  .loading-documentType {
     height: 350px;
   }
 
-  .no-data-vat {
+  .no-data-documentType {
     height: 350px;
   }
 
-  .vat-table-container {
+  .documentType-table-container {
     &.MuiTableContainer-root {
       max-height: 500px;
     }
   }
 
-  .table-header1-vat {
+  .table-header1-documentType {
     &.MuiTableRow-root {
       .MuiTableCell-root {
         padding: 5px;
@@ -244,7 +244,7 @@
     }
   }
 
-  .table-header-vat {
+  .table-header-documentType {
     &.MuiTableRow-root {
       .MuiTableCell-root {
         padding: 10px;
@@ -253,7 +253,7 @@
     }
   }
 
-  .table-body-vat {
+  .table-body-documentType {
     &.MuiTableRow-root {
       .MuiTableCell-root {
         padding: 4px;
@@ -262,7 +262,7 @@
     }
   }
 
-  .table-footer-vat {
+  .table-footer-documentType {
     &.MuiTableRow-root {
       .MuiTableCell-root {
         border: none;
@@ -291,26 +291,26 @@
     }
   }
 
-  .vat-icon-actions {
+  .documentType-icon-actions {
     &.MuiSvgIcon-root {
       font-size: 18px;
     }
   }
 
-  .vat-menu-icons {
+  .documentType-menu-icons {
     &.MuiSvgIcon-root {
       font-size: 18px;
     }
   }
 
-  .vat-menu-text {
+  .documentType-menu-text {
     &.MuiTypography-root {
       font-size: 12px;
       font-family: Roboto-Medium;
     }
   }
 
-  .button-add-vat {
+  .button-add-documentType {
     &.MuiButtonBase-root {
       text-transform: none;
       font-family: Roboto-Medium;
@@ -323,25 +323,25 @@
     }
   }
 
-  .vat-modal-dialog {
+  .documentType-modal-dialog {
     .MuiPaper-root {
       max-width: 400px;
     }
   }
 
-  .vat-icon-actions {
+  .documentType-icon-actions {
     &.MuiSvgIcon-root {
       font-size: 18px;
     }
   }
 
-  .loading-vat-create {
+  .loading-documentType-create {
     .MuiPaper-root {
       box-shadow: none;
       background-color: transparent;
     }
   }
-  .button-export-vat {
+  .button-export-documentType {
     &.MuiButtonBase-root {
       font-size: 11px;
     }

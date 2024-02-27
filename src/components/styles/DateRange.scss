@@ -1,0 +1,123 @@
+.date-range-modal-container {
+  &.MuiPaper-root {
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-direction: column;
+    gap: 10px;
+    overflow: hidden;
+  }
+}
+
+.date-range-image {
+  width: 65px;
+}
+
+.date-range-text {
+  &.MuiTypography-root {
+    font-family: Roboto-Black;
+    font-size: 20px;
+    letter-spacing: 1px;
+  }
+}
+
+.add-date-range-form-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.form-title-date-range {
+  &.MuiBox-root {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+}
+
+.select-date-range {
+  &.MuiBox-root {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+  }
+}
+
+.date-picker-container {
+  &.MuiBox-root {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    .MuiTypography-root {
+      position: absolute;
+      font-family: Roboto-light;
+      font-size: 12px;
+      letter-spacing: 1px;
+      margin-left: 15px;
+      bottom: 0;
+    }
+  }
+}
+
+.date-range-input-field {
+  &.MuiFormControl-root {
+    min-height: 75px;
+    .MuiInputBase-root {
+      border-radius: 10px;
+      font-family: Roboto-Medium;
+      letter-spacing: 1px;
+    }
+    .MuiFormLabel-root {
+      font-family: Roboto-Medium;
+      letter-spacing: 1px;
+    }
+    .MuiFormHelperText-root {
+      font-family: Roboto-Light;
+      letter-spacing: 1px;
+    }
+  }
+}
+
+.form-title-text-date-range {
+  &.MuiTypography-root {
+    font-family: Roboto-Black;
+    font-size: 14px;
+    letter-spacing: 1px;
+  }
+}
+
+.date-range-devider {
+  &.MuiDivider-root {
+    width: 100%;
+    margin-right: 3px;
+  }
+}
+
+.add-date-range-button-container {
+  &.MuiBox-root {
+    margin-top: 10px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    gap: 10px;
+    min-width: 510px;
+  }
+}
+
+.add-date-range-button {
+  &.MuiButtonBase-root {
+    font-family: Roboto-Medium;
+    text-transform: none;
+  }
+}
+
+.loading-date-range-create {
+  .MuiPaper-root {
+    box-shadow: none;
+    background-color: transparent;
+    width: 325px;
+  }
+}

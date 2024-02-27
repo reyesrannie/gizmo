@@ -35,6 +35,7 @@ import {
 } from "../../../services/functions/excelRead";
 import { useRef } from "react";
 import Lottie from "lottie-react";
+import { useSnackbar } from "notistack";
 
 const ImportModal = ({
   title,
@@ -44,6 +45,8 @@ const ImportModal = ({
   supplier = false,
 }) => {
   const dispatch = useDispatch();
+  const { enqueueSnackbar } = useSnackbar();
+
   const hasDataImport = useSelector((state) => state.menu.importHasData);
   const importTitle = useSelector((state) => state.menu.importTitle);
   const menuData = useSelector((state) => state.menu.menuData);
@@ -63,8 +66,9 @@ const ImportModal = ({
       dispatch(setImportTitle(files[0]?.name));
       dispatch(setMenuData(read));
     } catch (error) {
+      enqueueSnackbar("This file is not supported", { variant: "error" });
       dispatch(setImportHasData("error"));
-      dispatch(setImportTitle("error"));
+      dispatch(setImportTitle("This file is not supported"));
     }
     dispatch(setImportLoading(false));
   };
@@ -82,8 +86,9 @@ const ImportModal = ({
       dispatch(setMenuData(read));
       fileInputRef.current.value = null;
     } catch (error) {
+      enqueueSnackbar("This file is not supported", { variant: "error" });
       dispatch(setImportHasData("error"));
-      dispatch(setImportTitle("error"));
+      dispatch(setImportTitle("This file is not supported"));
     }
     dispatch(setImportLoading(false));
   };
@@ -100,8 +105,9 @@ const ImportModal = ({
         dispatch(setImportTitle(files[0]?.name));
         dispatch(setMenuData(read));
       } catch (error) {
+        enqueueSnackbar("This file is not supported", { variant: "error" });
         dispatch(setImportHasData("error"));
-        dispatch(setImportTitle("error"));
+        dispatch(setImportTitle("This file is not supported"));
       }
       dispatch(setImportLoading(false));
     } else {
@@ -111,8 +117,9 @@ const ImportModal = ({
         dispatch(setImportTitle(files[0]?.name));
         dispatch(setMenuData(read));
       } catch (error) {
+        enqueueSnackbar("This file is not supported", { variant: "error" });
         dispatch(setImportHasData("error"));
-        dispatch(setImportTitle("error"));
+        dispatch(setImportTitle("This file is not supported"));
       }
       dispatch(setImportLoading(false));
     }
@@ -173,7 +180,7 @@ const ImportModal = ({
         >
           <img
             src={
-              hasDataImport
+              hasDataImport !== "error"
                 ? excel
                 : hasDataImport === "error"
                 ? fileError
@@ -189,7 +196,9 @@ const ImportModal = ({
             <>
               <Typography className="import-drag-drop">Drag & Drop</Typography>
               <Typography className="import-drag-drop">or Browse</Typography>
-              <Typography className="import-support">supports .xlsx</Typography>
+              <Typography className="import-support">
+                only supports .xlsx
+              </Typography>
             </>
           )}
           <input

@@ -9,6 +9,8 @@ import "./App.scss";
 import Routing from "./services/routes/Routing";
 import CloseIcon from "@mui/icons-material/Close";
 import { SnackbarProvider, closeSnackbar } from "notistack";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 function App() {
   const screenHS = useMediaQuery("(max-height:681px)");
@@ -85,7 +87,9 @@ function App() {
           </IconButton>
         )}
       >
-        <Routing />
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <Routing />
+        </LocalizationProvider>
       </SnackbarProvider>
     </ThemeProvider>
   );

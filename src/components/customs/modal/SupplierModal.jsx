@@ -6,6 +6,8 @@ import {
   Box,
   Button,
   Dialog,
+  FormControlLabel,
+  Checkbox,
 } from "@mui/material";
 import React from "react";
 import supplier from "../../../assets/svg/supplier.svg";
@@ -80,6 +82,7 @@ const SupplierModal = ({ supplierData, view, update }) => {
   } = useForm({
     resolver: yupResolver(supplierSchema),
     defaultValues: {
+      noTin: false,
       tin: "",
       company_name: "",
       company_address: "",
@@ -93,6 +96,8 @@ const SupplierModal = ({ supplierData, view, update }) => {
   useEffect(() => {
     if (successType && successAtc && successVat) {
       const valuesItem = {
+        noTin:
+          supplierData?.tin?.length !== 15 && supplierData?.tin !== undefined,
         tin: supplierData?.tin || "",
         company_name: supplierData?.company_name || "",
         company_address: supplierData?.company_address || "",
@@ -198,6 +203,13 @@ const SupplierModal = ({ supplierData, view, update }) => {
         <Typography className="form-title-text-supplier">
           Company Details
         </Typography>
+        <FormControlLabel
+          className="check-box-no-tin-supplier"
+          control={<Checkbox color="secondary" />}
+          label="Supplier has no TIN"
+          checked={watch("noTin")}
+          onChange={() => setValue("noTin", !watch("noTin"))}
+        />
       </Box>
       <form
         className="form-container-supplier"
@@ -218,7 +230,7 @@ const SupplierModal = ({ supplierData, view, update }) => {
           label="TIN"
           error={Boolean(errors.tin)}
           helperText={errors.tin?.message}
-          tin
+          tin={!watch("noTin")}
           onKeyDown={(e) => {
             if (e?.target?.value?.length >= "15" && e.key !== "Backspace") {
               e.preventDefault();
