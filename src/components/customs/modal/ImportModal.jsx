@@ -30,6 +30,7 @@ import {
 } from "../../../services/slice/menuSlice";
 import {
   readExcelFile,
+  readExcelFileDocumentType,
   readExcelFileSupplier,
   readExcelFilewTag,
 } from "../../../services/functions/excelRead";
@@ -42,6 +43,7 @@ const ImportModal = ({
   importData,
   isLoading,
   withTag = false,
+  documentType = false,
   supplier = false,
 }) => {
   const dispatch = useDispatch();
@@ -110,6 +112,18 @@ const ImportModal = ({
         dispatch(setImportTitle("This file is not supported"));
       }
       dispatch(setImportLoading(false));
+    } else if (documentType) {
+      try {
+        const read = await readExcelFileDocumentType(files);
+        dispatch(setImportHasData(true));
+        dispatch(setImportTitle(files[0]?.name));
+        dispatch(setMenuData(read));
+      } catch (error) {
+        enqueueSnackbar("This file is not supported", { variant: "error" });
+        dispatch(setImportHasData("error"));
+        dispatch(setImportTitle("This file is not supported"));
+      }
+      dispatch(setImportLoading(false));
     } else {
       try {
         const read = await readExcelFilewTag(files);
@@ -139,6 +153,18 @@ const ImportModal = ({
       } catch (error) {
         dispatch(setImportHasData("error"));
         dispatch(setImportTitle("error"));
+      }
+      dispatch(setImportLoading(false));
+    } else if (documentType) {
+      try {
+        const read = await readExcelFileDocumentType(filesArray);
+        dispatch(setImportHasData(true));
+        dispatch(setImportTitle(filesArray[0]?.name));
+        dispatch(setMenuData(read));
+      } catch (error) {
+        enqueueSnackbar("This file is not supported", { variant: "error" });
+        dispatch(setImportHasData("error"));
+        dispatch(setImportTitle("This file is not supported"));
       }
       dispatch(setImportLoading(false));
     } else {

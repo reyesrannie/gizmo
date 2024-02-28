@@ -32,9 +32,9 @@ import Lottie from "lottie-react";
 
 import { useDispatch, useSelector } from "react-redux";
 import {
-  useArchiveSupplierTypeMutation,
-  useImportSupplierTypeMutation,
-  useSupplierTypeQuery,
+  useArchiveDocumentTypeMutation,
+  useDocumentTypeQuery,
+  useImportDocumentTypeMutation,
 } from "../../../services/store/request";
 
 import AddToPhotosOutlinedIcon from "@mui/icons-material/AddToPhotosOutlined";
@@ -66,8 +66,8 @@ import {
   setUpdateMenu,
 } from "../../../services/slice/menuSlice";
 import { generateExcel } from "../../../services/functions/exportFile";
-import SupplierTypeModal from "../../../components/customs/modal/SupplierTypeModal";
 import ImportModal from "../../../components/customs/modal/ImportModal";
+import DocumentTypeModal from "../../../components/customs/modal/DocumentTypeModal";
 
 const DocumentType = () => {
   const excelItems = ["ID", "CODE", "NAME", "CREATED AT", "DATE MODIFIED"];
@@ -89,11 +89,11 @@ const DocumentType = () => {
     onSortTable,
   } = useParamsHook();
 
-  const [archiveSupplierType, { isLoading: archiveLoading }] =
-    useArchiveSupplierTypeMutation();
+  const [archiveDocumentType, { isLoading: archiveLoading }] =
+    useArchiveDocumentTypeMutation();
 
-  const [importSupplierType, { isLoading: loadingImport }] =
-    useImportSupplierTypeMutation();
+  const [importDocumentType, { isLoading: loadingImport }] =
+    useImportDocumentTypeMutation();
 
   const {
     data: documentType,
@@ -101,11 +101,11 @@ const DocumentType = () => {
     isError,
     isFetching,
     status,
-  } = useSupplierTypeQuery(params);
+  } = useDocumentTypeQuery(params);
 
   const handleArchive = async () => {
     try {
-      const res = await archiveSupplierType(menuData).unwrap();
+      const res = await archiveDocumentType(menuData).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
       dispatch(resetMenu());
       dispatch(resetPrompt());
@@ -115,13 +115,8 @@ const DocumentType = () => {
   };
 
   const importCompanyHandler = async (submitData) => {
-    const obj = submitData?.map((items) => ({
-      code: items.code,
-      wtax: items.name,
-    }));
-
     try {
-      const res = await importSupplierType(obj).unwrap();
+      const res = await importDocumentType(submitData).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
       dispatch(resetMenu());
       dispatch(resetPrompt());
@@ -178,10 +173,9 @@ const DocumentType = () => {
                         startIcon={<FileUploadOutlinedIcon />}
                         onClick={() =>
                           generateExcel(
-                            "Supplier Type",
+                            "Document Type",
                             documentType?.result?.data,
-                            excelItems,
-                            "Tax"
+                            excelItems
                           )
                         }
                       >
@@ -225,13 +219,13 @@ const DocumentType = () => {
                 </TableCell>
                 <TableCell>
                   <TableSortLabel
-                    active={params.sorts === "wtax" || params.sorts === "-wtax"}
+                    active={params.sorts === "name" || params.sorts === "-name"}
                     onClick={() =>
-                      onSortTable(params.sorts === "wtax" ? "-wtax" : "wtax")
+                      onSortTable(params.sorts === "name" ? "-name" : "name")
                     }
-                    direction={params.sorts === "wtax" ? "asc" : "desc"}
+                    direction={params.sorts === "name" ? "asc" : "desc"}
                   >
-                    W-Tax
+                    Name
                   </TableSortLabel>
                 </TableCell>
                 <TableCell align="center"> Status</TableCell>
@@ -277,12 +271,12 @@ const DocumentType = () => {
                   </TableCell>
                 </TableRow>
               ) : (
-                documentType?.result?.data?.map((comp) => (
-                  <TableRow className="table-body-documentType" key={comp?.id}>
-                    <TableCell>{comp?.id}</TableCell>
-                    <TableCell>{comp?.code}</TableCell>
+                documentType?.result?.data?.map((dType) => (
+                  <TableRow className="table-body-documentType" key={dType?.id}>
+                    <TableCell>{dType?.id}</TableCell>
+                    <TableCell>{dType?.code}</TableCell>
 
-                    <TableCell>{comp?.wtax}</TableCell>
+                    <TableCell>{dType?.name}</TableCell>
                     <TableCell align="center">
                       {params.status === "active" && (
                         <StatusIndicator
@@ -298,12 +292,12 @@ const DocumentType = () => {
                       )}
                     </TableCell>
                     <TableCell align="center">
-                      {moment(comp?.updated_at).format("MMM DD YYYY")}
+                      {moment(dType?.updated_at).format("MMM DD YYYY")}
                     </TableCell>
                     <TableCell align="center">
                       <IconButton
                         onClick={(e) => {
-                          dispatch(setMenuData(comp));
+                          dispatch(setMenuData(dType));
                           setAnchorE1(e.currentTarget);
                         }}
                       >
@@ -381,18 +375,20 @@ const DocumentType = () => {
       </Dialog>
 
       <Dialog open={createMenu}>
-        <SupplierTypeModal />
+        <DocumentTypeModal />
       </Dialog>
 
       <Dialog open={updateMenu}>
-        <SupplierTypeModal stypeData={menuData} update />
+        <DocumentTypeModal dtypeData={menuData} update />
       </Dialog>
 
       <Dialog open={importMenu}>
         <ImportModal
-          title="Supplier type"
+          title="Document type"
           importData={importCompanyHandler}
           isLoading={loadingImport}
+          withTag
+          documentType
         />
       </Dialog>
 

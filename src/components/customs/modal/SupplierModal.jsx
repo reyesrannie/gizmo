@@ -28,6 +28,7 @@ import {
   useVatQuery,
   useCreateSupplierMutation,
   useUpdateSupplierMutation,
+  useDocumentTypeQuery,
 } from "../../../services/store/request";
 import { useEffect } from "react";
 import { objectError } from "../../../services/functions/errorResponse";
@@ -55,6 +56,15 @@ const SupplierModal = ({ supplierData, view, update }) => {
   });
 
   const {
+    data: documentTypes,
+    isLoading: loadingDocumentTypes,
+    isSuccess: successDocumentTypes,
+  } = useDocumentTypeQuery({
+    status: "active",
+    pagination: "none",
+  });
+
+  const {
     data: vat,
     isLoading: loadingVat,
     isSuccess: successVat,
@@ -69,8 +79,18 @@ const SupplierModal = ({ supplierData, view, update }) => {
   const [updateSupplier, { isLoading: loadingUpdate }] =
     useUpdateSupplierMutation();
 
-  const requiredFields = ["tin", "company_name", "company_address"];
-  const requiredArray = ["supplier_types", "supplier_atcs", "supplier_vats"];
+  const requiredFields = [
+    "tin",
+    "company_name",
+    "company_address",
+    "receipt_name",
+  ];
+  const requiredArray = [
+    "supplier_types",
+    "supplier_atcs",
+    "supplier_vats",
+    "supplier_documenttypes",
+  ];
 
   const {
     control,
@@ -83,25 +103,30 @@ const SupplierModal = ({ supplierData, view, update }) => {
     resolver: yupResolver(supplierSchema),
     defaultValues: {
       noTin: false,
+      is_company: false,
       tin: "",
       company_name: "",
       company_address: "",
       proprietor: "",
+      receipt_name: "",
       supplier_types: [],
       supplier_atcs: [],
       supplier_vats: [],
+      supplier_documenttypes: [],
     },
   });
 
   useEffect(() => {
-    if (successType && successAtc && successVat) {
+    if (successType && successAtc && successVat && successDocumentTypes) {
       const valuesItem = {
         noTin:
           supplierData?.tin?.length !== 15 && supplierData?.tin !== undefined,
         tin: supplierData?.tin || "",
+        is_company: supplierData?.is_company,
         company_name: supplierData?.company_name || "",
         company_address: supplierData?.company_address || "",
         proprietor: supplierData?.proprietor || "",
+        receipt_name: supplierData?.receipt_name || "",
         supplier_types:
           supplierData?.supplier_types?.map((tags) =>
             sTypes?.result?.find((item) => tags?.type_code === item.code)
@@ -113,6 +138,12 @@ const SupplierModal = ({ supplierData, view, update }) => {
         supplier_vats:
           supplierData?.supplier_vats?.map((tags) =>
             vat?.result?.find((item) => tags?.vat_code === item?.code)
+          ) || [],
+        supplier_documenttypes:
+          supplierData?.supplier_documenttypes?.map((tags) =>
+            documentTypes?.result?.find(
+              (item) => tags?.document_code === item?.code
+            )
           ) || [],
       };
       Object.entries(valuesItem).forEach(([key, value]) => {
@@ -127,7 +158,9 @@ const SupplierModal = ({ supplierData, view, update }) => {
     sTypes,
     setValue,
     supplierData,
+    documentTypes,
     vat,
+    successDocumentTypes,
   ]);
 
   const isFormValid = requiredFields.every((field) => !!watch(field));
@@ -164,6 +197,15 @@ const SupplierModal = ({ supplierData, view, update }) => {
         : submitData?.supplier_vats?.map((vat) => ({
             id: vat?.id,
             code: vat?.code,
+          })),
+      supplier_documenttypes: update
+        ? submitData?.supplier_documenttypes?.map((supplier_documenttypes) => ({
+            document_id: supplier_documenttypes?.id,
+            document_code: supplier_documenttypes?.code,
+          }))
+        : submitData?.supplier_documenttypes?.map((supplier_documenttypes) => ({
+            id: supplier_documenttypes?.id,
+            code: supplier_documenttypes?.code,
           })),
       id: update ? supplierData?.id : null,
     };
@@ -322,7 +364,54 @@ const SupplierModal = ({ supplierData, view, update }) => {
               />
             )}
           />
+          <Autocomplete
+            multiple
+            control={control}
+            name={"supplier_documenttypes"}
+            options={documentTypes?.result || []}
+            getOptionLabel={(option) => `${option?.code} - ${option?.name}`}
+            isOptionEqualToValue={(option, value) => option?.id === value?.id}
+            renderInput={(params) => (
+              <MuiTextField
+                name="supplier_documenttypes"
+                {...params}
+                label="Document Type *"
+                size="small"
+                variant="outlined"
+                error={Boolean(errors.supplier_documenttypes)}
+                helperText={errors.supplier_documenttypes?.message}
+                className="supplier-form-field-autocomplete"
+              />
+            )}
+          />
+          <Divider className="supplier-divider" />
+          <Box className="form-title-supplier">
+            <Typography className="form-title-text-supplier">
+              Name on receipt
+            </Typography>
+            <FormControlLabel
+              className="check-box-no-tin-supplier"
+              control={<Checkbox color="secondary" />}
+              label="Name under company?"
+              checked={watch("is_company")}
+              onChange={() => {
+                setValue("is_company", !watch("is_company"));
+                setValue(
+                  "receipt_name",
+                  watch("is_company") ? "RDF FOOD & LIVESTOCK'S INC" : ""
+                );
+              }}
+            />
+          </Box>
         </Box>
+        <AppTextBox
+          control={control}
+          name={"receipt_name"}
+          className="supplier-form-field-autocomplete"
+          label="Receipt name"
+          error={Boolean(errors.receipt_name)}
+          helperText={errors.receipt_name?.message}
+        />
         <Divider className="supplier-divider" />
 
         <Box className="form-button-supplier">
@@ -352,7 +441,8 @@ const SupplierModal = ({ supplierData, view, update }) => {
           loadingCreate ||
           loadingAtc ||
           loadingVat ||
-          loadingUpdate
+          loadingUpdate ||
+          loadingDocumentTypes
         }
         className="loading-supplier-create"
       >
