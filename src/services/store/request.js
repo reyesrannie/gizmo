@@ -543,6 +543,14 @@ export const jsonServerAPI = createApi({
       }),
       invalidatesTags: ["DocumentType"],
     }),
+    tagMonthYear: builder.query({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/gtag/transaction`,
+        method: "GET",
+        params: payload,
+      }),
+    }),
   }),
 });
 
@@ -615,4 +623,6 @@ export const {
   useImportDocumentTypeMutation,
   useUpdateDocumentTypeMutation,
   useArchiveDocumentTypeMutation,
+
+  useTagMonthYearQuery,
 } = jsonServerAPI;

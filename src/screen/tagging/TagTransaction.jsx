@@ -39,6 +39,7 @@ import ModeEditOutlineOutlinedIcon from "@mui/icons-material/ModeEditOutlineOutl
 import SettingsBackupRestoreOutlinedIcon from "@mui/icons-material/SettingsBackupRestoreOutlined";
 import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
 import SyncOutlinedIcon from "@mui/icons-material/SyncOutlined";
+import AddToPhotosOutlinedIcon from "@mui/icons-material/AddToPhotosOutlined";
 
 import loading from "../../assets/lottie/Loading-2.json";
 import loadingLight from "../../assets/lottie/Loading.json";
@@ -54,6 +55,7 @@ import { singleError } from "../../services/functions/errorResponse";
 import AppPrompt from "../../components/customs/AppPrompt";
 import {
   resetMenu,
+  setCreateMenu,
   setImportError,
   setMenuData,
   setUpdateMenu,
@@ -62,6 +64,7 @@ import CompanyModal from "../../components/customs/modal/CompanyModal";
 import ImportModal from "../../components/customs/modal/ImportModal";
 import { setDate } from "../../services/slice/syncSlice";
 import DateRange from "../../components/customs/modal/DateRange";
+import TransactionModal from "../../components/customs/modal/TransactionModal";
 
 const TagTransaction = () => {
   const date = useSelector((state) => state.sync.date);
@@ -124,7 +127,7 @@ const TagTransaction = () => {
         </Typography>
         <Box className="tag-transaction-button-container">
           <SearchText onSearchData={onSearchData} />
-          <Button
+          {/* <Button
             variant="contained"
             color="secondary"
             className="button-add-tag-transaction"
@@ -132,6 +135,16 @@ const TagTransaction = () => {
             onClick={() => dispatch(setDate(true))}
           >
             Sync
+          </Button> */}
+
+          <Button
+            variant="contained"
+            color="secondary"
+            className="button-add-tag-transaction"
+            startIcon={<AddToPhotosOutlinedIcon />}
+            onClick={() => dispatch(setCreateMenu(true))}
+          >
+            Add
           </Button>
         </Box>
       </Box>
@@ -322,8 +335,8 @@ const TagTransaction = () => {
         <Lottie animationData={loadingLight} loop={archiveLoading} />
       </Dialog>
 
-      <Dialog open={createMenu}>
-        <CompanyModal />
+      <Dialog open={createMenu} className="transaction-modal-dialog">
+        <TransactionModal />
       </Dialog>
 
       <Dialog open={updateMenu}>

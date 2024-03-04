@@ -1,0 +1,153 @@
+.transaction-modal-container {
+  &.MuiPaper-root {
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
+.transaction-image {
+  width: 75px;
+}
+
+.transaction-text {
+  &.MuiTypography-root {
+    font-family: Roboto-Black;
+    font-size: 25px;
+    letter-spacing: 1px;
+  }
+}
+
+.form-title-transaction {
+  &.MuiBox-root {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+}
+
+.form-title-text-transaction {
+  &.MuiTypography-root {
+    font-family: Roboto-Black;
+    font-size: 14px;
+    letter-spacing: 1px;
+  }
+}
+
+.form-container-transaction {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.transaction-devider {
+  &.MuiDivider-root {
+    width: 100%;
+    margin-right: 3px;
+  }
+}
+
+.transaction-form-textBox {
+  &.MuiFormControl-root {
+    border-radius: 10px;
+    min-width: 230px;
+    max-width: 230px;
+    min-height: 63px;
+
+    .MuiInputBase-root {
+      border-radius: 10px;
+      font-family: Roboto-Medium;
+      letter-spacing: 1px;
+    }
+    .MuiFormLabel-root {
+      font-family: Roboto-Medium;
+      letter-spacing: 1px;
+    }
+    .MuiFormHelperText-root {
+      font-family: Roboto-Light;
+      letter-spacing: 1px;
+    }
+  }
+}
+
+.transaction-form-date {
+  &.MuiFormControl-root {
+    border-radius: 10px;
+    min-width: 230px;
+    max-width: 230px;
+    min-height: 63px;
+
+    .MuiInputBase-root {
+      border-radius: 10px;
+      font-family: Roboto-Medium;
+      letter-spacing: 1px;
+      font-size: 14px;
+      max-height: 40px;
+    }
+    .MuiFormLabel-root {
+      overflow: visible !important;
+      line-height: 9px;
+      font-family: Roboto-Medium;
+      letter-spacing: 1px;
+    }
+    .MuiFormHelperText-root {
+      font-family: Roboto-Light;
+      letter-spacing: 1px;
+    }
+    .MuiSvgIcon-root {
+      font-size: 20px;
+    }
+  }
+}
+
+.add-transaction-button-container {
+  &.MuiBox-root {
+    margin-top: 10px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    gap: 10px;
+    min-width: 940px;
+  }
+}
+
+.transaction-form-field-textBox {
+  &.MuiFormControl-root {
+    border-radius: 10px;
+    min-height: 63px;
+
+    .MuiInputBase-root {
+      border-radius: 10px;
+      font-family: Roboto-Medium;
+      letter-spacing: 1px;
+    }
+    .MuiFormLabel-root {
+      font-family: Roboto-Medium;
+      letter-spacing: 1px;
+    }
+    .MuiFormHelperText-root {
+      font-family: Roboto-Light;
+      letter-spacing: 1px;
+    }
+  }
+}
+
+.add-transaction-button {
+  &.MuiButtonBase-root {
+    font-family: Roboto-Medium;
+    text-transform: none;
+  }
+}
+
+.loading-transaction-create {
+  .MuiPaper-root {
+    box-shadow: none;
+    background-color: transparent;
+    width: 325px;
+  }
+}

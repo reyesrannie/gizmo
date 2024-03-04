@@ -122,7 +122,7 @@ const SupplierModal = ({ supplierData, view, update }) => {
         noTin:
           supplierData?.tin?.length !== 15 && supplierData?.tin !== undefined,
         tin: supplierData?.tin || "",
-        is_company: supplierData?.is_company,
+        is_company: supplierData?.is_company === 1 ? true : false,
         company_name: supplierData?.company_name || "",
         company_address: supplierData?.company_address || "",
         proprietor: supplierData?.proprietor || "",

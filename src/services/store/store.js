@@ -6,6 +6,7 @@ import menuSlice from "../slice/menuSlice";
 import { jsonSedarAPI } from "./sedarRequest";
 import { jsonFistoApi } from "./fistoRequest";
 import syncSlice from "../slice/syncSlice";
+import transactionSlice from "../slice/transactionSlice";
 
 export const store = configureStore({
   reducer: {
@@ -13,6 +14,7 @@ export const store = configureStore({
     prompt: promptSlice,
     menu: menuSlice,
     sync: syncSlice,
+    transaction: transactionSlice,
 
     [jsonServerAPI.reducerPath]: jsonServerAPI.reducer,
     [jsonSedarAPI.reducerPath]: jsonSedarAPI.reducer,
