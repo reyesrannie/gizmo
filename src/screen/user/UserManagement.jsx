@@ -28,7 +28,7 @@ const UserManagement = () => {
                 path={card.path}
                 name={card.name}
                 firstIcon={card.firstIcon}
-                lastIcon={card.lastIcon}
+                // lastIcon={card.lastIcon}
                 desc={card.desc}
               />
             )

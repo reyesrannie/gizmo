@@ -23,7 +23,6 @@ const Masterlist = () => {
                 path={card.path}
                 name={card.name}
                 firstIcon={card.firstIcon}
-                lastIcon={card.lastIcon}
                 desc={card.desc}
               />
             )

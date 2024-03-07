@@ -37,6 +37,7 @@ const accessPermission = [
       { access_permission: "vat", label: "Vat" },
       { access_permission: "atc", label: "ATC" },
       { access_permission: "d-type", label: "Document Type" },
+      { access_permission: "account-number", label: "Account Number" },
     ],
   },
   {
@@ -56,6 +57,16 @@ const accessPermission = [
       {
         access_permission: "approver",
         label: "Approver",
+      },
+    ],
+  },
+  {
+    id: 6,
+    access: "Allocation",
+    children: [
+      {
+        access_permission: "ap_tag",
+        label: "AP",
       },
     ],
   },

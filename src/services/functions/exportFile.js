@@ -159,4 +159,39 @@ const generateExcelwSupplier = async (sheet, data, header) => {
   document.body.removeChild(link);
 };
 
-export { generateExcel, generateExcelwTag, generateExcelwSupplier };
+const generateExcelAccount = async (sheet, data, header) => {
+  const workbook = new Workbook();
+  const mainSheet = workbook.addWorksheet(sheet);
+  mainSheet.addRow(header);
+
+  data.forEach((item) => {
+    const row = [];
+    row.push(item?.id);
+    row.push(item?.account_no);
+    row.push(item?.location?.name);
+    row.push(item?.supplier?.company_name);
+    row.push(moment(item.created_at).format("MMM, DD YYYY"));
+    row.push(moment(item.updated_at).format("MMM, DD YYYY"));
+    mainSheet.addRow(row);
+  });
+
+  // Save the workbook
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  });
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.setAttribute("download", `${sheet}.xlsx`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
+export {
+  generateExcel,
+  generateExcelwTag,
+  generateExcelwSupplier,
+  generateExcelAccount,
+};

@@ -214,6 +214,7 @@ const UserModal = ({ menuData, view, update }) => {
     }
   };
 
+  console.log(watch("role_id"));
   const submitHandler = async (submitdata) => {
     const obj = {
       id: update || view ? menuData?.id : "",
@@ -243,10 +244,12 @@ const UserModal = ({ menuData, view, update }) => {
       position: submitdata?.position,
       role_id: submitdata?.role_id?.id,
       username: submitdata?.username,
-      amount: {
-        min_amount: submitdata?.min_amount,
-        max_amount: submitdata?.max_amount,
-      },
+      amount: watch("role_id")?.access_permission?.includes("approver")
+        ? {
+            min_amount: submitdata?.min_amount,
+            max_amount: submitdata?.max_amount,
+          }
+        : null,
       ap_tagging:
         update || view
           ? submitdata?.ap_tagging?.map((item) => ({

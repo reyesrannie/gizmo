@@ -16,6 +16,7 @@ import PrecisionManufacturingOutlinedIcon from "@mui/icons-material/PrecisionMan
 import StyleOutlinedIcon from "@mui/icons-material/StyleOutlined";
 import LocalOfferOutlinedIcon from "@mui/icons-material/LocalOfferOutlined";
 import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
+import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 
 import "../../components/styles/CardNavigation.scss";
 const user = [
@@ -174,6 +175,21 @@ const masterlist = [
       <NavigationOutlinedIcon className="icon-last" color="secondary" />
     ),
   },
+  {
+    path: "/masterlist/account-number",
+    desc: "A module for managing Account Number .",
+    name: "Account Number",
+    permission: ["account-number"],
+    firstIcon: (
+      <AccountCircleOutlinedIcon
+        color="secondary"
+        className="icon-card-details"
+      />
+    ),
+    lastIcon: (
+      <NavigationOutlinedIcon className="icon-last" color="secondary" />
+    ),
+  },
 ];
 
 const tagging = [
@@ -290,6 +306,12 @@ const menu = [
         path: "/masterlist/documenttype",
         permission: ["d-type"],
       },
+      {
+        desc: "Account Number",
+        icon: <AccountCircleOutlinedIcon />,
+        path: "/masterlist/account-number",
+        permission: ["account-number"],
+      },
     ],
   },
   {
@@ -362,6 +384,10 @@ const routes = [
       {
         path: "/masterlist/documenttype",
         name: "Document Type",
+      },
+      {
+        path: "/masterlist/account-number",
+        name: "Account Number",
       },
     ],
   },

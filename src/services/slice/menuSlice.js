@@ -14,9 +14,12 @@ const initialState = {
   importTitle: "",
   importLoading: false,
   importError: null,
-
   viewMenu: false,
   menuData: null,
+  header: "Tag Transaction",
+  isExpanded: false,
+  filterBy: "",
+  filter: false,
 };
 
 const menutSlice = createSlice({
@@ -68,6 +71,18 @@ const menutSlice = createSlice({
     setMenuData: (state, action) => {
       state.menuData = action.payload;
     },
+    setHeader: (state, action) => {
+      state.header = action.payload;
+    },
+    setIsExpanded: (state, action) => {
+      state.isExpanded = action.payload;
+    },
+    setFilterBy: (state, action) => {
+      state.filterBy = action.payload;
+    },
+    setFilter: (state, action) => {
+      state.filter = action.payload;
+    },
 
     resetMenu: () => {
       return initialState;
@@ -92,6 +107,10 @@ export const {
   setImportError,
   resetMenu,
   setMenuData,
+  setHeader,
+  setIsExpanded,
+  setFilterBy,
+  setFilter,
 } = menutSlice.actions;
 
 export default menutSlice.reducer;

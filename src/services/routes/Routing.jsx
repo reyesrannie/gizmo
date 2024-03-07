@@ -21,6 +21,7 @@ import Tagging from "../../screen/tagging/Tagging";
 import PageNotFound from "../../screen/PageNotFound";
 import TagTransaction from "../../screen/tagging/TagTransaction";
 import DocumentType from "../../screen/masterlist/document/DocumentType";
+import AccountNumber from "../../screen/masterlist/supplier/AccountNumber";
 
 const Routing = () => {
   const user = decodeUser();
@@ -84,6 +85,7 @@ const Routing = () => {
             "vat",
             "atc",
             "s-type",
+            "account-number",
           ]) ? (
             <Masterlist />
           ) : (
@@ -158,6 +160,14 @@ const Routing = () => {
           path: "documenttype",
           element: hasAccess(["d-type"]) ? (
             <DocumentType />
+          ) : (
+            <Navigate to={"/masterlist"} />
+          ),
+        },
+        {
+          path: "account-number",
+          element: hasAccess(["account-number"]) ? (
+            <AccountNumber />
           ) : (
             <Navigate to={"/masterlist"} />
           ),

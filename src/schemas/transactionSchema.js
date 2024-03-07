@@ -2,9 +2,12 @@ import * as Yup from "yup";
 
 const transactionSchema = Yup.object({
   tag_no: Yup.string().required("Tag number is required"),
+  ap: Yup.object().required("AP number required").typeError("AP is required"),
+
   tin: Yup.object().required("TIN is required"),
   name_in_receipt: Yup.string().required("Name is required"),
   proprietor: Yup.string().nullable(),
+  description: Yup.string(),
   document_type: Yup.object().required("Document type is required"),
   ref_no: Yup.string().when("document_type", {
     is: (document_type) => document_type?.required_fields?.includes("ref_no"),

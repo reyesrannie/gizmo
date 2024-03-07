@@ -31,6 +31,8 @@ export const jsonServerAPI = createApi({
     "SupplierType",
     "Supplier",
     "DocumentType",
+    "AccountNumber",
+    "Transaction",
   ],
   endpoints: (builder) => ({
     login: builder.mutation({
@@ -551,6 +553,95 @@ export const jsonServerAPI = createApi({
         params: payload,
       }),
     }),
+    accountNumber: builder.query({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/account-number`,
+        method: "GET",
+        params: payload,
+      }),
+      providesTags: ["AccountNumber"],
+    }),
+    createAccountNumber: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/account-number`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["AccountNumber"],
+    }),
+    importAccountNumber: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/import/account-number`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["AccountNumber"],
+    }),
+    updateAccountNumber: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/account-number/${payload.id}`,
+        method: "PUT",
+        body: payload,
+      }),
+      invalidatesTags: ["AccountNumber"],
+    }),
+    archiveAccountNumber: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/archive/account-number/${payload.id}`,
+        method: "PATCH",
+        body: payload,
+      }),
+      invalidatesTags: ["AccountNumber"],
+    }),
+    transaction: builder.query({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/transaction`,
+        method: "GET",
+        params: payload,
+      }),
+      providesTags: ["Transaction"],
+    }),
+    createTransaction: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/transaction`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["Transaction"],
+    }),
+    updateTransaction: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/transaction/${payload.id}`,
+        method: "PUT",
+        body: payload,
+      }),
+      invalidatesTags: ["Transaction"],
+    }),
+    archiveTransaction: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/archive/transaction/${payload.id}`,
+        method: "PATCH",
+        body: payload,
+      }),
+      invalidatesTags: ["Transaction"],
+    }),
+    tagYearMonth: builder.query({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `tag-year/transaction`,
+        method: "GET",
+        params: payload,
+      }),
+    }),
   }),
 });
 
@@ -625,4 +716,17 @@ export const {
   useArchiveDocumentTypeMutation,
 
   useTagMonthYearQuery,
+
+  useAccountNumberQuery,
+  useCreateAccountNumberMutation,
+  useArchiveAccountNumberMutation,
+  useUpdateAccountNumberMutation,
+  useImportAccountNumberMutation,
+
+  useTransactionQuery,
+  useCreateTransactionMutation,
+  useUpdateTransactionMutation,
+  useArchiveTransactionMutation,
+
+  useTagYearMonthQuery,
 } = jsonServerAPI;

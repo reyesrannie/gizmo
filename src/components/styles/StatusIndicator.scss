@@ -8,6 +8,16 @@
   }
 }
 
+.pending-indicator {
+  &.MuiChip-root {
+    border-radius: 20px;
+    font-size: 10px;
+    font-family: Roboto-Medium;
+    color: #1a1d24;
+    background-color: #ffc107;
+  }
+}
+
 .inActive-indicator {
   &.MuiChip-root {
     border-radius: 20px;

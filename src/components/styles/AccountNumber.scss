@@ -1,26 +1,12 @@
-.page-text-indicator-tag-transaction {
+.page-text-indicator-account-number {
   &.MuiTypography-root {
     font-family: "Roboto-Black";
     font-size: 24px;
+    margin-left: 20px;
   }
 }
 
-.page-text-accord-tag-transaction {
-  &.MuiTypography-root {
-    font-family: "Roboto-Black";
-    font-size: 18px;
-  }
-}
-
-.page-tag-transaction {
-  &.MuiTypography-root {
-    font-family: "Roboto-Black";
-    font-size: 24px;
-    margin-left: 18px;
-  }
-}
-
-.tag-transaction-head-container {
+.account-number-head-container {
   &.MuiBox-root {
     display: flex;
     align-items: center;
@@ -29,53 +15,7 @@
   }
 }
 
-.tag-transaction-navigation-container {
-  &.MuiBox-root {
-    display: flex;
-    align-items: center;
-    margin-left: 25px;
-  }
-}
-
-.tag-transaction-accordion {
-  &.MuiAccordion-root {
-    z-index: 99;
-    position: relative;
-    padding: 0;
-    max-height: 60px;
-    transition: none;
-    background-color: transparent;
-
-    .MuiButtonBase-root {
-      cursor: default !important;
-    }
-
-    &.Mui-expanded {
-      margin: 0;
-
-      .MuiButtonBase-root {
-        max-height: 60px;
-        background-color: #f2f2f2;
-        cursor: pointer !important;
-        &:hover {
-          background-color: #b9b9b9;
-        }
-      }
-      .MuiAccordionSummary-root {
-        max-height: 60px;
-        margin: 0;
-      }
-      .MuiAccordionDetails-root {
-        padding: 0;
-        margin: 0;
-        max-height: none;
-        overflow: visible;
-      }
-    }
-  }
-}
-
-.tag-transaction-button-container {
+.account-number-button-container {
   &.MuiBox-root {
     display: flex;
     align-items: center;
@@ -84,7 +24,7 @@
   }
 }
 
-.tag-transaction-body-container {
+.account-number-body-container {
   &.MuiBox-root {
     display: flex;
     align-items: center;
@@ -96,17 +36,17 @@
   }
 }
 
-.loading-tag-transaction {
+.loading-account-number {
   height: 500px;
 }
 
-.no-data-tag-transaction {
+.no-data-account-number {
   height: 500px;
   opacity: 0.7;
   filter: grayscale(0.3);
 }
 
-.tag-transaction-table-container {
+.account-number-table-container {
   &.MuiTableContainer-root {
     max-height: 735px;
     &::-webkit-scrollbar {
@@ -132,7 +72,18 @@
   }
 }
 
-.table-header1-import-tag-transaction {
+.table-header1-account-number {
+  &.MuiTableRow-root {
+    .MuiTableCell-root {
+      border: none;
+      font-family: Roboto-Bold;
+      letter-spacing: 1px;
+      padding: 10px;
+    }
+  }
+}
+
+.table-header-account-number {
   &.MuiTableRow-root {
     .MuiTableCell-root {
       border: none;
@@ -140,54 +91,19 @@
       letter-spacing: 1px;
       color: #f4ce92;
       background-color: #15253b;
+      padding: 14px;
     }
   }
 }
 
-.table-sort-tag-transaction {
-  .MuiPaper-root {
-    width: 230px;
-    padding: 10px;
-    border-radius: 10px;
-    overflow: visible !important;
-  }
-}
-
-.table-sort-select-tag-transaction {
-  &.MuiFormControl-root {
-    border-radius: 10px;
-    min-width: 230px;
-    max-width: 230px;
-    min-height: 63px;
-
-    .MuiInputBase-root {
-      border-radius: 10px;
-      font-family: Roboto-Medium;
-      letter-spacing: 1px;
-      font-size: 14px;
-    }
-    .MuiFormLabel-root {
-      overflow: visible !important;
-      font-family: Roboto-Medium;
-      letter-spacing: 1px;
-    }
-    .MuiFormHelperText-root {
-      font-family: Roboto-Light;
-      letter-spacing: 1px;
-    }
-    .MuiSvgIcon-root {
-      font-size: 20px;
-    }
-  }
-}
-
-.table-body-tag-transaction {
+.table-body-account-number {
   &.MuiTableRow-root {
     .MuiTableCell-root {
       border-bottom: 4px solid #f2f2f2;
       padding: 8px;
       font-family: Roboto-Light;
       letter-spacing: 1px;
+      max-width: 500px;
     }
     &:hover {
       background-color: #f2f2f2;
@@ -195,7 +111,40 @@
   }
 }
 
-.table-footer-tag-transaction {
+.account-number-company-name {
+  &.MuiTypography-root {
+    font-family: Roboto-Black;
+    letter-spacing: 1px;
+    font-size: 14px;
+  }
+}
+
+.account-number-company-tin {
+  &.MuiTypography-root {
+    font-family: Roboto-Medium;
+    letter-spacing: 1px;
+    font-size: 14px;
+    color: #f4ce92;
+  }
+}
+
+.account-number-company-address {
+  &.MuiTypography-root {
+    font-family: Roboto-Light;
+    letter-spacing: 1px;
+    font-size: 12px;
+  }
+}
+.account-number-company-proprietor {
+  &.MuiTypography-root {
+    font-family: Roboto-Light;
+    letter-spacing: 1px;
+    font-size: 12px;
+    color: #b6622d;
+  }
+}
+
+.table-footer-account-number {
   &.MuiTableRow-root {
     .MuiTableCell-root {
       border: none;
@@ -221,94 +170,52 @@
   }
 }
 
-.tag-transaction-company-name {
-  &.MuiTypography-root {
-    font-family: Roboto-Black;
-    letter-spacing: 1px;
-    font-size: 14px;
-  }
-}
-
-.tag-transaction-company-tin {
-  &.MuiTypography-root {
-    font-family: Roboto-Medium;
-    letter-spacing: 1px;
-    font-size: 14px;
-    color: #f4ce92;
-  }
-}
-.tag-transaction-company-type {
-  &.MuiTypography-root {
-    font-family: Roboto-Light;
-    letter-spacing: 1px;
-    font-size: 14px;
-  }
-}
-
-.tag-transaction-company-gtag {
-  &.MuiTypography-root {
-    font-family: Roboto-Light;
-    letter-spacing: 1px;
-    font-size: 14px;
-    color: #f4ce92;
-  }
-}
-
-.tag-transaction-company-proprietor {
-  &.MuiTypography-root {
-    font-family: Roboto-Light;
-    letter-spacing: 1px;
-    font-size: 12px;
-    color: #b6622d;
-  }
-}
-
-.tag-transaction-icon-actions {
+.account-number-icon-actions {
   &.MuiSvgIcon-root {
     font-size: 20px;
   }
 }
 
-.tag-transaction-menu-icons {
+.account-number-menu-icons {
   &.MuiSvgIcon-root {
     font-size: 20px;
   }
 }
 
-.tag-transaction-menu-text {
+.account-number-menu-text {
   &.MuiTypography-root {
     font-size: 14px;
     font-family: Roboto-Medium;
   }
 }
 
-.button-add-tag-transaction {
+.button-add-account-number {
   &.MuiButtonBase-root {
     text-transform: none;
     font-family: Roboto-Medium;
   }
 }
 
-.tag-transaction-modal-dialog {
+.account-number-modal-dialog {
   .MuiPaper-root {
     max-width: 810px;
   }
 }
 
-.tag-transaction-icon-actions {
+.account-number-icon-actions {
   &.MuiSvgIcon-root {
     font-size: 20px;
   }
 }
 
-.loading-tag-transaction-create {
+.loading-account-number-create {
   .MuiPaper-root {
     box-shadow: none;
     background-color: transparent;
   }
 }
 
-.button-export-tag-transaction {
+.button-export-account-number {
   &.MuiButtonBase-root {
     text-transform: none;
     font-family: Roboto-Medium;
@@ -316,26 +223,20 @@
   }
 }
 
-.header-options-tag-transaction {
+.header-options-account-number {
   &.MuiBox-root {
     background-color: #15253b;
   }
 }
 
-.transaction-modal-dialog {
-  .MuiPaper-root {
-    max-width: 990px;
-  }
-}
-
 @media (max-height: 768px) {
-  .page-text-indicator-tag-transaction {
+  .page-text-indicator-account-number {
     &.MuiTypography-root {
       font-size: 18px;
     }
   }
 
-  .tag-transaction-head-container {
+  .account-number-head-container {
     &.MuiBox-root {
       display: flex;
       align-items: center;
@@ -344,7 +245,7 @@
     }
   }
 
-  .check-box-archive-tag-transaction {
+  .check-box-archive-account-number {
     &.MuiFormControlLabel-root {
       .MuiSvgIcon-root {
         font-size: 16px;
@@ -355,21 +256,21 @@
     }
   }
 
-  .loading-tag-transaction {
+  .loading-account-number {
     height: 350px;
   }
 
-  .no-data-tag-transaction {
+  .no-data-account-number {
     height: 350px;
   }
 
-  .tag-transaction-table-container {
+  .account-number-table-container {
     &.MuiTableContainer-root {
       max-height: 500px;
     }
   }
 
-  .table-header1-tag-transaction {
+  .table-header1-account-number {
     &.MuiTableRow-root {
       .MuiTableCell-root {
         padding: 5px;
@@ -377,7 +278,7 @@
     }
   }
 
-  .table-header-tag-transaction {
+  .table-header-account-number {
     &.MuiTableRow-root {
       .MuiTableCell-root {
         padding: 10px;
@@ -386,7 +287,7 @@
     }
   }
 
-  .table-body-tag-transaction {
+  .table-body-account-number {
     &.MuiTableRow-root {
       .MuiTableCell-root {
         padding: 4px;
@@ -395,7 +296,7 @@
     }
   }
 
-  .table-footer-tag-transaction {
+  .table-footer-account-number {
     &.MuiTableRow-root {
       .MuiTableCell-root {
         border: none;
@@ -424,26 +325,26 @@
     }
   }
 
-  .tag-transaction-icon-actions {
+  .account-number-icon-actions {
     &.MuiSvgIcon-root {
       font-size: 18px;
     }
   }
 
-  .tag-transaction-menu-icons {
+  .account-number-menu-icons {
     &.MuiSvgIcon-root {
       font-size: 18px;
     }
   }
 
-  .tag-transaction-menu-text {
+  .account-number-menu-text {
     &.MuiTypography-root {
       font-size: 12px;
       font-family: Roboto-Medium;
     }
   }
 
-  .button-add-tag-transaction {
+  .button-add-account-number {
     &.MuiButtonBase-root {
       text-transform: none;
       font-family: Roboto-Medium;
@@ -456,25 +357,19 @@
     }
   }
 
-  .tag-transaction-modal-dialog {
-    .MuiPaper-root {
-      max-width: 400px;
-    }
-  }
-
-  .tag-transaction-icon-actions {
+  .account-number-icon-actions {
     &.MuiSvgIcon-root {
       font-size: 18px;
     }
   }
 
-  .loading-tag-transaction-create {
+  .loading-account-number-create {
     .MuiPaper-root {
       box-shadow: none;
       background-color: transparent;
     }
   }
-  .button-export-tag-transaction {
+  .button-export-account-number {
     &.MuiButtonBase-root {
       font-size: 11px;
     }

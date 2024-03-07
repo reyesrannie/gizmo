@@ -6,6 +6,7 @@ import {
   Paper,
   Typography,
   TextField as MuiTextField,
+  IconButton,
 } from "@mui/material";
 import React, { useEffect } from "react";
 
@@ -19,34 +20,36 @@ import moment from "moment";
 import { LoadingButton } from "@mui/lab";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { resetMenu } from "../../../services/slice/menuSlice";
 import {
+  useAccountNumberQuery,
   useApQuery,
-  useCreateCompanyMutation,
+  useCreateTransactionMutation,
   useDocumentTypeQuery,
+  useLocationQuery,
   useSupplierQuery,
   useTagMonthYearQuery,
-  useUpdateCompanyMutation,
+  useUpdateTransactionMutation,
 } from "../../../services/store/request";
 import { useSnackbar } from "notistack";
 import { objectError } from "../../../services/functions/errorResponse";
 import Autocomplete from "../AutoComplete";
-import { setFieldsRequired } from "../../../services/slice/transactionSlice";
 import { DatePicker } from "@mui/x-date-pickers";
 import useTaggingHook from "../../../services/hooks/useTaggingHook";
 import dayjs from "dayjs";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import transactionSchema from "../../../schemas/transactionSchema";
+import ClearIcon from "@mui/icons-material/Clear";
 
 const TransactionModal = ({ transactionData, view, update }) => {
   const dispatch = useDispatch();
 
   const { enqueueSnackbar } = useSnackbar();
 
-  const [createTransaction, { isLoading }] = useCreateCompanyMutation();
+  const [createTransaction, { isLoading }] = useCreateTransactionMutation();
   const [updateTransaction, { isLoading: updateLoading }] =
-    useUpdateCompanyMutation();
+    useUpdateTransactionMutation();
 
   const { params, onDateChange } = useTaggingHook();
 
@@ -54,20 +57,50 @@ const TransactionModal = ({ transactionData, view, update }) => {
     data: gtag,
     isLoading: gTagIsLoading,
     isSuccess: gTagSuccess,
-    refetch,
+    isFetching,
   } = useTagMonthYearQuery(params);
 
-  const { data: tin, isLoading: loadingTIN } = useSupplierQuery({
+  const {
+    data: tin,
+    isLoading: loadingTIN,
+    isSuccess: supplySuccess,
+  } = useSupplierQuery({
     status: "active",
     pagination: "none",
   });
 
-  const { data: document, isLoading: loadingDocument } = useDocumentTypeQuery({
+  const {
+    data: document,
+    isLoading: loadingDocument,
+    isSuccess: documentSuccess,
+  } = useDocumentTypeQuery({
     status: "active",
     pagination: "none",
   });
 
-  const { data: ap, isLoading: loadingAp } = useApQuery({
+  const {
+    data: ap,
+    isLoading: loadingAp,
+    isSuccess: apSuccess,
+  } = useApQuery({
+    status: "active",
+    pagination: "none",
+  });
+
+  const {
+    data: accountNumber,
+    isLoading: loadingAccountNumber,
+    isSuccess: accountSuccess,
+  } = useAccountNumberQuery({
+    status: "active",
+    pagination: "none",
+  });
+
+  const {
+    data: location,
+    isLoading: loadingLocation,
+    isSuccess: locationSuccess,
+  } = useLocationQuery({
     status: "active",
     pagination: "none",
   });
@@ -83,6 +116,7 @@ const TransactionModal = ({ transactionData, view, update }) => {
     resolver: yupResolver(transactionSchema),
     defaultValues: {
       tag_no: "",
+      description: "",
       supplier: "",
       proprietor: "",
       company_address: "",
@@ -110,6 +144,39 @@ const TransactionModal = ({ transactionData, view, update }) => {
     },
   });
 
+  const handleClear = (e) => {
+    const defaultValue = {
+      supplier: "",
+      proprietor: "",
+      company_address: "",
+      name_in_receipt: "",
+      ref_no: "",
+      delivery_invoice: "",
+      sales_invoice: "",
+      charge_invoice: "",
+      amount_withheld: "",
+      amount_check: "",
+      amount: "",
+      vat: "",
+      cost: "",
+      document_type: null,
+      account_number: null,
+      store: null,
+      coverage_from: null,
+      coverage_to: null,
+    };
+
+    Object.entries(defaultValue).forEach(([key, value]) => {
+      setValue(key, value);
+    });
+
+    if (!e) {
+      handleAutoFill();
+    } else {
+      setValue("tin", null);
+    }
+  };
+
   const handleAutoFill = () => {
     const items = {
       supplier: watch("tin")?.company_name || "",
@@ -121,61 +188,175 @@ const TransactionModal = ({ transactionData, view, update }) => {
           (item) =>
             item.code === watch("tin")?.supplier_documenttypes[0]?.document_code
         ) || null,
+      account_number: accountNumber?.result?.find(
+        (item) => watch("tin")?.id === item?.supplier?.id || null
+      ),
+      tag_month_year: dayjs(new Date(), { locale: AdapterDayjs.locale }),
     };
 
     Object.entries(items).forEach(([key, value]) => {
       setValue(key, value);
     });
-    const docs = watch("tin")?.supplier_documenttypes[0];
-    dispatch(
-      setFieldsRequired(
-        document?.result?.find((item) => item.code === docs.document_code)
+
+    setValue(
+      "store",
+      location?.result?.find(
+        (item) => watch("account_number")?.location?.id === item?.id || null
       )
     );
   };
 
   useEffect(() => {
-    if (gTagSuccess) {
+    if (gTagSuccess && !update) {
       const tagNoG = parseInt(gtag?.result) + 1 || 1;
-      setValue(
-        "tag_month_year",
-        dayjs(new Date(), { locale: AdapterDayjs.locale })
-      );
+
       setValue("g_tag_number", tagNoG.toString().padStart(4, "0"));
     }
-  }, [gTagSuccess, gtag]);
+    if (
+      gTagSuccess &&
+      supplySuccess &&
+      documentSuccess &&
+      apSuccess &&
+      accountSuccess &&
+      locationSuccess &&
+      update
+    ) {
+      const tagMonthYear = dayjs(transactionData?.tag_year, "YYMM").toDate();
+
+      const values = {
+        tag_no: transactionData?.tag_no || "",
+        supplier: transactionData?.supplier?.name || "",
+        proprietor: transactionData?.supplier?.proprietor || "",
+        company_address: transactionData?.supplier?.address || "",
+        name_in_receipt: transactionData?.supplier?.receipt_name || "",
+        ref_no: transactionData?.reference_no || "",
+        delivery_invoice: transactionData?.delivery_invoice || "",
+        sales_invoice: transactionData?.sales_invoice || "",
+        charge_invoice: transactionData?.charged_invoice || "",
+        amount_withheld: transactionData?.amount_check || "",
+        amount_check: transactionData?.amount_withheld || "",
+        amount: transactionData?.purchase_amount || "",
+        vat: transactionData?.vat_amount || "",
+        cost: transactionData?.cost || "",
+        g_tag_number: transactionData?.gtag_no || "",
+        description: transactionData?.description || "",
+        ap:
+          ap?.result?.find(
+            (item) => transactionData?.apTagging?.id === item.id
+          ) || null,
+        tin:
+          tin?.result?.find(
+            (item) => transactionData?.supplier?.id === item.id
+          ) || null,
+        date_invoice:
+          dayjs(new Date(transactionData?.date_invoice), {
+            locale: AdapterDayjs.locale,
+          }) || null,
+        date_recieved:
+          dayjs(new Date(transactionData?.date_received), {
+            locale: AdapterDayjs.locale,
+          }) || null,
+        tag_month_year:
+          dayjs(new Date(tagMonthYear), {
+            locale: AdapterDayjs.locale,
+          }) || null,
+        document_type:
+          document?.result?.find(
+            (item) => transactionData?.documentType?.id === item.id
+          ) || null,
+        account_number:
+          accountNumber?.result?.find(
+            (item) => transactionData?.accountNumber?.id === item.id
+          ) || null,
+        store:
+          location?.result?.find(
+            (item) => transactionData?.location?.id === item.id
+          ) || null,
+        coverage_from:
+          dayjs(new Date(transactionData?.coverage_from), {
+            locale: AdapterDayjs.locale,
+          }) || null,
+        coverage_to:
+          dayjs(new Date(transactionData?.coverage_to), {
+            locale: AdapterDayjs.locale,
+          }) || null,
+      };
+
+      Object.entries(values).forEach(([key, value]) => {
+        setValue(key, value);
+      });
+    }
+  }, [
+    gTagSuccess,
+    gtag,
+    supplySuccess,
+    documentSuccess,
+    apSuccess,
+    accountSuccess,
+    locationSuccess,
+    transactionData,
+    document,
+    ap,
+    location,
+    accountNumber,
+    tin,
+  ]);
 
   const checkField = (field) => {
     return watch("document_type")?.required_fields?.includes(field);
   };
 
-  console.log(errors);
   const submitHandler = async (submitData) => {
-    console.log(submitData);
+    const obj = {
+      tag_no: submitData?.tag_no,
+      date_invoice: moment(submitData?.date_invoice).format("YYYY-MM-DD"),
+      date_received: moment(submitData?.date_received).format("YYYY-MM-DD"),
+      document_type_id: submitData?.document_type?.id,
+      supplier_id: submitData?.tin?.id,
+      description: submitData?.description || "",
+      reference_no: submitData?.ref_no,
+      delivery_invoice: submitData?.delivery_invoice || "",
+      sales_invoice: submitData?.sales_invoice || "",
+      charged_invoice: submitData?.charged_invoice || "",
+      purchase_amount: submitData?.amount,
+      amount_withheld: submitData?.amount_withheld || "",
+      amount_check: submitData?.amount_check || "",
+      vat_amount: submitData?.vat || "",
+      cost: submitData?.cost || "",
+      description: submitData?.description || "",
+      location_id: submitData?.store?.id,
+      coverage_from: submitData?.coverage_from
+        ? moment(submitData?.coverage_from).format("YYYY-MM-DD")
+        : null,
+      coverage_to:
+        submitData?.coverage_to !== null
+          ? moment(submitData?.coverage_to).format("YYYY-MM-DD")
+          : null,
+      account_number_id: submitData?.account_number?.id,
+      ap_tagging_id: submitData?.ap?.id,
+      tag_year: moment(submitData?.tag_month_year).format("YYMM"),
+      gtag_no: submitData?.g_tag_number,
+      id: view || update ? transactionData?.id : null,
+    };
 
-    // const obj = {
-    //   ...submitData,
-    //   id: view || update ? transactionData?.id : null,
-    // };
-    // if (update) {
-    //   try {
-    //     const res = await updateTransaction(obj).unwrap();
-    //     enqueueSnackbar(res?.message, { variant: "success" });
-    //     dispatch(resetMenu());
-    //   } catch (error) {
-    //     objectError(error, setError, enqueueSnackbar);
-    //   }
-    // } else {
-    //   try {
-    //     const res = await createTransaction(obj).unwrap();
-    //     enqueueSnackbar(res?.message, { variant: "success" });
-    //     dispatch(resetMenu());
-    //   } catch (error) {
-    //     objectError(error, setError, enqueueSnackbar);
-    //   }
-    // }
+    if (update) {
+      try {
+        const res = await updateTransaction(obj).unwrap();
+        enqueueSnackbar(res?.message, { variant: "success" });
+        dispatch(resetMenu());
+      } catch (error) {
+        objectError(error, setError, enqueueSnackbar);
+      }
+    } else {
+      try {
+        const res = await createTransaction(obj).unwrap();
+        enqueueSnackbar(res?.message, { variant: "success" });
+        dispatch(resetMenu());
+      } catch (error) {
+        objectError(error, setError, enqueueSnackbar);
+      }
+    }
   };
-
   return (
     <Paper className="transaction-modal-container">
       <img
@@ -219,19 +400,40 @@ const TransactionModal = ({ transactionData, view, update }) => {
           options={tin?.result || []}
           getOptionLabel={(option) => `${option.tin}`}
           isOptionEqualToValue={(option, value) => option?.id === value?.id}
-          onClose={() => handleAutoFill()}
+          onClose={() => {
+            handleClear(false);
+          }}
           renderInput={(params) => (
             <MuiTextField
               name="ap_tagging"
               {...params}
-              label="TIN"
+              label="TIN *"
               size="small"
               variant="outlined"
               error={Boolean(errors.tin)}
               helperText={errors.tin?.message}
               className="transaction-form-textBox"
+              InputProps={{
+                ...params.InputProps,
+                endAdornment: (
+                  <>
+                    {params.InputProps.endAdornment}
+                    {watch("tin") && (
+                      <IconButton
+                        onClick={() => {
+                          handleClear(true);
+                        }}
+                        className="icon-clear-user"
+                      >
+                        <ClearIcon />
+                      </IconButton>
+                    )}
+                  </>
+                ),
+              }}
             />
           )}
+          disableClearable
         />
         <AppTextBox
           disabled
@@ -247,7 +449,7 @@ const TransactionModal = ({ transactionData, view, update }) => {
           disabled
           control={control}
           name={"proprietor"}
-          label={"Proprietor *"}
+          label={"Proprietor"}
           color="primary"
           className="transaction-form-textBox"
           error={Boolean(errors?.proprietor)}
@@ -290,7 +492,7 @@ const TransactionModal = ({ transactionData, view, update }) => {
               <MuiTextField
                 name="document_type"
                 {...params}
-                label="Document type"
+                label="Document type *"
                 size="small"
                 variant="outlined"
                 error={Boolean(errors.document_type)}
@@ -303,12 +505,13 @@ const TransactionModal = ({ transactionData, view, update }) => {
         <Controller
           name="date_invoice"
           control={control}
-          render={({ field: { onChange, ...restField } }) => (
+          render={({ field: { onChange, value, ...restField } }) => (
             <Box className="date-picker-container">
               <DatePicker
                 className="transaction-form-date"
-                label="Date Invoice"
+                label="Date Invoice *"
                 format="YYYY-MM-DD"
+                value={value}
                 onChange={(e) => {
                   onChange(e);
                 }}
@@ -324,12 +527,13 @@ const TransactionModal = ({ transactionData, view, update }) => {
         <Controller
           name="date_recieved"
           control={control}
-          render={({ field: { onChange, ...restField } }) => (
+          render={({ field: { onChange, value, ...restField } }) => (
             <Box className="date-picker-container">
               <DatePicker
                 className="transaction-form-date"
-                label="Date received"
+                label="Date received *"
                 format="YYYY-MM-DD"
+                value={value}
                 onChange={(e) => {
                   onChange(e);
                 }}
@@ -382,7 +586,7 @@ const TransactionModal = ({ transactionData, view, update }) => {
             disabled={view}
             control={control}
             name={"sales_invoice"}
-            label={"Sales Invoice*"}
+            label={"Sales Invoice *"}
             color="primary"
             className="transaction-form-textBox"
             error={Boolean(errors?.sales_invoice)}
@@ -394,7 +598,7 @@ const TransactionModal = ({ transactionData, view, update }) => {
             disabled={view}
             control={control}
             name={"charge_invoice"}
-            label={"Charge Invoice*"}
+            label={"Charge Invoice *"}
             color="primary"
             className="transaction-form-textBox"
             error={Boolean(errors?.charge_invoice)}
@@ -418,7 +622,7 @@ const TransactionModal = ({ transactionData, view, update }) => {
             disabled={view}
             control={control}
             name={"amount_withheld"}
-            label={"Amount withheld*"}
+            label={"Amount withheld *"}
             color="primary"
             className="transaction-form-textBox"
             error={Boolean(errors?.amount_withheld)}
@@ -431,7 +635,7 @@ const TransactionModal = ({ transactionData, view, update }) => {
             disabled={view}
             control={control}
             name={"amount_check"}
-            label={"Amount of check*"}
+            label={"Amount of check *"}
             color="primary"
             className="transaction-form-textBox"
             error={Boolean(errors?.amount_check)}
@@ -464,6 +668,16 @@ const TransactionModal = ({ transactionData, view, update }) => {
             helperText={errors?.cost?.message}
           />
         )}
+        <AppTextBox
+          multiline
+          minRows={1}
+          control={control}
+          name={"description"}
+          className="transaction-form-field-textBox "
+          label="Description (Optional)"
+          error={Boolean(errors.description)}
+          helperText={errors.description?.message}
+        />
 
         {checkField("coverage") && (
           <>
@@ -480,12 +694,13 @@ const TransactionModal = ({ transactionData, view, update }) => {
             <Controller
               name="coverage_from"
               control={control}
-              render={({ field: { onChange, ...restField } }) => (
+              render={({ field: { onChange, value, ...restField } }) => (
                 <Box className="date-picker-container">
                   <DatePicker
                     className="transaction-form-date"
-                    label="From"
+                    label="From *"
                     format="YYYY-MM-DD"
+                    value={value}
                     maxDate={watch("coverage_to")}
                     onChange={(e) => {
                       onChange(e);
@@ -502,13 +717,14 @@ const TransactionModal = ({ transactionData, view, update }) => {
             <Controller
               name="coverage_to"
               control={control}
-              render={({ field: { onChange, ...restField } }) => (
+              render={({ field: { onChange, value, ...restField } }) => (
                 <Box className="date-picker-container">
                   <DatePicker
                     className="transaction-form-date"
-                    label="To"
+                    label="To *"
                     minDate={watch("coverage_from")}
                     format="YYYY-MM-DD"
+                    value={value}
                     onChange={(e) => {
                       onChange(e);
                     }}
@@ -527,13 +743,11 @@ const TransactionModal = ({ transactionData, view, update }) => {
                 control={control}
                 name={"account_number"}
                 options={
-                  watch("tin")?.supplier_documenttypes?.map((item) =>
-                    document?.result?.find(
-                      (docs) => item.document_code === docs.code
-                    )
+                  accountNumber?.result?.filter(
+                    (account) => account?.supplier?.id === watch("tin")?.id
                   ) || []
                 }
-                getOptionLabel={(option) => `${option.name}`}
+                getOptionLabel={(option) => `${option.account_no}`}
                 isOptionEqualToValue={(option, value) =>
                   option?.code === value?.code
                 }
@@ -541,7 +755,7 @@ const TransactionModal = ({ transactionData, view, update }) => {
                   <MuiTextField
                     name="account_number"
                     {...params}
-                    label="Account Number"
+                    label="Account Number *"
                     size="small"
                     variant="outlined"
                     error={Boolean(errors.account_number)}
@@ -556,10 +770,8 @@ const TransactionModal = ({ transactionData, view, update }) => {
                 control={control}
                 name={"store"}
                 options={
-                  watch("tin")?.supplier_documenttypes?.map((item) =>
-                    document?.result?.find(
-                      (docs) => item.document_code === docs.code
-                    )
+                  location?.result?.filter(
+                    (item) => watch("account_number")?.location?.id === item?.id
                   ) || []
                 }
                 getOptionLabel={(option) => `${option.name}`}
@@ -570,7 +782,7 @@ const TransactionModal = ({ transactionData, view, update }) => {
                   <MuiTextField
                     name="store"
                     {...params}
-                    label="Store"
+                    label="Store *"
                     size="small"
                     variant="outlined"
                     error={Boolean(errors.store)}
@@ -600,7 +812,7 @@ const TransactionModal = ({ transactionData, view, update }) => {
             <MuiTextField
               name="ap_tagging"
               {...params}
-              label="AP"
+              label="AP *"
               size="small"
               variant="outlined"
               error={Boolean(errors.ap)}
@@ -615,8 +827,9 @@ const TransactionModal = ({ transactionData, view, update }) => {
           render={({ field: { onChange, value, ...restField } }) => (
             <Box className="date-picker-container">
               <DatePicker
+                disabled={update}
                 className="transaction-form-date"
-                label="Tag year month"
+                label="Tag year month *"
                 format="YY MM"
                 value={value}
                 views={["month", "year"]}
@@ -674,7 +887,11 @@ const TransactionModal = ({ transactionData, view, update }) => {
           updateLoading ||
           loadingTIN ||
           loadingDocument ||
-          gTagIsLoading
+          gTagIsLoading ||
+          loadingAccountNumber ||
+          loadingAp ||
+          loadingLocation ||
+          isFetching
         }
         className="loading-transaction-create"
       >
@@ -685,7 +902,11 @@ const TransactionModal = ({ transactionData, view, update }) => {
             updateLoading ||
             loadingTIN ||
             loadingDocument ||
-            gTagIsLoading
+            gTagIsLoading ||
+            loadingAccountNumber ||
+            loadingAp ||
+            loadingLocation ||
+            isFetching
           }
         />
       </Dialog>
