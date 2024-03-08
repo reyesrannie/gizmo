@@ -3,7 +3,6 @@ import { useState } from "react";
 
 const useTransactionHook = () => {
   const [params, setParams] = useState({
-    status: "active",
     page: 1,
     per_page: 10,
     pagination: null,
@@ -31,6 +30,7 @@ const useTransactionHook = () => {
     setParams((currentValue) => ({
       ...currentValue,
       status: status,
+      state: "",
       page: 1,
     }));
   };
@@ -54,6 +54,7 @@ const useTransactionHook = () => {
     setParams((currentValue) => ({
       ...currentValue,
       state: state,
+      page: 1,
     }));
   };
 
@@ -61,6 +62,7 @@ const useTransactionHook = () => {
     setParams((currentValue) => ({
       ...currentValue,
       tagYear: tagYear,
+      page: 1,
     }));
   };
 

@@ -105,14 +105,39 @@
   }
 }
 
+.date-picker-container-transaction {
+  &.MuiBox-root {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    .MuiTypography-root {
+      position: absolute;
+      font-family: Roboto-light;
+      font-size: 12px;
+      letter-spacing: 1px;
+      margin-left: 15px;
+      bottom: 0;
+    }
+  }
+}
+
 .add-transaction-button-container {
   &.MuiBox-root {
     margin-top: 10px;
     display: flex;
     align-items: flex-end;
+    justify-content: space-between;
+    gap: 10px;
+    min-width: 950px;
+  }
+}
+
+.archive-transaction-button-container {
+  &.MuiBox-root {
+    display: flex;
+    align-items: flex-end;
     justify-content: flex-end;
     gap: 10px;
-    min-width: 940px;
   }
 }
 
@@ -141,6 +166,11 @@
   &.MuiButtonBase-root {
     font-family: Roboto-Medium;
     text-transform: none;
+  }
+}
+
+.trash-transaction-button {
+  &.MuiButtonBase-root {
   }
 }
 

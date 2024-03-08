@@ -13,9 +13,10 @@ import React from "react";
 import "../styles/MenuDrawer.scss";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router";
-import { setDrawer } from "../../services/slice/menuSlice";
+import { resetMenu, setDrawer } from "../../services/slice/menuSlice";
 import { menu } from "../../services/constants/items";
 import { hasAccess } from "../../services/functions/access";
+import { resetTransaction } from "../../services/slice/transactionSlice";
 
 const MenuDrawer = () => {
   const openDrawer = useSelector((state) => state.menu.drawer);
@@ -57,6 +58,8 @@ const MenuDrawer = () => {
                       }`}
                       onClick={() => {
                         navigate(menus.path);
+                        dispatch(resetMenu());
+                        dispatch(resetTransaction());
                         isTablet && dispatch(setDrawer(false));
                       }}
                     >
@@ -90,6 +93,8 @@ const MenuDrawer = () => {
                               location.pathname === child.path ? "selected" : ""
                             }`}
                             onClick={() => {
+                              dispatch(resetMenu());
+                              dispatch(resetTransaction());
                               navigate(child.path);
                               isTablet && dispatch(setDrawer(false));
                             }}
@@ -129,6 +134,8 @@ const MenuDrawer = () => {
                     }`}
                     onClick={() => {
                       navigate(menus.path);
+                      dispatch(resetMenu());
+                      dispatch(resetTransaction());
                       isTablet && dispatch(setDrawer(false));
                     }}
                   >

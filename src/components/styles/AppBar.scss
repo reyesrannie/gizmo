@@ -41,10 +41,28 @@
 
 .body-container {
   &.MuiPaper-root {
+    overflow-y: auto;
     min-width: 93vw;
-    min-height: 91vh;
+    max-height: 86vh;
     transition: all 0.2s ease;
     background-color: #f2f2f2;
+    &::-webkit-scrollbar {
+      width: 12px;
+    }
+    &::-webkit-scrollbar-thumb {
+      background-color: #ccc;
+      border-radius: 20px;
+      border: 1px solid #fff;
+    }
+    &::-webkit-scrollbar-thumb:hover {
+      background-color: #f4ce92;
+    }
+    &::-webkit-scrollbar-track {
+      border-radius: 20px;
+    }
+    &::-webkit-scrollbar-track:hover {
+      background-color: #eee;
+    }
   }
 }
 
@@ -168,6 +186,7 @@
   }
 }
 
+// @media (min-height: 800px) and (max-height: 1024px) {
 @media (max-height: 768px) {
   .appbar-container {
     &.MuiBox-root {
@@ -177,46 +196,29 @@
 
   .appBar {
     &.MuiAppBar-root {
-      min-height: 40px;
-      padding-right: 20px;
-      padding-left: 15px;
-      z-index: 5;
-    }
-
-    .menuBarBox {
-      &.MuiBox-root {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
+      min-height: 10px;
     }
 
     .MuiSvgIcon-root {
-      font-size: 18px;
+      font-size: 14px;
     }
   }
 
   .appBarLogo {
-    width: 120px;
+    width: 80px;
     margin: 10px;
   }
 
   .appBar-account-settings {
     &.MuiBox-root {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-color: #15253b;
-      border-radius: 100%;
-      width: 25px;
-      height: 25px;
+      width: 20px;
+      height: 20px;
     }
   }
 
   .account-first-letter {
     &.MuiTypography-root {
-      font-family: Roboto-Medium;
-      font-size: 14px;
+      font-size: 10px;
     }
   }
 }

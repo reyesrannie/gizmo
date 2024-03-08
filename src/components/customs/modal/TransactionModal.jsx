@@ -20,30 +20,50 @@ import moment from "moment";
 import { LoadingButton } from "@mui/lab";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { resetMenu } from "../../../services/slice/menuSlice";
 import {
   useAccountNumberQuery,
   useApQuery,
+  useArchiveTransactionMutation,
   useCreateTransactionMutation,
   useDocumentTypeQuery,
   useLocationQuery,
+  useStatusLogsQuery,
   useSupplierQuery,
   useTagMonthYearQuery,
   useUpdateTransactionMutation,
 } from "../../../services/store/request";
 import { useSnackbar } from "notistack";
-import { objectError } from "../../../services/functions/errorResponse";
+import {
+  objectError,
+  singleError,
+} from "../../../services/functions/errorResponse";
 import Autocomplete from "../AutoComplete";
 import { DatePicker } from "@mui/x-date-pickers";
 import useTaggingHook from "../../../services/hooks/useTaggingHook";
 import dayjs from "dayjs";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import transactionSchema from "../../../schemas/transactionSchema";
+
 import ClearIcon from "@mui/icons-material/Clear";
+import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
+import SortOutlinedIcon from "@mui/icons-material/SortOutlined";
+import AppPrompt from "../AppPrompt";
+import warningImg from "../../../assets/svg/warning.svg";
+import loadingLight from "../../../assets/lottie/Loading.json";
+
+import { resetPrompt, setWarning } from "../../../services/slice/promptSlice";
+import {
+  mapTransaction,
+  mapViewTransaction,
+} from "../../../services/functions/mapObject";
+import TransactionDrawer from "../TransactionDrawer";
+import { resetLogs } from "../../../services/slice/logSlice";
 
 const TransactionModal = ({ transactionData, view, update }) => {
   const dispatch = useDispatch();
+  const warning = useSelector((state) => state.prompt.warning);
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -53,12 +73,21 @@ const TransactionModal = ({ transactionData, view, update }) => {
 
   const { params, onDateChange } = useTaggingHook();
 
+  const { data: logs, isLoading: loadingLogs } = useStatusLogsQuery({
+    transaction_id: transactionData?.id,
+    sorts: "created_at",
+    pagination: "none",
+  });
+
   const {
     data: gtag,
     isLoading: gTagIsLoading,
     isSuccess: gTagSuccess,
     isFetching,
   } = useTagMonthYearQuery(params);
+
+  const [archiveTransaction, { isLoading: archiveLoading }] =
+    useArchiveTransactionMutation();
 
   const {
     data: tin,
@@ -124,7 +153,7 @@ const TransactionModal = ({ transactionData, view, update }) => {
       ref_no: "",
       delivery_invoice: "",
       sales_invoice: "",
-      charge_invoice: "",
+      charged_invoice: "",
       amount_withheld: "",
       amount_check: "",
       amount: "",
@@ -207,77 +236,34 @@ const TransactionModal = ({ transactionData, view, update }) => {
   };
 
   useEffect(() => {
-    if (gTagSuccess && !update) {
+    if (gTagSuccess && !update && !view) {
       const tagNoG = parseInt(gtag?.result) + 1 || 1;
 
       setValue("g_tag_number", tagNoG.toString().padStart(4, "0"));
     }
     if (
-      gTagSuccess &&
-      supplySuccess &&
-      documentSuccess &&
-      apSuccess &&
-      accountSuccess &&
-      locationSuccess &&
-      update
+      (gTagSuccess &&
+        supplySuccess &&
+        documentSuccess &&
+        apSuccess &&
+        accountSuccess &&
+        locationSuccess &&
+        update) ||
+      view
     ) {
       const tagMonthYear = dayjs(transactionData?.tag_year, "YYMM").toDate();
-
+      const mapData = mapViewTransaction(
+        transactionData,
+        ap,
+        tin,
+        document,
+        accountNumber,
+        location
+      );
       const values = {
-        tag_no: transactionData?.tag_no || "",
-        supplier: transactionData?.supplier?.name || "",
-        proprietor: transactionData?.supplier?.proprietor || "",
-        company_address: transactionData?.supplier?.address || "",
-        name_in_receipt: transactionData?.supplier?.receipt_name || "",
-        ref_no: transactionData?.reference_no || "",
-        delivery_invoice: transactionData?.delivery_invoice || "",
-        sales_invoice: transactionData?.sales_invoice || "",
-        charge_invoice: transactionData?.charged_invoice || "",
-        amount_withheld: transactionData?.amount_check || "",
-        amount_check: transactionData?.amount_withheld || "",
-        amount: transactionData?.purchase_amount || "",
-        vat: transactionData?.vat_amount || "",
-        cost: transactionData?.cost || "",
-        g_tag_number: transactionData?.gtag_no || "",
-        description: transactionData?.description || "",
-        ap:
-          ap?.result?.find(
-            (item) => transactionData?.apTagging?.id === item.id
-          ) || null,
-        tin:
-          tin?.result?.find(
-            (item) => transactionData?.supplier?.id === item.id
-          ) || null,
-        date_invoice:
-          dayjs(new Date(transactionData?.date_invoice), {
-            locale: AdapterDayjs.locale,
-          }) || null,
-        date_recieved:
-          dayjs(new Date(transactionData?.date_received), {
-            locale: AdapterDayjs.locale,
-          }) || null,
+        ...mapData,
         tag_month_year:
           dayjs(new Date(tagMonthYear), {
-            locale: AdapterDayjs.locale,
-          }) || null,
-        document_type:
-          document?.result?.find(
-            (item) => transactionData?.documentType?.id === item.id
-          ) || null,
-        account_number:
-          accountNumber?.result?.find(
-            (item) => transactionData?.accountNumber?.id === item.id
-          ) || null,
-        store:
-          location?.result?.find(
-            (item) => transactionData?.location?.id === item.id
-          ) || null,
-        coverage_from:
-          dayjs(new Date(transactionData?.coverage_from), {
-            locale: AdapterDayjs.locale,
-          }) || null,
-        coverage_to:
-          dayjs(new Date(transactionData?.coverage_to), {
             locale: AdapterDayjs.locale,
           }) || null,
       };
@@ -307,35 +293,9 @@ const TransactionModal = ({ transactionData, view, update }) => {
   };
 
   const submitHandler = async (submitData) => {
+    const mappedData = mapTransaction(submitData);
     const obj = {
-      tag_no: submitData?.tag_no,
-      date_invoice: moment(submitData?.date_invoice).format("YYYY-MM-DD"),
-      date_received: moment(submitData?.date_received).format("YYYY-MM-DD"),
-      document_type_id: submitData?.document_type?.id,
-      supplier_id: submitData?.tin?.id,
-      description: submitData?.description || "",
-      reference_no: submitData?.ref_no,
-      delivery_invoice: submitData?.delivery_invoice || "",
-      sales_invoice: submitData?.sales_invoice || "",
-      charged_invoice: submitData?.charged_invoice || "",
-      purchase_amount: submitData?.amount,
-      amount_withheld: submitData?.amount_withheld || "",
-      amount_check: submitData?.amount_check || "",
-      vat_amount: submitData?.vat || "",
-      cost: submitData?.cost || "",
-      description: submitData?.description || "",
-      location_id: submitData?.store?.id,
-      coverage_from: submitData?.coverage_from
-        ? moment(submitData?.coverage_from).format("YYYY-MM-DD")
-        : null,
-      coverage_to:
-        submitData?.coverage_to !== null
-          ? moment(submitData?.coverage_to).format("YYYY-MM-DD")
-          : null,
-      account_number_id: submitData?.account_number?.id,
-      ap_tagging_id: submitData?.ap?.id,
-      tag_year: moment(submitData?.tag_month_year).format("YYMM"),
-      gtag_no: submitData?.g_tag_number,
+      ...mappedData,
       id: view || update ? transactionData?.id : null,
     };
 
@@ -344,6 +304,7 @@ const TransactionModal = ({ transactionData, view, update }) => {
         const res = await updateTransaction(obj).unwrap();
         enqueueSnackbar(res?.message, { variant: "success" });
         dispatch(resetMenu());
+        dispatch(resetLogs());
       } catch (error) {
         objectError(error, setError, enqueueSnackbar);
       }
@@ -355,6 +316,17 @@ const TransactionModal = ({ transactionData, view, update }) => {
       } catch (error) {
         objectError(error, setError, enqueueSnackbar);
       }
+    }
+  };
+
+  const handleArchive = async () => {
+    try {
+      const res = await archiveTransaction(transactionData).unwrap();
+      enqueueSnackbar(res?.message, { variant: "success" });
+      dispatch(resetMenu());
+      dispatch(resetPrompt());
+    } catch (error) {
+      singleError(error, enqueueSnackbar);
     }
   };
   return (
@@ -395,6 +367,7 @@ const TransactionModal = ({ transactionData, view, update }) => {
           helperText={errors?.tag_no?.message}
         />
         <Autocomplete
+          disabled={view}
           control={control}
           name={"tin"}
           options={tin?.result || []}
@@ -475,6 +448,7 @@ const TransactionModal = ({ transactionData, view, update }) => {
         </Box>
         {watch("tin") && (
           <Autocomplete
+            disabled={view}
             control={control}
             name={"document_type"}
             options={
@@ -506,8 +480,9 @@ const TransactionModal = ({ transactionData, view, update }) => {
           name="date_invoice"
           control={control}
           render={({ field: { onChange, value, ...restField } }) => (
-            <Box className="date-picker-container">
+            <Box className="date-picker-container-transaction">
               <DatePicker
+                disabled={view}
                 className="transaction-form-date"
                 label="Date Invoice *"
                 format="YYYY-MM-DD"
@@ -528,8 +503,9 @@ const TransactionModal = ({ transactionData, view, update }) => {
           name="date_recieved"
           control={control}
           render={({ field: { onChange, value, ...restField } }) => (
-            <Box className="date-picker-container">
+            <Box className="date-picker-container-transaction">
               <DatePicker
+                disabled={view}
                 className="transaction-form-date"
                 label="Date received *"
                 format="YYYY-MM-DD"
@@ -597,12 +573,12 @@ const TransactionModal = ({ transactionData, view, update }) => {
           <AppTextBox
             disabled={view}
             control={control}
-            name={"charge_invoice"}
+            name={"charged_invoice"}
             label={"Charge Invoice *"}
             color="primary"
             className="transaction-form-textBox"
-            error={Boolean(errors?.charge_invoice)}
-            helperText={errors?.charge_invoice?.message}
+            error={Boolean(errors?.charged_invoice)}
+            helperText={errors?.charged_invoice?.message}
           />
         )}
         <AppTextBox
@@ -669,6 +645,7 @@ const TransactionModal = ({ transactionData, view, update }) => {
           />
         )}
         <AppTextBox
+          disabled={view}
           multiline
           minRows={1}
           control={control}
@@ -695,8 +672,9 @@ const TransactionModal = ({ transactionData, view, update }) => {
               name="coverage_from"
               control={control}
               render={({ field: { onChange, value, ...restField } }) => (
-                <Box className="date-picker-container">
+                <Box className="date-picker-container-transaction">
                   <DatePicker
+                    disabled={view}
                     className="transaction-form-date"
                     label="From *"
                     format="YYYY-MM-DD"
@@ -718,8 +696,9 @@ const TransactionModal = ({ transactionData, view, update }) => {
               name="coverage_to"
               control={control}
               render={({ field: { onChange, value, ...restField } }) => (
-                <Box className="date-picker-container">
+                <Box className="date-picker-container-transaction">
                   <DatePicker
+                    disabled={view}
                     className="transaction-form-date"
                     label="To *"
                     minDate={watch("coverage_from")}
@@ -740,6 +719,7 @@ const TransactionModal = ({ transactionData, view, update }) => {
 
             {checkField("account_number") && (
               <Autocomplete
+                disabled={view}
                 control={control}
                 name={"account_number"}
                 options={
@@ -767,6 +747,7 @@ const TransactionModal = ({ transactionData, view, update }) => {
             )}
             {checkField("store") && (
               <Autocomplete
+                disabled={view}
                 control={control}
                 name={"store"}
                 options={
@@ -803,6 +784,7 @@ const TransactionModal = ({ transactionData, view, update }) => {
           </Typography>
         </Box>
         <Autocomplete
+          disabled={view}
           control={control}
           name={"ap"}
           options={ap?.result || []}
@@ -825,9 +807,9 @@ const TransactionModal = ({ transactionData, view, update }) => {
           name="tag_month_year"
           control={control}
           render={({ field: { onChange, value, ...restField } }) => (
-            <Box className="date-picker-container">
+            <Box className="date-picker-container-transaction">
               <DatePicker
-                disabled={update}
+                disabled={update || view}
                 className="transaction-form-date"
                 label="Tag year month *"
                 format="YY MM"
@@ -859,25 +841,42 @@ const TransactionModal = ({ transactionData, view, update }) => {
           helperText={errors?.g_tag_number?.message}
         />
         <Box className="add-transaction-button-container">
-          {!view && (
-            <LoadingButton
+          <Box>
+            {update ? (
+              <LoadingButton
+                variant="contained"
+                color="error"
+                className="add-transaction-button"
+                onClick={() => dispatch(setWarning(true))}
+                startIcon={<DeleteForeverOutlinedIcon />}
+              >
+                Archive
+              </LoadingButton>
+            ) : (
+              "."
+            )}
+          </Box>
+          <Box className="archive-transaction-button-container">
+            {!view && (
+              <LoadingButton
+                variant="contained"
+                color="warning"
+                type="submit"
+                className="add-transaction-button"
+                disabled={!watch("tin")}
+              >
+                {update ? "Update" : "Add"}
+              </LoadingButton>
+            )}
+            <Button
               variant="contained"
-              color="warning"
-              type="submit"
+              color="primary"
+              onClick={() => dispatch(resetMenu())}
               className="add-transaction-button"
-              disabled={!watch("tin")}
             >
-              {update ? "Update" : "Add"}
-            </LoadingButton>
-          )}
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => dispatch(resetMenu())}
-            className="add-transaction-button"
-          >
-            {view ? "Close" : update ? "Cancel" : "Cancel"}
-          </Button>
+              {view ? "Close" : update ? "Cancel" : "Cancel"}
+            </Button>
+          </Box>
         </Box>
       </form>
 
@@ -891,25 +890,33 @@ const TransactionModal = ({ transactionData, view, update }) => {
           loadingAccountNumber ||
           loadingAp ||
           loadingLocation ||
-          isFetching
+          isFetching ||
+          loadingLogs
         }
         className="loading-transaction-create"
       >
-        <Lottie
-          animationData={loading}
-          loop={
-            isLoading ||
-            updateLoading ||
-            loadingTIN ||
-            loadingDocument ||
-            gTagIsLoading ||
-            loadingAccountNumber ||
-            loadingAp ||
-            loadingLocation ||
-            isFetching
-          }
+        <Lottie animationData={loading} loop />
+      </Dialog>
+
+      <Dialog open={warning}>
+        <AppPrompt
+          image={warningImg}
+          title={"Archive Transaction?"}
+          message={"You are about to archive this Transaction"}
+          nextLineMessage={"Once archived it can never be restore"}
+          confirmButton={"Yes, Archive it!"}
+          cancelButton={"Cancel"}
+          cancelOnClick={() => {
+            dispatch(resetPrompt());
+          }}
+          confirmOnClick={() => handleArchive()}
         />
       </Dialog>
+
+      <Dialog open={archiveLoading} className="loading-role-create">
+        <Lottie animationData={loadingLight} loop={archiveLoading} />
+      </Dialog>
+      <TransactionDrawer logs={logs?.result} />
     </Paper>
   );
 };

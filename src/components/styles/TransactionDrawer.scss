@@ -1,0 +1,120 @@
+.transaction-logs-container {
+  &.MuiPaper-root {
+    z-index: 100;
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 30%;
+    bottom: 0;
+    padding: 5px;
+    background-color: #15253b;
+    max-height: 34px;
+    border-radius: 10px 10px 0 0;
+    overflow: hidden;
+    transition: all 0.5s ease-in-out;
+  }
+}
+
+.transaction-logs-container.open {
+  &.MuiPaper-root {
+    max-height: 800px;
+    overflow: auto;
+    &::-webkit-scrollbar {
+      width: 14px;
+      border: 3px solid #fff;
+    }
+    &::-webkit-scrollbar-thumb {
+      background-color: #ccc;
+      border-radius: 20px;
+      border: 3px solid #fff;
+    }
+    &::-webkit-scrollbar-thumb:hover {
+      background-color: #f4ce92;
+    }
+    &::-webkit-scrollbar-track {
+      background-color: #fff;
+      border-radius: 20px;
+      border: 3px solid #fff;
+    }
+    &::-webkit-scrollbar-track:hover {
+      background-color: #eee;
+    }
+  }
+}
+
+.logs-transaction-item-container {
+  &.MuiBox-root {
+    margin: 10px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+  }
+}
+
+.logs-transaction-item-container.open {
+  &.MuiBox-root {
+    margin: 10px;
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+.logs-transaction-container {
+  &.MuiBox-root {
+    background-color: #f0f0f0;
+    padding: 5px;
+    min-width: 250px;
+    padding-left: 15px;
+    border-radius: 10px;
+  }
+}
+
+.transaction-drawer-date-month {
+  &.MuiTypography-root {
+    font-family: Roboto-Medium;
+    letter-spacing: 2px;
+  }
+}
+
+.transaction-drawer-date-day {
+  &.MuiTypography-root {
+    font-family: Roboto-Light;
+  }
+}
+
+.transaction-drawer-stepping-pending {
+  &.MuiSvgIcon-root {
+    font-size: 25px;
+    color: #ffc107;
+  }
+}
+
+.logs-title-transaction {
+  &.MuiTypography-root {
+    font-family: Roboto-Medium;
+    font-size: 12px;
+  }
+}
+
+.logs-indicator-transaction {
+  &.MuiTypography-root {
+    font-family: Roboto-Medium;
+    font-size: 11px;
+  }
+}
+
+.logs-details-text-transaction {
+  &.MuiTypography-root {
+    font-family: Roboto-Light;
+    font-size: 11px;
+  }
+}
+
+.logs-details-transaction {
+  &.MuiBox-root {
+    display: flex;
+    flex-direction: row;
+    gap: 11px;
+  }
+}

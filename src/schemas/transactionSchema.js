@@ -25,7 +25,7 @@ const transactionSchema = Yup.object({
       document_type?.required_fields?.includes("sales_invoice"),
     then: () => Yup.string().required("Sales Invoice is required"),
   }),
-  charge_invoice: Yup.string().when("document_type", {
+  charged_invoice: Yup.string().when("document_type", {
     is: (document_type) =>
       document_type?.required_fields?.includes("charge_invoice"),
     then: () => Yup.string().required("Charge Invoice is required"),

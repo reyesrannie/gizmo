@@ -14,8 +14,6 @@
     justify-content: center;
     flex-wrap: wrap;
     overflow: hidden;
-    overflow-y: auto;
-    max-height: 800px;
     &::-webkit-scrollbar {
       width: 12px;
     }

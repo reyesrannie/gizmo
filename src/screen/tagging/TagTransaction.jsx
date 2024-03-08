@@ -13,37 +13,30 @@ import {
 } from "@mui/material";
 
 import { useDispatch, useSelector } from "react-redux";
-import {
-  useArchiveCompanyMutation,
-  useTransactionQuery,
-} from "../../services/store/request";
+import { useTransactionQuery } from "../../services/store/request";
 
 import AddToPhotosOutlinedIcon from "@mui/icons-material/AddToPhotosOutlined";
 import ArrowDropDownCircleOutlinedIcon from "@mui/icons-material/ArrowDropDownCircleOutlined";
 
 import "../../components/styles/TagTransaction.scss";
 
-import { resetPrompt } from "../../services/slice/promptSlice";
-import { useSnackbar } from "notistack";
-import { singleError } from "../../services/functions/errorResponse";
-import {
-  resetMenu,
-  setCreateMenu,
-  setHeader,
-  setIsExpanded,
-} from "../../services/slice/menuSlice";
+import { setCreateMenu } from "../../services/slice/menuSlice";
 
 import { taggingHeader } from "../../services/constants/headers";
 import TaggingTable from "./TaggingTable";
 import useTransactionHook from "../../services/hooks/useTransactionHook";
+import {
+  resetTransaction,
+  setFilterBy,
+  setHeader,
+  setIsExpanded,
+} from "../../services/slice/transactionSlice";
 
 const TagTransaction = () => {
-  const { enqueueSnackbar } = useSnackbar();
   const dispatch = useDispatch();
-  const menuData = useSelector((state) => state.menu.menuData);
 
-  const isExpanded = useSelector((state) => state.menu.isExpanded);
-  const header = useSelector((state) => state.menu.header);
+  const isExpanded = useSelector((state) => state.transaction.isExpanded);
+  const header = useSelector((state) => state.transaction.header);
 
   const {
     params,
@@ -52,10 +45,8 @@ const TagTransaction = () => {
     onSearchData,
     onSortTable,
     onOrderBy,
+    onStateChange,
   } = useTransactionHook();
-
-  const [archiveCompany, { isLoading: archiveLoading }] =
-    useArchiveCompanyMutation();
 
   const {
     data: tagTransaction,
@@ -64,17 +55,6 @@ const TagTransaction = () => {
     isFetching,
     status,
   } = useTransactionQuery(params);
-
-  const handleArchive = async () => {
-    try {
-      const res = await archiveCompany(menuData).unwrap();
-      enqueueSnackbar(res?.message, { variant: "success" });
-      dispatch(resetMenu());
-      dispatch(resetPrompt());
-    } catch (error) {
-      singleError(error, enqueueSnackbar);
-    }
-  };
 
   return (
     <Box>
@@ -95,16 +75,19 @@ const TagTransaction = () => {
             </AccordionSummary>
             {taggingHeader?.map(
               (head, index) =>
-                header !== head && (
+                header !== head?.name && (
                   <AccordionSummary
                     key={index}
                     onClick={() => {
-                      dispatch(setHeader(head));
+                      dispatch(setHeader(head.name));
                       dispatch(setIsExpanded(false));
+                      onOrderBy("");
+                      dispatch(setFilterBy(""));
+                      onStateChange(head?.status);
                     }}
                   >
                     <Typography className="page-text-accord-tag-transaction">
-                      {head}
+                      {head?.name}
                     </Typography>
                   </AccordionSummary>
                 )
@@ -152,9 +135,54 @@ const TagTransaction = () => {
           onRowChange={onRowChange}
           status={status}
           tagTransaction={tagTransaction}
-          archiveLoading={archiveLoading}
-          handleArchive={handleArchive}
           onOrderBy={onOrderBy}
+          state="pending"
+        />
+      )}
+
+      {header === "Archived" && (
+        <TaggingTable
+          params={params}
+          onSortTable={onSortTable}
+          isError={isError}
+          isFetching={isFetching}
+          isLoading={isLoading}
+          onPageChange={onPageChange}
+          onRowChange={onRowChange}
+          status={status}
+          tagTransaction={tagTransaction}
+          onOrderBy={onOrderBy}
+          state="archived"
+        />
+      )}
+      {header === "Returned" && (
+        <TaggingTable
+          params={params}
+          onSortTable={onSortTable}
+          isError={isError}
+          isFetching={isFetching}
+          isLoading={isLoading}
+          onPageChange={onPageChange}
+          onRowChange={onRowChange}
+          status={status}
+          tagTransaction={tagTransaction}
+          onOrderBy={onOrderBy}
+          state="return"
+        />
+      )}
+      {header === "History" && (
+        <TaggingTable
+          params={params}
+          onSortTable={onSortTable}
+          isError={isError}
+          isFetching={isFetching}
+          isLoading={isLoading}
+          onPageChange={onPageChange}
+          onRowChange={onRowChange}
+          status={status}
+          tagTransaction={tagTransaction}
+          onOrderBy={onOrderBy}
+          state={""}
         />
       )}
     </Box>

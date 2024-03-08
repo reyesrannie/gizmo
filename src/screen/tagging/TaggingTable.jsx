@@ -1,9 +1,5 @@
 import React from "react";
 
-import Breadcrums from "../../components/customs/Breadcrums";
-import SearchText from "../../components/customs/SearchText";
-import useParamsHook from "../../services/hooks/useParamsHook";
-
 import {
   Autocomplete,
   Box,
@@ -36,21 +32,16 @@ import RemoveRedEyeOutlinedIcon from "@mui/icons-material/RemoveRedEyeOutlined";
 import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
 
 import loading from "../../assets/lottie/Loading-2.json";
-import loadingLight from "../../assets/lottie/Loading.json";
 import noData from "../../assets/lottie/NoData.json";
 import StatusIndicator from "../../components/customs/StatusIndicator";
-import warning from "../../assets/svg/warning.svg";
 import "../../components/styles/TagTransaction.scss";
 
 import { useState } from "react";
-import { resetPrompt, setWarning } from "../../services/slice/promptSlice";
 
-import AppPrompt from "../../components/customs/AppPrompt";
 import {
-  resetMenu,
-  setFilterBy,
   setMenuData,
   setUpdateMenu,
+  setViewMenu,
 } from "../../services/slice/menuSlice";
 
 import TransactionModal from "../../components/customs/modal/TransactionModal";
@@ -59,6 +50,8 @@ import {
   useSupplierQuery,
   useTagYearMonthQuery,
 } from "../../services/store/request";
+import { setFilterBy } from "../../services/slice/transactionSlice";
+import { ViewTimelineRounded } from "@mui/icons-material";
 
 const TaggingTable = ({
   params,
@@ -70,17 +63,17 @@ const TaggingTable = ({
   isFetching,
   onPageChange,
   onRowChange,
-  archiveLoading,
-  handleArchive,
   onOrderBy,
+  state,
 }) => {
   const [anchorE1, setAnchorE1] = useState(null);
   const dispatch = useDispatch();
   const menuData = useSelector((state) => state.menu.menuData);
-  const openWarning = useSelector((state) => state.prompt.warning);
   const createMenu = useSelector((state) => state.menu.createMenu);
   const updateMenu = useSelector((state) => state.menu.updateMenu);
-  const filterBy = useSelector((state) => state.menu.filterBy);
+  const viewMenu = useSelector((state) => state.menu.viewMenu);
+
+  const filterBy = useSelector((state) => state.transaction.filterBy);
 
   const { data: supplier, isLoading: loadingSupplier } = useSupplierQuery({
     status: "active",
@@ -94,9 +87,7 @@ const TaggingTable = ({
     });
 
   const { data: tagYearMonth, isLoading: loadingTagYearMonth } =
-    useTagYearMonthQuery({
-      state: "pending",
-    });
+    useTagYearMonthQuery({ state: state });
 
   return (
     <Box className="tag-transaction-body-container">
@@ -224,9 +215,9 @@ const TaggingTable = ({
                           className="pending-indicator"
                         />
                       )}
-                      {params.status === "inactive" && (
+                      {tag?.gas_status === "archived" && (
                         <StatusIndicator
-                          status="Inactive"
+                          status="Archived"
                           className="inActive-indicator"
                         />
                       )}
@@ -238,7 +229,9 @@ const TaggingTable = ({
                       <IconButton
                         onClick={(e) => {
                           dispatch(setMenuData(tag));
-                          dispatch(setUpdateMenu(true));
+                          tag?.gas_status !== "pending"
+                            ? dispatch(setViewMenu(true))
+                            : dispatch(setUpdateMenu(true));
                         }}
                       >
                         <RemoveRedEyeOutlinedIcon className="tag-transaction-icon-actions" />
@@ -322,42 +315,16 @@ const TaggingTable = ({
         />
       </Menu>
 
-      <Dialog open={archiveLoading} className="loading-role-create">
-        <Lottie animationData={loadingLight} loop={archiveLoading} />
-      </Dialog>
-
       <Dialog open={createMenu} className="transaction-modal-dialog">
         <TransactionModal />
       </Dialog>
 
-      <Dialog open={updateMenu} className="transaction-modal-dialog">
-        <TransactionModal transactionData={menuData} update />
+      <Dialog open={viewMenu} className="transaction-modal-dialog">
+        <TransactionModal transactionData={menuData} view />
       </Dialog>
 
-      <Dialog open={openWarning}>
-        <AppPrompt
-          image={warning}
-          title={
-            params.status === "active"
-              ? "Archive the Transaction?"
-              : "Restore the Transaction?"
-          }
-          message={
-            params.status === "active"
-              ? "You are about to archive this Transaction"
-              : "You are about to restore this Transaction"
-          }
-          nextLineMessage={"Please confirm to continue"}
-          confirmButton={
-            params.status === "active" ? "Yes, Archive it!" : "Yes, Restore it!"
-          }
-          cancelButton={"Cancel"}
-          cancelOnClick={() => {
-            dispatch(resetPrompt());
-            dispatch(resetMenu());
-          }}
-          confirmOnClick={() => handleArchive()}
-        />
+      <Dialog open={updateMenu} className="transaction-modal-dialog">
+        <TransactionModal transactionData={menuData} update />
       </Dialog>
     </Box>
   );

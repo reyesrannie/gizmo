@@ -72,6 +72,7 @@ function App() {
       },
       common: {
         white: "#fff",
+        inherit: "#1a1d24",
       },
     },
   });

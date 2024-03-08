@@ -642,6 +642,14 @@ export const jsonServerAPI = createApi({
         params: payload,
       }),
     }),
+    statusLogs: builder.query({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `status-log`,
+        method: "GET",
+        params: payload,
+      }),
+    }),
   }),
 });
 
@@ -729,4 +737,6 @@ export const {
   useArchiveTransactionMutation,
 
   useTagYearMonthQuery,
+
+  useStatusLogsQuery,
 } = jsonServerAPI;
