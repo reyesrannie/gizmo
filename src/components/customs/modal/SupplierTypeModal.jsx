@@ -1,4 +1,12 @@
-import { Box, Button, Dialog, Divider, Paper, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Dialog,
+  Divider,
+  Paper,
+  Typography,
+  TextField as MuiTextField,
+} from "@mui/material";
 import React from "react";
 
 import "../../styles/SupplierTypeModal.scss";
@@ -19,6 +27,8 @@ import {
 import { useSnackbar } from "notistack";
 import { objectError } from "../../../services/functions/errorResponse";
 import supplierTypeSchema from "../../../schemas/supplierTypeSchema";
+import Autocomplete from "../AutoComplete";
+import { supplierTypeReqFields } from "../../../services/constants/requiredFields";
 
 const SupplierTypeModal = ({ stypeData, view, update }) => {
   const dispatch = useDispatch();
@@ -31,11 +41,16 @@ const SupplierTypeModal = ({ stypeData, view, update }) => {
   const defaultValues = {
     wtax: "",
     code: "",
+    required_fields: [],
   };
 
   const defaultData = {
     code: stypeData?.code,
     wtax: stypeData?.wtax,
+    required_fields:
+      stypeData?.required_fields?.map((item) =>
+        supplierTypeReqFields?.find((req) => item === req.name || null)
+      ) || [],
   };
 
   const {
@@ -55,6 +70,7 @@ const SupplierTypeModal = ({ stypeData, view, update }) => {
       wtax: submitData?.wtax?.includes("%")
         ? submitData?.wtax
         : submitData?.wtax + "%",
+      required_fields: submitData?.required_fields?.map((item) => item.name),
       id: view || update ? stypeData?.id : null,
     };
 
@@ -114,6 +130,26 @@ const SupplierTypeModal = ({ stypeData, view, update }) => {
           className="add-supplierType-textbox"
           error={Boolean(errors?.wtax)}
           helperText={errors?.wtax?.message}
+        />
+
+        <Autocomplete
+          multiple
+          control={control}
+          name="required_fields"
+          options={supplierTypeReqFields || []}
+          getOptionLabel={(option) => option?.label}
+          isOptionEqualToValue={(option, value) => option?.id === value?.id}
+          renderInput={(params) => (
+            <MuiTextField
+              {...params}
+              label="Required Fields *"
+              size="small"
+              variant="outlined"
+              error={Boolean(errors?.required_fields)}
+              helperText={errors?.required_fields?.message}
+              className="add-documentType-textbox-autocomplete"
+            />
+          )}
         />
 
         <Box className="add-supplierType-button-container">

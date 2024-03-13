@@ -7,7 +7,6 @@ import {
   Accordion,
   AccordionSummary,
   Box,
-  Button,
   IconButton,
   Typography,
 } from "@mui/material";
@@ -15,28 +14,26 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { useTransactionQuery } from "../../services/store/request";
 
-import AddToPhotosOutlinedIcon from "@mui/icons-material/AddToPhotosOutlined";
 import ArrowDropDownCircleOutlinedIcon from "@mui/icons-material/ArrowDropDownCircleOutlined";
 
 import "../../components/styles/TagTransaction.scss";
 
-import { setCreateMenu } from "../../services/slice/menuSlice";
-
-import { taggingHeader } from "../../services/constants/headers";
-import TaggingTable from "./TaggingTable";
+import { apHeader } from "../../services/constants/headers";
 import useTransactionHook from "../../services/hooks/useTransactionHook";
 import {
-  resetTransaction,
   setFilterBy,
-  setHeader,
+  setTransactionHeader,
   setIsExpanded,
 } from "../../services/slice/transactionSlice";
+import TransactionTable from "./TransactionTable";
 
-const TagTransaction = () => {
+const Transaction = () => {
   const dispatch = useDispatch();
 
   const isExpanded = useSelector((state) => state.transaction.isExpanded);
-  const header = useSelector((state) => state.transaction.header);
+  const transactionHeader = useSelector(
+    (state) => state.transaction.transactionHeader
+  );
 
   const {
     params,
@@ -70,16 +67,16 @@ const TagTransaction = () => {
           >
             <AccordionSummary onClick={() => dispatch(setIsExpanded(false))}>
               <Typography className="page-text-indicator-tag-transaction">
-                {header}
+                {transactionHeader}
               </Typography>
             </AccordionSummary>
-            {taggingHeader?.map(
+            {apHeader?.map(
               (head, index) =>
-                header !== head?.name && (
+                transactionHeader !== head?.name && (
                   <AccordionSummary
                     key={index}
                     onClick={() => {
-                      dispatch(setHeader(head.name));
+                      dispatch(setTransactionHeader(head.name));
                       dispatch(setIsExpanded(false));
                       onOrderBy("");
                       dispatch(setFilterBy(""));
@@ -113,7 +110,7 @@ const TagTransaction = () => {
             Sync
           </Button> */}
 
-          <Button
+          {/* <Button
             variant="contained"
             color="secondary"
             className="button-add-tag-transaction"
@@ -121,11 +118,11 @@ const TagTransaction = () => {
             onClick={() => dispatch(setCreateMenu(true))}
           >
             Add
-          </Button>
+          </Button> */}
         </Box>
       </Box>
-      {header === "Tag Transaction" && (
-        <TaggingTable
+      {transactionHeader === "Pending" && (
+        <TransactionTable
           params={params}
           onSortTable={onSortTable}
           isError={isError}
@@ -140,23 +137,8 @@ const TagTransaction = () => {
         />
       )}
 
-      {header === "Archived" && (
-        <TaggingTable
-          params={params}
-          onSortTable={onSortTable}
-          isError={isError}
-          isFetching={isFetching}
-          isLoading={isLoading}
-          onPageChange={onPageChange}
-          onRowChange={onRowChange}
-          status={status}
-          tagTransaction={tagTransaction}
-          onOrderBy={onOrderBy}
-          state="archived"
-        />
-      )}
-      {header === "Returned" && (
-        <TaggingTable
+      {transactionHeader === "Returned" && (
+        <TransactionTable
           params={params}
           onSortTable={onSortTable}
           isError={isError}
@@ -170,8 +152,23 @@ const TagTransaction = () => {
           state="returned"
         />
       )}
-      {header === "History" && (
-        <TaggingTable
+      {transactionHeader === "Received" && (
+        <TransactionTable
+          params={params}
+          onSortTable={onSortTable}
+          isError={isError}
+          isFetching={isFetching}
+          isLoading={isLoading}
+          onPageChange={onPageChange}
+          onRowChange={onRowChange}
+          status={status}
+          tagTransaction={tagTransaction}
+          onOrderBy={onOrderBy}
+          state={"received"}
+        />
+      )}
+      {transactionHeader === "History" && (
+        <TransactionTable
           params={params}
           onSortTable={onSortTable}
           isError={isError}
@@ -189,4 +186,4 @@ const TagTransaction = () => {
   );
 };
 
-export default TagTransaction;
+export default Transaction;

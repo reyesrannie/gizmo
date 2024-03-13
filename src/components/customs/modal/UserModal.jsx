@@ -214,7 +214,6 @@ const UserModal = ({ menuData, view, update }) => {
     }
   };
 
-  console.log(watch("role_id"));
   const submitHandler = async (submitdata) => {
     const obj = {
       id: update || view ? menuData?.id : "",

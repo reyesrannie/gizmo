@@ -25,7 +25,40 @@
   &.MuiBox-root {
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
     width: 100%;
+  }
+}
+
+.form-tax-details {
+  &.MuiBox-root {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 10px;
+  }
+}
+
+.tax-details-value {
+  &.MuiPaper-root {
+    padding: 10px;
+    display: flex;
+    cursor: pointer;
+    &:hover {
+      background-color: #f2f2f2;
+    }
+  }
+}
+
+.add-tax-computation {
+  &.MuiButtonBase-root {
+    text-transform: none;
+    margin-bottom: 10px;
+    font-family: Roboto-Black;
+    font-size: 11px;
+    letter-spacing: 1px;
+    width: 5%;
   }
 }
 
@@ -75,6 +108,28 @@
   }
 }
 
+.transaction-tax-textBox {
+  &.MuiFormControl-root {
+    border-radius: 10px;
+    min-width: 210px;
+    max-width: 210px;
+    min-height: 63px;
+
+    .MuiInputBase-root {
+      border-radius: 10px;
+      font-family: Roboto-Medium;
+      letter-spacing: 1px;
+    }
+    .MuiFormLabel-root {
+      font-family: Roboto-Medium;
+      letter-spacing: 1px;
+    }
+    .MuiFormHelperText-root {
+      font-family: Roboto-Light;
+      letter-spacing: 1px;
+    }
+  }
+}
 .transaction-form-date {
   &.MuiFormControl-root {
     border-radius: 10px;
@@ -132,12 +187,29 @@
   }
 }
 
+.return-receive-container {
+  &.MuiBox-root {
+    display: flex;
+    gap: 10px;
+  }
+}
+
 .archive-transaction-button-container {
   &.MuiBox-root {
     display: flex;
     align-items: flex-end;
     justify-content: flex-end;
     gap: 10px;
+  }
+}
+
+.tax-computation-button-container {
+  &.MuiBox-root {
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    gap: 10px;
+    width: 100%;
   }
 }
 

@@ -54,6 +54,7 @@ function AppTextBox({
             {money ? (
               <NumericFormat
                 customInput={TextField}
+                decimalScale={2}
                 thousandSeparator={","}
                 autoFocus={false}
                 autoComplete="off"

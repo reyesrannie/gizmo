@@ -22,6 +22,9 @@ import PageNotFound from "../../screen/PageNotFound";
 import TagTransaction from "../../screen/tagging/TagTransaction";
 import DocumentType from "../../screen/masterlist/document/DocumentType";
 import AccountNumber from "../../screen/masterlist/supplier/AccountNumber";
+import AccountPayable from "../../screen/ap/AccountPayable";
+import Transaction from "../../screen/ap/Transaction";
+import AccountTitles from "../../screen/masterlist/coa/AccountTitles";
 
 const Routing = () => {
   const user = decodeUser();
@@ -86,6 +89,7 @@ const Routing = () => {
             "atc",
             "s-type",
             "account-number",
+            "account-titles",
           ]) ? (
             <Masterlist />
           ) : (
@@ -172,6 +176,14 @@ const Routing = () => {
             <Navigate to={"/masterlist"} />
           ),
         },
+        {
+          path: "account-titles",
+          element: hasAccess(["account-titles"]) ? (
+            <AccountTitles />
+          ) : (
+            <Navigate to={"/masterlist"} />
+          ),
+        },
       ],
     },
     {
@@ -186,6 +198,28 @@ const Routing = () => {
           path: "tagtransact",
           element: hasAccess(["tagging"]) ? (
             <TagTransaction />
+          ) : (
+            <Navigate to={"/"} />
+          ),
+        },
+      ],
+    },
+    {
+      path: "/ap",
+      element: user ? <AppBar /> : <Navigate to={"/login"} />,
+      children: [
+        {
+          path: "",
+          element: hasAccess(["ap_tag"]) ? (
+            <AccountPayable />
+          ) : (
+            <Navigate to={"/"} />
+          ),
+        },
+        {
+          path: "transaction",
+          element: hasAccess(["ap_tag"]) ? (
+            <Transaction />
           ) : (
             <Navigate to={"/"} />
           ),

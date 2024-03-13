@@ -3,6 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   fieldsRequired: [],
   header: "Tag Transaction",
+  transactionHeader: "Pending",
   isExpanded: false,
   filterBy: "",
   filter: false,
@@ -28,6 +29,10 @@ const transactionSlice = createSlice({
       state.filter = action.payload;
     },
 
+    setTransactionHeader: (state, action) => {
+      state.transactionHeader = action.payload;
+    },
+
     resetTransaction: () => {
       return initialState;
     },
@@ -41,6 +46,7 @@ export const {
   setIsExpanded,
   setFilterBy,
   setFilter,
+  setTransactionHeader,
 } = transactionSlice.actions;
 
 export default transactionSlice.reducer;

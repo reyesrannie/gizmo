@@ -1,3 +1,5 @@
+import React, { useEffect } from "react";
+
 import {
   Box,
   Button,
@@ -8,15 +10,6 @@ import {
   TextField as MuiTextField,
   IconButton,
 } from "@mui/material";
-import React, { useEffect } from "react";
-
-import "../../styles/TransactionModal.scss";
-import transaction from "../../../assets/svg/transaction.svg";
-import AppTextBox from "../AppTextBox";
-import loading from "../../../assets/lottie/Loading-2.json";
-import Lottie from "lottie-react";
-import moment from "moment";
-
 import { LoadingButton } from "@mui/lab";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -39,31 +32,43 @@ import {
   objectError,
   singleError,
 } from "../../../services/functions/errorResponse";
-import Autocomplete from "../AutoComplete";
 import { DatePicker } from "@mui/x-date-pickers";
-import useTaggingHook from "../../../services/hooks/useTaggingHook";
-import dayjs from "dayjs";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import transactionSchema from "../../../schemas/transactionSchema";
-
-import ClearIcon from "@mui/icons-material/Clear";
-import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
-import SortOutlinedIcon from "@mui/icons-material/SortOutlined";
-import AppPrompt from "../AppPrompt";
-import warningImg from "../../../assets/svg/warning.svg";
-import loadingLight from "../../../assets/lottie/Loading.json";
-
-import { resetPrompt, setWarning } from "../../../services/slice/promptSlice";
+import {
+  resetPrompt,
+  setOpenReason,
+  setWarning,
+} from "../../../services/slice/promptSlice";
 import {
   mapTransaction,
   mapViewTransaction,
 } from "../../../services/functions/mapObject";
-import TransactionDrawer from "../TransactionDrawer";
 import { resetLogs } from "../../../services/slice/logSlice";
+
+import "../../styles/TransactionModal.scss";
+
+import transaction from "../../../assets/svg/transaction.svg";
+import AppTextBox from "../AppTextBox";
+import loading from "../../../assets/lottie/Loading-2.json";
+import Autocomplete from "../AutoComplete";
+import useTaggingHook from "../../../services/hooks/useTaggingHook";
+import transactionSchema from "../../../schemas/transactionSchema";
+import AppPrompt from "../AppPrompt";
+import warningImg from "../../../assets/svg/warning.svg";
+import loadingLight from "../../../assets/lottie/Loading.json";
+import TransactionDrawer from "../TransactionDrawer";
+
+import dayjs from "dayjs";
+import Lottie from "lottie-react";
+import moment from "moment";
+import ClearIcon from "@mui/icons-material/Clear";
+import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
+import ReasonInput from "../ReasonInput";
 
 const TransactionModal = ({ transactionData, view, update }) => {
   const dispatch = useDispatch();
   const warning = useSelector((state) => state.prompt.warning);
+  const openReason = useSelector((state) => state.prompt.openReason);
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -72,12 +77,6 @@ const TransactionModal = ({ transactionData, view, update }) => {
     useUpdateTransactionMutation();
 
   const { params, onDateChange } = useTaggingHook();
-
-  const { data: logs, isLoading: loadingLogs } = useStatusLogsQuery({
-    transaction_id: transactionData?.id,
-    sorts: "created_at",
-    pagination: "none",
-  });
 
   const {
     data: gtag,
@@ -150,16 +149,17 @@ const TransactionModal = ({ transactionData, view, update }) => {
       proprietor: "",
       company_address: "",
       name_in_receipt: "",
+      invoice_no: "",
       ref_no: "",
       delivery_invoice: "",
-      sales_invoice: "",
-      charged_invoice: "",
       amount_withheld: "",
       amount_check: "",
       amount: "",
       vat: "",
       cost: "",
       g_tag_number: "",
+      supplier_type_id: "",
+      atc_id: "",
       ap: null,
       tin: null,
       date_invoice: null,
@@ -179,15 +179,15 @@ const TransactionModal = ({ transactionData, view, update }) => {
       proprietor: "",
       company_address: "",
       name_in_receipt: "",
+      invoice_no: "",
       ref_no: "",
-      delivery_invoice: "",
-      sales_invoice: "",
-      charge_invoice: "",
       amount_withheld: "",
       amount_check: "",
       amount: "",
       vat: "",
       cost: "",
+      supplier_type_id: "",
+      atc_id: "",
       document_type: null,
       account_number: null,
       store: null,
@@ -212,11 +212,15 @@ const TransactionModal = ({ transactionData, view, update }) => {
       proprietor: watch("tin")?.proprietor || "",
       company_address: watch("tin")?.company_address || "",
       name_in_receipt: watch("tin")?.receipt_name || "",
+      supplier_type_id: watch("tin")?.supplier_types[0]?.type_id || "",
+      atc_id: watch("tin")?.supplier_atcs[0]?.atc_id || "",
+
       document_type:
         document?.result?.find(
           (item) =>
             item.code === watch("tin")?.supplier_documenttypes[0]?.document_code
         ) || null,
+
       account_number: accountNumber?.result?.find(
         (item) => watch("tin")?.id === item?.supplier?.id || null
       ),
@@ -319,9 +323,14 @@ const TransactionModal = ({ transactionData, view, update }) => {
     }
   };
 
-  const handleArchive = async () => {
+  const handleArchive = async (submitData) => {
+    const obj = {
+      ...submitData,
+      id: transactionData?.id,
+    };
+
     try {
-      const res = await archiveTransaction(transactionData).unwrap();
+      const res = await archiveTransaction(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
       dispatch(resetMenu());
       dispatch(resetPrompt());
@@ -533,6 +542,18 @@ const TransactionModal = ({ transactionData, view, update }) => {
           error={Boolean(errors?.name_in_receipt)}
           helperText={errors?.name_in_receipt?.message}
         />
+        {checkField("invoice_no") && (
+          <AppTextBox
+            disabled={view}
+            control={control}
+            name={"invoice_no"}
+            label={"Invoice No. *"}
+            color="primary"
+            className="transaction-form-textBox"
+            error={Boolean(errors?.invoice_no)}
+            helperText={errors?.invoice_no?.message}
+          />
+        )}
         {checkField("ref_no") && (
           <AppTextBox
             disabled={view}
@@ -545,42 +566,7 @@ const TransactionModal = ({ transactionData, view, update }) => {
             helperText={errors?.ref_no?.message}
           />
         )}
-        {checkField("delivery_invoice") && (
-          <AppTextBox
-            disabled={view}
-            control={control}
-            name={"delivery_invoice"}
-            label={"Delivery Invoice *"}
-            color="primary"
-            className="transaction-form-textBox"
-            error={Boolean(errors?.delivery_invoice)}
-            helperText={errors?.delivery_invoice?.message}
-          />
-        )}
-        {checkField("sales_invoice") && (
-          <AppTextBox
-            disabled={view}
-            control={control}
-            name={"sales_invoice"}
-            label={"Sales Invoice *"}
-            color="primary"
-            className="transaction-form-textBox"
-            error={Boolean(errors?.sales_invoice)}
-            helperText={errors?.sales_invoice?.message}
-          />
-        )}
-        {checkField("charge_invoice") && (
-          <AppTextBox
-            disabled={view}
-            control={control}
-            name={"charged_invoice"}
-            label={"Charge Invoice *"}
-            color="primary"
-            className="transaction-form-textBox"
-            error={Boolean(errors?.charged_invoice)}
-            helperText={errors?.charged_invoice?.message}
-          />
-        )}
+
         <AppTextBox
           money
           disabled={view}
@@ -890,8 +876,7 @@ const TransactionModal = ({ transactionData, view, update }) => {
           loadingAccountNumber ||
           loadingAp ||
           loadingLocation ||
-          isFetching ||
-          loadingLogs
+          isFetching
         }
         className="loading-transaction-create"
       >
@@ -909,14 +894,34 @@ const TransactionModal = ({ transactionData, view, update }) => {
           cancelOnClick={() => {
             dispatch(resetPrompt());
           }}
-          confirmOnClick={() => handleArchive()}
+          confirmOnClick={() => dispatch(setOpenReason(true))}
+        />
+      </Dialog>
+
+      <Dialog open={openReason}>
+        <ReasonInput
+          title={"Reason for archive"}
+          reasonDesc={"Please enter the reason for archiving this transaction"}
+          warning={
+            "Note that this transaction will be permanently archived once confirmed."
+          }
+          confirmButton={"Confirm"}
+          cancelButton={"Cancel"}
+          cancelOnClick={() => {
+            dispatch(resetPrompt());
+          }}
+          confirmOnClick={handleArchive}
         />
       </Dialog>
 
       <Dialog open={archiveLoading} className="loading-role-create">
         <Lottie animationData={loadingLight} loop={archiveLoading} />
       </Dialog>
-      <TransactionDrawer logs={logs?.result} />
+      {view || update ? (
+        <TransactionDrawer transactionData={transactionData} />
+      ) : (
+        <></>
+      )}
     </Paper>
   );
 };

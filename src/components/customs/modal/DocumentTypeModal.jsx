@@ -26,9 +26,10 @@ import {
 } from "../../../services/store/request";
 import { useSnackbar } from "notistack";
 import { objectError } from "../../../services/functions/errorResponse";
-import requiredFields from "../../../services/constants/requiredFields";
+
 import documentTypeSchema from "../../../schemas/documentTypeSchema";
 import Autocomplete from "../AutoComplete";
+import { requiredFields } from "../../../services/constants/requiredFields";
 
 const DocumentTypeModal = ({ dtypeData, view, update }) => {
   const dispatch = useDispatch();

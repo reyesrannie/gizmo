@@ -9,6 +9,7 @@ const initialState = {
   rolesData: null,
   createMenu: false,
   updateMenu: false,
+  receiveMenu: false,
   importMenu: false,
   importHasData: false,
   importTitle: "",
@@ -16,6 +17,8 @@ const initialState = {
   importError: null,
   viewMenu: false,
   menuData: null,
+  createTax: false,
+  updateTax: false,
 };
 
 const menutSlice = createSlice({
@@ -67,6 +70,15 @@ const menutSlice = createSlice({
     setMenuData: (state, action) => {
       state.menuData = action.payload;
     },
+    setReceiveMenu: (state, action) => {
+      state.receiveMenu = action.payload;
+    },
+    setCreateTax: (state, action) => {
+      state.createTax = action.payload;
+    },
+    setUpdateTax: (state, action) => {
+      state.updateTax = action.payload;
+    },
 
     resetMenu: () => {
       return initialState;
@@ -91,6 +103,9 @@ export const {
   setImportError,
   resetMenu,
   setMenuData,
+  setReceiveMenu,
+  setCreateTax,
+  setUpdateTax,
 } = menutSlice.actions;
 
 export default menutSlice.reducer;

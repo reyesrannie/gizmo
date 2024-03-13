@@ -1,70 +1,91 @@
-const requiredFields = [
+export const requiredFields = [
   {
     id: 1,
-    name: "sales_invoice",
-    type: "string",
-    label: "Sales Invoice",
-  },
-  {
-    id: 2,
-    name: "delivery_invoice",
-    type: "string",
-    label: "Delivery Invoice",
-  },
-  {
-    id: 3,
-    name: "charge_invoice",
-    type: "string",
-    label: "Charge Invoice",
-  },
-  {
-    id: 4,
     name: "amount_withheld",
     type: "number",
     label: "Amount Withheld",
   },
   {
-    id: 6,
+    id: 2,
     name: "amount_check",
     type: "number",
     label: "Amount of Check",
   },
   {
-    id: 7,
+    id: 3,
     name: "vat",
     type: "string",
     label: "VAT",
   },
   {
-    id: 8,
+    id: 4,
     name: "cost",
     type: "string",
     label: "Cost",
   },
   {
-    id: 9,
+    id: 5,
     name: "store",
     type: "string",
     label: "Store",
   },
   {
-    id: 10,
+    id: 6,
     name: "coverage",
     type: "string",
     label: "Coverage",
   },
   {
-    id: 11,
+    id: 7,
     name: "account_number",
     type: "string",
     label: "Account_number",
   },
   {
-    id: 12,
+    id: 8,
     name: "ref_no",
     type: "string",
     label: "Reference Number",
   },
+  {
+    id: 9,
+    name: "invoice_no",
+    type: "string",
+    label: "Invoice Number",
+  },
 ];
 
-export default requiredFields;
+export const supplierTypeReqFields = [
+  {
+    id: 1,
+    name: "vat_local",
+    type: "number",
+    label: "Vat Local",
+    divide: 1.12,
+    vit: 0.12,
+  },
+  {
+    id: 2,
+    name: "vat_service",
+    type: "number",
+    label: "Vat Service",
+    divide: 1.12,
+    vit: 0.12,
+  },
+  {
+    id: 3,
+    name: "nvat_local",
+    type: "number",
+    label: "NON-VAT Local",
+    divide: 1,
+    vit: 0,
+  },
+  {
+    id: 4,
+    name: "nvat_service",
+    type: "string",
+    label: "NON-VAT Service",
+    divide: 1,
+    vit: 0,
+  },
+];

@@ -38,6 +38,7 @@ const accessPermission = [
       { access_permission: "atc", label: "ATC" },
       { access_permission: "d-type", label: "Document Type" },
       { access_permission: "account-number", label: "Account Number" },
+      { access_permission: "account-titles", label: "Account Titles" },
     ],
   },
   {

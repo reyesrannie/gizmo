@@ -17,6 +17,8 @@ import StyleOutlinedIcon from "@mui/icons-material/StyleOutlined";
 import LocalOfferOutlinedIcon from "@mui/icons-material/LocalOfferOutlined";
 import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
+import PointOfSaleOutlinedIcon from "@mui/icons-material/PointOfSaleOutlined";
+import DonutSmallOutlinedIcon from "@mui/icons-material/DonutSmallOutlined";
 
 import "../../components/styles/CardNavigation.scss";
 const user = [
@@ -190,6 +192,18 @@ const masterlist = [
       <NavigationOutlinedIcon className="icon-last" color="secondary" />
     ),
   },
+  {
+    path: "/masterlist/account-titles",
+    desc: "A module for managing Account Titles .",
+    name: "Account Titles",
+    permission: ["account-titles"],
+    firstIcon: (
+      <DonutSmallOutlinedIcon color="secondary" className="icon-card-details" />
+    ),
+    lastIcon: (
+      <NavigationOutlinedIcon className="icon-last" color="secondary" />
+    ),
+  },
 ];
 
 const tagging = [
@@ -200,6 +214,24 @@ const tagging = [
     permission: ["tagging"],
     firstIcon: (
       <LocalOfferOutlinedIcon color="secondary" className="icon-card-details" />
+    ),
+    lastIcon: (
+      <NavigationOutlinedIcon className="icon-last" color="secondary" />
+    ),
+  },
+];
+
+const apTransaction = [
+  {
+    path: "/ap/transaction",
+    desc: "Accounts Payable transaction",
+    name: "Accounts Payable",
+    permission: ["ap_tag"],
+    firstIcon: (
+      <PointOfSaleOutlinedIcon
+        color="secondary"
+        className="icon-card-details"
+      />
     ),
     lastIcon: (
       <NavigationOutlinedIcon className="icon-last" color="secondary" />
@@ -249,6 +281,8 @@ const menu = [
       "atc",
       "s-type",
       "d-type",
+      "account-number",
+      "account-titles",
     ],
     children: [
       {
@@ -312,6 +346,12 @@ const menu = [
         path: "/masterlist/account-number",
         permission: ["account-number"],
       },
+      {
+        desc: "Account Titles",
+        icon: <DonutSmallOutlinedIcon />,
+        path: "/masterlist/account-number",
+        permission: ["account-titles"],
+      },
     ],
   },
   {
@@ -325,6 +365,20 @@ const menu = [
         icon: <LocalOfferOutlinedIcon />,
         path: "/tagging/tagtransact",
         permission: ["tagging"],
+      },
+    ],
+  },
+  {
+    desc: "Accounts Payable",
+    icon: <PointOfSaleOutlinedIcon />,
+    path: "/ap",
+    permission: ["ap_tag"],
+    children: [
+      {
+        desc: "Accounts Payable",
+        icon: <LocalOfferOutlinedIcon />,
+        path: "/ap/transaction",
+        permission: ["ap_tag"],
       },
     ],
   },
@@ -389,6 +443,10 @@ const routes = [
         path: "/masterlist/account-number",
         name: "Account Number",
       },
+      {
+        path: "/masterlist/account-titles",
+        name: "Account Titles",
+      },
     ],
   },
   {
@@ -401,6 +459,16 @@ const routes = [
       },
     ],
   },
+  {
+    path: "/ap",
+    name: "Accounts Payable",
+    children: [
+      {
+        path: "/ap/transaction",
+        name: "Transaction",
+      },
+    ],
+  },
 ];
 
-export { user, masterlist, tagging, menu, routes };
+export { user, masterlist, tagging, apTransaction, menu, routes };

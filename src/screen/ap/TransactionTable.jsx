@@ -40,20 +40,20 @@ import { useState } from "react";
 
 import {
   setMenuData,
+  setReceiveMenu,
   setUpdateMenu,
   setViewMenu,
 } from "../../services/slice/menuSlice";
 
-import TransactionModal from "../../components/customs/modal/TransactionModal";
 import {
   useDocumentTypeQuery,
   useSupplierQuery,
   useTagYearMonthQuery,
 } from "../../services/store/request";
 import { setFilterBy } from "../../services/slice/transactionSlice";
-import { ViewTimelineRounded } from "@mui/icons-material";
+import TransactionModalAp from "../../components/customs/modal/TransactionModalAp";
 
-const TaggingTable = ({
+const TransactionTable = ({
   params,
   onSortTable,
   isLoading,
@@ -69,7 +69,7 @@ const TaggingTable = ({
   const [anchorE1, setAnchorE1] = useState(null);
   const dispatch = useDispatch();
   const menuData = useSelector((state) => state.menu.menuData);
-  const createMenu = useSelector((state) => state.menu.createMenu);
+  const receiveMenu = useSelector((state) => state.menu.receiveMenu);
   const updateMenu = useSelector((state) => state.menu.updateMenu);
   const viewMenu = useSelector((state) => state.menu.viewMenu);
 
@@ -239,16 +239,14 @@ const TaggingTable = ({
                     </TableCell>
                     <TableCell align="center">
                       <IconButton
-                        onClick={(e) => {
+                        onClick={() => {
                           dispatch(setMenuData(tag));
 
                           tag?.gas_status === "pending" &&
-                            dispatch(setUpdateMenu(true));
-                          tag?.gas_status === "archived" &&
-                            dispatch(setViewMenu(true));
-                          tag?.gas_status === "returned" &&
-                            dispatch(setUpdateMenu(true));
+                            dispatch(setReceiveMenu(true));
                           tag?.gas_status === "received" &&
+                            dispatch(setUpdateMenu(true));
+                          tag?.gas_status === "returned" &&
                             dispatch(setViewMenu(true));
                         }}
                       >
@@ -333,19 +331,19 @@ const TaggingTable = ({
         />
       </Menu>
 
-      <Dialog open={createMenu} className="transaction-modal-dialog">
-        <TransactionModal />
+      <Dialog open={receiveMenu} className="transaction-modal-dialog">
+        <TransactionModalAp transactionData={menuData} receive />
       </Dialog>
 
       <Dialog open={viewMenu} className="transaction-modal-dialog">
-        <TransactionModal transactionData={menuData} view />
+        <TransactionModalAp transactionData={menuData} view />
       </Dialog>
 
       <Dialog open={updateMenu} className="transaction-modal-dialog">
-        <TransactionModal transactionData={menuData} update />
+        <TransactionModalAp transactionData={menuData} update />
       </Dialog>
     </Box>
   );
 };
 
-export default TaggingTable;
+export default TransactionTable;

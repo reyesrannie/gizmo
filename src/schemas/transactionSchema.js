@@ -9,6 +9,8 @@ const transactionSchema = Yup.object({
   proprietor: Yup.string().nullable(),
   description: Yup.string(),
   document_type: Yup.object().required("Document type is required"),
+  supplier_type_id: Yup.string().nullable(),
+  atc_id: Yup.string().nullable(),
   ref_no: Yup.string().when("document_type", {
     is: (document_type) => document_type?.required_fields?.includes("ref_no"),
     then: () => Yup.string().required("Ref number is required"),
@@ -20,16 +22,7 @@ const transactionSchema = Yup.object({
       document_type?.required_fields?.includes("delivery_invoice"),
     then: () => Yup.string().required("Delivery Invoice is required"),
   }),
-  sales_invoice: Yup.string().when("document_type", {
-    is: (document_type) =>
-      document_type?.required_fields?.includes("sales_invoice"),
-    then: () => Yup.string().required("Sales Invoice is required"),
-  }),
-  charged_invoice: Yup.string().when("document_type", {
-    is: (document_type) =>
-      document_type?.required_fields?.includes("charge_invoice"),
-    then: () => Yup.string().required("Charge Invoice is required"),
-  }),
+
   amount: Yup.string().required("Amount is required"),
   amount_withheld: Yup.string().when("document_type", {
     is: (document_type) =>
@@ -37,6 +30,11 @@ const transactionSchema = Yup.object({
     then: () => Yup.string().required("Amount Withheld is required"),
   }),
   amount_check: Yup.string().when("document_type", {
+    is: (document_type) =>
+      document_type?.required_fields?.includes("amount_check"),
+    then: () => Yup.string().required("Amount of check is required"),
+  }),
+  invoice_no: Yup.string().when("document_type", {
     is: (document_type) =>
       document_type?.required_fields?.includes("amount_check"),
     then: () => Yup.string().required("Amount of check is required"),

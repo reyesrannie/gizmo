@@ -1,0 +1,349 @@
+.page-text-indicator-accountTitle {
+  &.MuiTypography-root {
+    font-family: "Roboto-Black";
+    font-size: 24px;
+    margin-left: 20px;
+  }
+}
+
+.accountTitle-head-container {
+  &.MuiBox-root {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-right: 20px;
+  }
+}
+
+.accountTitle-button-container {
+  &.MuiBox-root {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+  }
+}
+
+.accountTitle-body-container {
+  &.MuiBox-root {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #fff;
+    margin: 20px;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+}
+
+.loading-accountTitle {
+  height: 500px;
+}
+
+.no-data-accountTitle {
+  height: 500px;
+  opacity: 0.7;
+  filter: grayscale(0.3);
+}
+
+.accountTitle-table-container {
+  &.MuiTableContainer-root {
+    max-height: 735px;
+    &::-webkit-scrollbar {
+      width: 14px;
+      border: 3px solid #fff;
+    }
+    &::-webkit-scrollbar-thumb {
+      background-color: #ccc;
+      border-radius: 20px;
+      border: 3px solid #fff;
+    }
+    &::-webkit-scrollbar-thumb:hover {
+      background-color: #f4ce92;
+    }
+    &::-webkit-scrollbar-track {
+      background-color: #fff;
+      border-radius: 20px;
+      border: 3px solid #fff;
+    }
+    &::-webkit-scrollbar-track:hover {
+      background-color: #eee;
+    }
+  }
+}
+
+.table-header1-accountTitle {
+  &.MuiTableRow-root {
+    .MuiTableCell-root {
+      border: none;
+      font-family: Roboto-Bold;
+      letter-spacing: 1px;
+      padding: 10px;
+    }
+  }
+}
+
+.table-header-accountTitle {
+  &.MuiTableRow-root {
+    .MuiTableCell-root {
+      border: none;
+      font-family: Roboto-Bold;
+      letter-spacing: 1px;
+      color: #f4ce92;
+      background-color: #15253b;
+      padding: 14px;
+    }
+  }
+}
+
+.table-body-accountTitle {
+  &.MuiTableRow-root {
+    .MuiTableCell-root {
+      border-bottom: 4px solid #f2f2f2;
+      padding: 8px;
+      font-family: Roboto-Light;
+      letter-spacing: 1px;
+    }
+    &:hover {
+      background-color: #f2f2f2;
+    }
+  }
+}
+
+.table-footer-accountTitle {
+  &.MuiTableRow-root {
+    .MuiTableCell-root {
+      border: none;
+      padding: 1px;
+      background-color: #fff;
+
+      .MuiTablePagination-root {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+
+        .MuiTablePagination-selectLabel {
+          font-family: Roboto-Light;
+        }
+        .MuiInputBase-root {
+          font-family: Roboto-Light;
+        }
+        .MuiTablePagination-displayedRows {
+          font-family: Roboto-Light;
+        }
+      }
+    }
+  }
+}
+
+.accountTitle-icon-actions {
+  &.MuiSvgIcon-root {
+    font-size: 20px;
+  }
+}
+
+.accountTitle-menu-icons {
+  &.MuiSvgIcon-root {
+    font-size: 20px;
+  }
+}
+
+.accountTitle-menu-text {
+  &.MuiTypography-root {
+    font-size: 14px;
+    font-family: Roboto-Medium;
+  }
+}
+
+.button-add-accountTitle {
+  &.MuiButtonBase-root {
+    text-transform: none;
+    font-family: Roboto-Medium;
+  }
+}
+
+.accountTitle-modal-dialog {
+  .MuiPaper-root {
+    max-width: 810px;
+  }
+}
+
+.accountTitle-icon-actions {
+  &.MuiSvgIcon-root {
+    font-size: 20px;
+  }
+}
+
+.loading-accountTitle-create {
+  .MuiPaper-root {
+    box-shadow: none;
+    background-color: transparent;
+  }
+}
+
+.button-export-accountTitle {
+  &.MuiButtonBase-root {
+    text-transform: none;
+    font-family: Roboto-Medium;
+    margin-left: 15px;
+  }
+}
+
+.header-options-accountTitle {
+  &.MuiBox-root {
+    background-color: #15253b;
+  }
+}
+
+@media (max-height: 768px) {
+  .page-text-indicator-accountTitle {
+    &.MuiTypography-root {
+      font-size: 18px;
+    }
+  }
+
+  .accountTitle-head-container {
+    &.MuiBox-root {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-right: 20px;
+    }
+  }
+
+  .check-box-archive-accountTitle {
+    &.MuiFormControlLabel-root {
+      .MuiSvgIcon-root {
+        font-size: 16px;
+      }
+      .MuiTypography-root {
+        font-size: 12px;
+      }
+    }
+  }
+
+  .loading-accountTitle {
+    height: 350px;
+  }
+
+  .no-data-accountTitle {
+    height: 350px;
+  }
+
+  .accountTitle-table-container {
+    &.MuiTableContainer-root {
+      max-height: 500px;
+    }
+  }
+
+  .table-header1-accountTitle {
+    &.MuiTableRow-root {
+      .MuiTableCell-root {
+        padding: 5px;
+      }
+    }
+  }
+
+  .table-header-accountTitle {
+    &.MuiTableRow-root {
+      .MuiTableCell-root {
+        padding: 10px;
+        font-size: 10px;
+      }
+    }
+  }
+
+  .table-body-accountTitle {
+    &.MuiTableRow-root {
+      .MuiTableCell-root {
+        padding: 4px;
+        font-size: 11px;
+      }
+    }
+  }
+
+  .table-footer-accountTitle {
+    &.MuiTableRow-root {
+      .MuiTableCell-root {
+        border: none;
+        padding: 1px;
+        background-color: #fff;
+
+        .MuiTablePagination-root {
+          display: flex;
+          justify-content: flex-end;
+          align-items: center;
+
+          .MuiTablePagination-selectLabel {
+            font-size: 12px;
+          }
+          .MuiInputBase-root {
+            font-size: 12px;
+          }
+          .MuiTablePagination-displayedRows {
+            font-size: 12px;
+          }
+          .MuiSvgIcon-root {
+            font-size: 18px;
+          }
+        }
+      }
+    }
+  }
+
+  .accountTitle-icon-actions {
+    &.MuiSvgIcon-root {
+      font-size: 18px;
+    }
+  }
+
+  .accountTitle-menu-icons {
+    &.MuiSvgIcon-root {
+      font-size: 18px;
+    }
+  }
+
+  .accountTitle-menu-text {
+    &.MuiTypography-root {
+      font-size: 12px;
+      font-family: Roboto-Medium;
+    }
+  }
+
+  .button-add-accountTitle {
+    &.MuiButtonBase-root {
+      text-transform: none;
+      font-family: Roboto-Medium;
+      font-size: 10px;
+      max-height: 25px;
+      max-width: 25px;
+      .MuiSvgIcon-root {
+        font-size: 14px;
+      }
+    }
+  }
+
+  .accountTitle-modal-dialog {
+    .MuiPaper-root {
+      max-width: 400px;
+    }
+  }
+
+  .accountTitle-icon-actions {
+    &.MuiSvgIcon-root {
+      font-size: 18px;
+    }
+  }
+
+  .loading-accountTitle-create {
+    .MuiPaper-root {
+      box-shadow: none;
+      background-color: transparent;
+    }
+  }
+  .button-export-accountTitle {
+    &.MuiButtonBase-root {
+      font-size: 11px;
+    }
+  }
+}

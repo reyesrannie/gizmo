@@ -18,7 +18,11 @@ import { setLogsOpen, setSuccessLog } from "../../services/slice/logSlice";
 import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
 import CircleOutlinedIcon from "@mui/icons-material/CircleOutlined";
 import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
-import { useUsersQuery } from "../../services/store/request";
+import SwapHorizontalCircleOutlinedIcon from "@mui/icons-material/SwapHorizontalCircleOutlined";
+import {
+  useStatusLogsQuery,
+  useUsersQuery,
+} from "../../services/store/request";
 import moment from "moment";
 import { useRef } from "react";
 import { useEffect } from "react";
@@ -37,12 +41,21 @@ const CustomIndicator = ({ props, item }) => {
       {completed && item?.status === "archived" && (
         <CancelOutlinedIcon color="error" />
       )}
+      {completed && item?.status === "returned" && (
+        <SwapHorizontalCircleOutlinedIcon color="error" />
+      )}
       {!completed && <CircleOutlinedIcon color="warning" />}
     </Box>
   );
 };
 
-const TransactionDrawer = ({ logs }) => {
+const TransactionDrawer = ({ transactionData }) => {
+  const { data: logs, isLoading: loadingLogs } = useStatusLogsQuery({
+    transaction_id: transactionData?.id,
+    sorts: "created_at",
+    pagination: "none",
+  });
+
   const paperRef = useRef(null);
   const { data: user } = useUsersQuery({
     status: "active",
@@ -92,8 +105,8 @@ const TransactionDrawer = ({ logs }) => {
       <Box
         className={`logs-transaction-item-container ${logsOpen ? "open" : ""}`}
       >
-        <Stepper activeStep={logs?.length} orientation="vertical">
-          {logs?.map((item, index) => {
+        <Stepper activeStep={logs?.result.length} orientation="vertical">
+          {logs?.result?.map((item, index) => {
             const createdBy = user?.result?.find(
               (items) => item?.created_by_id === items.id
             );
@@ -168,8 +181,26 @@ const TransactionDrawer = ({ logs }) => {
                           {item?.status?.toUpperCase()} by AP
                         </Typography>
                       )}
+                      {item?.status === "returned" && (
+                        <Typography
+                          color="error"
+                          className="logs-indicator-transaction"
+                        >
+                          {item?.status?.toUpperCase()}
+                        </Typography>
+                      )}
                     </Box>
                     {item?.status === "archived" && (
+                      <Box className={"logs-details-transaction"}>
+                        <Typography className="logs-indicator-transaction">
+                          Reason:
+                        </Typography>
+                        <Typography className="logs-details-text-transaction">
+                          {item?.reason}
+                        </Typography>
+                      </Box>
+                    )}
+                    {item?.status === "returned" && (
                       <Box className={"logs-details-transaction"}>
                         <Typography className="logs-indicator-transaction">
                           Reason:

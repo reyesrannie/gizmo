@@ -7,13 +7,13 @@ const mapTransaction = (submitData) => {
     tag_no: submitData?.tag_no,
     date_invoice: moment(submitData?.date_invoice).format("YYYY-MM-DD"),
     date_received: moment(submitData?.date_received).format("YYYY-MM-DD"),
-    document_type_id: submitData?.document_type?.id,
+    document_type_id: submitData?.document_type?.id || "",
+    supplier_type_id: submitData?.supplier_type_id || "",
+    atc_id: submitData?.atc_id || "",
     supplier_id: submitData?.tin?.id,
     description: submitData?.description || "",
     reference_no: submitData?.ref_no,
-    delivery_invoice: submitData?.delivery_invoice || "",
-    sales_invoice: submitData?.sales_invoice || "",
-    charged_invoice: submitData?.charged_invoice || "",
+    invoice_no: submitData?.invoice_no || "",
     purchase_amount: submitData?.amount,
     amount_withheld: submitData?.amount_withheld || "",
     amount_check: submitData?.amount_check || "",
@@ -45,16 +45,15 @@ const mapViewTransaction = (
   accountNumber,
   location
 ) => {
+  console.log(transactionData);
   const values = {
     tag_no: transactionData?.tag_no || "",
     supplier: transactionData?.supplier?.name || "",
     proprietor: transactionData?.supplier?.proprietor || "",
     company_address: transactionData?.supplier?.address || "",
     name_in_receipt: transactionData?.supplier?.receipt_name || "",
+    invoice_no: transactionData?.invoice_no || "",
     ref_no: transactionData?.reference_no || "",
-    delivery_invoice: transactionData?.delivery_invoice || "",
-    sales_invoice: transactionData?.sales_invoice || "",
-    charged_invoice: transactionData?.charged_invoice || "",
     amount_withheld: transactionData?.amount_check || "",
     amount_check: transactionData?.amount_withheld || "",
     amount: transactionData?.purchase_amount || "",
@@ -62,6 +61,9 @@ const mapViewTransaction = (
     cost: transactionData?.cost || "",
     g_tag_number: transactionData?.gtag_no || "",
     description: transactionData?.description || "",
+    supplier_type_id: transactionData?.supplierType?.id || "",
+    atc_id: transactionData?.atc?.id || "",
+
     ap:
       ap?.result?.find((item) => transactionData?.apTagging?.id === item.id) ||
       null,
@@ -101,4 +103,45 @@ const mapViewTransaction = (
   return values;
 };
 
-export { mapTransaction, mapViewTransaction };
+const mapAPTransaction = (
+  transactionData,
+  tin,
+  document,
+  accountNumber,
+  supplierTypes
+) => {
+  const values = {
+    tag_no: transactionData?.tag_no || "",
+    supplier: transactionData?.supplier?.name || "",
+    proprietor: transactionData?.supplier?.proprietor || "",
+    company_address: transactionData?.supplier?.address || "",
+    invoice_no: transactionData?.invoice_no || "",
+    amount: transactionData?.purchase_amount || "",
+    description: transactionData?.description || "",
+    tin:
+      tin?.result?.find((item) => transactionData?.supplier?.id === item.id) ||
+      null,
+    date_invoice:
+      dayjs(new Date(transactionData?.date_invoice), {
+        locale: AdapterDayjs.locale,
+      }) || null,
+
+    document_type:
+      document?.result?.find(
+        (item) => transactionData?.documentType?.id === item.id
+      ) || null,
+
+    supplier_type: supplierTypes?.result?.find(
+      (item) => transactionData?.supplierType?.id === item?.id || null
+    ),
+
+    account_number:
+      accountNumber?.result?.find(
+        (item) => transactionData?.accountNumber?.id === item.id
+      ) || null,
+  };
+
+  return values;
+};
+
+export { mapTransaction, mapViewTransaction, mapAPTransaction };
