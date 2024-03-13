@@ -1,5 +1,4 @@
 import {
-  Autocomplete,
   Box,
   Divider,
   Paper,
@@ -11,22 +10,44 @@ import {
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import vat from "../../../assets/svg/vat.svg";
-import apTransactionSchema from "../../../schemas/apTransactionSchema";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import AppTextBox from "../AppTextBox";
-import { DatePicker } from "@mui/x-date-pickers";
-import { setCreateTax } from "../../../services/slice/menuSlice";
+import {
+  setCreateTax,
+  setTaxData,
+  setUpdateTax,
+} from "../../../services/slice/menuSlice";
 import {
   useAccountTitlesQuery,
+  useCreateTaxComputationMutation,
+  useSupplierQuery,
   useSupplierTypeQuery,
 } from "../../../services/store/request";
 import Lottie from "lottie-react";
 import loadingLight from "../../../assets/lottie/Loading.json";
+import taxComputationSchema from "../../../schemas/taxComputationSchema";
+import Autocomplete from "../AutoComplete";
+import { setSupplyType } from "../../../services/slice/optionsSlice";
+import { supplierTypeReqFields } from "../../../services/constants/requiredFields";
+import { enqueueSnackbar } from "notistack";
+import { objectError } from "../../../services/functions/errorResponse";
 
 const TaxComputation = ({ update }) => {
   const dispatch = useDispatch();
   const transactionData = useSelector((state) => state.menu.menuData);
+  const taxData = useSelector((state) => state.menu.taxData);
+
+  const supplyType = useSelector((state) => state.options.supplyType);
+
+  const {
+    data: tin,
+    isLoading: loadingTIN,
+    isSuccess: supplySuccess,
+  } = useSupplierQuery({
+    status: "active",
+    pagination: "none",
+  });
 
   const {
     data: accountTitles,
@@ -46,6 +67,9 @@ const TaxComputation = ({ update }) => {
     pagination: "none",
   });
 
+  const [createTaxComputation, { isLoading: loadingTax }] =
+    useCreateTaxComputationMutation();
+
   const {
     control,
     handleSubmit,
@@ -54,11 +78,12 @@ const TaxComputation = ({ update }) => {
     watch,
     formState: { errors },
   } = useForm({
-    resolver: yupResolver(apTransactionSchema),
+    resolver: yupResolver(taxComputationSchema),
     defaultValues: {
       transaction_id: "",
       stype_id: null,
       coa_id: null,
+      mode: "Debit",
       amount: "",
       vat_local: "",
       vat_service: "",
@@ -67,18 +92,144 @@ const TaxComputation = ({ update }) => {
       vat_input_tax: "",
       wtax_payable_cr: "",
       total_invoice_amount: "",
+      debit: "",
+      credit: "",
+      account: "",
     },
   });
 
-  console.log(transactionData);
+  const checkField = (field) => {
+    return watch("stype_id")?.required_fields?.includes(field);
+  };
 
   useEffect(() => {
-    if (successTitles || supplierTypeSuccess) {
+    if (successTitles && supplierTypeSuccess && supplySuccess && !update) {
       const obj = {
         transaction_id: transactionData?.id,
+        stype_id: supplierTypes?.result?.find(
+          (item) => transactionData?.supplierType?.id === item?.id
+        ),
+        amount: transactionData?.purchase_amount,
       };
+
+      Object.entries(obj).forEach(([key, value]) => {
+        setValue(key, value);
+      });
+
+      const tinType = tin?.result?.find(
+        (item) => item?.id === transactionData?.supplier?.id
+      );
+      dispatch(setSupplyType(tinType));
+      setRequiredFieldsValue(transactionData?.purchase_amount);
     }
-  }, [successTitles, supplierTypeSuccess, transactionData]);
+    if (successTitles && supplierTypeSuccess && supplySuccess && update) {
+      console.log(taxData);
+      const obj = {
+        transaction_id: taxData?.transaction_id,
+        stype_id: supplierTypes?.result?.find(
+          (item) => taxData?.stype_id === item?.id
+        ),
+        coa_id: accountTitles?.result?.find(
+          (item) => taxData?.coa_id === item?.id
+        ),
+        mode: taxData?.mode,
+        amount: taxData?.amount,
+        vat_local: taxData?.vat_local,
+        vat_service: taxData?.vat_service,
+        nvat_local: taxData?.nvat_local,
+        nvat_service: taxData?.nvat_service,
+        vat_input_tax: taxData?.vat_input_tax,
+        wtax_payable_cr: taxData?.wtax_payable_cr,
+        total_invoice_amount: taxData?.total_invoice_amount,
+        debit: taxData?.debit,
+        credit: taxData?.credit,
+        account: taxData?.account,
+      };
+
+      Object.entries(obj).forEach(([key, value]) => {
+        setValue(key, value);
+      });
+
+      const tinType = tin?.result?.find(
+        (item) => item?.id === transactionData?.supplier?.id
+      );
+      dispatch(setSupplyType(tinType));
+    }
+  }, [
+    successTitles,
+    supplierTypes,
+    supplierTypeSuccess,
+    transactionData,
+    tin,
+    update,
+    taxData,
+    dispatch,
+  ]);
+
+  const setRequiredFieldsValue = (amount) => {
+    const updatedFields = {};
+    watch("stype_id")?.required_fields?.forEach((fieldName) => {
+      const field = supplierTypeReqFields.find((f) => fieldName === f.name);
+      if (field) {
+        updatedFields[field.name] = amount / field.divide;
+        updatedFields["vat_input_tax"] = updatedFields[field.name] * field.vit;
+        updatedFields["wtax_payable_cr"] =
+          (updatedFields[field.name] * parseFloat(watch("stype_id")?.wtax)) /
+          100;
+        updatedFields["total_invoice_amount"] =
+          updatedFields["vat_input_tax"] + updatedFields[field.name];
+        updatedFields["debit"] =
+          watch("mode") === "Debit" ? updatedFields[field.name] : 0;
+        updatedFields["credit"] =
+          watch("mode") === "Credit" ? updatedFields[field.name] : 0;
+        updatedFields["account"] =
+          updatedFields["total_invoice_amount"] -
+          updatedFields["wtax_payable_cr"];
+      }
+    });
+
+    Object.entries(updatedFields).forEach(([key, value]) => {
+      setValue(key, value);
+    });
+  };
+
+  const handleClear = () => {
+    const obj = {
+      vat_local: "",
+      vat_service: "",
+      nvat_local: "",
+      nvat_service: "",
+      vat_input_tax: "",
+      wtax_payable_cr: "",
+      total_invoice_amount: "",
+      debit: "",
+      credit: "",
+      account: "",
+    };
+
+    Object.entries(obj).forEach(([key, value]) => {
+      setValue(key, value);
+    });
+
+    setRequiredFieldsValue(watch("amount"));
+  };
+
+  const submitHandler = async (submitData) => {
+    const obj = {
+      ...submitData,
+      transaction_id: submitData?.transaction_id,
+      stype_id: submitData?.stype_id?.id,
+      coa_id: submitData?.coa_id?.id,
+    };
+
+    try {
+      const res = await createTaxComputation(obj).unwrap();
+      enqueueSnackbar(res?.message, { variant: "success" });
+      dispatch(setCreateTax(false));
+    } catch (error) {
+      objectError(error, setError, enqueueSnackbar);
+    }
+  };
 
   return (
     <Paper className="transaction-modal-container">
@@ -100,24 +251,11 @@ const TaxComputation = ({ update }) => {
 
       <form
         className="form-container-transaction"
-        // onSubmit={handleSubmit(submitHandler)}
+        onSubmit={handleSubmit(submitHandler)}
       >
-        <AppTextBox
-          money
-          control={control}
-          name={"amount"}
-          label={"Amount *"}
-          color="primary"
-          className="transaction-form-textBox"
-          error={Boolean(errors?.amount)}
-          helperText={errors?.amount?.message}
-          //   onKeyUp={(e) => {
-          //     setRequiredFieldsValue(e.target.value.replace(/,/g, ""));
-          //   }}
-        />
         <Autocomplete
           control={control}
-          name={""}
+          name={"coa_id"}
           options={accountTitles?.result || []}
           getOptionLabel={(option) => `${option.code} - ${option.name}`}
           isOptionEqualToValue={(option, value) => option?.id === value?.id}
@@ -128,6 +266,59 @@ const TaxComputation = ({ update }) => {
               label="Account Titles *"
               size="small"
               variant="outlined"
+              error={Boolean(errors.coa_id)}
+              helperText={errors.coa_id?.message}
+              className="transaction-form-textBox"
+            />
+          )}
+          disableClearable
+        />
+        <Autocomplete
+          control={control}
+          name={"stype_id"}
+          options={
+            supplyType?.supplier_types?.map((item) =>
+              supplierTypes?.result?.find(
+                (i) => i.id === parseInt(item.type_id)
+              )
+            ) || []
+          }
+          getOptionLabel={(option) => `${option.code} - ${option.wtax}`}
+          isOptionEqualToValue={(option, value) => option?.id === value?.id}
+          onClose={() => {
+            handleClear();
+          }}
+          renderInput={(params) => (
+            <MuiTextField
+              name="stype_id"
+              {...params}
+              label="Supplier Type *"
+              size="small"
+              variant="outlined"
+              error={Boolean(errors.stype_id)}
+              helperText={errors.stype_id?.message}
+              className="transaction-form-textBox"
+            />
+          )}
+          disableClearable
+        />
+
+        <Autocomplete
+          control={control}
+          name={"mode"}
+          options={["Debit", "Credit"]}
+          getOptionLabel={(option) => `${option}`}
+          isOptionEqualToValue={(option, value) => option === value}
+          onClose={() => {
+            handleClear();
+          }}
+          renderInput={(params) => (
+            <MuiTextField
+              name="mode"
+              {...params}
+              label="Mode *"
+              size="small"
+              variant="outlined"
               error={Boolean(errors.tin)}
               helperText={errors.tin?.message}
               className="transaction-form-textBox"
@@ -135,117 +326,133 @@ const TaxComputation = ({ update }) => {
           )}
           disableClearable
         />
-        <AppTextBox
-          disabled
-          control={control}
-          name={"supplier"}
-          label={"Supplier *"}
-          color="primary"
-          className="transaction-form-textBox"
-          error={Boolean(errors?.supplier)}
-          helperText={errors?.supplier?.message}
-        />
-        <AppTextBox
-          disabled
-          control={control}
-          name={"proprietor"}
-          label={"Proprietor"}
-          color="primary"
-          className="transaction-form-textBox"
-          error={Boolean(errors?.proprietor)}
-          helperText={errors?.proprietor?.message}
-        />
-        <AppTextBox
-          disabled
-          multiline
-          minRows={1}
-          control={control}
-          name={"company_address"}
-          className="transaction-form-field-textBox "
-          label="Address"
-          error={Boolean(errors.company_address)}
-          helperText={errors.company_address?.message}
-        />
-        <Box className="form-title-transaction">
-          <Divider orientation="horizontal" className="transaction-devider" />
 
-          <Typography className="form-title-text-transaction">
-            Receipt Details
-          </Typography>
-        </Box>
-        <Controller
-          name="date_invoice"
-          control={control}
-          render={({ field: { onChange, value, ...restField } }) => (
-            <Box className="date-picker-container-transaction">
-              <DatePicker
-                disabled
-                className="transaction-form-date"
-                label="Date Invoice *"
-                format="YYYY-MM-DD"
-                value={value}
-                onChange={(e) => {
-                  onChange(e);
-                }}
-              />
-              {errors.date_invoice && (
-                <Typography variant="caption" color="error">
-                  {errors.date_invoice?.message}
-                </Typography>
-              )}
-            </Box>
-          )}
-        />
         <AppTextBox
-          disabled
+          money
           control={control}
-          name={"invoice_no"}
-          label={"Invoice No. *"}
+          name={"amount"}
+          label={"Amount *"}
           color="primary"
           className="transaction-form-textBox"
-          error={Boolean(errors?.invoice_no)}
-          helperText={errors?.invoice_no?.message}
+          error={Boolean(errors?.amount)}
+          helperText={errors?.amount?.message}
+          onKeyUp={(e) => {
+            setRequiredFieldsValue(e.target.value.replace(/,/g, ""));
+          }}
         />
-        {watch("tin") && (
-          <Autocomplete
-            disabled
+
+        {checkField("vat_local") && (
+          <AppTextBox
+            money
             control={control}
-            name={"document_type"}
-            options={
-              watch("tin")?.supplier_documenttypes?.map((item) =>
-                document?.result?.find(
-                  (docs) => item.document_code === docs.code
-                )
-              ) || []
-            }
-            getOptionLabel={(option) => `${option.name}`}
-            isOptionEqualToValue={(option, value) =>
-              option?.code === value?.code
-            }
-            renderInput={(params) => (
-              <MuiTextField
-                name="document_type"
-                {...params}
-                label="Document type *"
-                size="small"
-                variant="outlined"
-                error={Boolean(errors.document_type)}
-                helperText={errors.document_type?.message}
-                className="transaction-form-textBox"
-              />
-            )}
+            name={"vat_local"}
+            label={"Vat Local *"}
+            color="primary"
+            className="transaction-tax-textBox"
+            error={Boolean(errors?.vat_local)}
+            helperText={errors?.vat_local?.message}
+          />
+        )}
+        {checkField("vat_service") && (
+          <AppTextBox
+            money
+            control={control}
+            name={"vat_service"}
+            label={"Vat Service *"}
+            color="primary"
+            className="transaction-tax-textBox"
+            error={Boolean(errors?.vat_service)}
+            helperText={errors?.vat_service?.message}
+          />
+        )}
+        {checkField("nvat_local") && (
+          <AppTextBox
+            money
+            control={control}
+            name={"nvat_local"}
+            label={"Non-Vat Local *"}
+            color="primary"
+            className="transaction-tax-textBox"
+            error={Boolean(errors?.nvat_local)}
+            helperText={errors?.nvat_local?.message}
+          />
+        )}
+        {checkField("nvat_service") && (
+          <AppTextBox
+            money
+            control={control}
+            name={"nvat_service"}
+            label={"Non-Vat Service *"}
+            color="primary"
+            className="transaction-tax-textBox"
+            error={Boolean(errors?.nvat_service)}
+            helperText={errors?.nvat_service?.message}
+          />
+        )}
+        <AppTextBox
+          money
+          control={control}
+          name={"vat_input_tax"}
+          label={"Vat Input Tax *"}
+          color="primary"
+          className="transaction-tax-textBox"
+          error={Boolean(errors?.vat_input_tax)}
+          helperText={errors?.vat_input_tax?.message}
+        />
+        <AppTextBox
+          money
+          control={control}
+          name={"wtax_payable_cr"}
+          label={"Wtax Payable Cr *"}
+          color="primary"
+          className="transaction-tax-textBox"
+          error={Boolean(errors?.wtax_payable_cr)}
+          helperText={errors?.wtax_payable_cr?.message}
+        />
+        <AppTextBox
+          money
+          control={control}
+          name={"total_invoice_amount"}
+          label={"Total Invoice Amount *"}
+          color="primary"
+          className="transaction-tax-textBox"
+          error={Boolean(errors?.total_invoice_amount)}
+          helperText={errors?.total_invoice_amount?.message}
+        />
+        {watch("mode") === "Debit" && (
+          <AppTextBox
+            money
+            control={control}
+            name={"debit"}
+            label={"Debit *"}
+            color="primary"
+            className="transaction-tax-textBox"
+            error={Boolean(errors?.debit)}
+            helperText={errors?.debit?.message}
+          />
+        )}
+        {watch("mode") === "Credit" && (
+          <AppTextBox
+            money
+            control={control}
+            name={"credit"}
+            label={"Credit *"}
+            color="primary"
+            className="transaction-tax-textBox"
+            error={Boolean(errors?.credit)}
+            helperText={errors?.credit?.message}
           />
         )}
 
         <AppTextBox
-          multiline
-          minRows={1}
+          money
           control={control}
-          name={"description"}
-          className="transaction-form-field-textBox "
-          label="Description (Optional)"
-          error={Boolean(errors.description)}
-          helperText={errors.description?.message}
+          name={"account"}
+          label={"Account *"}
+          color="primary"
+          className="transaction-tax-textBox"
+          error={Boolean(errors?.account)}
+          helperText={errors?.account?.message}
         />
 
         <Box className="form-title-transaction">
@@ -258,15 +465,18 @@ const TaxComputation = ({ update }) => {
             color="warning"
             type="submit"
             className="add-transaction-button"
-            disabled={!watch("tin")}
           >
-            Create
+            {update ? "Update" : "Create"}
           </Button>
 
           <Button
             variant="contained"
             color="primary"
-            onClick={() => dispatch(setCreateTax(false))}
+            onClick={() => {
+              dispatch(setCreateTax(false));
+              dispatch(setUpdateTax(false));
+              dispatch(setTaxData(null));
+            }}
             className="add-transaction-button"
           >
             Cancel
@@ -275,7 +485,7 @@ const TaxComputation = ({ update }) => {
       </form>
 
       <Dialog
-        open={loadingTitles || supplierTypeLoading}
+        open={loadingTitles || supplierTypeLoading || loadingTIN || loadingTax}
         className="loading-role-create"
       >
         <Lottie animationData={loadingLight} loop />

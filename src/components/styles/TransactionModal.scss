@@ -37,6 +37,39 @@
     flex-direction: column;
     width: 100%;
     gap: 10px;
+    overflow: hidden;
+  }
+}
+
+.form-tax-box-details {
+  &.MuiBox-root {
+    display: flex;
+    overflow: auto;
+    flex-direction: column;
+    width: 100%;
+    max-height: 100px;
+    gap: 10px;
+    padding: 5px;
+    &::-webkit-scrollbar {
+      width: 14px;
+      border: 3px solid #fff;
+    }
+    &::-webkit-scrollbar-thumb {
+      background-color: #ccc;
+      border-radius: 20px;
+      border: 3px solid #fff;
+    }
+    &::-webkit-scrollbar-thumb:hover {
+      background-color: #f4ce92;
+    }
+    &::-webkit-scrollbar-track {
+      background-color: #fff;
+      border-radius: 20px;
+      border: 3px solid #fff;
+    }
+    &::-webkit-scrollbar-track:hover {
+      background-color: #eee;
+    }
   }
 }
 
@@ -44,6 +77,8 @@
   &.MuiPaper-root {
     padding: 10px;
     display: flex;
+    border-radius: 10px;
+    gap: 10px;
     cursor: pointer;
     &:hover {
       background-color: #f2f2f2;
@@ -59,6 +94,13 @@
     font-size: 11px;
     letter-spacing: 1px;
     width: 5%;
+  }
+}
+
+.amount-tax {
+  &.MuiTypography-root {
+    font-family: Roboto-Medium;
+    font-size: 14px;
   }
 }
 

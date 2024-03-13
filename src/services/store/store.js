@@ -8,6 +8,7 @@ import { jsonFistoApi } from "./fistoRequest";
 import syncSlice from "../slice/syncSlice";
 import transactionSlice from "../slice/transactionSlice";
 import logSlice from "../slice/logSlice";
+import optionsSlice from "../slice/optionsSlice";
 
 export const store = configureStore({
   reducer: {
@@ -17,6 +18,7 @@ export const store = configureStore({
     sync: syncSlice,
     transaction: transactionSlice,
     log: logSlice,
+    options: optionsSlice,
 
     [jsonServerAPI.reducerPath]: jsonServerAPI.reducer,
     [jsonSedarAPI.reducerPath]: jsonSedarAPI.reducer,

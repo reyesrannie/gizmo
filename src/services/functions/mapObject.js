@@ -108,7 +108,7 @@ const mapAPTransaction = (
   tin,
   document,
   accountNumber,
-  supplierTypes
+  atc
 ) => {
   const values = {
     tag_no: transactionData?.tag_no || "",
@@ -131,10 +131,8 @@ const mapAPTransaction = (
         (item) => transactionData?.documentType?.id === item.id
       ) || null,
 
-    supplier_type: supplierTypes?.result?.find(
-      (item) => transactionData?.supplierType?.id === item?.id || null
-    ),
-
+    atc_id:
+      atc?.result?.find((item) => transactionData?.atc?.id === item.id) || null,
     account_number:
       accountNumber?.result?.find(
         (item) => transactionData?.accountNumber?.id === item.id

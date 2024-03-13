@@ -13,10 +13,16 @@ import { LoadingButton } from "@mui/lab";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useDispatch, useSelector } from "react-redux";
-import { resetMenu, setCreateTax } from "../../../services/slice/menuSlice";
+import {
+  resetMenu,
+  setCreateTax,
+  setTaxData,
+  setUpdateTax,
+} from "../../../services/slice/menuSlice";
 import {
   useAccountNumberQuery,
   useArchiveTransactionMutation,
+  useAtcQuery,
   useCreateTransactionMutation,
   useDocumentTypeQuery,
   useLocationQuery,
@@ -24,6 +30,7 @@ import {
   useReturnTransactionMutation,
   useSupplierQuery,
   useSupplierTypeQuery,
+  useTaxComputationQuery,
   useUpdateTransactionMutation,
 } from "../../../services/store/request";
 import { useSnackbar } from "notistack";
@@ -67,13 +74,14 @@ import KeyboardReturnOutlinedIcon from "@mui/icons-material/KeyboardReturnOutlin
 
 import ReasonInput from "../ReasonInput";
 import apTransactionSchema from "../../../schemas/apTransactionSchema";
-import { supplierTypeReqFields } from "../../../services/constants/requiredFields";
-import { setTransactionHeader } from "../../../services/slice/transactionSlice";
+
 import TaxComputation from "./TaxComputation";
 
 const TransactionModalAp = ({ transactionData, view, update, receive }) => {
   const dispatch = useDispatch();
   const createTax = useSelector((state) => state.menu.createTax);
+  const updateTax = useSelector((state) => state.menu.updateTax);
+
   const openReason = useSelector((state) => state.prompt.openReason);
   const openReasonReturn = useSelector(
     (state) => state.prompt.openReasonReturn
@@ -131,6 +139,25 @@ const TransactionModalAp = ({ transactionData, view, update, receive }) => {
   });
 
   const {
+    data: atc,
+    isLoading: loadingAtc,
+    isSuccess: atcSuccess,
+  } = useAtcQuery({
+    status: "active",
+    pagination: "none",
+  });
+
+  const {
+    data: taxComputation,
+    isLoading: loadingTax,
+    isSuccess: taxSuccess,
+  } = useTaxComputationQuery({
+    status: "active",
+    transaction_id: transactionData?.id,
+    pagination: "none",
+  });
+
+  const {
     control,
     handleSubmit,
     setError,
@@ -151,6 +178,8 @@ const TransactionModalAp = ({ transactionData, view, update, receive }) => {
       date_invoice: null,
       document_type: null,
       store: null,
+      location_id: null,
+      atc_id: null,
     },
   });
 
@@ -160,6 +189,7 @@ const TransactionModalAp = ({ transactionData, view, update, receive }) => {
         documentSuccess &&
         accountSuccess &&
         locationSuccess &&
+        atcSuccess &&
         update) ||
       view ||
       receive
@@ -169,7 +199,8 @@ const TransactionModalAp = ({ transactionData, view, update, receive }) => {
         transactionData,
         tin,
         document,
-        accountNumber
+        accountNumber,
+        atc
       );
 
       const values = {
@@ -192,6 +223,7 @@ const TransactionModalAp = ({ transactionData, view, update, receive }) => {
     document,
     accountNumber,
     tin,
+    atcSuccess,
     watch,
   ]);
 
@@ -206,7 +238,6 @@ const TransactionModalAp = ({ transactionData, view, update, receive }) => {
       enqueueSnackbar(res?.message, { variant: "success" });
       dispatch(resetMenu());
       dispatch(resetPrompt());
-      dispatch(setTransactionHeader());
     } catch (error) {
       singleError(error, enqueueSnackbar);
     }
@@ -401,6 +432,46 @@ const TransactionModalAp = ({ transactionData, view, update, receive }) => {
             )}
           />
         )}
+
+        <Autocomplete
+          control={control}
+          name={"atc_id"}
+          options={atc?.result || []}
+          getOptionLabel={(option) => `${option.code} - ${option.name}`}
+          isOptionEqualToValue={(option, value) => option?.code === value?.code}
+          renderInput={(params) => (
+            <MuiTextField
+              name="atc_id"
+              {...params}
+              label="ATC *"
+              size="small"
+              variant="outlined"
+              error={Boolean(errors.location_id)}
+              helperText={errors.location_id?.message}
+              className="transaction-form-textBox"
+            />
+          )}
+        />
+        <Autocomplete
+          control={control}
+          name={"location_id"}
+          options={location?.result || []}
+          getOptionLabel={(option) => `${option.code} - ${option.name}`}
+          isOptionEqualToValue={(option, value) => option?.code === value?.code}
+          renderInput={(params) => (
+            <MuiTextField
+              name="location_id"
+              {...params}
+              label="Location *"
+              size="small"
+              variant="outlined"
+              error={Boolean(errors.location_id)}
+              helperText={errors.location_id?.message}
+              className="transaction-form-textBox"
+            />
+          )}
+        />
+
         <AppTextBox
           money
           disabled={view}
@@ -414,7 +485,7 @@ const TransactionModalAp = ({ transactionData, view, update, receive }) => {
         />
 
         <AppTextBox
-          disabled={view}
+          disabled
           multiline
           minRows={1}
           control={control}
@@ -444,7 +515,25 @@ const TransactionModalAp = ({ transactionData, view, update, receive }) => {
             >
               Add
             </Button>
-            <Paper className="tax-details-value">1</Paper>
+            <Box className="form-tax-box-details">
+              {taxComputation?.result?.map((tax, index) => (
+                <Paper
+                  key={index}
+                  className="tax-details-value"
+                  onClick={() => {
+                    dispatch(setUpdateTax(true));
+                    dispatch(setTaxData(tax));
+                  }}
+                >
+                  <Typography className="amount-tax">
+                    Account title: {tax?.amount}
+                  </Typography>
+                  <Typography className="amount-tax">
+                    Amount: {tax?.amount}
+                  </Typography>
+                </Paper>
+              ))}
+            </Box>
           </Box>
         )}
         <Box className="form-title-transaction">
@@ -520,7 +609,9 @@ const TransactionModalAp = ({ transactionData, view, update, receive }) => {
           loadingAccountNumber ||
           loadingLocation ||
           receiveLoading ||
-          returnLoading
+          loadingAtc ||
+          returnLoading ||
+          loadingTax
         }
         className="loading-transaction-create"
       >
@@ -596,6 +687,10 @@ const TransactionModalAp = ({ transactionData, view, update, receive }) => {
 
       <Dialog open={createTax} className="transaction-modal-dialog">
         <TaxComputation />
+      </Dialog>
+
+      <Dialog open={updateTax} className="transaction-modal-dialog">
+        <TaxComputation update />
       </Dialog>
     </Paper>
   );

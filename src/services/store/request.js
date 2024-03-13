@@ -67,6 +67,7 @@ export const jsonServerAPI = createApi({
         "AccountNumber",
         "Transaction",
         "Logs",
+        "TaxComputation",
       ],
     }),
     passwordChange: builder.mutation({
@@ -732,6 +733,24 @@ export const jsonServerAPI = createApi({
       }),
       invalidatesTags: ["AccountTitles"],
     }),
+    taxComputation: builder.query({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/transaction-tax`,
+        method: "GET",
+        params: payload,
+      }),
+      providesTags: ["TaxComputation"],
+    }),
+    createTaxComputation: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/transaction-tax`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["TaxComputation"],
+    }),
   }),
 });
 
@@ -829,4 +848,7 @@ export const {
   useTagYearMonthQuery,
 
   useStatusLogsQuery,
+
+  useTaxComputationQuery,
+  useCreateTaxComputationMutation,
 } = jsonServerAPI;
