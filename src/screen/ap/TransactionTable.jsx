@@ -39,6 +39,7 @@ import "../../components/styles/TagTransaction.scss";
 import { useState } from "react";
 
 import {
+  setCheckMenu,
   setMenuData,
   setReceiveMenu,
   setUpdateMenu,
@@ -72,6 +73,7 @@ const TransactionTable = ({
   const receiveMenu = useSelector((state) => state.menu.receiveMenu);
   const updateMenu = useSelector((state) => state.menu.updateMenu);
   const viewMenu = useSelector((state) => state.menu.viewMenu);
+  const checkMenu = useSelector((state) => state.menu.checkMenu);
 
   const filterBy = useSelector((state) => state.transaction.filterBy);
 
@@ -233,6 +235,13 @@ const TransactionTable = ({
                           className="inActive-indicator"
                         />
                       )}
+
+                      {tag?.gas_status === "checked" && (
+                        <StatusIndicator
+                          status="Checking"
+                          className="checked-indicator"
+                        />
+                      )}
                     </TableCell>
                     <TableCell align="center">
                       {moment(tag?.updated_at).format("MMM DD YYYY")}
@@ -248,6 +257,8 @@ const TransactionTable = ({
                             dispatch(setUpdateMenu(true));
                           tag?.gas_status === "returned" &&
                             dispatch(setViewMenu(true));
+                          tag?.gas_status === "checked" &&
+                            dispatch(setCheckMenu(true));
                         }}
                       >
                         <RemoveRedEyeOutlinedIcon className="tag-transaction-icon-actions" />
@@ -341,6 +352,10 @@ const TransactionTable = ({
 
       <Dialog open={updateMenu} className="transaction-modal-dialog">
         <TransactionModalAp transactionData={menuData} update />
+      </Dialog>
+
+      <Dialog open={checkMenu} className="transaction-modal-dialog">
+        <TransactionModalAp transactionData={menuData} checked />
       </Dialog>
     </Box>
   );

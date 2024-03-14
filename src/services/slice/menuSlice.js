@@ -8,6 +8,8 @@ const initialState = {
   rolesUpdate: false,
   rolesData: null,
   createMenu: false,
+  checkMenu: false,
+
   updateMenu: false,
   receiveMenu: false,
   importMenu: false,
@@ -83,6 +85,9 @@ const menutSlice = createSlice({
     setTaxData: (state, action) => {
       state.taxData = action.payload;
     },
+    setCheckMenu: (state, action) => {
+      state.checkMenu = action.payload;
+    },
     resetMenu: () => {
       return initialState;
     },
@@ -110,6 +115,7 @@ export const {
   setCreateTax,
   setUpdateTax,
   setTaxData,
+  setCheckMenu,
 } = menutSlice.actions;
 
 export default menutSlice.reducer;

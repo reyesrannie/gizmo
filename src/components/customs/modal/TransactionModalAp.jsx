@@ -21,8 +21,10 @@ import {
 } from "../../../services/slice/menuSlice";
 import {
   useAccountNumberQuery,
+  useAccountTitlesQuery,
   useArchiveTransactionMutation,
   useAtcQuery,
+  useCheckedTransactionMutation,
   useCreateTransactionMutation,
   useDocumentTypeQuery,
   useLocationQuery,
@@ -71,16 +73,28 @@ import Lottie from "lottie-react";
 import AddIcon from "@mui/icons-material/Add";
 import HandshakeOutlinedIcon from "@mui/icons-material/HandshakeOutlined";
 import KeyboardReturnOutlinedIcon from "@mui/icons-material/KeyboardReturnOutlined";
+import LocalOfferOutlinedIcon from "@mui/icons-material/LocalOfferOutlined";
 
 import ReasonInput from "../ReasonInput";
 import apTransactionSchema from "../../../schemas/apTransactionSchema";
 
 import TaxComputation from "./TaxComputation";
+import {
+  resetOption,
+  setDisableButton,
+} from "../../../services/slice/optionsSlice";
 
-const TransactionModalAp = ({ transactionData, view, update, receive }) => {
+const TransactionModalAp = ({
+  transactionData,
+  view,
+  update,
+  receive,
+  checked,
+}) => {
   const dispatch = useDispatch();
   const createTax = useSelector((state) => state.menu.createTax);
   const updateTax = useSelector((state) => state.menu.updateTax);
+  const disableButton = useSelector((state) => state.options.disableButton);
 
   const openReason = useSelector((state) => state.prompt.openReason);
   const openReasonReturn = useSelector(
@@ -93,7 +107,7 @@ const TransactionModalAp = ({ transactionData, view, update, receive }) => {
 
   const [createTransaction, { isLoading }] = useCreateTransactionMutation();
   const [updateTransaction, { isLoading: updateLoading }] =
-    useUpdateTransactionMutation();
+    useCheckedTransactionMutation();
   const [returnTransaction, { isLoading: returnLoading }] =
     useReturnTransactionMutation();
   const [receiveTransaction, { isLoading: receiveLoading }] =
@@ -158,6 +172,24 @@ const TransactionModalAp = ({ transactionData, view, update, receive }) => {
   });
 
   const {
+    data: supplierType,
+    isLoading: loadingType,
+    isSuccess: typeSuccess,
+  } = useSupplierTypeQuery({
+    status: "active",
+    pagination: "none",
+  });
+
+  const {
+    data: accountTitles,
+    isLoading: loadingTitles,
+    isSuccess: successTitles,
+  } = useAccountTitlesQuery({
+    status: "active",
+    pagination: "none",
+  });
+
+  const {
     control,
     handleSubmit,
     setError,
@@ -190,9 +222,12 @@ const TransactionModalAp = ({ transactionData, view, update, receive }) => {
         accountSuccess &&
         locationSuccess &&
         atcSuccess &&
+        typeSuccess &&
+        successTitles &&
         update) ||
       view ||
-      receive
+      receive ||
+      checked
     ) {
       const tagMonthYear = dayjs(transactionData?.tag_year, "YYMM").toDate();
       const mapData = mapAPTransaction(
@@ -214,6 +249,14 @@ const TransactionModalAp = ({ transactionData, view, update, receive }) => {
       Object.entries(values).forEach(([key, value]) => {
         setValue(key, value);
       });
+      const totalAmount = taxComputation?.result?.reduce((acc, curr) => {
+        return acc + parseFloat(curr.amount);
+      }, 0);
+      if (totalAmount >= transactionData?.purchase_amount) {
+        dispatch(setDisableButton(true));
+      } else {
+        dispatch(setDisableButton(false));
+      }
     }
   }, [
     supplySuccess,
@@ -223,8 +266,19 @@ const TransactionModalAp = ({ transactionData, view, update, receive }) => {
     document,
     accountNumber,
     tin,
+    atc,
     atcSuccess,
+    typeSuccess,
+    successTitles,
+    transactionData,
+    taxComputation,
     watch,
+    dispatch,
+    receive,
+    setValue,
+    update,
+    view,
+    checked,
   ]);
 
   const performTransactionAction = async (action, submitData) => {
@@ -351,17 +405,19 @@ const TransactionModalAp = ({ transactionData, view, update, receive }) => {
           error={Boolean(errors?.proprietor)}
           helperText={errors?.proprietor?.message}
         />
-        <AppTextBox
-          disabled
-          multiline
-          minRows={1}
-          control={control}
-          name={"company_address"}
-          className="transaction-form-field-textBox "
-          label="Address"
-          error={Boolean(errors.company_address)}
-          helperText={errors.company_address?.message}
-        />
+        {receive && (
+          <AppTextBox
+            disabled
+            multiline
+            minRows={1}
+            control={control}
+            name={"company_address"}
+            className="transaction-form-field-textBox "
+            label="Address"
+            error={Boolean(errors.company_address)}
+            helperText={errors.company_address?.message}
+          />
+        )}
         <Box className="form-title-transaction">
           <Divider orientation="horizontal" className="transaction-devider" />
 
@@ -392,16 +448,17 @@ const TransactionModalAp = ({ transactionData, view, update, receive }) => {
             </Box>
           )}
         />
-        <AppTextBox
-          disabled
-          control={control}
-          name={"invoice_no"}
-          label={"Invoice No. *"}
-          color="primary"
-          className="transaction-form-textBox"
-          error={Boolean(errors?.invoice_no)}
-          helperText={errors?.invoice_no?.message}
-        />
+        {update && (
+          <AppTextBox
+            control={control}
+            name={"invoice_no"}
+            label={"Invoice No. *"}
+            color="primary"
+            className="transaction-form-textBox"
+            error={Boolean(errors?.invoice_no)}
+            helperText={errors?.invoice_no?.message}
+          />
+        )}
         {watch("tin") && (
           <Autocomplete
             disabled
@@ -433,48 +490,56 @@ const TransactionModalAp = ({ transactionData, view, update, receive }) => {
           />
         )}
 
-        <Autocomplete
-          control={control}
-          name={"atc_id"}
-          options={atc?.result || []}
-          getOptionLabel={(option) => `${option.code} - ${option.name}`}
-          isOptionEqualToValue={(option, value) => option?.code === value?.code}
-          renderInput={(params) => (
-            <MuiTextField
-              name="atc_id"
-              {...params}
-              label="ATC *"
-              size="small"
-              variant="outlined"
-              error={Boolean(errors.location_id)}
-              helperText={errors.location_id?.message}
-              className="transaction-form-textBox"
-            />
-          )}
-        />
-        <Autocomplete
-          control={control}
-          name={"location_id"}
-          options={location?.result || []}
-          getOptionLabel={(option) => `${option.code} - ${option.name}`}
-          isOptionEqualToValue={(option, value) => option?.code === value?.code}
-          renderInput={(params) => (
-            <MuiTextField
-              name="location_id"
-              {...params}
-              label="Location *"
-              size="small"
-              variant="outlined"
-              error={Boolean(errors.location_id)}
-              helperText={errors.location_id?.message}
-              className="transaction-form-textBox"
-            />
-          )}
-        />
+        {update && (
+          <Autocomplete
+            control={control}
+            name={"atc_id"}
+            options={atc?.result || []}
+            getOptionLabel={(option) => `${option.code} - ${option.name}`}
+            isOptionEqualToValue={(option, value) =>
+              option?.code === value?.code
+            }
+            renderInput={(params) => (
+              <MuiTextField
+                name="atc_id"
+                {...params}
+                label="ATC *"
+                size="small"
+                variant="outlined"
+                error={Boolean(errors.atc_id)}
+                helperText={errors.atc_id?.message}
+                className="transaction-form-textBox"
+              />
+            )}
+          />
+        )}
+        {update && (
+          <Autocomplete
+            control={control}
+            name={"location_id"}
+            options={location?.result || []}
+            getOptionLabel={(option) => `${option.code} - ${option.name}`}
+            isOptionEqualToValue={(option, value) =>
+              option?.code === value?.code
+            }
+            renderInput={(params) => (
+              <MuiTextField
+                name="location_id"
+                {...params}
+                label="Location *"
+                size="small"
+                variant="outlined"
+                error={Boolean(errors.location_id)}
+                helperText={errors.location_id?.message}
+                className="transaction-form-textBox"
+              />
+            )}
+          />
+        )}
 
         <AppTextBox
           money
-          disabled={view}
+          disabled
           control={control}
           name={"amount"}
           label={"Amount *"}
@@ -495,46 +560,150 @@ const TransactionModalAp = ({ transactionData, view, update, receive }) => {
           error={Boolean(errors.description)}
           helperText={errors.description?.message}
         />
-        {update && (
+        {update || checked ? (
           <Box className="form-title-transaction">
             <Divider orientation="horizontal" className="transaction-devider" />
             <Typography className="form-title-text-transaction">
               Tax computation
             </Typography>
           </Box>
+        ) : (
+          <></>
         )}
-        {update && (
+        {update || checked ? (
           <Box className="form-tax-details">
-            <Button
-              endIcon={<AddIcon />}
-              color="secondary"
-              variant="contained"
-              size="small"
-              className="add-tax-computation"
-              onClick={() => dispatch(setCreateTax(true))}
-            >
-              Add
-            </Button>
+            {!checked && (
+              <Button
+                disabled={disableButton}
+                endIcon={<AddIcon />}
+                color="secondary"
+                variant="contained"
+                size="small"
+                className="add-tax-computation"
+                onClick={() => dispatch(setCreateTax(true))}
+              >
+                Add
+              </Button>
+            )}
             <Box className="form-tax-box-details">
-              {taxComputation?.result?.map((tax, index) => (
-                <Paper
-                  key={index}
-                  className="tax-details-value"
-                  onClick={() => {
-                    dispatch(setUpdateTax(true));
-                    dispatch(setTaxData(tax));
-                  }}
-                >
-                  <Typography className="amount-tax">
-                    Account title: {tax?.amount}
-                  </Typography>
-                  <Typography className="amount-tax">
-                    Amount: {tax?.amount}
-                  </Typography>
-                </Paper>
-              ))}
+              {taxComputation?.result?.map((tax, index) => {
+                const type = supplierType?.result?.find(
+                  (item) => tax?.stype_id === item.id
+                );
+                const title = accountTitles?.result?.find(
+                  (item) => tax?.coa_id === item?.id
+                );
+
+                const convertToPeso = (value) => {
+                  return value
+                    ?.toString()
+                    .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                };
+
+                return (
+                  <Paper
+                    elevation={3}
+                    key={index}
+                    className="tax-details-value"
+                    onClick={() => {
+                      update && dispatch(setUpdateTax(true));
+                      update && dispatch(setTaxData(tax));
+                    }}
+                  >
+                    <LocalOfferOutlinedIcon />
+                    <Box className="tax-box-value-container">
+                      <Box className="tax-box-value">
+                        <Typography className="amount-tax">
+                          Amount: <span>&#8369;</span>{" "}
+                          {convertToPeso(tax.amount)}
+                        </Typography>
+                        <Typography className="amount-tax">
+                          Code: {type?.code}
+                        </Typography>
+                        <Typography className="amount-tax">
+                          Wtax: {type?.wtax}
+                        </Typography>
+                      </Box>
+                      <Box className="tax-box-value">
+                        <Typography className="amount-tax">
+                          Vat Input Tax: <span>&#8369;</span>{" "}
+                          {convertToPeso(tax.vat_input_tax)}
+                        </Typography>
+                        {tax?.nvat_local !== "0.00" && (
+                          <Typography className="amount-tax">
+                            Non-Vat Local: <span>&#8369;</span>{" "}
+                            {convertToPeso(tax.nvat_local)}
+                          </Typography>
+                        )}
+                        {tax?.nvat_service !== "0.00" && (
+                          <Typography className="amount-tax">
+                            Non-Vat Service: <span>&#8369;</span>{" "}
+                            {convertToPeso(tax.nvat_service)}
+                          </Typography>
+                        )}
+                        {tax?.vat_local !== "0.00" && (
+                          <Typography className="amount-tax">
+                            Vat Local: <span>&#8369;</span>{" "}
+                            {convertToPeso(tax.vat_local)}
+                          </Typography>
+                        )}
+                        {tax?.vat_service !== "0.00" && (
+                          <Typography className="amount-tax">
+                            Vat Service: <span>&#8369;</span>{" "}
+                            {convertToPeso(tax.vat_service)}
+                          </Typography>
+                        )}
+
+                        <Typography className="amount-tax">
+                          Wtax Payable: <span>&#8369;</span>{" "}
+                          {convertToPeso(tax.wtax_payable_cr)}
+                        </Typography>
+                      </Box>
+                      <Box className="tax-box-value">
+                        <Typography className="amount-tax">
+                          Total invoice amount: <span>&#8369;</span>{" "}
+                          {convertToPeso(tax.total_invoice_amount)}
+                        </Typography>
+                      </Box>
+                    </Box>
+                    <Divider
+                      orientation="horizontal"
+                      className="transaction-devider"
+                    />
+                    <Box className="tax-box-value-container">
+                      <Box className="tax-box-value">
+                        <Typography className="amount-tax">
+                          Account Code: {title?.code}
+                        </Typography>
+                        <Typography className="amount-tax">
+                          Account Title: {title?.name}
+                        </Typography>
+                      </Box>
+                      <Box className="tax-box-value">
+                        <Typography className="amount-tax">
+                          {transactionData?.tag_year}-{transactionData?.gtag_no}
+                        </Typography>
+                      </Box>
+                      <Box className="tax-box-value">
+                        <Typography className="amount-tax">
+                          {tax?.mode} : <span>&#8369;</span>{" "}
+                          {tax?.mode === "Debit"
+                            ? convertToPeso(tax.debit)
+                            : convertToPeso(tax.credit)}
+                        </Typography>
+                        <Typography className="amount-tax">
+                          Account: <span>&#8369;</span>{" "}
+                          {convertToPeso(tax.account)}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </Paper>
+                );
+              })}
             </Box>
           </Box>
+        ) : (
+          <></>
         )}
         <Box className="form-title-transaction">
           <Divider orientation="horizontal" className="transaction-devider" />
@@ -583,7 +752,7 @@ const TransactionModalAp = ({ transactionData, view, update, receive }) => {
                 color="warning"
                 type="submit"
                 className="add-transaction-button"
-                disabled={!watch("tin")}
+                disabled={!disableButton}
               >
                 Update
               </LoadingButton>
@@ -591,7 +760,10 @@ const TransactionModalAp = ({ transactionData, view, update, receive }) => {
             <Button
               variant="contained"
               color="primary"
-              onClick={() => dispatch(resetMenu())}
+              onClick={() => {
+                dispatch(resetMenu());
+                dispatch(resetOption());
+              }}
               className="add-transaction-button"
             >
               {view ? "Close" : update ? "Cancel" : "Cancel"}
@@ -611,6 +783,8 @@ const TransactionModalAp = ({ transactionData, view, update, receive }) => {
           receiveLoading ||
           loadingAtc ||
           returnLoading ||
+          loadingType ||
+          loadingTitles ||
           loadingTax
         }
         className="loading-transaction-create"
@@ -686,11 +860,11 @@ const TransactionModalAp = ({ transactionData, view, update, receive }) => {
       )}
 
       <Dialog open={createTax} className="transaction-modal-dialog">
-        <TaxComputation />
+        <TaxComputation taxComputation={taxComputation} />
       </Dialog>
 
       <Dialog open={updateTax} className="transaction-modal-dialog">
-        <TaxComputation update />
+        <TaxComputation update taxComputation={taxComputation} />
       </Dialog>
     </Paper>
   );

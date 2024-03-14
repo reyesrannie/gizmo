@@ -23,22 +23,27 @@ import {
   useCreateTaxComputationMutation,
   useSupplierQuery,
   useSupplierTypeQuery,
+  useUpdateTaxComputationMutation,
 } from "../../../services/store/request";
 import Lottie from "lottie-react";
 import loadingLight from "../../../assets/lottie/Loading.json";
 import taxComputationSchema from "../../../schemas/taxComputationSchema";
 import Autocomplete from "../AutoComplete";
-import { setSupplyType } from "../../../services/slice/optionsSlice";
+import {
+  setDisableButton,
+  setDisableCreate,
+  setSupplyType,
+} from "../../../services/slice/optionsSlice";
 import { supplierTypeReqFields } from "../../../services/constants/requiredFields";
 import { enqueueSnackbar } from "notistack";
 import { objectError } from "../../../services/functions/errorResponse";
 
-const TaxComputation = ({ update }) => {
+const TaxComputation = ({ update, taxComputation }) => {
   const dispatch = useDispatch();
   const transactionData = useSelector((state) => state.menu.menuData);
   const taxData = useSelector((state) => state.menu.taxData);
-
   const supplyType = useSelector((state) => state.options.supplyType);
+  const disableCreate = useSelector((state) => state.options.disableCreate);
 
   const {
     data: tin,
@@ -69,6 +74,8 @@ const TaxComputation = ({ update }) => {
 
   const [createTaxComputation, { isLoading: loadingTax }] =
     useCreateTaxComputationMutation();
+  const [updateTaxComputation, { isLoading: loadingUpdate }] =
+    useUpdateTaxComputationMutation();
 
   const {
     control,
@@ -76,6 +83,7 @@ const TaxComputation = ({ update }) => {
     setError,
     setValue,
     watch,
+    clearErrors,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(taxComputationSchema),
@@ -104,12 +112,16 @@ const TaxComputation = ({ update }) => {
 
   useEffect(() => {
     if (successTitles && supplierTypeSuccess && supplySuccess && !update) {
+      const sumAmount = taxComputation?.result?.reduce((acc, curr) => {
+        return acc + parseFloat(curr.amount);
+      }, 0);
+
       const obj = {
         transaction_id: transactionData?.id,
         stype_id: supplierTypes?.result?.find(
           (item) => transactionData?.supplierType?.id === item?.id
         ),
-        amount: transactionData?.purchase_amount,
+        amount: parseFloat(transactionData?.purchase_amount) - sumAmount,
       };
 
       Object.entries(obj).forEach(([key, value]) => {
@@ -120,10 +132,11 @@ const TaxComputation = ({ update }) => {
         (item) => item?.id === transactionData?.supplier?.id
       );
       dispatch(setSupplyType(tinType));
-      setRequiredFieldsValue(transactionData?.purchase_amount);
+      setRequiredFieldsValue(
+        parseFloat(transactionData?.purchase_amount) - sumAmount
+      );
     }
     if (successTitles && supplierTypeSuccess && supplySuccess && update) {
-      console.log(taxData);
       const obj = {
         transaction_id: taxData?.transaction_id,
         stype_id: supplierTypes?.result?.find(
@@ -164,33 +177,57 @@ const TaxComputation = ({ update }) => {
     update,
     taxData,
     dispatch,
+    taxComputation,
+    accountTitles,
+    setValue,
+    supplySuccess,
   ]);
 
   const setRequiredFieldsValue = (amount) => {
-    const updatedFields = {};
-    watch("stype_id")?.required_fields?.forEach((fieldName) => {
-      const field = supplierTypeReqFields.find((f) => fieldName === f.name);
-      if (field) {
-        updatedFields[field.name] = amount / field.divide;
-        updatedFields["vat_input_tax"] = updatedFields[field.name] * field.vit;
-        updatedFields["wtax_payable_cr"] =
-          (updatedFields[field.name] * parseFloat(watch("stype_id")?.wtax)) /
-          100;
-        updatedFields["total_invoice_amount"] =
-          updatedFields["vat_input_tax"] + updatedFields[field.name];
-        updatedFields["debit"] =
-          watch("mode") === "Debit" ? updatedFields[field.name] : 0;
-        updatedFields["credit"] =
-          watch("mode") === "Credit" ? updatedFields[field.name] : 0;
-        updatedFields["account"] =
-          updatedFields["total_invoice_amount"] -
-          updatedFields["wtax_payable_cr"];
-      }
-    });
+    const sumAmount = taxComputation?.result?.reduce((acc, curr) => {
+      return acc + parseFloat(curr.amount);
+    }, 0);
 
-    Object.entries(updatedFields).forEach(([key, value]) => {
-      setValue(key, value);
-    });
+    const totalAmount = update
+      ? sumAmount + parseFloat(amount) - taxData?.amount
+      : sumAmount + parseFloat(amount);
+
+    if (totalAmount > transactionData?.purchase_amount) {
+      dispatch(setDisableCreate(true));
+      setError("amount", {
+        type: "max",
+        message: "Amount Exceeded",
+      });
+    } else {
+      dispatch(setDisableCreate(false));
+
+      clearErrors();
+      const updatedFields = {};
+      watch("stype_id")?.required_fields?.forEach((fieldName) => {
+        const field = supplierTypeReqFields.find((f) => fieldName === f.name);
+        if (field) {
+          updatedFields[field.name] = amount / field.divide;
+          updatedFields["vat_input_tax"] =
+            updatedFields[field.name] * field.vit;
+          updatedFields["wtax_payable_cr"] =
+            (updatedFields[field.name] * parseFloat(watch("stype_id")?.wtax)) /
+            100;
+          updatedFields["total_invoice_amount"] =
+            updatedFields["vat_input_tax"] + updatedFields[field.name];
+          updatedFields["debit"] =
+            watch("mode") === "Debit" ? updatedFields[field.name] : 0;
+          updatedFields["credit"] =
+            watch("mode") === "Credit" ? updatedFields[field.name] : 0;
+          updatedFields["account"] =
+            updatedFields["total_invoice_amount"] -
+            updatedFields["wtax_payable_cr"];
+        }
+      });
+
+      Object.entries(updatedFields).forEach(([key, value]) => {
+        setValue(key, value);
+      });
+    }
   };
 
   const handleClear = () => {
@@ -220,12 +257,16 @@ const TaxComputation = ({ update }) => {
       transaction_id: submitData?.transaction_id,
       stype_id: submitData?.stype_id?.id,
       coa_id: submitData?.coa_id?.id,
+      id: taxData?.id,
     };
 
     try {
-      const res = await createTaxComputation(obj).unwrap();
+      const res = update
+        ? await updateTaxComputation(obj).unwrap()
+        : await createTaxComputation(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
       dispatch(setCreateTax(false));
+      dispatch(setUpdateTax(false));
     } catch (error) {
       objectError(error, setError, enqueueSnackbar);
     }
@@ -245,7 +286,7 @@ const TaxComputation = ({ update }) => {
       <Divider orientation="horizontal" className="transaction-devider" />
       <Box className="form-title-transaction">
         <Typography className="form-title-text-transaction">
-          Supplier Details
+          Tax Computation
         </Typography>
       </Box>
 
@@ -465,6 +506,7 @@ const TaxComputation = ({ update }) => {
             color="warning"
             type="submit"
             className="add-transaction-button"
+            disabled={disableCreate}
           >
             {update ? "Update" : "Create"}
           </Button>
@@ -485,7 +527,13 @@ const TaxComputation = ({ update }) => {
       </form>
 
       <Dialog
-        open={loadingTitles || supplierTypeLoading || loadingTIN || loadingTax}
+        open={
+          loadingTitles ||
+          supplierTypeLoading ||
+          loadingTIN ||
+          loadingTax ||
+          loadingUpdate
+        }
         className="loading-role-create"
       >
         <Lottie animationData={loadingLight} loop />

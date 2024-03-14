@@ -9,7 +9,7 @@ const mapTransaction = (submitData) => {
     date_received: moment(submitData?.date_received).format("YYYY-MM-DD"),
     document_type_id: submitData?.document_type?.id || "",
     supplier_type_id: submitData?.supplier_type_id || "",
-    atc_id: submitData?.atc_id || "",
+    atc_id: submitData?.atc_id?.id || "",
     supplier_id: submitData?.tin?.id,
     description: submitData?.description || "",
     reference_no: submitData?.ref_no,
@@ -45,7 +45,6 @@ const mapViewTransaction = (
   accountNumber,
   location
 ) => {
-  console.log(transactionData);
   const values = {
     tag_no: transactionData?.tag_no || "",
     supplier: transactionData?.supplier?.name || "",

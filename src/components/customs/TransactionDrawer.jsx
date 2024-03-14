@@ -44,6 +44,9 @@ const CustomIndicator = ({ props, item }) => {
       {completed && item?.status === "returned" && (
         <SwapHorizontalCircleOutlinedIcon color="error" />
       )}
+      {completed && item?.status === "checked" && (
+        <CheckCircleOutlinedIcon color="warning" />
+      )}
       {!completed && <CircleOutlinedIcon color="warning" />}
     </Box>
   );
@@ -184,6 +187,14 @@ const TransactionDrawer = ({ transactionData }) => {
                       {item?.status === "returned" && (
                         <Typography
                           color="error"
+                          className="logs-indicator-transaction"
+                        >
+                          {item?.status?.toUpperCase()}
+                        </Typography>
+                      )}
+                      {item?.status === "checked" && (
+                        <Typography
+                          color="#B6622d"
                           className="logs-indicator-transaction"
                         >
                           {item?.status?.toUpperCase()}

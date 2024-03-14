@@ -644,6 +644,15 @@ export const jsonServerAPI = createApi({
       }),
       invalidatesTags: ["Transaction", "Logs"],
     }),
+    checkedTransaction: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `checked/transaction/${payload.id}`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["Transaction", "Logs"],
+    }),
     archiveTransaction: builder.mutation({
       transformResponse: (response) => response,
       query: (payload) => ({
@@ -751,6 +760,15 @@ export const jsonServerAPI = createApi({
       }),
       invalidatesTags: ["TaxComputation"],
     }),
+    updateTaxComputation: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/transaction-tax/${payload.id}`,
+        method: "PUT",
+        body: payload,
+      }),
+      invalidatesTags: ["TaxComputation"],
+    }),
   }),
 });
 
@@ -844,6 +862,7 @@ export const {
   useArchiveTransactionMutation,
   useReceiveTransactionMutation,
   useReturnTransactionMutation,
+  useCheckedTransactionMutation,
 
   useTagYearMonthQuery,
 
@@ -851,4 +870,5 @@ export const {
 
   useTaxComputationQuery,
   useCreateTaxComputationMutation,
+  useUpdateTaxComputationMutation,
 } = jsonServerAPI;

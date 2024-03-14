@@ -8,8 +8,7 @@ const apTransactionSchema = Yup.object({
 
   company_address: Yup.string().required("Supplier address is required"),
   amount: Yup.string().required("Amount is required"),
-  supplier_type: Yup.string().required("Supplier type is required"),
-  invoice_no: Yup.string().required("Amount of check is required"),
+  invoice_no: Yup.string().required("Invoice number is required"),
   location_id: Yup.object()
     .typeError("Location is required")
     .required("Location is required")
@@ -21,9 +20,6 @@ const apTransactionSchema = Yup.object({
   date_invoice: Yup.date()
     .typeError("Date invoice is required")
     .required("Date invoice is required"),
-  date_recieved: Yup.date()
-    .typeError("Date receive is required")
-    .required("Date receive is required"),
 });
 
 export default apTransactionSchema;

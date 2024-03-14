@@ -233,6 +233,12 @@ const TaggingTable = ({
                           className="inActive-indicator"
                         />
                       )}
+                      {tag?.gas_status === "checked" && (
+                        <StatusIndicator
+                          status="Checking"
+                          className="checked-indicator"
+                        />
+                      )}
                     </TableCell>
                     <TableCell align="center">
                       {moment(tag?.updated_at).format("MMM DD YYYY")}
@@ -249,6 +255,8 @@ const TaggingTable = ({
                           tag?.gas_status === "returned" &&
                             dispatch(setUpdateMenu(true));
                           tag?.gas_status === "received" &&
+                            dispatch(setViewMenu(true));
+                          tag?.gas_status === "checked" &&
                             dispatch(setViewMenu(true));
                         }}
                       >

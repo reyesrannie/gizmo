@@ -17,6 +17,16 @@
     background-color: #ffc107;
   }
 }
+
+.checked-indicator {
+  &.MuiChip-root {
+    border-radius: 20px;
+    font-size: 10px;
+    font-family: Roboto-Medium;
+    color: #1a1d24;
+    background-color: #01b0f1;
+  }
+}
 .received-indicator {
   &.MuiChip-root {
     border-radius: 20px;

@@ -214,13 +214,11 @@ const TransactionModal = ({ transactionData, view, update }) => {
       name_in_receipt: watch("tin")?.receipt_name || "",
       supplier_type_id: watch("tin")?.supplier_types[0]?.type_id || "",
       atc_id: watch("tin")?.supplier_atcs[0]?.atc_id || "",
-
       document_type:
         document?.result?.find(
           (item) =>
             item.code === watch("tin")?.supplier_documenttypes[0]?.document_code
         ) || null,
-
       account_number: accountNumber?.result?.find(
         (item) => watch("tin")?.id === item?.supplier?.id || null
       ),
@@ -303,23 +301,15 @@ const TransactionModal = ({ transactionData, view, update }) => {
       id: view || update ? transactionData?.id : null,
     };
 
-    if (update) {
-      try {
-        const res = await updateTransaction(obj).unwrap();
-        enqueueSnackbar(res?.message, { variant: "success" });
-        dispatch(resetMenu());
-        dispatch(resetLogs());
-      } catch (error) {
-        objectError(error, setError, enqueueSnackbar);
-      }
-    } else {
-      try {
-        const res = await createTransaction(obj).unwrap();
-        enqueueSnackbar(res?.message, { variant: "success" });
-        dispatch(resetMenu());
-      } catch (error) {
-        objectError(error, setError, enqueueSnackbar);
-      }
+    try {
+      const res = update
+        ? await updateTransaction(obj).unwrap()
+        : await createTransaction(obj).unwrap();
+      enqueueSnackbar(res?.message, { variant: "success" });
+      dispatch(resetMenu());
+      dispatch(resetLogs());
+    } catch (error) {
+      objectError(error, setError, enqueueSnackbar);
     }
   };
 
