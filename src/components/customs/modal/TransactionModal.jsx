@@ -19,10 +19,12 @@ import {
   useAccountNumberQuery,
   useApQuery,
   useArchiveTransactionMutation,
+  useCheckTransactionQuery,
   useCreateTransactionMutation,
   useDocumentTypeQuery,
+  useJournalTransactionQuery,
   useLocationQuery,
-  useStatusLogsQuery,
+  useReceiveTransactionMutation,
   useSupplierQuery,
   useTagMonthYearQuery,
   useUpdateTransactionMutation,
@@ -36,7 +38,9 @@ import { DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import {
   resetPrompt,
+  setEntryReceive,
   setOpenReason,
+  setReceive,
   setWarning,
 } from "../../../services/slice/promptSlice";
 import {
@@ -57,18 +61,41 @@ import AppPrompt from "../AppPrompt";
 import warningImg from "../../../assets/svg/warning.svg";
 import loadingLight from "../../../assets/lottie/Loading.json";
 import TransactionDrawer from "../TransactionDrawer";
+import receiveImg from "../../../assets/svg/receive.svg";
 
 import dayjs from "dayjs";
 import Lottie from "lottie-react";
 import moment from "moment";
 import ClearIcon from "@mui/icons-material/Clear";
 import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
-import ReasonInput from "../ReasonInput";
+import FmdBadOutlinedIcon from "@mui/icons-material/FmdBadOutlined";
+import HandshakeOutlinedIcon from "@mui/icons-material/HandshakeOutlined";
 
-const TransactionModal = ({ transactionData, view, update }) => {
+import ReasonInput from "../ReasonInput";
+import {
+  clearValue,
+  transactionDefaultValue,
+} from "../../../services/constants/defaultValues";
+import ReceiveEntry from "../ReceiveEntry";
+import { useNavigate } from "react-router-dom";
+
+const TransactionModal = ({
+  transactionData,
+  create,
+  view,
+  update,
+  receive,
+}) => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const warning = useSelector((state) => state.prompt.warning);
   const openReason = useSelector((state) => state.prompt.openReason);
+  const isReceive = useSelector((state) => state.prompt.receive);
+  const entryReceive = useSelector((state) => state.prompt.entryReceive);
+  const isContinue = useSelector((state) => state.prompt.isContinue);
+  const navigateTo = useSelector((state) => state.prompt.navigate);
+
+  const defaultValue = transactionDefaultValue();
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -134,66 +161,44 @@ const TransactionModal = ({ transactionData, view, update }) => {
   });
 
   const {
+    data: checkTransaction,
+    isLoading: loadingSingle,
+    isSuccess: singleSuccess,
+  } = useCheckTransactionQuery({
+    status: "active",
+    pagination: "none",
+    transaction_id: transactionData?.id,
+  });
+
+  const {
+    data: journalTransaction,
+    isLoading: loadingJournal,
+    isSuccess: journalSuccess,
+  } = useJournalTransactionQuery({
+    status: "active",
+    pagination: "none",
+    transaction_id: transactionData?.id,
+  });
+
+  const [receiveTransaction, { isLoading: receiveLoading }] =
+    useReceiveTransactionMutation();
+
+  const {
     control,
     handleSubmit,
     setError,
     setValue,
     watch,
+    clearErrors,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(transactionSchema),
-    defaultValues: {
-      tag_no: "",
-      description: "",
-      supplier: "",
-      proprietor: "",
-      company_address: "",
-      name_in_receipt: "",
-      invoice_no: "",
-      ref_no: "",
-      delivery_invoice: "",
-      amount_withheld: "",
-      amount_check: "",
-      amount: "",
-      vat: "",
-      cost: "",
-      g_tag_number: "",
-      supplier_type_id: "",
-      atc_id: "",
-      ap: null,
-      tin: null,
-      date_invoice: null,
-      date_recieved: null,
-      tag_month_year: null,
-      document_type: null,
-      account_number: null,
-      store: null,
-      coverage_from: null,
-      coverage_to: null,
-    },
+    defaultValues: defaultValue,
   });
 
   const handleClear = (e) => {
-    const defaultValue = {
-      supplier: "",
-      proprietor: "",
-      company_address: "",
-      name_in_receipt: "",
-      invoice_no: "",
-      ref_no: "",
-      amount_withheld: "",
-      amount_check: "",
-      amount: "",
-      vat: "",
-      cost: "",
-      supplier_type_id: "",
-      atc_id: "",
-      document_type: null,
-      account_number: null,
-      store: null,
-      coverage_from: null,
-      coverage_to: null,
-    };
+    clearErrors();
+    const defaultValue = clearValue();
 
     Object.entries(defaultValue).forEach(([key, value]) => {
       setValue(key, value);
@@ -238,20 +243,19 @@ const TransactionModal = ({ transactionData, view, update }) => {
   };
 
   useEffect(() => {
-    if (gTagSuccess && !update && !view) {
+    if (gTagSuccess && create) {
       const tagNoG = parseInt(gtag?.result) + 1 || 1;
-
       setValue("g_tag_number", tagNoG.toString().padStart(4, "0"));
     }
+
     if (
-      (gTagSuccess &&
-        supplySuccess &&
-        documentSuccess &&
-        apSuccess &&
-        accountSuccess &&
-        locationSuccess &&
-        update) ||
-      view
+      gTagSuccess &&
+      supplySuccess &&
+      documentSuccess &&
+      apSuccess &&
+      accountSuccess &&
+      locationSuccess &&
+      !create
     ) {
       const tagMonthYear = dayjs(transactionData?.tag_year, "YYMM").toDate();
       const mapData = mapViewTransaction(
@@ -288,6 +292,11 @@ const TransactionModal = ({ transactionData, view, update }) => {
     location,
     accountNumber,
     tin,
+    create,
+    update,
+    view,
+    receive,
+    setValue,
   ]);
 
   const checkField = (field) => {
@@ -298,13 +307,14 @@ const TransactionModal = ({ transactionData, view, update }) => {
     const mappedData = mapTransaction(submitData);
     const obj = {
       ...mappedData,
-      id: view || update ? transactionData?.id : null,
+      id: !create ? transactionData?.id : null,
     };
 
     try {
-      const res = update
-        ? await updateTransaction(obj).unwrap()
-        : await createTransaction(obj).unwrap();
+      const res =
+        update || receive
+          ? await updateTransaction(obj).unwrap()
+          : await createTransaction(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
       dispatch(resetMenu());
       dispatch(resetLogs());
@@ -328,6 +338,36 @@ const TransactionModal = ({ transactionData, view, update }) => {
       singleError(error, enqueueSnackbar);
     }
   };
+
+  const convertToPeso = (value) => {
+    return parseFloat(value)
+      .toFixed(2)
+      .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  };
+
+  const handleReceive = async () => {
+    const obj = {
+      id: transactionData?.id,
+    };
+
+    try {
+      const res = await receiveTransaction(obj).unwrap();
+      enqueueSnackbar(res?.message, { variant: "success" });
+      dispatch(resetMenu());
+      dispatch(resetPrompt());
+    } catch (error) {
+      singleError(error, enqueueSnackbar);
+    }
+  };
+
+  const validateRoute = () => {
+    const isZero =
+      parseFloat(transactionData?.purchase_amount) ===
+      parseFloat(journalTransaction?.result?.amount || 0) +
+        parseFloat(checkTransaction?.result?.amount || 0);
+    isZero ? handleReceive() : dispatch(setEntryReceive(true));
+  };
+
   return (
     <Paper className="transaction-modal-container">
       <img
@@ -338,11 +378,10 @@ const TransactionModal = ({ transactionData, view, update }) => {
       />
 
       <Typography className="transaction-text">
-        {view
-          ? "Transaction"
-          : update
-          ? "Update Transaction"
-          : "Add Transaction"}
+        {view && "Transaction"}
+        {update && "Update Transaction"}
+        {create && "Add Transaction"}
+        {receive && "Transaction"}
       </Typography>
       <Divider orientation="horizontal" className="transaction-devider" />
       <Box className="form-title-transaction">
@@ -366,7 +405,7 @@ const TransactionModal = ({ transactionData, view, update }) => {
           helperText={errors?.tag_no?.message}
         />
         <Autocomplete
-          disabled={view}
+          disabled={view || receive}
           control={control}
           name={"tin"}
           options={tin?.result || []}
@@ -377,7 +416,7 @@ const TransactionModal = ({ transactionData, view, update }) => {
           }}
           renderInput={(params) => (
             <MuiTextField
-              name="ap_tagging"
+              name="tin"
               {...params}
               label="TIN *"
               size="small"
@@ -498,29 +537,31 @@ const TransactionModal = ({ transactionData, view, update }) => {
             </Box>
           )}
         />
-        <Controller
-          name="date_recieved"
-          control={control}
-          render={({ field: { onChange, value, ...restField } }) => (
-            <Box className="date-picker-container-transaction">
-              <DatePicker
-                disabled={view}
-                className="transaction-form-date"
-                label="Date received *"
-                format="YYYY-MM-DD"
-                value={value}
-                onChange={(e) => {
-                  onChange(e);
-                }}
-              />
-              {errors.date_recieved && (
-                <Typography variant="caption" color="error">
-                  {errors.date_recieved.message}
-                </Typography>
-              )}
-            </Box>
-          )}
-        />
+        {!receive && (
+          <Controller
+            name="date_recieved"
+            control={control}
+            render={({ field: { onChange, value, ...restField } }) => (
+              <Box className="date-picker-container-transaction">
+                <DatePicker
+                  disabled={view}
+                  className="transaction-form-date"
+                  label="Date received *"
+                  format="YYYY-MM-DD"
+                  value={value}
+                  onChange={(e) => {
+                    onChange(e);
+                  }}
+                />
+                {errors.date_recieved && (
+                  <Typography variant="caption" color="error">
+                    {errors.date_recieved.message}
+                  </Typography>
+                )}
+              </Box>
+            )}
+          />
+        )}
 
         <AppTextBox
           disabled={view}
@@ -559,7 +600,7 @@ const TransactionModal = ({ transactionData, view, update }) => {
 
         <AppTextBox
           money
-          disabled={view}
+          disabled={singleSuccess || view}
           control={control}
           name={"amount"}
           label={"Amount *"}
@@ -753,14 +794,46 @@ const TransactionModal = ({ transactionData, view, update }) => {
         )}
 
         <Box className="form-title-transaction">
+          {singleSuccess || journalSuccess ? (
+            <Box className="note-transaction-container">
+              <FmdBadOutlinedIcon
+                color="warning"
+                className="icon-prompt-text"
+              />
+              <Typography className="app-prompt-text-note">
+                The transaction has been split into separate entries, leaving a
+                balance of: <span>&#8369;</span>
+                {convertToPeso(
+                  transactionData?.purchase_amount -
+                    (checkTransaction?.result?.amount || 0) -
+                    (journalTransaction?.result?.amount || 0)
+                )}
+                {singleSuccess && (
+                  <>
+                    <br />
+                    Check Voucher: <span>&#8369;</span>
+                    {convertToPeso(checkTransaction?.result?.amount)}
+                  </>
+                )}
+                {journalSuccess && (
+                  <>
+                    <br />
+                    Journal Voucher: <span>&#8369;</span>
+                    {convertToPeso(journalTransaction?.result?.amount)}
+                  </>
+                )}
+              </Typography>
+            </Box>
+          ) : (
+            <></>
+          )}
           <Divider orientation="horizontal" className="transaction-devider" />
-
           <Typography className="form-title-text-transaction">
             Allocation
           </Typography>
         </Box>
         <Autocomplete
-          disabled={view}
+          disabled={view || singleSuccess || journalSuccess}
           control={control}
           name={"ap"}
           options={ap?.result || []}
@@ -785,7 +858,7 @@ const TransactionModal = ({ transactionData, view, update }) => {
           render={({ field: { onChange, value, ...restField } }) => (
             <Box className="date-picker-container-transaction">
               <DatePicker
-                disabled={update || view}
+                disabled={update || view || receive}
                 className="transaction-form-date"
                 label="Tag year month *"
                 format="YY MM"
@@ -816,10 +889,12 @@ const TransactionModal = ({ transactionData, view, update }) => {
           error={Boolean(errors?.g_tag_number)}
           helperText={errors?.g_tag_number?.message}
         />
+
         <Box className="add-transaction-button-container">
           <Box>
             {update ? (
               <LoadingButton
+                disabled={singleSuccess || journalSuccess}
                 variant="contained"
                 color="error"
                 className="add-transaction-button"
@@ -831,6 +906,17 @@ const TransactionModal = ({ transactionData, view, update }) => {
             ) : (
               "."
             )}
+            {receive && (
+              <LoadingButton
+                variant="contained"
+                color="success"
+                className="add-transaction-button"
+                onClick={() => dispatch(setReceive(true))}
+                startIcon={<HandshakeOutlinedIcon />}
+              >
+                Receive
+              </LoadingButton>
+            )}
           </Box>
           <Box className="archive-transaction-button-container">
             {!view && (
@@ -841,16 +927,17 @@ const TransactionModal = ({ transactionData, view, update }) => {
                 className="add-transaction-button"
                 disabled={!watch("tin")}
               >
-                {update ? "Update" : "Add"}
+                {create ? "Add" : "Update"}
               </LoadingButton>
             )}
+
             <Button
               variant="contained"
               color="primary"
               onClick={() => dispatch(resetMenu())}
               className="add-transaction-button"
             >
-              {view ? "Close" : update ? "Cancel" : "Cancel"}
+              {view ? "Close" : "Cancel"}
             </Button>
           </Box>
         </Box>
@@ -866,11 +953,33 @@ const TransactionModal = ({ transactionData, view, update }) => {
           loadingAccountNumber ||
           loadingAp ||
           loadingLocation ||
-          isFetching
+          isFetching ||
+          loadingSingle ||
+          loadingJournal ||
+          receiveLoading
         }
         className="loading-transaction-create"
       >
         <Lottie animationData={loading} loop />
+      </Dialog>
+
+      <Dialog open={isReceive}>
+        <AppPrompt
+          image={receiveImg}
+          title={"Receive Transaction?"}
+          message={"You are about to receive this Transaction"}
+          nextLineMessage={"Please confirm to receive"}
+          confirmButton={"Yes, Receive it!"}
+          cancelButton={"Cancel"}
+          cancelOnClick={() => {
+            dispatch(resetPrompt());
+          }}
+          confirmOnClick={() => validateRoute()}
+        />
+      </Dialog>
+
+      <Dialog open={entryReceive}>
+        <ReceiveEntry />
       </Dialog>
 
       <Dialog open={warning}>
@@ -907,11 +1016,27 @@ const TransactionModal = ({ transactionData, view, update }) => {
       <Dialog open={archiveLoading} className="loading-role-create">
         <Lottie animationData={loadingLight} loop={archiveLoading} />
       </Dialog>
-      {view || update ? (
-        <TransactionDrawer transactionData={transactionData} />
-      ) : (
-        <></>
-      )}
+
+      <TransactionDrawer transactionData={transactionData} />
+
+      <Dialog open={isContinue}>
+        <AppPrompt
+          image={receiveImg}
+          title={"Proceed with Computation?"}
+          message={"Do you want to proceed with The Tax Computation?"}
+          confirmButton={"Yes, Continue!"}
+          cancelButton={"Later"}
+          cancelOnClick={() => {
+            dispatch(resetPrompt());
+            dispatch(resetMenu());
+          }}
+          confirmOnClick={() => {
+            navigate(navigateTo);
+            dispatch(resetPrompt());
+            dispatch(resetMenu());
+          }}
+        />
+      </Dialog>
     </Paper>
   );
 };

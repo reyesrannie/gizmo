@@ -19,6 +19,8 @@ import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 import PointOfSaleOutlinedIcon from "@mui/icons-material/PointOfSaleOutlined";
 import DonutSmallOutlinedIcon from "@mui/icons-material/DonutSmallOutlined";
+import CreditScoreOutlinedIcon from "@mui/icons-material/CreditScoreOutlined";
+import NewspaperOutlinedIcon from "@mui/icons-material/NewspaperOutlined";
 
 import "../../components/styles/CardNavigation.scss";
 const user = [
@@ -223,15 +225,42 @@ const tagging = [
 
 const apTransaction = [
   {
-    path: "/ap/transaction",
-    desc: "Accounts Payable transaction",
-    name: "Accounts Payable",
+    path: "/ap/pending",
+    desc: "Pending transaction",
+    name: "Pending",
     permission: ["ap_tag"],
     firstIcon: (
       <PointOfSaleOutlinedIcon
         color="secondary"
         className="icon-card-details"
       />
+    ),
+    lastIcon: (
+      <NavigationOutlinedIcon className="icon-last" color="secondary" />
+    ),
+  },
+  {
+    path: "/ap/check",
+    desc: "Check Voucher transaction",
+    name: "Check Voucher",
+    permission: ["ap_tag"],
+    firstIcon: (
+      <CreditScoreOutlinedIcon
+        color="secondary"
+        className="icon-card-details"
+      />
+    ),
+    lastIcon: (
+      <NavigationOutlinedIcon className="icon-last" color="secondary" />
+    ),
+  },
+  {
+    path: "/ap/journal",
+    desc: "Journal Voucher transaction",
+    name: "Journal Voucher",
+    permission: ["ap_tag"],
+    firstIcon: (
+      <NewspaperOutlinedIcon color="secondary" className="icon-card-details" />
     ),
     lastIcon: (
       <NavigationOutlinedIcon className="icon-last" color="secondary" />
@@ -375,9 +404,21 @@ const menu = [
     permission: ["ap_tag"],
     children: [
       {
-        desc: "Accounts Payable",
+        desc: "Pending",
         icon: <LocalOfferOutlinedIcon />,
-        path: "/ap/transaction",
+        path: "/ap/pending",
+        permission: ["ap_tag"],
+      },
+      {
+        desc: "Check Voucher",
+        icon: <CreditScoreOutlinedIcon />,
+        path: "/ap/check",
+        permission: ["ap_tag"],
+      },
+      {
+        desc: "Journal Voucher",
+        icon: <NewspaperOutlinedIcon />,
+        path: "/ap/journal",
         permission: ["ap_tag"],
       },
     ],
@@ -464,8 +505,16 @@ const routes = [
     name: "Accounts Payable",
     children: [
       {
-        path: "/ap/transaction",
-        name: "Transaction",
+        path: "/ap/pending",
+        name: "Pending Transaction",
+      },
+      {
+        path: "/ap/check",
+        name: "Check Voucher",
+      },
+      {
+        path: "/ap/journal",
+        name: "Journal Voucher",
       },
     ],
   },

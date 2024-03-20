@@ -114,6 +114,7 @@ const AccountsPayable = () => {
     const obj = submitData?.map((items) => ({
       company_code: items.code,
       description: items.name,
+      vp: items.vp,
     }));
 
     try {
@@ -154,7 +155,7 @@ const AccountsPayable = () => {
           <Table stickyHeader>
             <TableHead>
               <TableRow className="table-header1-ap">
-                <TableCell colSpan={6}>
+                <TableCell colSpan={7}>
                   <Stack flexDirection={"row"} justifyContent="space-between">
                     <FormControlLabel
                       className="check-box-archive-ap"
@@ -230,6 +231,7 @@ const AccountsPayable = () => {
                     Name
                   </TableSortLabel>
                 </TableCell>
+                <TableCell> Allocation</TableCell>
                 <TableCell align="center"> Status</TableCell>
                 <TableCell align="center">
                   <TableSortLabel
@@ -256,13 +258,13 @@ const AccountsPayable = () => {
             <TableBody>
               {isLoading || status === "pending" ? (
                 <TableRow>
-                  <TableCell colSpan={6} align="center">
+                  <TableCell colSpan={7} align="center">
                     <Lottie animationData={loading} className="loading-ap" />
                   </TableCell>
                 </TableRow>
               ) : isError ? (
                 <TableRow>
-                  <TableCell colSpan={6} align="center">
+                  <TableCell colSpan={7} align="center">
                     <Lottie animationData={noData} className="no-data-ap" />
                   </TableCell>
                 </TableRow>
@@ -273,6 +275,7 @@ const AccountsPayable = () => {
                     <TableCell>{comp?.company_code}</TableCell>
 
                     <TableCell>{comp?.description}</TableCell>
+                    <TableCell>{comp?.vp}</TableCell>
                     <TableCell align="center">
                       {params.status === "active" && (
                         <StatusIndicator
@@ -308,7 +311,7 @@ const AccountsPayable = () => {
             {!isFetching && !isError && (
               <TableFooter style={{ position: "sticky", bottom: 0 }}>
                 <TableRow className="table-footer-ap">
-                  <TableCell colSpan={6}>
+                  <TableCell colSpan={7}>
                     <TablePagination
                       rowsPerPageOptions={[5, 10, 25, 100]}
                       count={ap?.result?.total || 0}

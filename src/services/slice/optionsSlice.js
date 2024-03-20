@@ -5,6 +5,7 @@ const initialState = {
   mode: "debit",
   disableButton: false,
   disableCreate: true,
+  disableCheck: false,
 };
 
 const optionsSlice = createSlice({
@@ -23,7 +24,9 @@ const optionsSlice = createSlice({
     setDisableCreate: (state, action) => {
       state.disableCreate = action.payload;
     },
-
+    setDisableCheck: (state, action) => {
+      state.disableCheck = action.payload;
+    },
     resetOption: () => {
       return initialState;
     },
@@ -36,6 +39,7 @@ export const {
   setDisableButton,
   setDisableCreate,
   resetOption,
+  setDisableCheck,
 } = optionsSlice.actions;
 
 export default optionsSlice.reducer;

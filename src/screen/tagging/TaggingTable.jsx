@@ -5,9 +5,7 @@ import {
   Box,
   Dialog,
   IconButton,
-  ListItemIcon,
   Menu,
-  MenuItem,
   Table,
   TableBody,
   TableCell,
@@ -51,7 +49,6 @@ import {
   useTagYearMonthQuery,
 } from "../../services/store/request";
 import { setFilterBy } from "../../services/slice/transactionSlice";
-import { ViewTimelineRounded } from "@mui/icons-material";
 
 const TaggingTable = ({
   params,
@@ -342,7 +339,7 @@ const TaggingTable = ({
       </Menu>
 
       <Dialog open={createMenu} className="transaction-modal-dialog">
-        <TransactionModal />
+        <TransactionModal create />
       </Dialog>
 
       <Dialog open={viewMenu} className="transaction-modal-dialog">

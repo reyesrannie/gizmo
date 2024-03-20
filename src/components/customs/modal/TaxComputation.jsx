@@ -30,7 +30,6 @@ import loadingLight from "../../../assets/lottie/Loading.json";
 import taxComputationSchema from "../../../schemas/taxComputationSchema";
 import Autocomplete from "../AutoComplete";
 import {
-  setDisableButton,
   setDisableCreate,
   setSupplyType,
 } from "../../../services/slice/optionsSlice";
@@ -38,7 +37,7 @@ import { supplierTypeReqFields } from "../../../services/constants/requiredField
 import { enqueueSnackbar } from "notistack";
 import { objectError } from "../../../services/functions/errorResponse";
 
-const TaxComputation = ({ update, taxComputation }) => {
+const TaxComputation = ({ create, update, taxComputation, voucher }) => {
   const dispatch = useDispatch();
   const transactionData = useSelector((state) => state.menu.menuData);
   const taxData = useSelector((state) => state.menu.taxData);
@@ -111,30 +110,33 @@ const TaxComputation = ({ update, taxComputation }) => {
   };
 
   useEffect(() => {
-    if (successTitles && supplierTypeSuccess && supplySuccess && !update) {
-      const sumAmount = taxComputation?.result?.reduce((acc, curr) => {
-        return acc + parseFloat(curr.amount);
+    if (successTitles && supplierTypeSuccess && supplySuccess && create) {
+      const sumAmount = (taxComputation?.result || []).reduce((acc, curr) => {
+        return acc + parseFloat(curr?.amount || 0);
       }, 0);
 
       const obj = {
         transaction_id: transactionData?.id,
         stype_id: supplierTypes?.result?.find(
-          (item) => transactionData?.supplierType?.id === item?.id
+          (item) => transactionData?.transactions?.supplier_type_id === item?.id
         ),
-        amount: parseFloat(transactionData?.purchase_amount) - sumAmount,
+        amount: parseFloat(transactionData?.amount) - sumAmount,
       };
 
       Object.entries(obj).forEach(([key, value]) => {
         setValue(key, value);
       });
 
+      // const tinType = tin?.result?.find(
+      //   (item) => item?.id === transactionData?.supplier?.id
+      // );
+
       const tinType = tin?.result?.find(
-        (item) => item?.id === transactionData?.supplier?.id
+        (item) => item?.id === transactionData?.transactions?.supplier_id
       );
+
       dispatch(setSupplyType(tinType));
-      setRequiredFieldsValue(
-        parseFloat(transactionData?.purchase_amount) - sumAmount
-      );
+      setRequiredFieldsValue(parseFloat(transactionData?.amount) - sumAmount);
     }
     if (successTitles && supplierTypeSuccess && supplySuccess && update) {
       const obj = {
@@ -164,8 +166,9 @@ const TaxComputation = ({ update, taxComputation }) => {
       });
 
       const tinType = tin?.result?.find(
-        (item) => item?.id === transactionData?.supplier?.id
+        (item) => item?.id === transactionData?.transactions?.supplier_id
       );
+
       dispatch(setSupplyType(tinType));
     }
   }, [
@@ -184,15 +187,18 @@ const TaxComputation = ({ update, taxComputation }) => {
   ]);
 
   const setRequiredFieldsValue = (amount) => {
-    const sumAmount = taxComputation?.result?.reduce((acc, curr) => {
-      return acc + parseFloat(curr.amount);
+    const sumAmount = (taxComputation?.result || []).reduce((acc, curr) => {
+      return acc + parseFloat(curr?.amount || 0);
     }, 0);
 
     const totalAmount = update
       ? sumAmount + parseFloat(amount) - taxData?.amount
       : sumAmount + parseFloat(amount);
 
-    if (totalAmount > transactionData?.purchase_amount) {
+    const isDebit =
+      watch("mode") === "Debit" ? totalAmount : parseFloat(amount);
+
+    if (isDebit > transactionData?.amount) {
       dispatch(setDisableCreate(true));
       setError("amount", {
         type: "max",
@@ -258,6 +264,7 @@ const TaxComputation = ({ update, taxComputation }) => {
       stype_id: submitData?.stype_id?.id,
       coa_id: submitData?.coa_id?.id,
       id: taxData?.id,
+      voucher: voucher,
     };
 
     try {

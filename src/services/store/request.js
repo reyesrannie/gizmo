@@ -35,6 +35,12 @@ export const jsonServerAPI = createApi({
     "Transaction",
     "Logs",
     "AccountTitles",
+    "GTAG",
+    "VPNUMBER",
+    "SingleCheck",
+    "SingleJournal",
+    "CheckEntries",
+    "JournalEntries",
   ],
   endpoints: (builder) => ({
     login: builder.mutation({
@@ -68,6 +74,12 @@ export const jsonServerAPI = createApi({
         "Transaction",
         "Logs",
         "TaxComputation",
+        "GTAG",
+        "VPNUMBER",
+        "SingleCheck",
+        "SingleJournal",
+        "CheckEntries",
+        "JournalEntries",
       ],
     }),
     passwordChange: builder.mutation({
@@ -564,14 +576,7 @@ export const jsonServerAPI = createApi({
       }),
       invalidatesTags: ["DocumentType"],
     }),
-    tagMonthYear: builder.query({
-      transformResponse: (response) => response,
-      query: (payload) => ({
-        url: `/gtag/transaction`,
-        method: "GET",
-        params: payload,
-      }),
-    }),
+
     accountNumber: builder.query({
       transformResponse: (response) => response,
       query: (payload) => ({
@@ -616,86 +621,6 @@ export const jsonServerAPI = createApi({
         body: payload,
       }),
       invalidatesTags: ["AccountNumber"],
-    }),
-    transaction: builder.query({
-      transformResponse: (response) => response,
-      query: (payload) => ({
-        url: `/transaction`,
-        method: "GET",
-        params: payload,
-      }),
-      providesTags: ["Transaction"],
-    }),
-    createTransaction: builder.mutation({
-      transformResponse: (response) => response,
-      query: (payload) => ({
-        url: `/transaction`,
-        method: "POST",
-        body: payload,
-      }),
-      invalidatesTags: ["Transaction"],
-    }),
-    updateTransaction: builder.mutation({
-      transformResponse: (response) => response,
-      query: (payload) => ({
-        url: `/transaction/${payload.id}`,
-        method: "PUT",
-        body: payload,
-      }),
-      invalidatesTags: ["Transaction", "Logs"],
-    }),
-    checkedTransaction: builder.mutation({
-      transformResponse: (response) => response,
-      query: (payload) => ({
-        url: `checked/transaction/${payload.id}`,
-        method: "POST",
-        body: payload,
-      }),
-      invalidatesTags: ["Transaction", "Logs"],
-    }),
-    archiveTransaction: builder.mutation({
-      transformResponse: (response) => response,
-      query: (payload) => ({
-        url: `/archived/transaction/${payload.id}`,
-        method: "POST",
-        body: payload,
-      }),
-      invalidatesTags: ["Transaction", "Logs"],
-    }),
-    receiveTransaction: builder.mutation({
-      transformResponse: (response) => response,
-      query: (payload) => ({
-        url: `/received/transaction/${payload.id}`,
-        method: "POST",
-        body: payload,
-      }),
-      invalidatesTags: ["Transaction", "Logs"],
-    }),
-    returnTransaction: builder.mutation({
-      transformResponse: (response) => response,
-      query: (payload) => ({
-        url: `/returned/transaction/${payload.id}`,
-        method: "POST",
-        body: payload,
-      }),
-      invalidatesTags: ["Transaction", "Logs"],
-    }),
-    tagYearMonth: builder.query({
-      transformResponse: (response) => response,
-      query: (payload) => ({
-        url: `tag-year/transaction`,
-        method: "GET",
-        params: payload,
-      }),
-    }),
-    statusLogs: builder.query({
-      transformResponse: (response) => response,
-      query: (payload) => ({
-        url: `status-log`,
-        method: "GET",
-        params: payload,
-      }),
-      providesTags: ["Logs"],
     }),
     accountTitles: builder.query({
       transformResponse: (response) => response,
@@ -742,6 +667,105 @@ export const jsonServerAPI = createApi({
       }),
       invalidatesTags: ["AccountTitles"],
     }),
+    tagMonthYear: builder.query({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/gtag/transaction`,
+        method: "GET",
+        params: payload,
+      }),
+      providesTags: ["GTAG"],
+    }),
+    vpNumber: builder.query({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/vp/transaction`,
+        method: "GET",
+        params: payload,
+      }),
+      providesTags: ["VPNUMBER"],
+    }),
+    transaction: builder.query({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/transaction`,
+        method: "GET",
+        params: payload,
+      }),
+      providesTags: ["Transaction"],
+    }),
+    createTransaction: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/transaction`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["Transaction", "GTAG", "VPNUMBER"],
+    }),
+    updateTransaction: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/transaction/${payload.id}`,
+        method: "PUT",
+        body: payload,
+      }),
+      invalidatesTags: ["Transaction", "Logs", "VPNUMBER"],
+    }),
+    checkedTransaction: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `checked/transaction/${payload.id}`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["Transaction", "Logs", "VPNUMBER"],
+    }),
+    archiveTransaction: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/archived/transaction/${payload.id}`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["Transaction", "Logs", "VPNUMBER"],
+    }),
+    receiveTransaction: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/received/transaction/${payload.id}`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["Transaction", "Logs", "VPNUMBER"],
+    }),
+    returnTransaction: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/returned/transaction/${payload.id}`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["Transaction", "Logs", "VPNUMBER"],
+    }),
+    tagYearMonth: builder.query({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `tag-year/transaction`,
+        method: "GET",
+        params: payload,
+      }),
+    }),
+    statusLogs: builder.query({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `status-log`,
+        method: "GET",
+        params: payload,
+      }),
+      providesTags: ["Logs"],
+    }),
+
     taxComputation: builder.query({
       transformResponse: (response) => response,
       query: (payload) => ({
@@ -758,7 +782,7 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["TaxComputation"],
+      invalidatesTags: ["TaxComputation", "VPNUMBER"],
     }),
     updateTaxComputation: builder.mutation({
       transformResponse: (response) => response,
@@ -767,7 +791,80 @@ export const jsonServerAPI = createApi({
         method: "PUT",
         body: payload,
       }),
-      invalidatesTags: ["TaxComputation"],
+      invalidatesTags: ["TaxComputation", "VPNUMBER"],
+    }),
+
+    checkEntries: builder.query({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/transaction-check`,
+        method: "GET",
+        params: payload,
+      }),
+      providesTags: ["CheckEntries"],
+    }),
+    createCheckEntries: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/transaction-check`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["SingleCheck", "CheckEntries", "Logs"],
+    }),
+    updateCheckEntries: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/transaction-check/${payload.id}`,
+        method: "PUT",
+        body: payload,
+      }),
+      invalidatesTags: ["SingleCheck", "CheckEntries", "Logs"],
+    }),
+    journalEntries: builder.query({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/transaction-journal`,
+        method: "GET",
+        params: payload,
+      }),
+      providesTags: ["JournalEntries"],
+    }),
+    createJournalEntries: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/transaction-journal`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["SingleJournal", "JournalEntries", "Logs"],
+    }),
+    updateJournalEntries: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/transaction-journal/${payload.id}`,
+        method: "PUT",
+        body: payload,
+      }),
+      invalidatesTags: ["SingleJournal", "JournalEntries", "Logs"],
+    }),
+    checkTransaction: builder.query({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/single-check`,
+        method: "GET",
+        params: payload,
+      }),
+      providesTags: ["SingleCheck"],
+    }),
+    journalTransaction: builder.query({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/single-journal`,
+        method: "GET",
+        params: payload,
+      }),
+      providesTags: ["SingleJournal"],
     }),
   }),
 });
@@ -865,10 +962,22 @@ export const {
   useCheckedTransactionMutation,
 
   useTagYearMonthQuery,
+  useVpNumberQuery,
 
   useStatusLogsQuery,
 
   useTaxComputationQuery,
   useCreateTaxComputationMutation,
   useUpdateTaxComputationMutation,
+
+  useCheckEntriesQuery,
+  useCreateCheckEntriesMutation,
+  useUpdateCheckEntriesMutation,
+
+  useJournalEntriesQuery,
+  useCreateJournalEntriesMutation,
+  useUpdateJournalEntriesMutation,
+
+  useCheckTransactionQuery,
+  useJournalTransactionQuery,
 } = jsonServerAPI;

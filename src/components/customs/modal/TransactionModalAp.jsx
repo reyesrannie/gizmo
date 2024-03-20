@@ -22,7 +22,6 @@ import {
 import {
   useAccountNumberQuery,
   useAccountTitlesQuery,
-  useArchiveTransactionMutation,
   useAtcQuery,
   useCheckedTransactionMutation,
   useCreateTransactionMutation,
@@ -33,7 +32,7 @@ import {
   useSupplierQuery,
   useSupplierTypeQuery,
   useTaxComputationQuery,
-  useUpdateTransactionMutation,
+  useVpNumberQuery,
 } from "../../../services/store/request";
 import { useSnackbar } from "notistack";
 import {
@@ -45,13 +44,8 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import {
   resetPrompt,
   setOpenReasonReturn,
-  setReceive,
-  setReturn,
 } from "../../../services/slice/promptSlice";
-import {
-  mapAPTransaction,
-  mapTransaction,
-} from "../../../services/functions/mapObject";
+import { mapAPTransaction } from "../../../services/functions/mapObject";
 import { resetLogs } from "../../../services/slice/logSlice";
 
 import "../../styles/TransactionModal.scss";
@@ -64,15 +58,13 @@ import AppPrompt from "../AppPrompt";
 import receiveImg from "../../../assets/svg/receive.svg";
 import warningImg from "../../../assets/svg/warning.svg";
 
-import loadingLight from "../../../assets/lottie/Loading.json";
 import TransactionDrawer from "../TransactionDrawer";
 
 import dayjs from "dayjs";
 import Lottie from "lottie-react";
 
 import AddIcon from "@mui/icons-material/Add";
-import HandshakeOutlinedIcon from "@mui/icons-material/HandshakeOutlined";
-import KeyboardReturnOutlinedIcon from "@mui/icons-material/KeyboardReturnOutlined";
+
 import LocalOfferOutlinedIcon from "@mui/icons-material/LocalOfferOutlined";
 
 import ReasonInput from "../ReasonInput";
@@ -81,22 +73,17 @@ import apTransactionSchema from "../../../schemas/apTransactionSchema";
 import TaxComputation from "./TaxComputation";
 import {
   resetOption,
-  setDisableButton,
+  setDisableCheck,
 } from "../../../services/slice/optionsSlice";
 
-const TransactionModalAp = ({
-  transactionData,
-  view,
-  update,
-  receive,
-  checked,
-}) => {
+const TransactionModalAp = ({ view, update, receive, checked, voucher }) => {
   const dispatch = useDispatch();
+  const transactionData = useSelector((state) => state.menu.menuData);
   const createTax = useSelector((state) => state.menu.createTax);
   const updateTax = useSelector((state) => state.menu.updateTax);
   const disableButton = useSelector((state) => state.options.disableButton);
+  const disableCheck = useSelector((state) => state.options.disableCheck);
 
-  const openReason = useSelector((state) => state.prompt.openReason);
   const openReasonReturn = useSelector(
     (state) => state.prompt.openReasonReturn
   );
@@ -104,17 +91,6 @@ const TransactionModalAp = ({
   const isReturn = useSelector((state) => state.prompt.return);
 
   const { enqueueSnackbar } = useSnackbar();
-
-  const [createTransaction, { isLoading }] = useCreateTransactionMutation();
-  const [updateTransaction, { isLoading: updateLoading }] =
-    useCheckedTransactionMutation();
-  const [returnTransaction, { isLoading: returnLoading }] =
-    useReturnTransactionMutation();
-  const [receiveTransaction, { isLoading: receiveLoading }] =
-    useReceiveTransactionMutation();
-
-  const [archiveTransaction, { isLoading: archiveLoading }] =
-    useArchiveTransactionMutation();
 
   const {
     data: tin,
@@ -161,15 +137,13 @@ const TransactionModalAp = ({
     pagination: "none",
   });
 
-  const {
-    data: taxComputation,
-    isLoading: loadingTax,
-    isSuccess: taxSuccess,
-  } = useTaxComputationQuery({
-    status: "active",
-    transaction_id: transactionData?.id,
-    pagination: "none",
-  });
+  const { data: taxComputation, isLoading: loadingTax } =
+    useTaxComputationQuery({
+      status: "active",
+      transaction_id: transactionData?.id,
+      voucher: voucher,
+      pagination: "none",
+    });
 
   const {
     data: supplierType,
@@ -189,6 +163,11 @@ const TransactionModalAp = ({
     pagination: "none",
   });
 
+  const { data: vpNumber, isLoading: loadingVp } = useVpNumberQuery({
+    ap_tagging_id: transactionData?.apTagging?.id,
+    yearMonth: transactionData?.tag_year,
+  });
+
   const {
     control,
     handleSubmit,
@@ -205,7 +184,7 @@ const TransactionModalAp = ({
       proprietor: "",
       company_address: "",
       invoice_no: "",
-      amount: "",
+      amount: transactionData?.amount,
       tin: null,
       date_invoice: null,
       document_type: null,
@@ -215,29 +194,38 @@ const TransactionModalAp = ({
     },
   });
 
+  const validateAmount = (amount) => {
+    const totalAmount = taxComputation?.result?.reduce((acc, curr) => {
+      return parseFloat(curr.credit)
+        ? acc - 0
+        : acc + parseFloat(curr.total_invoice_amount);
+    }, 0);
+    dispatch(
+      setDisableCheck(
+        totalAmount?.toFixed(2) !== parseFloat(amount)?.toFixed(2)
+      )
+    );
+  };
+
   useEffect(() => {
     if (
-      (supplySuccess &&
-        documentSuccess &&
-        accountSuccess &&
-        locationSuccess &&
-        atcSuccess &&
-        typeSuccess &&
-        successTitles &&
-        update) ||
-      view ||
-      receive ||
-      checked
+      supplySuccess &&
+      documentSuccess &&
+      accountSuccess &&
+      locationSuccess &&
+      atcSuccess &&
+      typeSuccess &&
+      successTitles
     ) {
       const tagMonthYear = dayjs(transactionData?.tag_year, "YYMM").toDate();
       const mapData = mapAPTransaction(
-        transactionData,
+        transactionData?.transactions,
         tin,
         document,
         accountNumber,
         atc
       );
-
+      validateAmount(watch("amount"));
       const values = {
         ...mapData,
         tag_month_year:
@@ -249,14 +237,6 @@ const TransactionModalAp = ({
       Object.entries(values).forEach(([key, value]) => {
         setValue(key, value);
       });
-      const totalAmount = taxComputation?.result?.reduce((acc, curr) => {
-        return acc + parseFloat(curr.amount);
-      }, 0);
-      if (totalAmount >= transactionData?.purchase_amount) {
-        dispatch(setDisableButton(true));
-      } else {
-        dispatch(setDisableButton(false));
-      }
     }
   }, [
     supplySuccess,
@@ -298,36 +278,22 @@ const TransactionModalAp = ({
   };
 
   const submitHandler = async (submitData) => {
-    const mappedData = mapTransaction(submitData);
+    const vp = parseInt(vpNumber?.result) + 1;
+
     const obj = {
-      ...mappedData,
       id: view || update ? transactionData?.id : null,
+      atc_id: submitData?.atc_id?.id,
+      location: submitData?.location_id?.id,
+      vp_series: `${transactionData?.apTagging?.vp}${transactionData?.tag_year}-${transactionData?.vp}`,
+      vp_no:
+        transactionData?.vp_no === null
+          ? vp.toString().padStart(4, "0")
+          : transactionData?.vp_no,
     };
-
-    try {
-      const res = update
-        ? await updateTransaction(obj).unwrap()
-        : await createTransaction(obj).unwrap();
-      enqueueSnackbar(res?.message, { variant: "success" });
-      dispatch(resetMenu());
-      if (update) {
-        dispatch(resetLogs());
-      }
-    } catch (error) {
-      objectError(error, setError, enqueueSnackbar);
-    }
   };
 
-  const handleArchive = async (submitData) => {
-    await performTransactionAction(archiveTransaction, submitData);
-  };
-
-  const handleReceive = async () => {
-    await performTransactionAction(receiveTransaction, {});
-  };
-
-  const handleReturn = async (submitData) => {
-    await performTransactionAction(returnTransaction, submitData);
+  const convertToPeso = (value) => {
+    return value?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
   return (
@@ -405,7 +371,7 @@ const TransactionModalAp = ({
           error={Boolean(errors?.proprietor)}
           helperText={errors?.proprietor?.message}
         />
-        {receive && (
+        {checked || receive ? (
           <AppTextBox
             disabled
             multiline
@@ -417,6 +383,8 @@ const TransactionModalAp = ({
             error={Boolean(errors.company_address)}
             helperText={errors.company_address?.message}
           />
+        ) : (
+          <></>
         )}
         <Box className="form-title-transaction">
           <Divider orientation="horizontal" className="transaction-devider" />
@@ -448,17 +416,18 @@ const TransactionModalAp = ({
             </Box>
           )}
         />
-        {update && (
-          <AppTextBox
-            control={control}
-            name={"invoice_no"}
-            label={"Invoice No. *"}
-            color="primary"
-            className="transaction-form-textBox"
-            error={Boolean(errors?.invoice_no)}
-            helperText={errors?.invoice_no?.message}
-          />
-        )}
+
+        <AppTextBox
+          disabled
+          control={control}
+          name={"invoice_no"}
+          label={"Invoice No. *"}
+          color="primary"
+          className="transaction-form-textBox"
+          error={Boolean(errors?.invoice_no)}
+          helperText={errors?.invoice_no?.message}
+        />
+
         {watch("tin") && (
           <Autocomplete
             disabled
@@ -594,12 +563,6 @@ const TransactionModalAp = ({
                   (item) => tax?.coa_id === item?.id
                 );
 
-                const convertToPeso = (value) => {
-                  return value
-                    ?.toString()
-                    .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-                };
-
                 return (
                   <Paper
                     elevation={3}
@@ -681,6 +644,7 @@ const TransactionModalAp = ({
                       </Box>
                       <Box className="tax-box-value">
                         <Typography className="amount-tax">
+                          VP#: {transactionData?.apTagging?.vp}
                           {transactionData?.tag_year}-{transactionData?.gtag_no}
                         </Typography>
                       </Box>
@@ -693,13 +657,43 @@ const TransactionModalAp = ({
                         </Typography>
                         <Typography className="amount-tax">
                           Account: <span>&#8369;</span>{" "}
-                          {convertToPeso(tax.account)}
+                          {tax?.mode === "Debit"
+                            ? convertToPeso(tax.account)
+                            : `-${convertToPeso(tax.credit)}`}
                         </Typography>
                       </Box>
                     </Box>
                   </Paper>
                 );
               })}
+              <Paper elevation={3} className="tax-details-value">
+                <Box className="tax-total-value">
+                  <Typography className="amount-tax">
+                    Total invoice amount : <span>&#8369;</span>{" "}
+                    {convertToPeso(
+                      taxComputation?.result
+                        ?.reduce((acc, curr) => {
+                          return parseFloat(curr.credit)
+                            ? acc - 0
+                            : acc + parseFloat(curr.total_invoice_amount);
+                        }, 0)
+                        ?.toFixed(2)
+                    )}
+                  </Typography>
+                  <Typography className="amount-tax">
+                    Total account : <span>&#8369;</span>{" "}
+                    {convertToPeso(
+                      taxComputation?.result
+                        ?.reduce((acc, curr) => {
+                          return parseFloat(curr.credit)
+                            ? acc - parseFloat(curr.account)
+                            : acc + parseFloat(curr.account);
+                        }, 0)
+                        ?.toFixed(2)
+                    )}
+                  </Typography>
+                </Box>
+              </Paper>
             </Box>
           </Box>
         ) : (
@@ -710,41 +704,7 @@ const TransactionModalAp = ({
         </Box>
 
         <Box className="add-transaction-button-container">
-          <Box className="return-receive-container">
-            {receive && (
-              <LoadingButton
-                variant="contained"
-                color="success"
-                className="add-transaction-button"
-                onClick={() => dispatch(setReceive(true))}
-                startIcon={<HandshakeOutlinedIcon />}
-              >
-                Receive
-              </LoadingButton>
-            )}
-            {receive && (
-              <LoadingButton
-                variant="contained"
-                color="error"
-                className="add-transaction-button"
-                onClick={() => dispatch(setReturn(true))}
-                startIcon={<KeyboardReturnOutlinedIcon />}
-              >
-                Return
-              </LoadingButton>
-            )}
-            {update && (
-              <LoadingButton
-                variant="contained"
-                color="error"
-                className="add-transaction-button"
-                onClick={() => dispatch(setReturn(true))}
-                startIcon={<KeyboardReturnOutlinedIcon />}
-              >
-                Return
-              </LoadingButton>
-            )}
-          </Box>
+          <Box className="return-receive-container"></Box>
           <Box className="archive-transaction-button-container">
             {update && (
               <LoadingButton
@@ -752,9 +712,9 @@ const TransactionModalAp = ({
                 color="warning"
                 type="submit"
                 className="add-transaction-button"
-                disabled={!disableButton}
+                disabled={disableCheck}
               >
-                Update
+                Checked
               </LoadingButton>
             )}
             <Button
@@ -774,18 +734,15 @@ const TransactionModalAp = ({
 
       <Dialog
         open={
-          isLoading ||
-          updateLoading ||
           loadingTIN ||
           loadingDocument ||
           loadingAccountNumber ||
           loadingLocation ||
-          receiveLoading ||
           loadingAtc ||
-          returnLoading ||
           loadingType ||
           loadingTitles ||
-          loadingTax
+          loadingTax ||
+          loadingVp
         }
         className="loading-transaction-create"
       >
@@ -806,53 +763,7 @@ const TransactionModalAp = ({
           confirmOnClick={() => dispatch(setOpenReasonReturn(true))}
         />
       </Dialog>
-      <Dialog open={isReceive}>
-        <AppPrompt
-          image={receiveImg}
-          title={"Receive Transaction?"}
-          message={"You are about to receive this Transaction"}
-          nextLineMessage={"Please confirm to receive"}
-          confirmButton={"Yes, Receive it!"}
-          cancelButton={"Cancel"}
-          cancelOnClick={() => {
-            dispatch(resetPrompt());
-          }}
-          confirmOnClick={() => handleReceive()}
-        />
-      </Dialog>
 
-      <Dialog open={openReason}>
-        <ReasonInput
-          title={"Reason for archive"}
-          reasonDesc={"Please enter the reason for archiving this transaction"}
-          warning={
-            "Note that this transaction will be permanently archived once confirmed."
-          }
-          confirmButton={"Confirm"}
-          cancelButton={"Cancel"}
-          cancelOnClick={() => {
-            dispatch(resetPrompt());
-          }}
-          confirmOnClick={handleArchive}
-        />
-      </Dialog>
-
-      <Dialog open={openReasonReturn}>
-        <ReasonInput
-          title={"Reason for return"}
-          reasonDesc={"Please enter the reason for returning this transaction"}
-          confirmButton={"Confirm"}
-          cancelButton={"Cancel"}
-          cancelOnClick={() => {
-            dispatch(resetPrompt());
-          }}
-          confirmOnClick={handleReturn}
-        />
-      </Dialog>
-
-      <Dialog open={archiveLoading} className="loading-role-create">
-        <Lottie animationData={loadingLight} loop={archiveLoading} />
-      </Dialog>
       {view || update ? (
         <TransactionDrawer transactionData={transactionData} />
       ) : (
@@ -860,11 +771,19 @@ const TransactionModalAp = ({
       )}
 
       <Dialog open={createTax} className="transaction-modal-dialog">
-        <TaxComputation taxComputation={taxComputation} />
+        <TaxComputation
+          create
+          taxComputation={taxComputation}
+          voucher={voucher}
+        />
       </Dialog>
 
       <Dialog open={updateTax} className="transaction-modal-dialog">
-        <TaxComputation update taxComputation={taxComputation} />
+        <TaxComputation
+          update
+          taxComputation={taxComputation}
+          voucher={voucher}
+        />
       </Dialog>
     </Paper>
   );

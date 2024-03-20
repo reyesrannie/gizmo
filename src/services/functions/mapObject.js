@@ -9,7 +9,7 @@ const mapTransaction = (submitData) => {
     date_received: moment(submitData?.date_received).format("YYYY-MM-DD"),
     document_type_id: submitData?.document_type?.id || "",
     supplier_type_id: submitData?.supplier_type_id || "",
-    atc_id: submitData?.atc_id?.id || "",
+    atc_id: submitData?.atc_id || "",
     supplier_id: submitData?.tin?.id,
     description: submitData?.description || "",
     reference_no: submitData?.ref_no,
@@ -109,26 +109,29 @@ const mapAPTransaction = (
   accountNumber,
   atc
 ) => {
+  const supplierTin =
+    tin?.result?.find((item) => transactionData?.supplier_id === item.id) ||
+    null;
+  const documentType =
+    document?.result?.find(
+      (item) => transactionData?.document_type_id === item.id
+    ) || null;
+
   const values = {
     tag_no: transactionData?.tag_no || "",
-    supplier: transactionData?.supplier?.name || "",
-    proprietor: transactionData?.supplier?.proprietor || "",
-    company_address: transactionData?.supplier?.address || "",
+    supplier: supplierTin?.company_name || "",
+    proprietor: supplierTin?.proprietor || "",
+    company_address: supplierTin?.company_address || "",
     invoice_no: transactionData?.invoice_no || "",
-    amount: transactionData?.purchase_amount || "",
+
     description: transactionData?.description || "",
-    tin:
-      tin?.result?.find((item) => transactionData?.supplier?.id === item.id) ||
-      null,
+    tin: supplierTin,
     date_invoice:
       dayjs(new Date(transactionData?.date_invoice), {
         locale: AdapterDayjs.locale,
       }) || null,
 
-    document_type:
-      document?.result?.find(
-        (item) => transactionData?.documentType?.id === item.id
-      ) || null,
+    document_type: documentType,
 
     atc_id:
       atc?.result?.find((item) => transactionData?.atc?.id === item.id) || null,

@@ -38,6 +38,9 @@ const CustomIndicator = ({ props, item }) => {
       {completed && item?.status === "received" && (
         <CheckCircleOutlinedIcon color="success" />
       )}
+      {completed && item?.status === "For Computation" && (
+        <CheckCircleOutlinedIcon color="info" />
+      )}
       {completed && item?.status === "archived" && (
         <CancelOutlinedIcon color="error" />
       )}
@@ -53,7 +56,7 @@ const CustomIndicator = ({ props, item }) => {
 };
 
 const TransactionDrawer = ({ transactionData }) => {
-  const { data: logs, isLoading: loadingLogs } = useStatusLogsQuery({
+  const { data: logs } = useStatusLogsQuery({
     transaction_id: transactionData?.id,
     sorts: "created_at",
     pagination: "none",
@@ -168,6 +171,14 @@ const TransactionDrawer = ({ transactionData }) => {
                           {item?.status?.toUpperCase()}
                         </Typography>
                       )}
+                      {item?.status === "For Computation" && (
+                        <Typography
+                          color="blueviolet"
+                          className="logs-indicator-transaction"
+                        >
+                          {item?.status?.toUpperCase()}
+                        </Typography>
+                      )}
                       {item?.status === "archived" && (
                         <Typography
                           color="error"
@@ -201,6 +212,67 @@ const TransactionDrawer = ({ transactionData }) => {
                         </Typography>
                       )}
                     </Box>
+                    {item?.check_voucher !== null && (
+                      <Box className={"logs-details-transaction"}>
+                        <Typography className="logs-indicator-transaction">
+                          Entry:
+                        </Typography>
+                        <Typography className="logs-details-text-transaction">
+                          {item?.check_voucher}
+                        </Typography>
+                      </Box>
+                    )}
+
+                    {item?.amount !== null && (
+                      <Box className={"logs-details-transaction"}>
+                        <Typography className="logs-indicator-transaction">
+                          Amount:
+                        </Typography>
+                        <Typography
+                          color="green"
+                          className="logs-details-text-transaction"
+                        >
+                          <span>&#8369;</span>
+                          {item?.amount
+                            ?.toString()
+                            .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                        </Typography>
+                      </Box>
+                    )}
+                    {item?.edited_amount_from !== item?.edited_amount_to &&
+                      item?.edited_amount_from !== null && (
+                        <Box className={"logs-details-transaction"}>
+                          <Typography className="logs-indicator-transaction">
+                            Prev. Amount:
+                          </Typography>
+                          <Typography
+                            color="red"
+                            className="logs-details-text-transaction"
+                          >
+                            <span>&#8369;</span>
+                            {item?.edited_amount_from
+                              ?.toString()
+                              .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                          </Typography>
+                        </Box>
+                      )}
+                    {item?.edited_amount_from !== item?.edited_amount_to &&
+                      item?.edited_amount_to !== null && (
+                        <Box className={"logs-details-transaction"}>
+                          <Typography className="logs-indicator-transaction">
+                            New Amount:
+                          </Typography>
+                          <Typography
+                            color="green"
+                            className="logs-details-text-transaction"
+                          >
+                            <span>&#8369;</span>
+                            {item?.edited_amount_to
+                              ?.toString()
+                              .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                          </Typography>
+                        </Box>
+                      )}
                     {item?.status === "archived" && (
                       <Box className={"logs-details-transaction"}>
                         <Typography className="logs-indicator-transaction">

@@ -25,6 +25,8 @@ import AccountNumber from "../../screen/masterlist/supplier/AccountNumber";
 import AccountPayable from "../../screen/ap/AccountPayable";
 import Transaction from "../../screen/ap/Transaction";
 import AccountTitles from "../../screen/masterlist/coa/AccountTitles";
+import CheckVoucher from "../../screen/ap/CheckVoucher";
+import JournalVoucher from "../../screen/ap/JournalVoucher";
 
 const Routing = () => {
   const user = decodeUser();
@@ -217,9 +219,25 @@ const Routing = () => {
           ),
         },
         {
-          path: "transaction",
+          path: "pending",
           element: hasAccess(["ap_tag"]) ? (
             <Transaction />
+          ) : (
+            <Navigate to={"/"} />
+          ),
+        },
+        {
+          path: "check",
+          element: hasAccess(["ap_tag"]) ? (
+            <CheckVoucher />
+          ) : (
+            <Navigate to={"/"} />
+          ),
+        },
+        {
+          path: "journal",
+          element: hasAccess(["ap_tag"]) ? (
+            <JournalVoucher />
           ) : (
             <Navigate to={"/"} />
           ),

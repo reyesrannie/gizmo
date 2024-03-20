@@ -3,7 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   fieldsRequired: [],
   header: "Tag Transaction",
-  transactionHeader: "Pending",
+  transactionHeader: "Received",
   isExpanded: false,
   filterBy: "",
   filter: false,

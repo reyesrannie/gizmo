@@ -96,6 +96,13 @@
   }
 }
 
+.tax-total-value {
+  &.MuiBox-root {
+    display: flex;
+    justify-content: space-between;
+  }
+}
+
 .tax-box-value-container {
   display: flex;
   justify-content: space-between;
@@ -299,15 +306,23 @@
   }
 }
 
-.trash-transaction-button {
-  &.MuiButtonBase-root {
-  }
-}
-
 .loading-transaction-create {
   .MuiPaper-root {
     box-shadow: none;
     background-color: transparent;
     width: 325px;
+  }
+}
+
+.note-transaction-container {
+  &.MuiBox-root {
+    background-color: #fcf6ed;
+    border-radius: 10px;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 10px;
+    margin-bottom: 10px;
   }
 }

@@ -11,48 +11,18 @@ const transactionSchema = Yup.object({
   document_type: Yup.object().required("Document type is required"),
   supplier_type_id: Yup.string().nullable(),
   atc_id: Yup.string().nullable(),
-  ref_no: Yup.string().when("document_type", {
-    is: (document_type) => document_type?.required_fields?.includes("ref_no"),
-    then: () => Yup.string().required("Ref number is required"),
-  }),
+  ref_no: Yup.string().nullable(),
   company_address: Yup.string().required("Supplier address is required"),
   g_tag_number: Yup.string().required("Tag Number address is required"),
-  delivery_invoice: Yup.string().when("document_type", {
-    is: (document_type) =>
-      document_type?.required_fields?.includes("delivery_invoice"),
-    then: () => Yup.string().required("Delivery Invoice is required"),
-  }),
+  delivery_invoice: Yup.string().nullable(),
 
   amount: Yup.string().required("Amount is required"),
-  amount_withheld: Yup.string().when("document_type", {
-    is: (document_type) =>
-      document_type?.required_fields?.includes("amount_withheld"),
-    then: () => Yup.string().required("Amount Withheld is required"),
-  }),
-  amount_check: Yup.string().when("document_type", {
-    is: (document_type) =>
-      document_type?.required_fields?.includes("amount_check"),
-    then: () => Yup.string().required("Amount of check is required"),
-  }),
-  invoice_no: Yup.string().when("document_type", {
-    is: (document_type) =>
-      document_type?.required_fields?.includes("amount_check"),
-    then: () => Yup.string().required("Amount of check is required"),
-  }),
-  vat: Yup.string().when("document_type", {
-    is: (document_type) => document_type?.required_fields?.includes("vat"),
-    then: () => Yup.string().required("Vat is required"),
-  }),
-  cost: Yup.string().when("document_type", {
-    is: (document_type) => document_type?.required_fields?.includes("cost"),
-    then: () => Yup.string().required("Cost is required"),
-  }),
-  store: Yup.object().when("document_type", {
-    is: (document_type) => document_type?.required_fields?.includes("store"),
-    then: () =>
-      Yup.object().required("Store is required").typeError("Store is required"),
-    otherwise: () => Yup.object().nullable(),
-  }),
+  amount_withheld: Yup.string().nullable(),
+  amount_check: Yup.string().nullable(),
+  invoice_no: Yup.string().nullable(),
+  vat: Yup.string().nullable(),
+  cost: Yup.string().nullable(),
+  store: Yup.object().nullable(),
   account_number: Yup.object().when("document_type", {
     is: (document_type) =>
       document_type?.required_fields?.includes("account_number"),

@@ -36,7 +36,13 @@ import "../../components/styles/TagTransaction.scss";
 
 import { useState } from "react";
 
-import { setMenuData, setReceiveMenu } from "../../services/slice/menuSlice";
+import {
+  setCheckMenu,
+  setMenuData,
+  setReceiveMenu,
+  setUpdateMenu,
+  setViewMenu,
+} from "../../services/slice/menuSlice";
 
 import {
   useDocumentTypeQuery,
@@ -47,7 +53,7 @@ import { setFilterBy } from "../../services/slice/transactionSlice";
 import TransactionModalAp from "../../components/customs/modal/TransactionModalAp";
 import TransactionModal from "../../components/customs/modal/TransactionModal";
 
-const TransactionTable = ({
+const CheckTable = ({
   params,
   onSortTable,
   isLoading,
@@ -67,7 +73,6 @@ const TransactionTable = ({
   const updateMenu = useSelector((state) => state.menu.updateMenu);
   const viewMenu = useSelector((state) => state.menu.viewMenu);
   const checkMenu = useSelector((state) => state.menu.checkMenu);
-
   const filterBy = useSelector((state) => state.transaction.filterBy);
 
   const { data: supplier, isLoading: loadingSupplier } = useSupplierQuery({
@@ -166,18 +171,18 @@ const TransactionTable = ({
             ) : (
               tagTransaction?.result?.data?.map((tag) => {
                 const document = documentType?.result?.find(
-                  (doc) => tag?.documentType?.id === doc?.id || null
+                  (doc) =>
+                    tag?.transactions?.document_type_id === doc?.id || null
                 );
                 const supplierName = supplier?.result?.find(
-                  (sup) => tag?.supplier?.id === sup?.id || null
+                  (sup) => tag?.transactions?.supplier_id === sup?.id || null
                 );
-
                 return (
                   <TableRow
                     className="table-body-tag-transaction"
                     key={tag?.id}
                   >
-                    <TableCell>{tag?.tag_no}</TableCell>
+                    <TableCell>{tag?.transactions?.tag_no}</TableCell>
                     <TableCell>
                       <Typography className="tag-transaction-company-name">
                         {supplierName?.company_name === null ? (
@@ -207,16 +212,16 @@ const TransactionTable = ({
                       )}
 
                       <Typography className="tag-transaction-company-name">
-                        {`${tag?.apTagging?.company_code} - ${tag?.tag_year} - ${tag?.gtag_no} `}
+                        {`${tag?.transactions?.ap_tagging} - ${tag?.transactions?.tag_year} - ${tag?.transactions?.gtag_no} `}
                       </Typography>
                       <Typography className="tag-transaction-company-type">
                         {document === null ? <>&mdash;</> : document?.name}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
-                      {tag?.gas_status === "pending" && (
+                      {tag?.state === "For Computation" && (
                         <StatusIndicator
-                          status="Pending"
+                          status="For Computation"
                           className="pending-indicator"
                         />
                       )}
@@ -228,8 +233,8 @@ const TransactionTable = ({
                       <IconButton
                         onClick={() => {
                           dispatch(setMenuData(tag));
-                          tag?.gas_status === "pending" &&
-                            dispatch(setReceiveMenu(true));
+                          tag?.state === "For Computation" &&
+                            dispatch(setUpdateMenu(true));
                         }}
                       >
                         <RemoveRedEyeOutlinedIcon className="tag-transaction-icon-actions" />
@@ -314,10 +319,34 @@ const TransactionTable = ({
       </Menu>
 
       <Dialog open={receiveMenu} className="transaction-modal-dialog">
-        <TransactionModal transactionData={menuData} receive />
+        <TransactionModalAp
+          transactionData={menuData}
+          receive
+          voucher={"check"}
+        />
+      </Dialog>
+
+      <Dialog open={viewMenu} className="transaction-modal-dialog">
+        <TransactionModalAp transactionData={menuData} view voucher={"check"} />
+      </Dialog>
+
+      <Dialog open={updateMenu} className="transaction-modal-dialog">
+        <TransactionModalAp
+          transactionData={menuData}
+          update
+          voucher={"check"}
+        />
+      </Dialog>
+
+      <Dialog open={checkMenu} className="transaction-modal-dialog">
+        <TransactionModalAp
+          transactionData={menuData}
+          checked
+          voucher={"check"}
+        />
       </Dialog>
     </Box>
   );
 };
 
-export default TransactionTable;
+export default CheckTable;

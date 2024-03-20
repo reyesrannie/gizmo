@@ -6,9 +6,9 @@ const taggingHeader = [
 ];
 
 const apHeader = [
-  { name: "Pending", status: "pending" },
+  { name: "Received", status: "For Computation" },
+  { name: "Checked", status: "checked" },
   { name: "Returned", status: "returned" },
-  { name: "Received", status: "received" },
   { name: "History", status: "" },
 ];
 

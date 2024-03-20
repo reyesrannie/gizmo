@@ -5,8 +5,12 @@ const initialState = {
   resetPassword: false,
   return: false,
   receive: false,
+  entryReceive: false,
   openReason: false,
   openReasonReturn: false,
+  disableProceed: false,
+  isContinue: false,
+  navigate: "",
 };
 
 const promptSlice = createSlice({
@@ -28,10 +32,22 @@ const promptSlice = createSlice({
     setReceive: (state, action) => {
       state.receive = action.payload;
     },
+    setEntryReceive: (state, action) => {
+      state.entryReceive = action.payload;
+    },
+
     setOpenReasonReturn: (state, action) => {
       state.openReasonReturn = action.payload;
     },
-
+    setDisableProceed: (state, action) => {
+      state.disableProceed = action.payload;
+    },
+    setIsContinue: (state, action) => {
+      state.isContinue = action.payload;
+    },
+    setNavigate: (state, action) => {
+      state.navigate = action.payload;
+    },
     resetPrompt: () => {
       return initialState;
     },
@@ -45,7 +61,11 @@ export const {
   setReturn,
   setReceive,
   resetPrompt,
+  setEntryReceive,
   setOpenReasonReturn,
+  setDisableProceed,
+  setIsContinue,
+  setNavigate,
 } = promptSlice.actions;
 
 export default promptSlice.reducer;

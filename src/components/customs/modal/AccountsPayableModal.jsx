@@ -30,11 +30,13 @@ const AccountsPayableModal = ({ apData, view, update }) => {
   const defaultValues = {
     company_code: "",
     description: "",
+    vp: "",
   };
 
   const defaultData = {
     company_code: apData?.company_code,
     description: apData?.description,
+    vp: apData?.vp,
   };
 
   const {
@@ -54,22 +56,14 @@ const AccountsPayableModal = ({ apData, view, update }) => {
       id: view || update ? apData?.id : null,
     };
 
-    if (update) {
-      try {
-        const res = await updateAP(obj).unwrap();
-        enqueueSnackbar(res?.message, { variant: "success" });
-        dispatch(resetMenu());
-      } catch (error) {
-        objectError(error, setError, enqueueSnackbar);
-      }
-    } else {
-      try {
-        const res = await createAP(obj).unwrap();
-        enqueueSnackbar(res?.message, { variant: "success" });
-        dispatch(resetMenu());
-      } catch (error) {
-        objectError(error, setError, enqueueSnackbar);
-      }
+    try {
+      const res = update
+        ? await updateAP(obj).unwrap()
+        : await createAP(obj).unwrap();
+      enqueueSnackbar(res?.message, { variant: "success" });
+      dispatch(resetMenu());
+    } catch (error) {
+      objectError(error, setError, enqueueSnackbar);
     }
   };
 
@@ -106,6 +100,16 @@ const AccountsPayableModal = ({ apData, view, update }) => {
           error={Boolean(errors?.description)}
           helperText={errors?.description?.message}
         />
+        <AppTextBox
+          disabled={view}
+          control={control}
+          name={"vp"}
+          label={"Allocation code *"}
+          color="primary"
+          className="add-ap-textbox"
+          error={Boolean(errors?.vp)}
+          helperText={errors?.vp?.message}
+        />
 
         <Box className="add-ap-button-container">
           {!view && (
@@ -114,7 +118,9 @@ const AccountsPayableModal = ({ apData, view, update }) => {
               color="warning"
               type="submit"
               className="add-ap-button"
-              disabled={!watch("company_code") || !watch("description")}
+              disabled={
+                !watch("company_code") || !watch("description") || !watch("vp")
+              }
             >
               {update ? "Update" : "Add"}
             </LoadingButton>
