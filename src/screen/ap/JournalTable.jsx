@@ -51,6 +51,7 @@ import {
 } from "../../services/store/request";
 import { setFilterBy } from "../../services/slice/transactionSlice";
 import TransactionModalAp from "../../components/customs/modal/TransactionModalAp";
+import { setVoucher } from "../../services/slice/optionsSlice";
 
 const JournalTable = ({
   params,
@@ -201,19 +202,15 @@ const JournalTable = ({
                     </TableCell>
 
                     <TableCell>
-                      {tag?.vp_series === null ? (
+                      {tag?.voucher_number ? (
                         <Typography className="tag-transaction-company-name">
-                          {`${tag?.apTagging?.company_code} - ${tag?.tag_year} - ${tag?.gtag_no} `}
+                          {tag?.voucher_number}
                         </Typography>
                       ) : (
                         <Typography className="tag-transaction-company-name">
-                          {tag?.vp_series}
+                          {`${tag?.transactions?.ap_tagging} - ${tag?.transactions?.tag_year} - ${tag?.transactions?.gtag_no} `}
                         </Typography>
                       )}
-
-                      <Typography className="tag-transaction-company-name">
-                        {`${tag?.transactions?.ap_tagging} - ${tag?.transactions?.tag_year} - ${tag?.transactions?.gtag_no} `}
-                      </Typography>
                       <Typography className="tag-transaction-company-type">
                         {document === null ? <>&mdash;</> : document?.name}
                       </Typography>
@@ -225,6 +222,12 @@ const JournalTable = ({
                           className="pending-indicator"
                         />
                       )}
+                      {tag?.state === "For Approval" && (
+                        <StatusIndicator
+                          status="For Approval"
+                          className="checked-indicator"
+                        />
+                      )}
                     </TableCell>
                     <TableCell align="center">
                       {moment(tag?.updated_at).format("MMM DD YYYY")}
@@ -232,9 +235,13 @@ const JournalTable = ({
                     <TableCell align="center">
                       <IconButton
                         onClick={() => {
+                          dispatch(setVoucher("journal"));
                           dispatch(setMenuData(tag));
                           tag?.state === "For Computation" &&
                             dispatch(setUpdateMenu(true));
+
+                          tag?.state === "For Approval" &&
+                            dispatch(setCheckMenu(true));
                         }}
                       >
                         <RemoveRedEyeOutlinedIcon className="tag-transaction-icon-actions" />
@@ -319,35 +326,19 @@ const JournalTable = ({
       </Menu>
 
       <Dialog open={receiveMenu} className="transaction-modal-dialog">
-        <TransactionModalAp
-          transactionData={menuData}
-          voucher={"journal"}
-          receive
-        />
+        <TransactionModalAp transactionData={menuData} receive />
       </Dialog>
 
       <Dialog open={viewMenu} className="transaction-modal-dialog">
-        <TransactionModalAp
-          transactionData={menuData}
-          voucher={"journal"}
-          view
-        />
+        <TransactionModalAp transactionData={menuData} view />
       </Dialog>
 
       <Dialog open={updateMenu} className="transaction-modal-dialog">
-        <TransactionModalAp
-          transactionData={menuData}
-          voucher={"journal"}
-          update
-        />
+        <TransactionModalAp transactionData={menuData} update />
       </Dialog>
 
       <Dialog open={checkMenu} className="transaction-modal-dialog">
-        <TransactionModalAp
-          transactionData={menuData}
-          voucher={"journal"}
-          checked
-        />
+        <TransactionModalAp transactionData={menuData} checked />
       </Dialog>
     </Box>
   );

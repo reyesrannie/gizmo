@@ -164,21 +164,31 @@ const TransactionModal = ({
     data: checkTransaction,
     isLoading: loadingSingle,
     isSuccess: singleSuccess,
-  } = useCheckTransactionQuery({
-    status: "active",
-    pagination: "none",
-    transaction_id: transactionData?.id,
-  });
+  } = useCheckTransactionQuery(
+    {
+      status: "active",
+      pagination: "none",
+      transaction_id: transactionData?.id,
+    },
+    {
+      skip: transactionData === null,
+    }
+  );
 
   const {
     data: journalTransaction,
     isLoading: loadingJournal,
     isSuccess: journalSuccess,
-  } = useJournalTransactionQuery({
-    status: "active",
-    pagination: "none",
-    transaction_id: transactionData?.id,
-  });
+  } = useJournalTransactionQuery(
+    {
+      status: "active",
+      pagination: "none",
+      transaction_id: transactionData?.id,
+    },
+    {
+      skip: transactionData === null,
+    }
+  );
 
   const [receiveTransaction, { isLoading: receiveLoading }] =
     useReceiveTransactionMutation();
@@ -319,7 +329,7 @@ const TransactionModal = ({
       dispatch(resetMenu());
       dispatch(resetLogs());
     } catch (error) {
-      objectError(error, setError, enqueueSnackbar);
+      singleError(error, enqueueSnackbar);
     }
   };
 
@@ -600,7 +610,7 @@ const TransactionModal = ({
 
         <AppTextBox
           money
-          disabled={singleSuccess || view}
+          disabled={singleSuccess || view || journalSuccess}
           control={control}
           name={"amount"}
           label={"Amount *"}

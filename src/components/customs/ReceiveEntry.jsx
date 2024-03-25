@@ -130,6 +130,7 @@ const ReceiveEntry = () => {
       }
     } else {
       const obj = {
+        tag_year: transactionData?.tag_year,
         transaction_id: transactionData?.id,
         ap_tagging_id: transactionData?.apTagging?.id || null,
         amount:

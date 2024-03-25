@@ -22,31 +22,29 @@ import {
 import {
   useAccountNumberQuery,
   useAccountTitlesQuery,
+  useArchiveCheckEntriesMutation,
+  useArchiveJournalEntriesMutation,
   useAtcQuery,
-  useCheckedTransactionMutation,
-  useCreateTransactionMutation,
+  useCheckedCVoucherMutation,
+  useCheckedJVoucherMutation,
   useDocumentTypeQuery,
   useLocationQuery,
-  useReceiveTransactionMutation,
-  useReturnTransactionMutation,
   useSupplierQuery,
   useSupplierTypeQuery,
   useTaxComputationQuery,
-  useVpNumberQuery,
+  useVpCheckNumberQuery,
+  useVpJournalNumberQuery,
 } from "../../../services/store/request";
 import { useSnackbar } from "notistack";
-import {
-  objectError,
-  singleError,
-} from "../../../services/functions/errorResponse";
+import { singleError } from "../../../services/functions/errorResponse";
 import { DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import {
   resetPrompt,
   setOpenReasonReturn,
+  setReturn,
 } from "../../../services/slice/promptSlice";
 import { mapAPTransaction } from "../../../services/functions/mapObject";
-import { resetLogs } from "../../../services/slice/logSlice";
 
 import "../../styles/TransactionModal.scss";
 
@@ -55,7 +53,6 @@ import AppTextBox from "../AppTextBox";
 import loading from "../../../assets/lottie/Loading-2.json";
 import Autocomplete from "../AutoComplete";
 import AppPrompt from "../AppPrompt";
-import receiveImg from "../../../assets/svg/receive.svg";
 import warningImg from "../../../assets/svg/warning.svg";
 
 import TransactionDrawer from "../TransactionDrawer";
@@ -66,8 +63,8 @@ import Lottie from "lottie-react";
 import AddIcon from "@mui/icons-material/Add";
 
 import LocalOfferOutlinedIcon from "@mui/icons-material/LocalOfferOutlined";
+import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
 
-import ReasonInput from "../ReasonInput";
 import apTransactionSchema from "../../../schemas/apTransactionSchema";
 
 import TaxComputation from "./TaxComputation";
@@ -76,18 +73,15 @@ import {
   setDisableCheck,
 } from "../../../services/slice/optionsSlice";
 
-const TransactionModalAp = ({ view, update, receive, checked, voucher }) => {
+const TransactionModalAp = ({ view, update, receive, checked }) => {
   const dispatch = useDispatch();
   const transactionData = useSelector((state) => state.menu.menuData);
   const createTax = useSelector((state) => state.menu.createTax);
   const updateTax = useSelector((state) => state.menu.updateTax);
   const disableButton = useSelector((state) => state.options.disableButton);
   const disableCheck = useSelector((state) => state.options.disableCheck);
+  const voucher = useSelector((state) => state.options.voucher);
 
-  const openReasonReturn = useSelector(
-    (state) => state.prompt.openReasonReturn
-  );
-  const isReceive = useSelector((state) => state.prompt.receive);
   const isReturn = useSelector((state) => state.prompt.return);
 
   const { enqueueSnackbar } = useSnackbar();
@@ -138,12 +132,15 @@ const TransactionModalAp = ({ view, update, receive, checked, voucher }) => {
   });
 
   const { data: taxComputation, isLoading: loadingTax } =
-    useTaxComputationQuery({
-      status: "active",
-      transaction_id: transactionData?.id,
-      voucher: voucher,
-      pagination: "none",
-    });
+    useTaxComputationQuery(
+      {
+        status: "active",
+        transaction_id: transactionData?.transactions?.id,
+        voucher: voucher,
+        pagination: "none",
+      },
+      { skip: transactionData === null }
+    );
 
   const {
     data: supplierType,
@@ -163,15 +160,41 @@ const TransactionModalAp = ({ view, update, receive, checked, voucher }) => {
     pagination: "none",
   });
 
-  const { data: vpNumber, isLoading: loadingVp } = useVpNumberQuery({
-    ap_tagging_id: transactionData?.apTagging?.id,
-    yearMonth: transactionData?.tag_year,
-  });
+  const { data: vpCheckNumber, isLoading: loadingVp } = useVpCheckNumberQuery(
+    {
+      ap_tagging_id: transactionData?.apTagging?.id,
+      yearMonth: transactionData?.tag_year,
+    },
+    {
+      skip:
+        voucher === "journal" || voucher === null || transactionData === null,
+    }
+  );
 
+  const { data: vpJournalNumber, isLoading: loadingJournalVP } =
+    useVpJournalNumberQuery(
+      {
+        ap_tagging_id: transactionData?.apTagging?.id,
+        yearMonth: transactionData?.tag_year,
+      },
+      {
+        skip:
+          voucher === "check" || voucher === null || transactionData === null,
+      }
+    );
+
+  const [checkedCV, { isLoading: loadingChecked }] =
+    useCheckedCVoucherMutation();
+  const [checkedJV, { isLoading: loadingJournal }] =
+    useCheckedJVoucherMutation();
+
+  const [archiveCV, { isLoading: loadingArchiveCV }] =
+    useArchiveCheckEntriesMutation();
+  const [archiveJV, { isLoading: loadingArchiveJV }] =
+    useArchiveJournalEntriesMutation();
   const {
     control,
     handleSubmit,
-    setError,
     setValue,
     watch,
     formState: { errors },
@@ -184,6 +207,7 @@ const TransactionModalAp = ({ view, update, receive, checked, voucher }) => {
       proprietor: "",
       company_address: "",
       invoice_no: "",
+      cip_no: "",
       amount: transactionData?.amount,
       tin: null,
       date_invoice: null,
@@ -261,14 +285,38 @@ const TransactionModalAp = ({ view, update, receive, checked, voucher }) => {
     checked,
   ]);
 
-  const performTransactionAction = async (action, submitData) => {
+  const submitHandler = async (submitData) => {
+    const vpCheck = parseInt(vpCheckNumber?.result) + 1;
+    const vpJournal = parseInt(vpJournalNumber?.result) + 1;
+
+    const year = Math.floor(transactionData?.transactions?.tag_year / 100);
+    const month = transactionData?.transactions?.tag_year % 100;
+    const formattedDate = `20${year}-${month.toString().padStart(2, "0")}`;
     const obj = {
       id: transactionData?.id,
-      ...submitData,
+      transaction_id: transactionData?.transactions?.id,
+      atc_id: submitData?.atc_id?.id,
+      location_id: submitData?.location_id?.id,
+      cip_no: submitData?.cip_no,
+      voucher_number:
+        voucher === "check"
+          ? `CV${transactionData?.apTagging?.vp}${formattedDate}-${vpCheck
+              .toString()
+              .padStart(4, "0")}`
+          : `JV${transactionData?.apTagging?.vp}${formattedDate}-${vpJournal
+              .toString()
+              .padStart(4, "0")}`,
+      vp_no:
+        voucher === "check"
+          ? vpCheck.toString().padStart(4, "0")
+          : vpJournal.toString().padStart(4, "0"),
     };
 
     try {
-      const res = await action(obj).unwrap();
+      const res =
+        voucher === "check"
+          ? await checkedCV(obj).unwrap()
+          : await checkedJV(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
       dispatch(resetMenu());
       dispatch(resetPrompt());
@@ -277,19 +325,23 @@ const TransactionModalAp = ({ view, update, receive, checked, voucher }) => {
     }
   };
 
-  const submitHandler = async (submitData) => {
-    const vp = parseInt(vpNumber?.result) + 1;
-
+  const archiveHandler = async () => {
     const obj = {
-      id: view || update ? transactionData?.id : null,
-      atc_id: submitData?.atc_id?.id,
-      location: submitData?.location_id?.id,
-      vp_series: `${transactionData?.apTagging?.vp}${transactionData?.tag_year}-${transactionData?.vp}`,
-      vp_no:
-        transactionData?.vp_no === null
-          ? vp.toString().padStart(4, "0")
-          : transactionData?.vp_no,
+      id: transactionData?.id,
+      transaction_id: transactionData?.transactions?.id,
     };
+
+    try {
+      const res =
+        voucher === "check"
+          ? await archiveCV(obj).unwrap()
+          : await archiveJV(obj).unwrap();
+      enqueueSnackbar(res?.message, { variant: "success" });
+      dispatch(resetMenu());
+      dispatch(resetPrompt());
+    } catch (error) {
+      singleError(error, enqueueSnackbar);
+    }
   };
 
   const convertToPeso = (value) => {
@@ -458,7 +510,16 @@ const TransactionModalAp = ({ view, update, receive, checked, voucher }) => {
             )}
           />
         )}
-
+        <AppTextBox
+          disabled={checked}
+          control={control}
+          name={"cip_no"}
+          label={"CIP No. (Optional)"}
+          color="primary"
+          className="transaction-form-textBox"
+          error={Boolean(errors?.cip_no)}
+          helperText={errors?.cip_no?.message}
+        />
         {update && (
           <Autocomplete
             control={control}
@@ -482,6 +543,7 @@ const TransactionModalAp = ({ view, update, receive, checked, voucher }) => {
             )}
           />
         )}
+
         {update && (
           <Autocomplete
             control={control}
@@ -508,7 +570,6 @@ const TransactionModalAp = ({ view, update, receive, checked, voucher }) => {
 
         <AppTextBox
           money
-          disabled
           control={control}
           name={"amount"}
           label={"Amount *"}
@@ -562,6 +623,17 @@ const TransactionModalAp = ({ view, update, receive, checked, voucher }) => {
                 const title = accountTitles?.result?.find(
                   (item) => tax?.coa_id === item?.id
                 );
+
+                const vpCheck = parseInt(vpCheckNumber?.result) + 1;
+                const vpJournal = parseInt(vpJournalNumber?.result) + 1;
+
+                const year = Math.floor(
+                  transactionData?.transactions?.tag_year / 100
+                );
+                const month = transactionData?.transactions?.tag_year % 100;
+                const formattedDate = `20${year}-${month
+                  .toString()
+                  .padStart(2, "0")}`;
 
                 return (
                   <Paper
@@ -643,10 +715,21 @@ const TransactionModalAp = ({ view, update, receive, checked, voucher }) => {
                         </Typography>
                       </Box>
                       <Box className="tax-box-value">
-                        <Typography className="amount-tax">
-                          VP#: {transactionData?.apTagging?.vp}
-                          {transactionData?.tag_year}-{transactionData?.gtag_no}
-                        </Typography>
+                        {transactionData?.voucher_number === null && (
+                          <Typography className="amount-tax">
+                            VP#: {voucher === "check" ? "CV" : "JV"}
+                            {transactionData?.apTagging?.vp}
+                            {formattedDate}-
+                            {voucher === "check"
+                              ? vpCheck.toString().padStart(4, "0")
+                              : vpJournal.toString().padStart(4, "0")}
+                          </Typography>
+                        )}
+                        {transactionData?.voucher_number !== null && (
+                          <Typography className="amount-tax">
+                            VP#: {transactionData?.voucher_number}
+                          </Typography>
+                        )}
                       </Box>
                       <Box className="tax-box-value">
                         <Typography className="amount-tax">
@@ -704,7 +787,19 @@ const TransactionModalAp = ({ view, update, receive, checked, voucher }) => {
         </Box>
 
         <Box className="add-transaction-button-container">
-          <Box className="return-receive-container"></Box>
+          <Box className="return-receive-container">
+            {update && (
+              <Button
+                variant="contained"
+                color="error"
+                className="add-transaction-button"
+                startIcon={<DeleteForeverOutlinedIcon />}
+                onClick={() => dispatch(setReturn(true))}
+              >
+                Archive
+              </Button>
+            )}
+          </Box>
           <Box className="archive-transaction-button-container">
             {update && (
               <LoadingButton
@@ -742,7 +837,12 @@ const TransactionModalAp = ({ view, update, receive, checked, voucher }) => {
           loadingType ||
           loadingTitles ||
           loadingTax ||
-          loadingVp
+          loadingVp ||
+          loadingChecked ||
+          loadingJournal ||
+          loadingJournalVP ||
+          loadingArchiveCV ||
+          loadingArchiveJV
         }
         className="loading-transaction-create"
       >
@@ -752,38 +852,30 @@ const TransactionModalAp = ({ view, update, receive, checked, voucher }) => {
       <Dialog open={isReturn}>
         <AppPrompt
           image={warningImg}
-          title={"Return Transaction?"}
-          message={"You are about to return this Transaction"}
-          nextLineMessage={"Please confirm to return it to tagging"}
-          confirmButton={"Yes, Return it!"}
+          title={"Archive Entry?"}
+          message={"You are about to archive this Entry"}
+          nextLineMessage={"Please confirm to archive it to tagging"}
+          confirmButton={"Yes, Archive it!"}
           cancelButton={"Cancel"}
           cancelOnClick={() => {
             dispatch(resetPrompt());
           }}
-          confirmOnClick={() => dispatch(setOpenReasonReturn(true))}
+          confirmOnClick={() => archiveHandler()}
         />
       </Dialog>
 
       {view || update ? (
-        <TransactionDrawer transactionData={transactionData} />
+        <TransactionDrawer transactionData={transactionData?.transactions} />
       ) : (
         <></>
       )}
 
       <Dialog open={createTax} className="transaction-modal-dialog">
-        <TaxComputation
-          create
-          taxComputation={taxComputation}
-          voucher={voucher}
-        />
+        <TaxComputation create taxComputation={taxComputation} />
       </Dialog>
 
       <Dialog open={updateTax} className="transaction-modal-dialog">
-        <TaxComputation
-          update
-          taxComputation={taxComputation}
-          voucher={voucher}
-        />
+        <TaxComputation update taxComputation={taxComputation} />
       </Dialog>
     </Paper>
   );

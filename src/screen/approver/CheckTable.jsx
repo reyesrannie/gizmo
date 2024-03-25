@@ -50,6 +50,7 @@ import {
 import { setFilterBy } from "../../services/slice/transactionSlice";
 import TransactionModalAp from "../../components/customs/modal/TransactionModalAp";
 import { setVoucher } from "../../services/slice/optionsSlice";
+import TransactionModalApprover from "../../components/customs/modal/TransactionModalApprover";
 
 const CheckTable = ({
   params,
@@ -214,13 +215,6 @@ const CheckTable = ({
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
-                      {tag?.state === "For Computation" && (
-                        <StatusIndicator
-                          status="For Computation"
-                          className="pending-indicator"
-                        />
-                      )}
-
                       {tag?.state === "For Approval" && (
                         <StatusIndicator
                           status="For Approval"
@@ -236,9 +230,6 @@ const CheckTable = ({
                         onClick={() => {
                           dispatch(setMenuData(tag));
                           dispatch(setVoucher("check"));
-                          tag?.state === "For Computation" &&
-                            dispatch(setUpdateMenu(true));
-
                           tag?.state === "For Approval" &&
                             dispatch(setCheckMenu(true));
                         }}
@@ -328,16 +319,12 @@ const CheckTable = ({
         <TransactionModalAp transactionData={menuData} receive />
       </Dialog>
 
-      <Dialog open={viewMenu} className="transaction-modal-dialog">
-        <TransactionModalAp transactionData={menuData} view />
-      </Dialog>
-
       <Dialog open={updateMenu} className="transaction-modal-dialog">
         <TransactionModalAp transactionData={menuData} update />
       </Dialog>
 
       <Dialog open={checkMenu} className="transaction-modal-dialog">
-        <TransactionModalAp transactionData={menuData} checked />
+        <TransactionModalApprover transactionData={menuData} checked />
       </Dialog>
     </Box>
   );

@@ -1,0 +1,218 @@
+.voucher-number-header {
+  &.MuiTableCell-root {
+    border-bottom: 2px solid black;
+    padding: 2px;
+    .MuiTypography-root {
+      font-family: Roboto-Black;
+      font-size: 12px;
+    }
+  }
+}
+
+.voucher-name-header {
+  &.MuiTableCell-root {
+    border: 2px solid black;
+    padding: 2px;
+    width: 30%;
+    .MuiTypography-root {
+      font-family: Roboto-Black;
+      font-size: 11px;
+    }
+  }
+}
+
+.voucher-type-header {
+  &.MuiTableCell-root {
+    border: 2px solid black;
+    padding: 2px;
+    width: 40%;
+    .MuiTypography-root {
+      font-family: Roboto-Black;
+      font-size: 16px;
+    }
+  }
+}
+
+.voucher-payee-header {
+  &.MuiTableCell-root {
+    border: 2px solid black;
+    padding: 2px;
+    width: 30%;
+  }
+}
+
+.voucher-payment-header {
+  &.MuiTableCell-root {
+    border: 2px solid black;
+    border-bottom: 1px solid black;
+    padding: 2px;
+    .MuiTypography-root {
+      font-family: Roboto-Medium;
+      font-size: 11px;
+    }
+  }
+}
+
+.payee-typo {
+  &.MuiTypography-root {
+    font-family: Roboto-Light;
+    font-size: 8px;
+  }
+}
+
+.name-supplier-typo {
+  &.MuiTypography-root {
+    font-family: Roboto-Black;
+    font-size: 8px;
+  }
+}
+
+.voucher-empty-details {
+  &.MuiTableCell-root {
+    border-bottom: 1px solid black;
+    padding: 2px;
+
+    .MuiTypography-root {
+      font-family: Roboto-Light;
+      font-size: 10px;
+    }
+  }
+}
+
+.voucher-payment-details {
+  &.MuiTableCell-root {
+    border: 2px solid black;
+    border-bottom: 1px solid black;
+    border-top: none;
+    padding: 2px;
+
+    .MuiTypography-root {
+      font-family: Roboto-Light;
+      font-size: 10px;
+    }
+  }
+}
+.voucher-empty-row-top-details {
+  &.MuiTableCell-root {
+    border: 2px solid black;
+    border-bottom: 1px solid black;
+    padding: 2px;
+    height: 15px;
+    .MuiTypography-root {
+      font-family: Roboto-Light;
+      font-size: 10px;
+    }
+  }
+}
+
+.voucher-empty-row-details {
+  &.MuiTableCell-root {
+    border: 2px solid black;
+    border-bottom: 1px solid black;
+    border-top: none;
+    padding: 2px;
+    height: 15px;
+
+    .MuiTypography-root {
+      font-family: Roboto-Light;
+      font-size: 10px;
+    }
+  }
+}
+
+.voucher-tag-details {
+  &.MuiTableCell-root {
+    border: none;
+    padding: 2px;
+    .MuiTypography-root {
+      font-family: Roboto-Light;
+      font-size: 10px;
+      height: 100%;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+    }
+  }
+}
+
+.voucher-computation-details {
+  &.MuiTableCell-root {
+    border: none;
+    padding: 2px;
+    height: 15px;
+    .MuiTypography-root {
+      font-family: Roboto-Light;
+      font-size: 10px;
+    }
+  }
+}
+
+.voucher-computation-details-border {
+  &.MuiTableCell-root {
+    border-left: 2px solid black;
+    border-right: 2px solid black;
+    border-bottom: none;
+    padding: 2px;
+    height: 15px;
+    .MuiTypography-root {
+      font-family: Roboto-Light;
+      font-size: 10px;
+    }
+  }
+}
+
+.voucher-account-title-details {
+  &.MuiTableCell-root {
+    border-left: 2px solid black;
+    border-right: none;
+    border-bottom: none;
+    padding: 2px;
+    height: 15px;
+    .MuiTypography-root {
+      font-family: Roboto-Light;
+      font-size: 10px;
+    }
+  }
+}
+
+.voucher-titles-typography {
+  &.MuiTypography-root {
+    font-family: Roboto-Light;
+    font-size: 10px;
+    margin-left: 100px;
+  }
+}
+
+.voucher-titles-typography-indent {
+  &.MuiTypography-root {
+    font-family: Roboto-Light;
+    font-size: 10px;
+    margin-left: 250px;
+  }
+}
+
+.voucher-payment-footer {
+  &.MuiTableCell-root {
+    border: 2px solid black;
+    border-bottom: 1px solid black;
+    padding: 1px;
+    .MuiTypography-root {
+      font-family: Roboto-Medium;
+      font-size: 11px;
+    }
+  }
+}
+
+.voucher-payment-footer-sign {
+  &.MuiTableCell-root {
+    border: 2px solid black;
+    border-bottom: 1px solid black;
+    padding: 1px;
+    .MuiTypography-root {
+      font-family: Roboto-Medium;
+      font-size: 8px;
+      display: flex;
+      height: 55px;
+    }
+  }
+}

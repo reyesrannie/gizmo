@@ -27,6 +27,8 @@ import Transaction from "../../screen/ap/Transaction";
 import AccountTitles from "../../screen/masterlist/coa/AccountTitles";
 import CheckVoucher from "../../screen/ap/CheckVoucher";
 import JournalVoucher from "../../screen/ap/JournalVoucher";
+import Approver from "../../screen/approver/Approver";
+import ApprovingCheck from "../../screen/approver/ApprovingCheck";
 
 const Routing = () => {
   const user = decodeUser();
@@ -238,6 +240,28 @@ const Routing = () => {
           path: "journal",
           element: hasAccess(["ap_tag"]) ? (
             <JournalVoucher />
+          ) : (
+            <Navigate to={"/"} />
+          ),
+        },
+      ],
+    },
+    {
+      path: "/approver",
+      element: user ? <AppBar /> : <Navigate to={"/login"} />,
+      children: [
+        {
+          path: "",
+          element: hasAccess(["approver"]) ? (
+            <Approver />
+          ) : (
+            <Navigate to={"/"} />
+          ),
+        },
+        {
+          path: "approvecheck",
+          element: hasAccess(["approver"]) ? (
+            <ApprovingCheck />
           ) : (
             <Navigate to={"/"} />
           ),

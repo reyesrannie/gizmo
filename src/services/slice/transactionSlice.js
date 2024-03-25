@@ -4,9 +4,11 @@ const initialState = {
   fieldsRequired: [],
   header: "Tag Transaction",
   transactionHeader: "Received",
+  approvedHeader: "For Approval",
   isExpanded: false,
   filterBy: "",
   filter: false,
+  voucherData: [],
 };
 
 const transactionSlice = createSlice({
@@ -28,11 +30,15 @@ const transactionSlice = createSlice({
     setFilter: (state, action) => {
       state.filter = action.payload;
     },
-
     setTransactionHeader: (state, action) => {
       state.transactionHeader = action.payload;
     },
-
+    setApprovedHeader: (state, action) => {
+      state.approvedHeader = action.payload;
+    },
+    setVoucherData: (state, action) => {
+      state.voucherData = action.payload;
+    },
     resetTransaction: () => {
       return initialState;
     },
@@ -47,6 +53,8 @@ export const {
   setFilterBy,
   setFilter,
   setTransactionHeader,
+  setApprovedHeader,
+  setVoucherData,
 } = transactionSlice.actions;
 
 export default transactionSlice.reducer;

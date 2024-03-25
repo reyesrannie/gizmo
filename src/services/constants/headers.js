@@ -7,9 +7,15 @@ const taggingHeader = [
 
 const apHeader = [
   { name: "Received", status: "For Computation" },
-  { name: "Checked", status: "checked" },
+  { name: "Checked", status: "For Approval" },
   { name: "Returned", status: "returned" },
   { name: "History", status: "" },
 ];
 
-export { taggingHeader, apHeader };
+const approverHeader = [
+  { name: "For Approval", status: "For Approval" },
+  { name: "Returned", status: "returned" },
+  { name: "History", status: "" },
+];
+
+export { taggingHeader, apHeader, approverHeader };

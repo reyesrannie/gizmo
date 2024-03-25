@@ -49,6 +49,7 @@ const Breadcrums = () => {
       <Link
         href="/"
         onClick={(e) => {
+          dispatch(resetTransaction());
           e.preventDefault();
           navigate("/");
         }}

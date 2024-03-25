@@ -4,7 +4,8 @@ const apTransactionSchema = Yup.object({
   tag_no: Yup.string().required("Tag number is required"),
   tin: Yup.object().required("TIN is required"),
   proprietor: Yup.string().nullable(),
-  description: Yup.string(),
+  description: Yup.string().nullable(),
+  cip_no: Yup.string().nullable(),
 
   company_address: Yup.string().required("Supplier address is required"),
   amount: Yup.string().required("Amount is required"),
@@ -13,10 +14,7 @@ const apTransactionSchema = Yup.object({
     .typeError("Location is required")
     .required("Location is required")
     .typeError("Location is required"),
-  atc_id: Yup.object()
-    .typeError("Location is required")
-    .required("Location is required")
-    .typeError("Location is required"),
+  atc_id: Yup.object().typeError("ATC is required").required("ATC is required"),
   date_invoice: Yup.date()
     .typeError("Date invoice is required")
     .required("Date invoice is required"),

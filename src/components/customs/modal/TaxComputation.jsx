@@ -37,12 +37,13 @@ import { supplierTypeReqFields } from "../../../services/constants/requiredField
 import { enqueueSnackbar } from "notistack";
 import { objectError } from "../../../services/functions/errorResponse";
 
-const TaxComputation = ({ create, update, taxComputation, voucher }) => {
+const TaxComputation = ({ create, update, taxComputation }) => {
   const dispatch = useDispatch();
   const transactionData = useSelector((state) => state.menu.menuData);
   const taxData = useSelector((state) => state.menu.taxData);
   const supplyType = useSelector((state) => state.options.supplyType);
   const disableCreate = useSelector((state) => state.options.disableCreate);
+  const voucher = useSelector((state) => state.options.voucher);
 
   const {
     data: tin,
@@ -148,7 +149,7 @@ const TaxComputation = ({ create, update, taxComputation, voucher }) => {
           (item) => taxData?.coa_id === item?.id
         ),
         mode: taxData?.mode,
-        amount: taxData?.amount,
+        amount: parseFloat(taxData?.amount).toFixed(2),
         vat_local: taxData?.vat_local,
         vat_service: taxData?.vat_service,
         nvat_local: taxData?.nvat_local,
@@ -260,7 +261,7 @@ const TaxComputation = ({ create, update, taxComputation, voucher }) => {
   const submitHandler = async (submitData) => {
     const obj = {
       ...submitData,
-      transaction_id: submitData?.transaction_id,
+      transaction_id: transactionData?.transactions?.id,
       stype_id: submitData?.stype_id?.id,
       coa_id: submitData?.coa_id?.id,
       id: taxData?.id,

@@ -6,6 +6,7 @@ const initialState = {
   disableButton: false,
   disableCreate: true,
   disableCheck: false,
+  voucher: null,
 };
 
 const optionsSlice = createSlice({
@@ -27,6 +28,9 @@ const optionsSlice = createSlice({
     setDisableCheck: (state, action) => {
       state.disableCheck = action.payload;
     },
+    setVoucher: (state, action) => {
+      state.voucher = action.payload;
+    },
     resetOption: () => {
       return initialState;
     },
@@ -40,6 +44,7 @@ export const {
   setDisableCreate,
   resetOption,
   setDisableCheck,
+  setVoucher,
 } = optionsSlice.actions;
 
 export default optionsSlice.reducer;

@@ -36,7 +36,8 @@ export const jsonServerAPI = createApi({
     "Logs",
     "AccountTitles",
     "GTAG",
-    "VPNUMBER",
+    "VPCheckNumber",
+    "VPJournalNumber",
     "SingleCheck",
     "SingleJournal",
     "CheckEntries",
@@ -75,7 +76,7 @@ export const jsonServerAPI = createApi({
         "Logs",
         "TaxComputation",
         "GTAG",
-        "VPNUMBER",
+        "VPCheckNumber",
         "SingleCheck",
         "SingleJournal",
         "CheckEntries",
@@ -676,14 +677,23 @@ export const jsonServerAPI = createApi({
       }),
       providesTags: ["GTAG"],
     }),
-    vpNumber: builder.query({
+    vpCheckNumber: builder.query({
       transformResponse: (response) => response,
       query: (payload) => ({
-        url: `/vp/transaction`,
+        url: `/check-vp/transaction`,
         method: "GET",
         params: payload,
       }),
-      providesTags: ["VPNUMBER"],
+      providesTags: ["VPCheckNumber"],
+    }),
+    vpJournalNumber: builder.query({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/journal-vp/transaction`,
+        method: "GET",
+        params: payload,
+      }),
+      providesTags: ["VPJournalNumber"],
     }),
     transaction: builder.query({
       transformResponse: (response) => response,
@@ -701,7 +711,7 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["Transaction", "GTAG", "VPNUMBER"],
+      invalidatesTags: ["Transaction", "GTAG", "VPCheckNumber"],
     }),
     updateTransaction: builder.mutation({
       transformResponse: (response) => response,
@@ -710,16 +720,7 @@ export const jsonServerAPI = createApi({
         method: "PUT",
         body: payload,
       }),
-      invalidatesTags: ["Transaction", "Logs", "VPNUMBER"],
-    }),
-    checkedTransaction: builder.mutation({
-      transformResponse: (response) => response,
-      query: (payload) => ({
-        url: `checked/transaction/${payload.id}`,
-        method: "POST",
-        body: payload,
-      }),
-      invalidatesTags: ["Transaction", "Logs", "VPNUMBER"],
+      invalidatesTags: ["Transaction", "Logs", "VPCheckNumber"],
     }),
     archiveTransaction: builder.mutation({
       transformResponse: (response) => response,
@@ -728,7 +729,7 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["Transaction", "Logs", "VPNUMBER"],
+      invalidatesTags: ["Transaction", "Logs", "VPCheckNumber"],
     }),
     receiveTransaction: builder.mutation({
       transformResponse: (response) => response,
@@ -737,7 +738,7 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["Transaction", "Logs", "VPNUMBER"],
+      invalidatesTags: ["Transaction", "Logs", "VPCheckNumber"],
     }),
     returnTransaction: builder.mutation({
       transformResponse: (response) => response,
@@ -746,7 +747,7 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["Transaction", "Logs", "VPNUMBER"],
+      invalidatesTags: ["Transaction", "Logs", "VPCheckNumber"],
     }),
     tagYearMonth: builder.query({
       transformResponse: (response) => response,
@@ -782,7 +783,7 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["TaxComputation", "VPNUMBER"],
+      invalidatesTags: ["TaxComputation", "VPCheckNumber", "VPJournalNumber"],
     }),
     updateTaxComputation: builder.mutation({
       transformResponse: (response) => response,
@@ -791,7 +792,7 @@ export const jsonServerAPI = createApi({
         method: "PUT",
         body: payload,
       }),
-      invalidatesTags: ["TaxComputation", "VPNUMBER"],
+      invalidatesTags: ["TaxComputation", "VPCheckNumber", "VPJournalNumber"],
     }),
 
     checkEntries: builder.query({
@@ -821,6 +822,24 @@ export const jsonServerAPI = createApi({
       }),
       invalidatesTags: ["SingleCheck", "CheckEntries", "Logs"],
     }),
+    archiveCheckEntries: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/archive/transaction-check/${payload.id}`,
+        method: "PATCH",
+        params: payload,
+      }),
+      invalidatesTags: ["SingleCheck", "CheckEntries"],
+    }),
+    checkedCVoucher: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/checked/transaction-check/${payload.id}`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["CheckEntries", "Logs", "VPCheckNumber"],
+    }),
     journalEntries: builder.query({
       transformResponse: (response) => response,
       query: (payload) => ({
@@ -837,7 +856,7 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["SingleJournal", "JournalEntries", "Logs"],
+      invalidatesTags: ["JournalEntries", "Logs", "VPJournalNumber"],
     }),
     updateJournalEntries: builder.mutation({
       transformResponse: (response) => response,
@@ -847,6 +866,24 @@ export const jsonServerAPI = createApi({
         body: payload,
       }),
       invalidatesTags: ["SingleJournal", "JournalEntries", "Logs"],
+    }),
+    archiveJournalEntries: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/archive/transaction-journal/${payload.id}`,
+        method: "PATCH",
+        params: payload,
+      }),
+      invalidatesTags: ["SingleCheck", "JournalEntries"],
+    }),
+    checkedJVoucher: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/checked/transaction-journal/${payload.id}`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["JournalEntries", "Logs", "VPJournalNumber"],
     }),
     checkTransaction: builder.query({
       transformResponse: (response) => response,
@@ -959,10 +996,10 @@ export const {
   useArchiveTransactionMutation,
   useReceiveTransactionMutation,
   useReturnTransactionMutation,
-  useCheckedTransactionMutation,
 
   useTagYearMonthQuery,
-  useVpNumberQuery,
+  useVpCheckNumberQuery,
+  useVpJournalNumberQuery,
 
   useStatusLogsQuery,
 
@@ -973,11 +1010,16 @@ export const {
   useCheckEntriesQuery,
   useCreateCheckEntriesMutation,
   useUpdateCheckEntriesMutation,
+  useArchiveCheckEntriesMutation,
 
   useJournalEntriesQuery,
   useCreateJournalEntriesMutation,
   useUpdateJournalEntriesMutation,
+  useArchiveJournalEntriesMutation,
 
   useCheckTransactionQuery,
   useJournalTransactionQuery,
+
+  useCheckedCVoucherMutation,
+  useCheckedJVoucherMutation,
 } = jsonServerAPI;

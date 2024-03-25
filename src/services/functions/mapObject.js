@@ -134,7 +134,7 @@ const mapAPTransaction = (
     document_type: documentType,
 
     atc_id:
-      atc?.result?.find((item) => transactionData?.atc?.id === item.id) || null,
+      atc?.result?.find((item) => transactionData?.atc_id === item.id) || null,
     account_number:
       accountNumber?.result?.find(
         (item) => transactionData?.accountNumber?.id === item.id

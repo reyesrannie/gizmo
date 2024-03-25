@@ -21,6 +21,9 @@ import PointOfSaleOutlinedIcon from "@mui/icons-material/PointOfSaleOutlined";
 import DonutSmallOutlinedIcon from "@mui/icons-material/DonutSmallOutlined";
 import CreditScoreOutlinedIcon from "@mui/icons-material/CreditScoreOutlined";
 import NewspaperOutlinedIcon from "@mui/icons-material/NewspaperOutlined";
+import FactCheckOutlinedIcon from "@mui/icons-material/FactCheckOutlined";
+import PlaylistAddCheckOutlinedIcon from "@mui/icons-material/PlaylistAddCheckOutlined";
+import TaskOutlinedIcon from "@mui/icons-material/TaskOutlined";
 
 import "../../components/styles/CardNavigation.scss";
 const user = [
@@ -267,6 +270,35 @@ const apTransaction = [
     ),
   },
 ];
+const approver = [
+  {
+    path: "/approver/approvecheck",
+    desc: "Approving of check entries to appropriate Approver.",
+    name: "Check Approval",
+    permission: ["approver"],
+    firstIcon: (
+      <PlaylistAddCheckOutlinedIcon
+        color="secondary"
+        className="icon-card-details"
+      />
+    ),
+    lastIcon: (
+      <NavigationOutlinedIcon className="icon-last" color="secondary" />
+    ),
+  },
+  {
+    path: "/approver/approvejournal",
+    desc: "Approving of journal entries to appropriate Approver.",
+    name: "Journal Approval",
+    permission: ["approver"],
+    firstIcon: (
+      <TaskOutlinedIcon color="secondary" className="icon-card-details" />
+    ),
+    lastIcon: (
+      <NavigationOutlinedIcon className="icon-last" color="secondary" />
+    ),
+  },
+];
 
 const menu = [
   {
@@ -397,6 +429,7 @@ const menu = [
       },
     ],
   },
+
   {
     desc: "Accounts Payable",
     icon: <PointOfSaleOutlinedIcon />,
@@ -420,6 +453,26 @@ const menu = [
         icon: <NewspaperOutlinedIcon />,
         path: "/ap/journal",
         permission: ["ap_tag"],
+      },
+    ],
+  },
+  {
+    desc: "Approver",
+    icon: <FactCheckOutlinedIcon />,
+    path: "/approver",
+    permission: ["approver"],
+    children: [
+      {
+        desc: "Check Approval",
+        icon: <PlaylistAddCheckOutlinedIcon />,
+        path: "/approver/approvecheck",
+        permission: ["approver"],
+      },
+      {
+        desc: "Journal Approval",
+        icon: <TaskOutlinedIcon />,
+        path: "/approver/approvejournal",
+        permission: ["approver"],
       },
     ],
   },
@@ -518,6 +571,20 @@ const routes = [
       },
     ],
   },
+  {
+    path: "/approver",
+    name: "Approver",
+    children: [
+      {
+        path: "/approver/approvecheck",
+        name: "Check Approval",
+      },
+      {
+        path: "/approver/approvejournal",
+        name: "Journal Approval",
+      },
+    ],
+  },
 ];
 
-export { user, masterlist, tagging, apTransaction, menu, routes };
+export { user, masterlist, tagging, apTransaction, approver, menu, routes };

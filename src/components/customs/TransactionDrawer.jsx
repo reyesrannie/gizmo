@@ -50,17 +50,23 @@ const CustomIndicator = ({ props, item }) => {
       {completed && item?.status === "checked" && (
         <CheckCircleOutlinedIcon color="warning" />
       )}
+      {completed && item?.status === "For Approval" && (
+        <CheckCircleOutlinedIcon color="warning" />
+      )}
       {!completed && <CircleOutlinedIcon color="warning" />}
     </Box>
   );
 };
 
 const TransactionDrawer = ({ transactionData }) => {
-  const { data: logs } = useStatusLogsQuery({
-    transaction_id: transactionData?.id,
-    sorts: "created_at",
-    pagination: "none",
-  });
+  const { data: logs } = useStatusLogsQuery(
+    {
+      transaction_id: transactionData?.id,
+      sorts: "created_at",
+      pagination: "none",
+    },
+    { skip: transactionData === null }
+  );
 
   const paperRef = useRef(null);
   const { data: user } = useUsersQuery({
@@ -211,14 +217,22 @@ const TransactionDrawer = ({ transactionData }) => {
                           {item?.status?.toUpperCase()}
                         </Typography>
                       )}
+                      {item?.status === "For Approval" && (
+                        <Typography
+                          color="#B6622d"
+                          className="logs-indicator-transaction"
+                        >
+                          {item?.status?.toUpperCase()}
+                        </Typography>
+                      )}
                     </Box>
-                    {item?.check_voucher !== null && (
+                    {item?.voucher_type !== null && (
                       <Box className={"logs-details-transaction"}>
                         <Typography className="logs-indicator-transaction">
                           Entry:
                         </Typography>
                         <Typography className="logs-details-text-transaction">
-                          {item?.check_voucher}
+                          {item?.voucher_type}
                         </Typography>
                       </Box>
                     )}

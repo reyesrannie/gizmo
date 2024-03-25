@@ -23,6 +23,7 @@ import {
   setFilterBy,
   setHeader,
   setIsExpanded,
+  setTransactionHeader,
 } from "../../services/slice/transactionSlice";
 import CheckTable from "./CheckTable";
 import useApHook from "../../services/hooks/useApHook";
@@ -76,7 +77,7 @@ const CheckVoucher = () => {
                   <AccordionSummary
                     key={index}
                     onClick={() => {
-                      dispatch(setHeader(head.name));
+                      dispatch(setTransactionHeader(head.name));
                       dispatch(setIsExpanded(false));
                       onOrderBy("");
                       dispatch(setFilterBy(""));
@@ -117,7 +118,7 @@ const CheckVoucher = () => {
           state={"received"}
         />
       )}
-      {transactionHeader === "Archived" && (
+      {transactionHeader === "Checked" && (
         <CheckTable
           params={params}
           onSortTable={onSortTable}
@@ -129,7 +130,7 @@ const CheckVoucher = () => {
           status={status}
           tagTransaction={tagTransaction}
           onOrderBy={onOrderBy}
-          state="archived"
+          state="checked"
         />
       )}
       {transactionHeader === "Returned" && (
