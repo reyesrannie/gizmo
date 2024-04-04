@@ -43,12 +43,6 @@ export const requiredFields = [
   },
   {
     id: 8,
-    name: "ref_no",
-    type: "string",
-    label: "Reference Number",
-  },
-  {
-    id: 9,
     name: "invoice_no",
     type: "string",
     label: "Invoice Number",

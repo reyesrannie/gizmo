@@ -15,6 +15,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useDispatch, useSelector } from "react-redux";
 import {
   resetMenu,
+  setComputationMenu,
   setCreateTax,
   setTaxData,
   setUpdateTax,
@@ -72,12 +73,15 @@ import {
   resetOption,
   setDisableCheck,
 } from "../../../services/slice/optionsSlice";
+import ComputationMenu from "./ComputationMenu";
 
 const TransactionModalAp = ({ view, update, receive, checked }) => {
   const dispatch = useDispatch();
   const transactionData = useSelector((state) => state.menu.menuData);
   const createTax = useSelector((state) => state.menu.createTax);
   const updateTax = useSelector((state) => state.menu.updateTax);
+  const computationMenu = useSelector((state) => state.menu.computationMenu);
+
   const disableButton = useSelector((state) => state.options.disableButton);
   const disableCheck = useSelector((state) => state.options.disableCheck);
   const voucher = useSelector((state) => state.options.voucher);
@@ -220,10 +224,9 @@ const TransactionModalAp = ({ view, update, receive, checked }) => {
 
   const validateAmount = (amount) => {
     const totalAmount = taxComputation?.result?.reduce((acc, curr) => {
-      return parseFloat(curr.credit)
-        ? acc - 0
-        : acc + parseFloat(curr.total_invoice_amount);
+      return acc + parseFloat(curr.total_invoice_amount);
     }, 0);
+
     dispatch(
       setDisableCheck(
         totalAmount?.toFixed(2) !== parseFloat(amount)?.toFixed(2)
@@ -246,8 +249,7 @@ const TransactionModalAp = ({ view, update, receive, checked }) => {
         transactionData?.transactions,
         tin,
         document,
-        accountNumber,
-        atc
+        accountNumber
       );
       validateAmount(watch("amount"));
       const values = {
@@ -261,6 +263,19 @@ const TransactionModalAp = ({ view, update, receive, checked }) => {
       Object.entries(values).forEach(([key, value]) => {
         setValue(key, value);
       });
+
+      if (update) {
+        const updateField = {
+          atc_id: atc?.result?.find((item) => transactionData?.atc === item.id),
+          location_id: location?.result?.find(
+            (item) => transactionData?.location === item?.id
+          ),
+        };
+
+        Object.entries(updateField).forEach(([key, value]) => {
+          setValue(key, value);
+        });
+      }
     }
   }, [
     supplySuccess,
@@ -749,27 +764,29 @@ const TransactionModalAp = ({ view, update, receive, checked }) => {
                   </Paper>
                 );
               })}
-              <Paper elevation={3} className="tax-details-value">
+              <Paper
+                elevation={3}
+                className="tax-details-value"
+                onClick={() => dispatch(setComputationMenu(true))}
+              >
                 <Box className="tax-total-value">
                   <Typography className="amount-tax">
                     Total invoice amount : <span>&#8369;</span>{" "}
                     {convertToPeso(
                       taxComputation?.result
                         ?.reduce((acc, curr) => {
-                          return parseFloat(curr.credit)
-                            ? acc - 0
-                            : acc + parseFloat(curr.total_invoice_amount);
+                          return acc + parseFloat(curr.total_invoice_amount);
                         }, 0)
                         ?.toFixed(2)
                     )}
                   </Typography>
                   <Typography className="amount-tax">
-                    Total account : <span>&#8369;</span>{" "}
+                    Total amount : <span>&#8369;</span>{" "}
                     {convertToPeso(
                       taxComputation?.result
                         ?.reduce((acc, curr) => {
                           return parseFloat(curr.credit)
-                            ? acc - parseFloat(curr.account)
+                            ? acc - parseFloat(0)
                             : acc + parseFloat(curr.account);
                         }, 0)
                         ?.toFixed(2)
@@ -872,6 +889,10 @@ const TransactionModalAp = ({ view, update, receive, checked }) => {
 
       <Dialog open={createTax} className="transaction-modal-dialog">
         <TaxComputation create taxComputation={taxComputation} />
+      </Dialog>
+
+      <Dialog open={computationMenu} className="transaction-modal-dialog-tax">
+        <ComputationMenu />
       </Dialog>
 
       <Dialog open={updateTax} className="transaction-modal-dialog">

@@ -102,13 +102,7 @@ const mapViewTransaction = (
   return values;
 };
 
-const mapAPTransaction = (
-  transactionData,
-  tin,
-  document,
-  accountNumber,
-  atc
-) => {
+const mapAPTransaction = (transactionData, tin, document, accountNumber) => {
   const supplierTin =
     tin?.result?.find((item) => transactionData?.supplier_id === item.id) ||
     null;
@@ -133,8 +127,6 @@ const mapAPTransaction = (
 
     document_type: documentType,
 
-    atc_id:
-      atc?.result?.find((item) => transactionData?.atc_id === item.id) || null,
     account_number:
       accountNumber?.result?.find(
         (item) => transactionData?.accountNumber?.id === item.id

@@ -118,6 +118,7 @@ const SupplierType = () => {
     const obj = submitData?.map((items) => ({
       code: items.code,
       wtax: items.name,
+      required_fields: [items.ReqF],
     }));
 
     try {

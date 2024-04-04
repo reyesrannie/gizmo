@@ -19,6 +19,7 @@ import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
 import CircleOutlinedIcon from "@mui/icons-material/CircleOutlined";
 import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
 import SwapHorizontalCircleOutlinedIcon from "@mui/icons-material/SwapHorizontalCircleOutlined";
+import RecommendOutlinedIcon from "@mui/icons-material/RecommendOutlined";
 import {
   useStatusLogsQuery,
   useUsersQuery,
@@ -52,6 +53,9 @@ const CustomIndicator = ({ props, item }) => {
       )}
       {completed && item?.status === "For Approval" && (
         <CheckCircleOutlinedIcon color="warning" />
+      )}
+      {completed && item?.status === "approved" && (
+        <RecommendOutlinedIcon color="success" />
       )}
       {!completed && <CircleOutlinedIcon color="warning" />}
     </Box>
@@ -220,6 +224,14 @@ const TransactionDrawer = ({ transactionData }) => {
                       {item?.status === "For Approval" && (
                         <Typography
                           color="#B6622d"
+                          className="logs-indicator-transaction"
+                        >
+                          {item?.status?.toUpperCase()}
+                        </Typography>
+                      )}
+                      {item?.status === "approved" && (
+                        <Typography
+                          color="green"
                           className="logs-indicator-transaction"
                         >
                           {item?.status?.toUpperCase()}

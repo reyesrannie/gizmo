@@ -12,28 +12,28 @@ import {
 } from "@mui/material";
 
 import { useDispatch, useSelector } from "react-redux";
-import { useCheckEntriesQuery } from "../../services/store/request";
+import { useJournalEntriesQuery } from "../../services/store/request";
 
 import ArrowDropDownCircleOutlinedIcon from "@mui/icons-material/ArrowDropDownCircleOutlined";
 
 import "../../components/styles/TagTransaction.scss";
 
-import { apHeader } from "../../services/constants/headers";
+import { approverHeader } from "../../services/constants/headers";
 import {
+  setApprovedHeader,
   setFilterBy,
-  setHeader,
   setIsExpanded,
-  setTransactionHeader,
 } from "../../services/slice/transactionSlice";
-import CheckTable from "./CheckTable";
-import useApHook from "../../services/hooks/useApHook";
 
-const CheckVoucher = () => {
+import JournalTable from "./JournalTable";
+import useApproverHook from "../../services/hooks/useApproverHook";
+
+const ApprovingJournal = () => {
   const dispatch = useDispatch();
 
   const isExpanded = useSelector((state) => state.transaction.isExpanded);
-  const transactionHeader = useSelector(
-    (state) => state.transaction.transactionHeader
+  const approvedHeader = useSelector(
+    (state) => state.transaction.approvedHeader
   );
 
   const {
@@ -44,7 +44,7 @@ const CheckVoucher = () => {
     onSortTable,
     onOrderBy,
     onStateChange,
-  } = useApHook();
+  } = useApproverHook();
 
   const {
     data: tagTransaction,
@@ -52,7 +52,7 @@ const CheckVoucher = () => {
     isError,
     isFetching,
     status,
-  } = useCheckEntriesQuery(params);
+  } = useJournalEntriesQuery(params);
 
   return (
     <Box>
@@ -68,16 +68,16 @@ const CheckVoucher = () => {
           >
             <AccordionSummary onClick={() => dispatch(setIsExpanded(false))}>
               <Typography className="page-text-indicator-tag-transaction">
-                {transactionHeader}
+                {approvedHeader}
               </Typography>
             </AccordionSummary>
-            {apHeader?.map(
+            {approverHeader?.map(
               (head, index) =>
-                transactionHeader !== head?.name && (
+                approvedHeader !== head?.name && (
                   <AccordionSummary
                     key={index}
                     onClick={() => {
-                      dispatch(setTransactionHeader(head.name));
+                      dispatch(setApprovedHeader(head.name));
                       dispatch(setIsExpanded(false));
                       onOrderBy("");
                       dispatch(setFilterBy(""));
@@ -103,8 +103,8 @@ const CheckVoucher = () => {
           <SearchText onSearchData={onSearchData} />
         </Box>
       </Box>
-      {transactionHeader === "Received" && (
-        <CheckTable
+      {approvedHeader === "For Approval" && (
+        <JournalTable
           params={params}
           onSortTable={onSortTable}
           isError={isError}
@@ -115,11 +115,11 @@ const CheckVoucher = () => {
           status={status}
           tagTransaction={tagTransaction}
           onOrderBy={onOrderBy}
-          state={"received"}
+          state={"For Approval"}
         />
       )}
-      {transactionHeader === "Checked" && (
-        <CheckTable
+      {approvedHeader === "Checked" && (
+        <JournalTable
           params={params}
           onSortTable={onSortTable}
           isError={isError}
@@ -133,8 +133,8 @@ const CheckVoucher = () => {
           state="checked"
         />
       )}
-      {transactionHeader === "Returned" && (
-        <CheckTable
+      {approvedHeader === "Returned" && (
+        <JournalTable
           params={params}
           onSortTable={onSortTable}
           isError={isError}
@@ -148,23 +148,8 @@ const CheckVoucher = () => {
           state="returned"
         />
       )}
-      {transactionHeader === "Approved" && (
-        <CheckTable
-          params={params}
-          onSortTable={onSortTable}
-          isError={isError}
-          isFetching={isFetching}
-          isLoading={isLoading}
-          onPageChange={onPageChange}
-          onRowChange={onRowChange}
-          status={status}
-          tagTransaction={tagTransaction}
-          onOrderBy={onOrderBy}
-          state={"approved"}
-        />
-      )}
-      {transactionHeader === "History" && (
-        <CheckTable
+      {approvedHeader === "History" && (
+        <JournalTable
           params={params}
           onSortTable={onSortTable}
           isError={isError}
@@ -182,4 +167,4 @@ const CheckVoucher = () => {
   );
 };
 
-export default CheckVoucher;
+export default ApprovingJournal;

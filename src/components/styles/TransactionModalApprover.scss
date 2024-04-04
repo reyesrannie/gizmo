@@ -1,3 +1,13 @@
+.table-container-for-print {
+  @media print {
+    &.MuiTableContainer-root {
+      width: 96%;
+      margin: 2%;
+      overflow: hidden;
+    }
+  }
+}
+
 .voucher-number-header {
   &.MuiTableCell-root {
     border-bottom: 2px solid black;
@@ -12,11 +22,11 @@
 .voucher-name-header {
   &.MuiTableCell-root {
     border: 2px solid black;
-    padding: 2px;
+    padding: 4px;
     width: 30%;
     .MuiTypography-root {
       font-family: Roboto-Black;
-      font-size: 11px;
+      font-size: 12px;
     }
   }
 }
@@ -24,7 +34,7 @@
 .voucher-type-header {
   &.MuiTableCell-root {
     border: 2px solid black;
-    padding: 2px;
+    padding: 4px;
     width: 40%;
     .MuiTypography-root {
       font-family: Roboto-Black;
@@ -36,7 +46,7 @@
 .voucher-payee-header {
   &.MuiTableCell-root {
     border: 2px solid black;
-    padding: 2px;
+    padding: 4px;
     width: 30%;
   }
 }
@@ -45,7 +55,7 @@
   &.MuiTableCell-root {
     border: 2px solid black;
     border-bottom: 1px solid black;
-    padding: 2px;
+    padding: 0px;
     .MuiTypography-root {
       font-family: Roboto-Medium;
       font-size: 11px;
@@ -70,8 +80,7 @@
 .voucher-empty-details {
   &.MuiTableCell-root {
     border-bottom: 1px solid black;
-    padding: 2px;
-
+    padding: 0px;
     .MuiTypography-root {
       font-family: Roboto-Light;
       font-size: 10px;
@@ -84,8 +93,7 @@
     border: 2px solid black;
     border-bottom: 1px solid black;
     border-top: none;
-    padding: 2px;
-
+    padding: 1px;
     .MuiTypography-root {
       font-family: Roboto-Light;
       font-size: 10px;
@@ -96,8 +104,8 @@
   &.MuiTableCell-root {
     border: 2px solid black;
     border-bottom: 1px solid black;
-    padding: 2px;
-    height: 15px;
+    padding: 1px;
+    height: 13px;
     .MuiTypography-root {
       font-family: Roboto-Light;
       font-size: 10px;
@@ -110,8 +118,8 @@
     border: 2px solid black;
     border-bottom: 1px solid black;
     border-top: none;
-    padding: 2px;
-    height: 15px;
+    padding: 1px;
+    height: 13px;
 
     .MuiTypography-root {
       font-family: Roboto-Light;
@@ -138,8 +146,8 @@
 .voucher-computation-details {
   &.MuiTableCell-root {
     border: none;
-    padding: 2px;
-    height: 15px;
+    padding: 1px;
+    height: 13px;
     .MuiTypography-root {
       font-family: Roboto-Light;
       font-size: 10px;
@@ -152,8 +160,8 @@
     border-left: 2px solid black;
     border-right: 2px solid black;
     border-bottom: none;
-    padding: 2px;
-    height: 15px;
+    padding: 1px;
+    height: 13px;
     .MuiTypography-root {
       font-family: Roboto-Light;
       font-size: 10px;
@@ -189,6 +197,13 @@
     font-size: 10px;
     margin-left: 250px;
   }
+  @media print {
+    &.MuiTypography-root {
+      font-family: Roboto-Light;
+      font-size: 10px;
+      margin-left: 200px;
+    }
+  }
 }
 
 .voucher-payment-footer {
@@ -213,6 +228,34 @@
       font-size: 8px;
       display: flex;
       height: 55px;
+    }
+  }
+}
+
+.voucher-payment-footer-approve {
+  &.MuiTableCell-root {
+    border: 2px solid black;
+    border-bottom: 1px solid black;
+    padding: 1px;
+    .MuiTypography-root {
+      font-family: Roboto-Medium;
+      font-size: 11px;
+      display: flex;
+      height: 35px;
+    }
+  }
+}
+
+.voucher-payment-footer-approve.approved {
+  &.MuiTableCell-root {
+    border: 2px solid black;
+    border-bottom: 1px solid black;
+    padding: 1px;
+    .MuiTypography-root {
+      font-family: Roboto-Medium;
+      font-size: 11px;
+      display: flex;
+      height: 100%;
     }
   }
 }

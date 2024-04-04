@@ -8,7 +8,8 @@ const initialState = {
   isExpanded: false,
   filterBy: "",
   filter: false,
-  voucherData: [],
+  voucherData: null,
+  formBIR: false,
 };
 
 const transactionSlice = createSlice({
@@ -39,6 +40,9 @@ const transactionSlice = createSlice({
     setVoucherData: (state, action) => {
       state.voucherData = action.payload;
     },
+    setFromBIR: (state, action) => {
+      state.formBIR = action.payload;
+    },
     resetTransaction: () => {
       return initialState;
     },
@@ -54,6 +58,7 @@ export const {
   setFilter,
   setTransactionHeader,
   setApprovedHeader,
+  setFromBIR,
   setVoucherData,
 } = transactionSlice.actions;
 

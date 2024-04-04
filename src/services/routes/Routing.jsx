@@ -29,6 +29,7 @@ import CheckVoucher from "../../screen/ap/CheckVoucher";
 import JournalVoucher from "../../screen/ap/JournalVoucher";
 import Approver from "../../screen/approver/Approver";
 import ApprovingCheck from "../../screen/approver/ApprovingCheck";
+import ApprovingJournal from "../../screen/approver/ApprovingJournal";
 
 const Routing = () => {
   const user = decodeUser();
@@ -262,6 +263,14 @@ const Routing = () => {
           path: "approvecheck",
           element: hasAccess(["approver"]) ? (
             <ApprovingCheck />
+          ) : (
+            <Navigate to={"/"} />
+          ),
+        },
+        {
+          path: "approvejournal",
+          element: hasAccess(["approver"]) ? (
+            <ApprovingJournal />
           ) : (
             <Navigate to={"/"} />
           ),

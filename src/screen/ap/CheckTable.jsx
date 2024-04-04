@@ -40,6 +40,7 @@ import {
   setCheckMenu,
   setMenuData,
   setUpdateMenu,
+  setViewMenu,
 } from "../../services/slice/menuSlice";
 
 import {
@@ -50,6 +51,7 @@ import {
 import { setFilterBy } from "../../services/slice/transactionSlice";
 import TransactionModalAp from "../../components/customs/modal/TransactionModalAp";
 import { setVoucher } from "../../services/slice/optionsSlice";
+import TransactionModalApprover from "../../components/customs/modal/TransactionModalApprover";
 
 const CheckTable = ({
   params,
@@ -227,6 +229,20 @@ const CheckTable = ({
                           className="checked-indicator"
                         />
                       )}
+
+                      {tag?.state === "approved" && (
+                        <StatusIndicator
+                          status="Approved"
+                          className="received-indicator"
+                        />
+                      )}
+
+                      {tag?.state === "returned" && (
+                        <StatusIndicator
+                          status="Returned"
+                          className="inActive-indicator"
+                        />
+                      )}
                     </TableCell>
                     <TableCell align="center">
                       {moment(tag?.updated_at).format("MMM DD YYYY")}
@@ -239,8 +255,14 @@ const CheckTable = ({
                           tag?.state === "For Computation" &&
                             dispatch(setUpdateMenu(true));
 
+                          tag?.state === "returned" &&
+                            dispatch(setUpdateMenu(true));
+
                           tag?.state === "For Approval" &&
                             dispatch(setCheckMenu(true));
+
+                          tag?.state === "approved" &&
+                            dispatch(setViewMenu(true));
                         }}
                       >
                         <RemoveRedEyeOutlinedIcon className="tag-transaction-icon-actions" />
@@ -329,7 +351,7 @@ const CheckTable = ({
       </Dialog>
 
       <Dialog open={viewMenu} className="transaction-modal-dialog">
-        <TransactionModalAp transactionData={menuData} view />
+        <TransactionModalApprover transactionData={menuData} approved ap />
       </Dialog>
 
       <Dialog open={updateMenu} className="transaction-modal-dialog">

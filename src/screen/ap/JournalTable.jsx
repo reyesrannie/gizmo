@@ -52,6 +52,7 @@ import {
 import { setFilterBy } from "../../services/slice/transactionSlice";
 import TransactionModalAp from "../../components/customs/modal/TransactionModalAp";
 import { setVoucher } from "../../services/slice/optionsSlice";
+import TransactionModalApprover from "../../components/customs/modal/TransactionModalApprover";
 
 const JournalTable = ({
   params,
@@ -330,7 +331,7 @@ const JournalTable = ({
       </Dialog>
 
       <Dialog open={viewMenu} className="transaction-modal-dialog">
-        <TransactionModalAp transactionData={menuData} view />
+        <TransactionModalApprover transactionData={menuData} approved ap />
       </Dialog>
 
       <Dialog open={updateMenu} className="transaction-modal-dialog">

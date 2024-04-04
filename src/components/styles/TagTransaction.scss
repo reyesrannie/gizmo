@@ -328,6 +328,12 @@
   }
 }
 
+.transaction-modal-dialog-tax {
+  .MuiPaper-root {
+    max-width: none;
+  }
+}
+
 @media (max-height: 768px) {
   .page-text-indicator-tag-transaction {
     &.MuiTypography-root {

@@ -398,7 +398,7 @@ const SupplierModal = ({ supplierData, view, update }) => {
                 setValue("is_company", !watch("is_company"));
                 setValue(
                   "receipt_name",
-                  watch("is_company") ? "RDF FOOD & LIVESTOCK'S INC" : ""
+                  watch("is_company") ? "RDF FEED, LIVESTOCK & FOODS, INC." : ""
                 );
               }}
             />

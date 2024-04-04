@@ -128,10 +128,6 @@ const TaxComputation = ({ create, update, taxComputation }) => {
         setValue(key, value);
       });
 
-      // const tinType = tin?.result?.find(
-      //   (item) => item?.id === transactionData?.supplier?.id
-      // );
-
       const tinType = tin?.result?.find(
         (item) => item?.id === transactionData?.transactions?.supplier_id
       );
@@ -497,7 +493,7 @@ const TaxComputation = ({ create, update, taxComputation }) => {
           money
           control={control}
           name={"account"}
-          label={"Account *"}
+          label={"Total Amount *"}
           color="primary"
           className="transaction-tax-textBox"
           error={Boolean(errors?.account)}

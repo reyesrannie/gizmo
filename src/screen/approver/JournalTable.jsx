@@ -52,7 +52,7 @@ import TransactionModalAp from "../../components/customs/modal/TransactionModalA
 import { setVoucher } from "../../services/slice/optionsSlice";
 import TransactionModalApprover from "../../components/customs/modal/TransactionModalApprover";
 
-const CheckTable = ({
+const JournalTable = ({
   params,
   onSortTable,
   isLoading,
@@ -344,4 +344,4 @@ const CheckTable = ({
   );
 };
 
-export default CheckTable;
+export default JournalTable;

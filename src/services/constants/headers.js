@@ -9,6 +9,7 @@ const apHeader = [
   { name: "Received", status: "For Computation" },
   { name: "Checked", status: "For Approval" },
   { name: "Returned", status: "returned" },
+  { name: "Approved", status: "approved" },
   { name: "History", status: "" },
 ];
 

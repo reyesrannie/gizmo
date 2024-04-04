@@ -9,7 +9,7 @@ const initialState = {
   rolesData: null,
   createMenu: false,
   checkMenu: false,
-
+  computationMenu: false,
   updateMenu: false,
   receiveMenu: false,
   importMenu: false,
@@ -22,6 +22,7 @@ const initialState = {
   createTax: false,
   updateTax: false,
   taxData: null,
+  printable: false,
 };
 
 const menutSlice = createSlice({
@@ -88,6 +89,13 @@ const menutSlice = createSlice({
     setCheckMenu: (state, action) => {
       state.checkMenu = action.payload;
     },
+    setComputationMenu: (state, action) => {
+      state.computationMenu = action.payload;
+    },
+    setPrintable: (state, action) => {
+      state.printable = action.payload;
+    },
+
     resetMenu: () => {
       return initialState;
     },
@@ -116,6 +124,8 @@ export const {
   setUpdateTax,
   setTaxData,
   setCheckMenu,
+  setPrintable,
+  setComputationMenu,
 } = menutSlice.actions;
 
 export default menutSlice.reducer;

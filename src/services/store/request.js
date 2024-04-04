@@ -831,6 +831,24 @@ export const jsonServerAPI = createApi({
       }),
       invalidatesTags: ["SingleCheck", "CheckEntries"],
     }),
+    returnCheckEntries: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/returned/transaction-check/${payload.id}`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["SingleCheck", "CheckEntries", "Logs"],
+    }),
+    approveCheckEntries: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/approved/transaction-check/${payload.id}`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["SingleCheck", "CheckEntries", "Logs"],
+    }),
     checkedCVoucher: builder.mutation({
       transformResponse: (response) => response,
       query: (payload) => ({
@@ -875,6 +893,24 @@ export const jsonServerAPI = createApi({
         params: payload,
       }),
       invalidatesTags: ["SingleCheck", "JournalEntries"],
+    }),
+    returnJournalEntries: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/returned/transaction-journal/${payload.id}`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["SingleCheck", "JournalEntries", "Logs"],
+    }),
+    approveJournalEntries: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/approved/transaction-journal/${payload.id}`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["SingleCheck", "JournalEntries", "Logs"],
     }),
     checkedJVoucher: builder.mutation({
       transformResponse: (response) => response,
@@ -1011,11 +1047,15 @@ export const {
   useCreateCheckEntriesMutation,
   useUpdateCheckEntriesMutation,
   useArchiveCheckEntriesMutation,
+  useReturnCheckEntriesMutation,
+  useApproveCheckEntriesMutation,
 
   useJournalEntriesQuery,
   useCreateJournalEntriesMutation,
   useUpdateJournalEntriesMutation,
   useArchiveJournalEntriesMutation,
+  useReturnJournalEntriesMutation,
+  useApproveJournalEntriesMutation,
 
   useCheckTransactionQuery,
   useJournalTransactionQuery,
