@@ -315,7 +315,18 @@ const AccountTitles = () => {
                 <TableRow className="table-footer-accountTitle">
                   <TableCell colSpan={6}>
                     <TablePagination
-                      rowsPerPageOptions={[5, 10, 25, 100]}
+                      rowsPerPageOptions={[
+                        5,
+                        10,
+                        25,
+                        {
+                          label: "All",
+                          value:
+                            accountTitle?.result?.total > 100
+                              ? accountTitle?.result?.total
+                              : 100,
+                        },
+                      ]}
                       count={accountTitle?.result?.total || 0}
                       rowsPerPage={accountTitle?.result?.per_page || 10}
                       page={accountTitle?.result?.current_page - 1 || 0}

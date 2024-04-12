@@ -278,7 +278,18 @@ const CheckTable = ({
               <TableRow className="table-footer-tag-transaction">
                 <TableCell colSpan={6}>
                   <TablePagination
-                    rowsPerPageOptions={[5, 10, 25, 100]}
+                    rowsPerPageOptions={[
+                      5,
+                      10,
+                      25,
+                      {
+                        label: "All",
+                        value:
+                          tagTransaction?.result?.total > 100
+                            ? tagTransaction?.result?.total
+                            : 100,
+                      },
+                    ]}
                     count={tagTransaction?.result?.total || 0}
                     rowsPerPage={tagTransaction?.result?.per_page || 10}
                     page={tagTransaction?.result?.current_page - 1 || 0}

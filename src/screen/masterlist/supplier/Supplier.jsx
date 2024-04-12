@@ -332,7 +332,18 @@ const Supplier = () => {
                 <TableRow className="table-footer-supplier">
                   <TableCell colSpan={6}>
                     <TablePagination
-                      rowsPerPageOptions={[5, 10, 25, 100]}
+                      rowsPerPageOptions={[
+                        5,
+                        10,
+                        25,
+                        {
+                          label: "All",
+                          value:
+                            supplier?.result?.total > 100
+                              ? supplier?.result?.total
+                              : 100,
+                        },
+                      ]}
                       count={supplier?.result?.total || 0}
                       rowsPerPage={supplier?.result?.per_page || 10}
                       page={supplier?.result?.current_page - 1 || 0}

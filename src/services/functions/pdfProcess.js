@@ -116,7 +116,9 @@ export const printPDF = async (data) => {
 
   const isSG =
     data?.atc.substring(2, 5) === "158" || data?.atc.substring(2, 5) === "160";
+
   const hasAmountL = vpl !== 0;
+  const hasAmountS = vps !== 0;
 
   const isAG = data?.atc.substring(2, 5) === "120";
   const isRental = data?.atc.substring(2, 5) === "100";
@@ -180,21 +182,24 @@ export const printPDF = async (data) => {
       { x: 182, y: 560, size: 10 }
     );
 
-  hasAmountL &&
+  hasAmountS &&
+    hasAmountL &&
     drawText(convertToPeso(vps), {
       x: getMonth(data?.month),
       y: 546,
       size: 9,
     });
 
-  hasAmountL &&
+  hasAmountS &&
+    hasAmountL &&
     drawText(convertToPeso(vps), {
       x: 448,
       y: 546,
       size: 9,
     });
 
-  hasAmountL &&
+  hasAmountS &&
+    hasAmountL &&
     drawText(convertToPeso(wTaxS), {
       x: 520,
       y: 546,
@@ -202,6 +207,7 @@ export const printPDF = async (data) => {
     });
 
   isSG &&
+    hasAmountS &&
     hasAmountL &&
     drawText(`${data?.atc?.substring(0, 2)}160`, { x: 182, y: 546, size: 10 });
 

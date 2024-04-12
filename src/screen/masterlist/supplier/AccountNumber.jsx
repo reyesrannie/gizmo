@@ -326,7 +326,18 @@ const AccountNumber = () => {
                 <TableRow className="table-footer-account-number">
                   <TableCell colSpan={6}>
                     <TablePagination
-                      rowsPerPageOptions={[5, 10, 25, 100]}
+                      rowsPerPageOptions={[
+                        5,
+                        10,
+                        25,
+                        {
+                          label: "All",
+                          value:
+                            accountNumber?.result?.total > 100
+                              ? accountNumber?.result?.total
+                              : 100,
+                        },
+                      ]}
                       count={accountNumber?.result?.total || 0}
                       rowsPerPage={accountNumber?.result?.per_page || 10}
                       page={accountNumber?.result?.current_page - 1 || 0}

@@ -40,11 +40,7 @@ import { useSnackbar } from "notistack";
 import { singleError } from "../../../services/functions/errorResponse";
 import { DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import {
-  resetPrompt,
-  setOpenReasonReturn,
-  setReturn,
-} from "../../../services/slice/promptSlice";
+import { resetPrompt, setReturn } from "../../../services/slice/promptSlice";
 import { mapAPTransaction } from "../../../services/functions/mapObject";
 
 import "../../styles/TransactionModal.scss";
@@ -219,12 +215,17 @@ const TransactionModalAp = ({ view, update, receive, checked }) => {
       store: null,
       location_id: null,
       atc_id: null,
+      remarks: "",
+      voucherType: voucher,
+      coa_id: null,
     },
   });
 
   const validateAmount = (amount) => {
     const totalAmount = taxComputation?.result?.reduce((acc, curr) => {
-      return acc + parseFloat(curr.total_invoice_amount);
+      return curr?.credit !== "0.00"
+        ? acc + 0
+        : acc + parseFloat(curr.total_invoice_amount);
     }, 0);
 
     dispatch(
@@ -232,6 +233,8 @@ const TransactionModalAp = ({ view, update, receive, checked }) => {
         totalAmount?.toFixed(2) !== parseFloat(amount)?.toFixed(2)
       )
     );
+
+    console.log(totalAmount?.toFixed(2));
   };
 
   useEffect(() => {
@@ -254,6 +257,10 @@ const TransactionModalAp = ({ view, update, receive, checked }) => {
       validateAmount(watch("amount"));
       const values = {
         ...mapData,
+        coa_id: accountTitles?.result?.find(
+          (item) => transactionData?.coa_id === item?.id
+        ),
+        remarks: transactionData?.remarks || "",
         tag_month_year:
           dayjs(new Date(tagMonthYear), {
             locale: AdapterDayjs.locale,
@@ -270,6 +277,7 @@ const TransactionModalAp = ({ view, update, receive, checked }) => {
           location_id: location?.result?.find(
             (item) => transactionData?.location === item?.id
           ),
+          remarks: transactionData?.remarks,
         };
 
         Object.entries(updateField).forEach(([key, value]) => {
@@ -298,33 +306,18 @@ const TransactionModalAp = ({ view, update, receive, checked }) => {
     update,
     view,
     checked,
+    accountTitles,
   ]);
 
   const submitHandler = async (submitData) => {
-    const vpCheck = parseInt(vpCheckNumber?.result) + 1;
-    const vpJournal = parseInt(vpJournalNumber?.result) + 1;
-
-    const year = Math.floor(transactionData?.transactions?.tag_year / 100);
-    const month = transactionData?.transactions?.tag_year % 100;
-    const formattedDate = `20${year}-${month.toString().padStart(2, "0")}`;
     const obj = {
       id: transactionData?.id,
       transaction_id: transactionData?.transactions?.id,
       atc_id: submitData?.atc_id?.id,
       location_id: submitData?.location_id?.id,
       cip_no: submitData?.cip_no,
-      voucher_number:
-        voucher === "check"
-          ? `CV${transactionData?.apTagging?.vp}${formattedDate}-${vpCheck
-              .toString()
-              .padStart(4, "0")}`
-          : `JV${transactionData?.apTagging?.vp}${formattedDate}-${vpJournal
-              .toString()
-              .padStart(4, "0")}`,
-      vp_no:
-        voucher === "check"
-          ? vpCheck.toString().padStart(4, "0")
-          : vpJournal.toString().padStart(4, "0"),
+      remarks: submitData?.remarks,
+      coa_id: submitData?.coa_id?.id,
     };
 
     try {
@@ -535,6 +528,30 @@ const TransactionModalAp = ({ view, update, receive, checked }) => {
           error={Boolean(errors?.cip_no)}
           helperText={errors?.cip_no?.message}
         />
+        {voucher === "journal" && (
+          <Autocomplete
+            disabled={checked}
+            control={control}
+            name={"coa_id"}
+            options={accountTitles?.result || []}
+            getOptionLabel={(option) => `${option.code} - ${option.name}`}
+            isOptionEqualToValue={(option, value) =>
+              option?.code === value?.code
+            }
+            renderInput={(params) => (
+              <MuiTextField
+                name="coa_id"
+                {...params}
+                label="Account Title"
+                size="small"
+                variant="outlined"
+                error={Boolean(errors.coa_id)}
+                helperText={errors.coa_id?.message}
+                className="transaction-form-textBox"
+              />
+            )}
+          />
+        )}
         {update && (
           <Autocomplete
             control={control}
@@ -584,6 +601,7 @@ const TransactionModalAp = ({ view, update, receive, checked }) => {
         )}
 
         <AppTextBox
+          disabled={checked}
           money
           control={control}
           name={"amount"}
@@ -605,6 +623,20 @@ const TransactionModalAp = ({ view, update, receive, checked }) => {
           error={Boolean(errors.description)}
           helperText={errors.description?.message}
         />
+
+        {voucher === "journal" && (
+          <AppTextBox
+            disabled={checked}
+            multiline
+            minRows={1}
+            control={control}
+            name={"remarks"}
+            className="transaction-form-field-textBox "
+            label="Journal Description *"
+            error={Boolean(errors.remarks)}
+            helperText={errors.remarks?.message}
+          />
+        )}
         {update || checked ? (
           <Box className="form-title-transaction">
             <Divider orientation="horizontal" className="transaction-devider" />
@@ -745,6 +777,11 @@ const TransactionModalAp = ({ view, update, receive, checked }) => {
                             VP#: {transactionData?.voucher_number}
                           </Typography>
                         )}
+                        {tax?.remarks !== null && (
+                          <Typography className="amount-tax">
+                            Remarks: {tax?.remarks}
+                          </Typography>
+                        )}
                       </Box>
                       <Box className="tax-box-value">
                         <Typography className="amount-tax">
@@ -775,7 +812,9 @@ const TransactionModalAp = ({ view, update, receive, checked }) => {
                     {convertToPeso(
                       taxComputation?.result
                         ?.reduce((acc, curr) => {
-                          return acc + parseFloat(curr.total_invoice_amount);
+                          return curr?.credit !== "0.00"
+                            ? acc + 0
+                            : acc + parseFloat(curr.total_invoice_amount);
                         }, 0)
                         ?.toFixed(2)
                     )}

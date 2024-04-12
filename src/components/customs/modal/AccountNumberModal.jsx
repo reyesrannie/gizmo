@@ -156,7 +156,9 @@ const AccountNumberModal = ({ accountNumberData, view, update }) => {
           control={control}
           name={"supplier_id"}
           options={supplier?.result || []}
-          getOptionLabel={(option) => `${option?.company_name}`}
+          getOptionLabel={(option) =>
+            `${option?.tin} - ${option?.company_name}`
+          }
           isOptionEqualToValue={(option, value) => option?.id === value?.id}
           renderInput={(params) => (
             <MuiTextField

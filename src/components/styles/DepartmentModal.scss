@@ -39,6 +39,7 @@
 .add-department-textbox {
   &.MuiFormControl-root {
     min-height: 60px;
+
     width: 350px;
     .MuiInputBase-root {
       border-radius: 10px;
@@ -52,6 +53,39 @@
     .MuiFormHelperText-root {
       font-family: Roboto-Light;
       letter-spacing: 1px;
+    }
+  }
+}
+
+.department-box-container-scope {
+  &.MuiBox-root {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    max-width: 350px;
+    max-height: 300px;
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    &::-webkit-scrollbar {
+      width: 14px;
+      border: 3px solid #fff;
+    }
+    &::-webkit-scrollbar-thumb {
+      background-color: #ccc;
+      border-radius: 20px;
+      border: 3px solid #fff;
+    }
+    &::-webkit-scrollbar-thumb:hover {
+      background-color: #f4ce92;
+    }
+    &::-webkit-scrollbar-track {
+      background-color: #fff;
+      border-radius: 20px;
+      border: 3px solid #fff;
+    }
+    &::-webkit-scrollbar-track:hover {
+      background-color: #eee;
     }
   }
 }

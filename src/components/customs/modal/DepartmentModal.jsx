@@ -152,29 +152,29 @@ const DepartmentModal = ({ departmentData, view, update }) => {
           error={Boolean(errors?.name)}
           helperText={errors?.name?.message}
         />
-
-        <Autocomplete
-          disabled={view}
-          multiple
-          control={control}
-          name="scope_location"
-          options={location?.result || []}
-          getOptionLabel={(option) => `${option?.code} - ${option?.name}`}
-          isOptionEqualToValue={(option, value) => option?.id === value?.id}
-          renderInput={(params) => (
-            <MuiTextField
-              name="scope_location"
-              {...params}
-              label="Location"
-              size="small"
-              variant="outlined"
-              error={Boolean(errors.scope_location)}
-              helperText={errors.scope_location?.message}
-              className="add-department-textbox"
-            />
-          )}
-        />
-
+        <Box className="department-box-container-scope">
+          <Autocomplete
+            disabled={view}
+            multiple
+            control={control}
+            name="scope_location"
+            options={location?.result || []}
+            getOptionLabel={(option) => `${option?.code} - ${option?.name}`}
+            isOptionEqualToValue={(option, value) => option?.id === value?.id}
+            renderInput={(params) => (
+              <MuiTextField
+                name="scope_location"
+                {...params}
+                label="Location"
+                size="small"
+                variant="outlined"
+                error={Boolean(errors.scope_location)}
+                helperText={errors.scope_location?.message}
+                className="add-department-textbox"
+              />
+            )}
+          />
+        </Box>
         <Box className="add-department-button-container">
           {!view && (
             <LoadingButton

@@ -255,7 +255,18 @@ const RoleManagement = () => {
                 <TableRow className="table-footer-cell">
                   <TableCell colSpan={6}>
                     <TablePagination
-                      rowsPerPageOptions={[5, 10, 25, 100]}
+                      rowsPerPageOptions={[
+                        5,
+                        10,
+                        25,
+                        {
+                          label: "All",
+                          value:
+                            roles?.result?.total > 100
+                              ? roles?.result?.total
+                              : 100,
+                        },
+                      ]}
                       count={roles?.result?.total || 0}
                       rowsPerPage={roles?.result?.per_page || 10}
                       page={roles?.result?.current_page - 1 || 0}

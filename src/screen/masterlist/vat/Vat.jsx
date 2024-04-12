@@ -298,7 +298,16 @@ const Vat = () => {
                 <TableRow className="table-footer-vat">
                   <TableCell colSpan={6}>
                     <TablePagination
-                      rowsPerPageOptions={[5, 10, 25, 100]}
+                      rowsPerPageOptions={[
+                        5,
+                        10,
+                        25,
+                        {
+                          label: "All",
+                          value:
+                            vat?.result?.total > 100 ? vat?.result?.total : 100,
+                        },
+                      ]}
                       count={vat?.result?.total || 0}
                       rowsPerPage={vat?.result?.per_page || 10}
                       page={vat?.result?.current_page - 1 || 0}

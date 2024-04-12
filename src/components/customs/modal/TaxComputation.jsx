@@ -103,6 +103,8 @@ const TaxComputation = ({ create, update, taxComputation }) => {
       debit: "",
       credit: "",
       account: "",
+      remarks: "",
+      creditFrom: null,
     },
   });
 
@@ -156,6 +158,7 @@ const TaxComputation = ({ create, update, taxComputation }) => {
         debit: taxData?.debit,
         credit: taxData?.credit,
         account: taxData?.account,
+        remarks: taxData?.remarks,
       };
 
       Object.entries(obj).forEach(([key, value]) => {
@@ -321,13 +324,7 @@ const TaxComputation = ({ create, update, taxComputation }) => {
         <Autocomplete
           control={control}
           name={"stype_id"}
-          options={
-            supplyType?.supplier_types?.map((item) =>
-              supplierTypes?.result?.find(
-                (i) => i.id === parseInt(item.type_id)
-              )
-            ) || []
-          }
+          options={supplierTypes?.result || []}
           getOptionLabel={(option) => `${option.code} - ${option.wtax}`}
           isOptionEqualToValue={(option, value) => option?.id === value?.id}
           onClose={() => {
@@ -371,6 +368,32 @@ const TaxComputation = ({ create, update, taxComputation }) => {
           )}
           disableClearable
         />
+
+        {watch("mode") === "Credit" && (
+          <Autocomplete
+            control={control}
+            name={"creditFrom"}
+            options={["Gross Amount", "Check Amount"]}
+            getOptionLabel={(option) => `${option}`}
+            isOptionEqualToValue={(option, value) => option === value}
+            onClose={() => {
+              handleClear();
+            }}
+            renderInput={(params) => (
+              <MuiTextField
+                name="creditFrom"
+                {...params}
+                label="Credit To *"
+                size="small"
+                variant="outlined"
+                error={Boolean(errors.creditFrom)}
+                helperText={errors.creditFrom?.message}
+                className="transaction-form-textBox"
+              />
+            )}
+            disableClearable
+          />
+        )}
 
         <AppTextBox
           money
@@ -493,11 +516,22 @@ const TaxComputation = ({ create, update, taxComputation }) => {
           money
           control={control}
           name={"account"}
-          label={"Total Amount *"}
+          label={voucher === "check" ? "Check Amount *" : "Total Amount *"}
           color="primary"
           className="transaction-tax-textBox"
           error={Boolean(errors?.account)}
           helperText={errors?.account?.message}
+        />
+
+        <AppTextBox
+          multiline
+          minRows={1}
+          control={control}
+          name={"remarks"}
+          className="transaction-form-field-textBox "
+          label="Remarks (Optional)"
+          error={Boolean(errors.remarks)}
+          helperText={errors.remarks?.message}
         />
 
         <Box className="form-title-transaction">

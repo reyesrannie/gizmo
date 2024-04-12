@@ -419,7 +419,9 @@ const TransactionModal = ({
           control={control}
           name={"tin"}
           options={tin?.result || []}
-          getOptionLabel={(option) => `${option.tin}`}
+          getOptionLabel={(option) =>
+            `${option.tin} -> ${option?.company_name}`
+          }
           isOptionEqualToValue={(option, value) => option?.id === value?.id}
           onClose={() => {
             handleClear(false);
@@ -499,13 +501,7 @@ const TransactionModal = ({
             disabled={view}
             control={control}
             name={"document_type"}
-            options={
-              watch("tin")?.supplier_documenttypes?.map((item) =>
-                document?.result?.find(
-                  (docs) => item.document_code === docs.code
-                )
-              ) || []
-            }
+            options={document?.result || []}
             getOptionLabel={(option) => `${option.name}`}
             isOptionEqualToValue={(option, value) =>
               option?.code === value?.code

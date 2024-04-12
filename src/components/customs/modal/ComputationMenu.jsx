@@ -11,12 +11,18 @@ import {
   TableCell,
   Table,
   TableBody,
-  TableFooter,
-  TablePagination,
+  Stack,
 } from "@mui/material";
 
 import { useDispatch, useSelector } from "react-redux";
-import { useTaxComputationQuery } from "../../../services/store/request";
+import {
+  useApQuery,
+  useAtcQuery,
+  useDocumentTypeQuery,
+  useLocationQuery,
+  useSupplierQuery,
+  useTaxComputationQuery,
+} from "../../../services/store/request";
 import { setComputationMenu } from "../../../services/slice/menuSlice";
 import loading from "../../../assets/lottie/Loading-2.json";
 import noData from "../../../assets/lottie/NoData.json";
@@ -24,7 +30,7 @@ import noData from "../../../assets/lottie/NoData.json";
 import vat from "../../../assets/svg/vat.svg";
 import Lottie from "lottie-react";
 
-const ComputationMenu = () => {
+const ComputationMenu = ({ details }) => {
   const dispatch = useDispatch();
   const menuData = useSelector((state) => state.menu.menuData);
   const voucher = useSelector((state) => state.options.voucher);
@@ -34,7 +40,7 @@ const ComputationMenu = () => {
     isLoading: loadingTax,
     status,
     isError,
-    isFetching,
+    isSuccess: successTax,
   } = useTaxComputationQuery(
     {
       status: "active",
@@ -43,6 +49,48 @@ const ComputationMenu = () => {
     },
     { skip: menuData === null }
   );
+
+  const {
+    data: supplier,
+    isLoading: loadingSupplier,
+    isSuccess: successSupplier,
+  } = useSupplierQuery({
+    status: "active",
+    pagination: "none",
+  });
+
+  const {
+    data: ap,
+    isLoading: loadingAP,
+    isSuccess: successAP,
+  } = useApQuery({ status: "active", pagination: "none" });
+
+  const {
+    data: document,
+    isLoading: loadingDocument,
+    isSuccess: documentSuccess,
+  } = useDocumentTypeQuery({
+    status: "active",
+    pagination: "none",
+  });
+
+  const {
+    data: location,
+    isLoading: loadingLocation,
+    isSuccess: locationSuccess,
+  } = useLocationQuery({
+    status: "active",
+    pagination: "none",
+  });
+
+  const {
+    data: atc,
+    isLoading: loadingAtc,
+    isSuccess: atcSuccess,
+  } = useAtcQuery({
+    status: "active",
+    pagination: "none",
+  });
 
   const convertToPeso = (value) => {
     return parseFloat(value)
@@ -90,6 +138,24 @@ const ComputationMenu = () => {
     return acc + parseFloat(curr.vat_input_tax);
   }, 0);
 
+  const supplierDetails = supplier?.result?.find(
+    (item) => menuData?.transactions?.supplier_id === item?.id
+  );
+
+  const documentDetails = document?.result?.find(
+    (item) => menuData?.transactions?.document_type_id === item?.id
+  );
+
+  const apDetails = ap?.result?.find(
+    (item) => menuData?.transactions?.ap_tagging === item?.company_code
+  );
+
+  const locationDetails = location?.result?.find(
+    (item) => menuData?.location === item?.id
+  );
+
+  const atcDetails = atc?.result?.find((item) => menuData?.atc === item?.id);
+
   return (
     <Paper className="transaction-modal-container">
       <img
@@ -99,8 +165,91 @@ const ComputationMenu = () => {
         draggable="false"
       />
       <Typography className="transaction-text">
-        Total Tax Computation
+        {!details ? "Total Tax Computation" : "Complete Details"}
       </Typography>
+      {details &&
+        successAP &&
+        successTax &&
+        successSupplier &&
+        locationSuccess &&
+        documentSuccess &&
+        atcSuccess && (
+          <TableContainer className="tag-transaction-table-container">
+            <Table stickyHeader>
+              <TableHead>
+                <TableRow className="table-header1-import-tag-transaction">
+                  <TableCell>Tag #.</TableCell>
+                  <TableCell>Supplier</TableCell>
+                  <TableCell align="center">Invoice</TableCell>
+                  <TableCell align="center">Description</TableCell>
+                  <TableCell align="center">Allocation</TableCell>
+                </TableRow>
+              </TableHead>
+
+              <TableBody>
+                <TableRow className="table-body-tag-transaction">
+                  <TableCell>{menuData?.transactions?.tag_no}</TableCell>
+                  <TableCell>
+                    <Stack>
+                      <Typography className="supplier-company-name">
+                        {supplierDetails?.company_name}
+                      </Typography>
+                      <Typography className="supplier-company-tin">
+                        {supplierDetails?.tin}
+                      </Typography>
+                      <Typography className="supplier-company-address">
+                        {supplierDetails?.company_address}
+                      </Typography>
+                      <Typography className="supplier-company-proprietor">
+                        {supplierDetails?.proprietor !== ""
+                          ? supplierDetails?.proprietor
+                          : ""}
+                      </Typography>
+                    </Stack>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Stack>
+                      <Typography className="supplier-company-name">
+                        {menuData?.transactions?.invoice_no}
+                      </Typography>
+                      <Typography className="supplier-company-money">
+                        <span>&#8369;</span>
+                        {convertToPeso(menuData?.transactions?.purchase_amount)}
+                      </Typography>
+
+                      <Typography className="supplier-company-address">
+                        {atcDetails?.code}
+                      </Typography>
+                      <Typography className="supplier-company-address">
+                        {documentDetails?.name}
+                      </Typography>
+                    </Stack>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Typography className="supplier-company-address">
+                      {menuData?.transactions?.description}
+                    </Typography>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Stack>
+                      <Typography className="supplier-company-name">
+                        {menuData?.transactions?.ap_tagging} -
+                        {menuData?.transactions?.tag_year}
+                      </Typography>
+                      <Typography className="supplier-company-tin">
+                        {apDetails?.description}
+                      </Typography>
+                      <Typography className="supplier-company-address">
+                        {locationDetails?.code} - {locationDetails?.name}
+                      </Typography>
+                    </Stack>
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
+
       <TableContainer className="tag-transaction-table-container">
         <Table stickyHeader>
           <TableHead>
@@ -121,14 +270,20 @@ const ComputationMenu = () => {
               {debit !== 0 && <TableCell align="center">Debit</TableCell>}
               {credit !== 0 && <TableCell align="center">Credit</TableCell>}
 
-              <TableCell align="center">Account</TableCell>
+              <TableCell align="center">Total Amount</TableCell>
             </TableRow>
           </TableHead>
 
           <TableBody>
-            {loadingTax || status === "pending" ? (
+            {loadingDocument ||
+            loadingAP ||
+            loadingSupplier ||
+            loadingTax ||
+            loadingLocation ||
+            loadingAtc ||
+            status === "pending" ? (
               <TableRow>
-                <TableCell colSpan={13} align="center">
+                <TableCell colSpan={14} align="center">
                   <Lottie
                     animationData={loading}
                     className="loading-tag-transaction"
@@ -137,7 +292,7 @@ const ComputationMenu = () => {
               </TableRow>
             ) : isError ? (
               <TableRow>
-                <TableCell colSpan={13} align="center">
+                <TableCell colSpan={14} align="center">
                   <Lottie
                     animationData={noData}
                     className="no-data-tag-transaction"

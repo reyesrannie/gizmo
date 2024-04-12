@@ -25,7 +25,7 @@ const errorResponses = () => {
         variant: "error",
       });
     } else {
-      setToast(error?.data?.message, { variant: "error" });
+      setToast("Something went wrong...", { variant: "error" });
     }
   };
 

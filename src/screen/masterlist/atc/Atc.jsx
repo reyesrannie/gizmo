@@ -298,7 +298,16 @@ const Atc = () => {
                 <TableRow className="table-footer-atc">
                   <TableCell colSpan={6}>
                     <TablePagination
-                      rowsPerPageOptions={[5, 10, 25, 100]}
+                      rowsPerPageOptions={[
+                        5,
+                        10,
+                        25,
+                        {
+                          label: "All",
+                          value:
+                            atc?.result?.total > 100 ? atc?.result?.total : 100,
+                        },
+                      ]}
                       count={atc?.result?.total || 0}
                       rowsPerPage={atc?.result?.per_page || 10}
                       page={atc?.result?.current_page - 1 || 0}

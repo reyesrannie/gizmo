@@ -313,7 +313,16 @@ const AccountsPayable = () => {
                 <TableRow className="table-footer-ap">
                   <TableCell colSpan={7}>
                     <TablePagination
-                      rowsPerPageOptions={[5, 10, 25, 100]}
+                      rowsPerPageOptions={[
+                        5,
+                        10,
+                        25,
+                        {
+                          label: "All",
+                          value:
+                            ap?.result?.total > 100 ? ap?.result?.total : 100,
+                        },
+                      ]}
                       count={ap?.result?.total || 0}
                       rowsPerPage={ap?.result?.per_page || 10}
                       page={ap?.result?.current_page - 1 || 0}

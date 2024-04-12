@@ -337,7 +337,18 @@ const Department = () => {
                 <TableRow className="table-footer-department">
                   <TableCell colSpan={7}>
                     <TablePagination
-                      rowsPerPageOptions={[5, 10, 25, 100]}
+                      rowsPerPageOptions={[
+                        5,
+                        10,
+                        25,
+                        {
+                          label: "All",
+                          value:
+                            department?.result?.total > 100
+                              ? department?.result?.total
+                              : 100,
+                        },
+                      ]}
                       count={department?.result?.total || 0}
                       rowsPerPage={department?.result?.per_page || 10}
                       page={department?.result?.current_page - 1 || 0}

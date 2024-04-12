@@ -229,6 +229,20 @@ const JournalTable = ({
                           className="checked-indicator"
                         />
                       )}
+
+                      {tag?.state === "returned" && (
+                        <StatusIndicator
+                          status="Returned"
+                          className="inActive-indicator"
+                        />
+                      )}
+
+                      {tag?.state === "approved" && (
+                        <StatusIndicator
+                          status="Approved"
+                          className="received-indicator"
+                        />
+                      )}
                     </TableCell>
                     <TableCell align="center">
                       {moment(tag?.updated_at).format("MMM DD YYYY")}
@@ -243,6 +257,12 @@ const JournalTable = ({
 
                           tag?.state === "For Approval" &&
                             dispatch(setCheckMenu(true));
+
+                          tag?.state === "returned" &&
+                            dispatch(setUpdateMenu(true));
+
+                          tag?.state === "approved" &&
+                            dispatch(setViewMenu(true));
                         }}
                       >
                         <RemoveRedEyeOutlinedIcon className="tag-transaction-icon-actions" />
@@ -258,7 +278,18 @@ const JournalTable = ({
               <TableRow className="table-footer-tag-transaction">
                 <TableCell colSpan={6}>
                   <TablePagination
-                    rowsPerPageOptions={[5, 10, 25, 100]}
+                    rowsPerPageOptions={[
+                      5,
+                      10,
+                      25,
+                      {
+                        label: "All",
+                        value:
+                          tagTransaction?.result?.total > 100
+                            ? tagTransaction?.result?.total
+                            : 100,
+                      },
+                    ]}
                     count={tagTransaction?.result?.total || 0}
                     rowsPerPage={tagTransaction?.result?.per_page || 10}
                     page={tagTransaction?.result?.current_page - 1 || 0}

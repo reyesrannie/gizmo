@@ -289,7 +289,18 @@ const UserAccounts = () => {
                 <TableRow className="table-footer-user">
                   <TableCell colSpan={7}>
                     <TablePagination
-                      rowsPerPageOptions={[5, 10, 25, 100]}
+                      rowsPerPageOptions={[
+                        5,
+                        10,
+                        25,
+                        {
+                          label: "All",
+                          value:
+                            users?.result?.total > 100
+                              ? users?.result?.total
+                              : 100,
+                        },
+                      ]}
                       count={users?.result?.total || 0}
                       rowsPerPage={users?.result?.per_page || 10}
                       page={users?.result?.current_page - 1 || 0}

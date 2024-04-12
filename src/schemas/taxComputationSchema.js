@@ -4,6 +4,9 @@ const taxComputationSchema = Yup.object({
   amount: Yup.string().required("Amount is required"),
   vat_input_tax: Yup.string().required("Vat input tax is required"),
   wtax_payable_cr: Yup.string().required("Wtax payable tax is required"),
+  mode: Yup.string().required("Mode payable tax is required"),
+  remarks: Yup.string().nullable(),
+  creditFrom: Yup.string().nullable(),
   stype_id: Yup.object()
     .typeError("Supplier Type  is required")
     .required("Supplier Type  is required")

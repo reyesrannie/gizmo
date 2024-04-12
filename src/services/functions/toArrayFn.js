@@ -1,10 +1,10 @@
 import moment from "moment";
 
-export const arrayFieldOne = (menuData, sumAmount) => {
+export const arrayFieldOne = (menuData, sumAmount, voucher) => {
   const obj = [
     {
       date: moment(menuData?.transactions?.date_invoice).format("MM/DD/YY"),
-      description: menuData?.transactions?.description,
+      remarks: menuData?.remarks,
       invoice: menuData?.transactions?.invoice_no,
       amount: sumAmount,
     },
@@ -12,7 +12,17 @@ export const arrayFieldOne = (menuData, sumAmount) => {
     undefined,
   ];
 
-  return obj;
+  const objJV = [
+    {
+      date: moment(menuData?.transactions?.date_invoice).format("MM/DD/YY"),
+      remarks: menuData?.remarks,
+      invoice: menuData?.transactions?.invoice_no,
+      amount: sumAmount,
+    },
+    undefined,
+  ];
+
+  return voucher === "check" ? obj : objJV;
 };
 
 export const arrayFieldThree = (menuData, sumAmount) => {
@@ -45,7 +55,7 @@ export const mapTitleAccount = (item) => {
   return obj;
 };
 
-export const coaArrays = (coa, taxComputation, supTypePercent) => {
+export const coaArrays = (coa, taxComputation, supTypePercent, coa_id) => {
   const sumInputTax = (taxComputation || []).reduce((acc, curr) => {
     return acc + parseFloat(curr?.vat_input_tax || 0);
   }, 0);
@@ -68,7 +78,7 @@ export const coaArrays = (coa, taxComputation, supTypePercent) => {
           id: 183,
           name: "WITHHOLDING TAX PAYABLE",
           mode: "Credit",
-          code: "217000",
+          code: "217110",
           amount: item?.wtax_payable_cr,
           wtax: wtax,
         };
@@ -77,7 +87,7 @@ export const coaArrays = (coa, taxComputation, supTypePercent) => {
         id: 183,
         name: "WITHHOLDING TAX PAYABLE",
         mode: "Credit",
-        code: "217000",
+        code: "217110",
         amount: item?.wtax_payable_cr,
         wtax: wtax,
       };
@@ -85,7 +95,7 @@ export const coaArrays = (coa, taxComputation, supTypePercent) => {
     .filter(Boolean);
 
   const inputTax = {
-    id: 117,
+    id: 115,
     name: "INPUT TAX",
     mode: "Debit",
     code: "116110",
@@ -93,10 +103,10 @@ export const coaArrays = (coa, taxComputation, supTypePercent) => {
   };
 
   const accountPayable = {
-    id: 157,
+    id: 155,
     name: "ACCOUNTS PAYABLE",
     mode: "Credit",
-    code: "211100",
+    code: coa_id ? coa_id?.code : "211100",
     amount: sumAccount,
   };
 

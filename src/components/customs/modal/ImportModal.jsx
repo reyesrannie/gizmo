@@ -190,7 +190,6 @@ const ImportModal = ({
   const handleSubmit = () => {
     importData(menuData);
   };
-
   return (
     <Paper className="import-container">
       <Box>
@@ -235,7 +234,7 @@ const ImportModal = ({
           />
         </Box>
       </Box>
-      {importError !== null && (
+      {importError !== undefined && importError !== null && (
         <Box className="import-box-container">
           <TableContainer className="import-table-container">
             <Table stickyHeader>
@@ -247,7 +246,7 @@ const ImportModal = ({
                 </TableRow>
               </TableHead>
               <TableBody>
-                {Object.keys(importError)?.map((row, index) => {
+                {Object?.keys(importError)?.map((row, index) => {
                   const response = importError[row][0];
                   const line = row.split(".");
                   return (

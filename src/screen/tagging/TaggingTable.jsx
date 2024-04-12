@@ -215,7 +215,7 @@ const TaggingTable = ({
                       {tag?.gas_status === "received" && (
                         <StatusIndicator
                           status="Received"
-                          className="received-indicator"
+                          className="checked-indicator"
                         />
                       )}
                       {tag?.gas_status === "archived" && (
@@ -234,6 +234,12 @@ const TaggingTable = ({
                         <StatusIndicator
                           status="Checking"
                           className="checked-indicator"
+                        />
+                      )}
+                      {tag?.gas_status === "approved" && (
+                        <StatusIndicator
+                          status="Approved"
+                          className="received-indicator"
                         />
                       )}
                     </TableCell>
@@ -255,6 +261,8 @@ const TaggingTable = ({
                             dispatch(setViewMenu(true));
                           tag?.gas_status === "checked" &&
                             dispatch(setViewMenu(true));
+                          tag?.gas_status === "approved" &&
+                            dispatch(setViewMenu(true));
                         }}
                       >
                         <RemoveRedEyeOutlinedIcon className="tag-transaction-icon-actions" />
@@ -270,7 +278,18 @@ const TaggingTable = ({
               <TableRow className="table-footer-tag-transaction">
                 <TableCell colSpan={6}>
                   <TablePagination
-                    rowsPerPageOptions={[5, 10, 25, 100]}
+                    rowsPerPageOptions={[
+                      5,
+                      10,
+                      25,
+                      {
+                        label: "All",
+                        value:
+                          tagTransaction?.result?.total > 100
+                            ? tagTransaction?.result?.total
+                            : 100,
+                      },
+                    ]}
                     count={tagTransaction?.result?.total || 0}
                     rowsPerPage={tagTransaction?.result?.per_page || 10}
                     page={tagTransaction?.result?.current_page - 1 || 0}

@@ -311,7 +311,18 @@ const Company = () => {
                 <TableRow className="table-footer-company">
                   <TableCell colSpan={6}>
                     <TablePagination
-                      rowsPerPageOptions={[5, 10, 25, 100]}
+                      rowsPerPageOptions={[
+                        5,
+                        10,
+                        25,
+                        {
+                          label: "All",
+                          value:
+                            company?.result?.total > 100
+                              ? company?.result?.total
+                              : 100,
+                        },
+                      ]}
                       count={company?.result?.total || 0}
                       rowsPerPage={company?.result?.per_page || 10}
                       page={company?.result?.current_page - 1 || 0}

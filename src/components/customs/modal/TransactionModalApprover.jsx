@@ -23,7 +23,11 @@ import warningImg from "../../../assets/svg/warning.svg";
 import "../../styles/TransactionModal.scss";
 import "../../styles/TransactionModalApprover.scss";
 import { LoadingButton } from "@mui/lab";
-import { resetMenu, setPrintable } from "../../../services/slice/menuSlice";
+import {
+  resetMenu,
+  setComputationMenu,
+  setPrintable,
+} from "../../../services/slice/menuSlice";
 import { resetOption } from "../../../services/slice/optionsSlice";
 import { resetPrompt, setReturn } from "../../../services/slice/promptSlice";
 
@@ -31,6 +35,7 @@ import {
   useAccountTitlesQuery,
   useApproveCheckEntriesMutation,
   useApproveJournalEntriesMutation,
+  useApproveTransactionMutation,
   useReturnCheckEntriesMutation,
   useReturnJournalEntriesMutation,
   useStatusLogsQuery,
@@ -38,6 +43,8 @@ import {
   useSupplierTypeQuery,
   useTaxComputationQuery,
   useUsersQuery,
+  useVpCheckNumberQuery,
+  useVpJournalNumberQuery,
 } from "../../../services/store/request";
 import {
   setFromBIR,
@@ -56,12 +63,14 @@ import ReasonInput from "../ReasonInput";
 import { enqueueSnackbar } from "notistack";
 import { singleError } from "../../../services/functions/errorResponse";
 import Form2307 from "./Form2307";
+import ComputationMenu from "./ComputationMenu";
 
 const TransactionModalApprover = ({ view, update, approved, ap }) => {
   const dispatch = useDispatch();
   const isReturn = useSelector((state) => state.prompt.return);
   const menuData = useSelector((state) => state.menu.menuData);
   const printable = useSelector((state) => state.menu.printable);
+  const computationMenu = useSelector((state) => state.menu.computationMenu);
 
   const voucher = useSelector((state) => state.options.voucher);
   const voucherData = useSelector((state) => state.transaction.voucherData);
@@ -126,6 +135,27 @@ const TransactionModalApprover = ({ view, update, approved, ap }) => {
     pagination: "none",
   });
 
+  const { data: vpCheckNumber, isLoading: loadingVp } = useVpCheckNumberQuery(
+    {
+      ap_tagging_id: menuData?.apTagging?.id,
+      yearMonth: menuData?.tag_year,
+    },
+    {
+      skip: voucher === "journal" || voucher === null || menuData === null,
+    }
+  );
+
+  const { data: vpJournalNumber, isLoading: loadingJournalVP } =
+    useVpJournalNumberQuery(
+      {
+        ap_tagging_id: menuData?.apTagging?.id,
+        yearMonth: menuData?.tag_year,
+      },
+      {
+        skip: voucher === "check" || voucher === null || menuData === null,
+      }
+    );
+
   const [returnCheckEntry, { isLoading: loadingReturn }] =
     useReturnCheckEntriesMutation();
 
@@ -137,6 +167,9 @@ const TransactionModalApprover = ({ view, update, approved, ap }) => {
 
   const [approveJournalEntry, { isLoading: loadingApproveJournal }] =
     useApproveJournalEntriesMutation();
+
+  const [approveTransaction, { isLoading: loadingApproveTransaction }] =
+    useApproveTransactionMutation();
 
   useEffect(() => {
     if (
@@ -174,13 +207,22 @@ const TransactionModalApprover = ({ view, update, approved, ap }) => {
         supplierType?.result?.find((sup) => item?.stype_id === sup?.id)
       );
 
+      const coa_id = accountTitles?.result?.find(
+        (item) => menuData?.coa_id === item?.id
+      );
+
       const preparedBy = logs?.result?.find(
         (stat) => stat?.status === "For Approval"
       );
 
       const rowThree = arrayFieldThree(menuData);
-      const row = arrayFieldOne(menuData, sumAmount);
-      const arrayCoa = coaArrays(coa, taxComputation?.result, supTypePercent);
+      const row = arrayFieldOne(menuData, sumAmount, voucher);
+      const arrayCoa = coaArrays(
+        coa,
+        taxComputation?.result,
+        supTypePercent,
+        coa_id
+      );
 
       const obj = {
         supplier_name: supplier?.company_name,
@@ -196,11 +238,12 @@ const TransactionModalApprover = ({ view, update, approved, ap }) => {
       dispatch(setVoucherData(obj));
     }
   }, [
-    successUser,
     taxSuccess,
-    taxComputation,
     supplySuccess,
+    successTitles,
     typeSuccess,
+    successLogs,
+    successUser,
     dispatch,
     setVoucherData,
     accountTitles,
@@ -231,15 +274,40 @@ const TransactionModalApprover = ({ view, update, approved, ap }) => {
   };
 
   const approveHandler = async () => {
+    const vpCheck = parseInt(vpCheckNumber?.result) + 1;
+    const vpJournal = parseInt(vpJournalNumber?.result) + 1;
+    const year = Math.floor(menuData?.transactions?.tag_year / 100);
+    const month = menuData?.transactions?.tag_year % 100;
+    const formattedDate = `20${year}-${month.toString().padStart(2, "0")}`;
+
     const obj = {
       id: menuData?.id,
+      voucher_number:
+        voucher === "check"
+          ? `CV${menuData?.apTagging?.vp}${formattedDate}-${vpCheck
+              .toString()
+              .padStart(4, "0")}`
+          : `JV${menuData?.apTagging?.vp}${formattedDate}-${vpJournal
+              .toString()
+              .padStart(4, "0")}`,
+      vp_no:
+        voucher === "check"
+          ? vpCheck.toString().padStart(4, "0")
+          : vpJournal.toString().padStart(4, "0"),
+    };
+
+    const transactId = {
+      id: menuData?.transactions?.id,
     };
     try {
       const res =
         voucher === "check"
           ? await approveCheckEntry(obj).unwrap()
           : await approveJournalEntry(obj).unwrap();
+      menuData?.transactions?.gas_status !== "approved" &&
+        (await approveTransaction(transactId).unwrap());
       enqueueSnackbar(res?.message, { variant: "success" });
+
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
@@ -248,6 +316,24 @@ const TransactionModalApprover = ({ view, update, approved, ap }) => {
   };
 
   const componentRef = useRef();
+
+  const vpCheck = parseInt(vpCheckNumber?.result) + 1;
+  const vpJournal = parseInt(vpJournalNumber?.result) + 1;
+
+  const year = Math.floor(menuData?.transactions?.tag_year / 100);
+  const month = menuData?.transactions?.tag_year % 100;
+  const formattedDate = `20${year}-${month.toString().padStart(2, "0")}`;
+  const totalDebitAmount = voucherData?.coaArray.reduce(
+    (total, item) =>
+      item?.mode === "Debit" ? total + parseFloat(item?.amount) : total,
+    0
+  );
+
+  const totalCreditAmount = voucherData?.coaArray.reduce(
+    (total, item) =>
+      item?.mode === "Credit" ? total + parseFloat(item?.amount) : total,
+    0
+  );
 
   return (
     <Paper className="transaction-modal-container">
@@ -260,7 +346,18 @@ const TransactionModalApprover = ({ view, update, approved, ap }) => {
                 align="right"
                 className="voucher-number-header"
               >
-                <Typography>{menuData?.voucher_number}</Typography>
+                <Typography>
+                  {menuData?.voucher_number === null &&
+                    (voucher === "check" ? "CV" : "JV") +
+                      menuData?.apTagging?.vp +
+                      formattedDate +
+                      "-" +
+                      (voucher === "check"
+                        ? vpCheck.toString().padStart(4, "0")
+                        : vpJournal.toString().padStart(4, "0"))}
+                  {menuData?.voucher_number !== null &&
+                    menuData?.voucher_number}
+                </Typography>
               </TableCell>
             </TableRow>
             <TableRow>
@@ -283,7 +380,9 @@ const TransactionModalApprover = ({ view, update, approved, ap }) => {
                 align="left"
                 className="voucher-payee-header"
               >
-                <Typography className="payee-typo">PAYEE</Typography>
+                <Typography className="payee-typo">
+                  {voucher === "check" ? "PAYEE" : "SUPPLIERS"}
+                </Typography>
                 <Typography className="name-supplier-typo" align="center">
                   {voucherData?.supplier_name}
                 </Typography>
@@ -298,7 +397,9 @@ const TransactionModalApprover = ({ view, update, approved, ap }) => {
                 align="center"
                 className="voucher-payment-header"
               >
-                <Typography>Payment Details</Typography>
+                <Typography>
+                  {voucher === "check" ? "Payment Details" : "Descriptions"}
+                </Typography>
               </TableCell>
               <TableCell
                 colSpan={2}
@@ -334,7 +435,9 @@ const TransactionModalApprover = ({ view, update, approved, ap }) => {
                   >
                     {item !== undefined && (
                       <Typography>
-                        &nbsp; PAYMENT FOR &nbsp; {item?.invoice}
+                        &nbsp;
+                        {voucher === "check" ? "PAYMENT FOR" : "Reference No."}
+                        &nbsp; {item?.invoice}
                       </Typography>
                     )}
                   </TableCell>
@@ -366,6 +469,37 @@ const TransactionModalApprover = ({ view, update, approved, ap }) => {
                 </TableRow>
               );
             })}
+
+            {voucher === "journal" && (
+              <TableRow>
+                <TableCell
+                  align="center"
+                  className={"voucher-empty-row-details"}
+                ></TableCell>
+                <TableCell
+                  align="center"
+                  colSpan={5}
+                  className={"voucher-empty-row-details"}
+                >
+                  <Typography>
+                    &nbsp;
+                    {menuData?.remarks}
+                    &nbsp;
+                  </Typography>
+                </TableCell>
+
+                <TableCell
+                  align="center"
+                  className={"voucher-empty-row-details"}
+                  colSpan={2}
+                />
+
+                <TableCell
+                  align="center"
+                  className={"voucher-empty-row-details"}
+                ></TableCell>
+              </TableRow>
+            )}
             {voucherData?.first_row?.map((item, index) => {
               return (
                 <TableRow key={index}>
@@ -498,7 +632,11 @@ const TransactionModalApprover = ({ view, update, approved, ap }) => {
                               : "voucher-titles-typography-indent"
                           }
                         >
-                          {item?.name}
+                          {
+                            accountTitles?.result?.find(
+                              (titles) => item?.code === titles?.code
+                            )?.name
+                          }
                         </Typography>
                       )}
                       {item?.name === "WITHHOLDING TAX PAYABLE" && (
@@ -538,6 +676,42 @@ const TransactionModalApprover = ({ view, update, approved, ap }) => {
                 </TableRow>
               );
             })}
+            {voucher === "journal" && (
+              <TableRow>
+                <TableCell
+                  align="left"
+                  colSpan={6}
+                  className="voucher-computation-details-border"
+                ></TableCell>
+
+                <TableCell
+                  align="right"
+                  className="voucher-computation-details-border"
+                ></TableCell>
+                <TableCell
+                  align="left"
+                  className="voucher-computation-details-border"
+                >
+                  <Stack flexDirection="row" justifyContent="space-between">
+                    <Typography>&nbsp; Total:</Typography>
+                    <Typography>
+                      {convertToPeso(parseFloat(totalDebitAmount).toFixed(2))}
+                    </Typography>
+                  </Stack>
+                </TableCell>
+                <TableCell
+                  align="right"
+                  className="voucher-computation-details-border"
+                >
+                  <Stack flexDirection="row" justifyContent="space-between">
+                    <Typography> &nbsp; Total</Typography>
+                    <Typography>
+                      {convertToPeso(parseFloat(totalCreditAmount).toFixed(2))}
+                    </Typography>
+                  </Stack>
+                </TableCell>
+              </TableRow>
+            )}
 
             <TableRow>
               <TableCell
@@ -604,10 +778,21 @@ const TransactionModalApprover = ({ view, update, approved, ap }) => {
                 )}
               </TableCell>
               <TableCell align="left" className="voucher-payment-footer">
-                <Typography>CV NO.</Typography>
+                <Typography>{voucher === "check" ? "CV" : "JV"} NO.</Typography>
               </TableCell>
               <TableCell align="center" className="voucher-payment-footer">
-                <Typography>{menuData?.voucher_number}</Typography>
+                <Typography>
+                  {menuData?.voucher_number === null &&
+                    (voucher === "check" ? "CV" : "JV") +
+                      menuData?.apTagging?.vp +
+                      formattedDate +
+                      "-" +
+                      (voucher === "check"
+                        ? vpCheck.toString().padStart(4, "0")
+                        : vpJournal.toString().padStart(4, "0"))}
+                  {menuData?.voucher_number !== null &&
+                    menuData?.voucher_number}
+                </Typography>
               </TableCell>
             </TableRow>
             <TableRow>
@@ -643,6 +828,17 @@ const TransactionModalApprover = ({ view, update, approved, ap }) => {
               Return
             </Button>
           )}
+
+          <Button
+            variant="contained"
+            color="success"
+            className="add-transaction-button"
+            // startIcon={<DeleteForeverOutlinedIcon />}
+            onClick={() => dispatch(setComputationMenu(true))}
+          >
+            Details
+          </Button>
+
           {approved && ap && (
             <ReactToPrint
               trigger={() => (
@@ -704,7 +900,10 @@ const TransactionModalApprover = ({ view, update, approved, ap }) => {
           loadingApprove ||
           loadingType ||
           loadingReturnJournal ||
-          loadingApproveJournal
+          loadingApproveJournal ||
+          loadingVp ||
+          loadingJournalVP ||
+          loadingApproveTransaction
         }
         className="loading-transaction-create"
       >
@@ -729,6 +928,10 @@ const TransactionModalApprover = ({ view, update, approved, ap }) => {
 
       <Dialog open={formBIR} className="transaction-modal-dialog">
         <Form2307 />
+      </Dialog>
+
+      <Dialog open={computationMenu} className="transaction-modal-dialog-tax">
+        <ComputationMenu details />
       </Dialog>
 
       {/* <Dialog open={createTax} className="transaction-modal-dialog">

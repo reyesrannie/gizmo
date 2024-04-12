@@ -117,7 +117,6 @@ const mapAPTransaction = (transactionData, tin, document, accountNumber) => {
     proprietor: supplierTin?.proprietor || "",
     company_address: supplierTin?.company_address || "",
     invoice_no: transactionData?.invoice_no || "",
-
     description: transactionData?.description || "",
     tin: supplierTin,
     date_invoice:

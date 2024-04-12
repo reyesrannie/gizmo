@@ -313,7 +313,18 @@ const DocumentType = () => {
                 <TableRow className="table-footer-documentType">
                   <TableCell colSpan={6}>
                     <TablePagination
-                      rowsPerPageOptions={[5, 10, 25, 100]}
+                      rowsPerPageOptions={[
+                        5,
+                        10,
+                        25,
+                        {
+                          label: "All",
+                          value:
+                            documentType?.result?.total > 100
+                              ? documentType?.result?.total
+                              : 100,
+                        },
+                      ]}
                       count={documentType?.result?.total || 0}
                       rowsPerPage={documentType?.result?.per_page || 10}
                       page={documentType?.result?.current_page - 1 || 0}

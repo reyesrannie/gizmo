@@ -240,12 +240,16 @@ const JournalTable = ({
                       <IconButton
                         onClick={() => {
                           dispatch(setMenuData(tag));
-                          dispatch(setVoucher("check"));
+                          dispatch(setVoucher("journal"));
 
                           tag?.state === "approved" &&
                             dispatch(setViewMenu(true));
+
                           tag?.state === "For Approval" &&
                             dispatch(setCheckMenu(true));
+
+                          tag?.state === "returned" &&
+                            dispatch(setViewMenu(true));
                         }}
                       >
                         <RemoveRedEyeOutlinedIcon className="tag-transaction-icon-actions" />
@@ -261,7 +265,18 @@ const JournalTable = ({
               <TableRow className="table-footer-tag-transaction">
                 <TableCell colSpan={6}>
                   <TablePagination
-                    rowsPerPageOptions={[5, 10, 25, 100]}
+                    rowsPerPageOptions={[
+                      5,
+                      10,
+                      25,
+                      {
+                        label: "All",
+                        value:
+                          tagTransaction?.result?.total > 100
+                            ? tagTransaction?.result?.total
+                            : 100,
+                      },
+                    ]}
                     count={tagTransaction?.result?.total || 0}
                     rowsPerPage={tagTransaction?.result?.per_page || 10}
                     page={tagTransaction?.result?.current_page - 1 || 0}

@@ -311,7 +311,18 @@ const Location = () => {
                 <TableRow className="table-footer-location">
                   <TableCell colSpan={6}>
                     <TablePagination
-                      rowsPerPageOptions={[5, 10, 25, 100]}
+                      rowsPerPageOptions={[
+                        5,
+                        10,
+                        25,
+                        {
+                          label: "All",
+                          value:
+                            location?.result?.total > 100
+                              ? location?.result?.total
+                              : 100,
+                        },
+                      ]}
                       count={location?.result?.total || 0}
                       rowsPerPage={location?.result?.per_page || 10}
                       page={location?.result?.current_page - 1 || 0}

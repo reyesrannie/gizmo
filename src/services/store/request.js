@@ -713,6 +713,15 @@ export const jsonServerAPI = createApi({
       }),
       invalidatesTags: ["Transaction", "GTAG", "VPCheckNumber"],
     }),
+    approveTransaction: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/approved/transaction/${payload.id}`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["Transaction", "GTAG", "VPCheckNumber"],
+    }),
     updateTransaction: builder.mutation({
       transformResponse: (response) => response,
       query: (payload) => ({
@@ -1032,6 +1041,7 @@ export const {
   useArchiveTransactionMutation,
   useReceiveTransactionMutation,
   useReturnTransactionMutation,
+  useApproveTransactionMutation,
 
   useTagYearMonthQuery,
   useVpCheckNumberQuery,
