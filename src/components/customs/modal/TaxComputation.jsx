@@ -36,6 +36,7 @@ import {
 import { supplierTypeReqFields } from "../../../services/constants/requiredFields";
 import { enqueueSnackbar } from "notistack";
 import { objectError } from "../../../services/functions/errorResponse";
+import { totalAmount } from "../../../services/functions/compute";
 
 const TaxComputation = ({ create, update, taxComputation }) => {
   const dispatch = useDispatch();
@@ -104,7 +105,7 @@ const TaxComputation = ({ create, update, taxComputation }) => {
       credit: "",
       account: "",
       remarks: "",
-      creditFrom: null,
+      credit_from: null,
     },
   });
 
@@ -114,9 +115,7 @@ const TaxComputation = ({ create, update, taxComputation }) => {
 
   useEffect(() => {
     if (successTitles && supplierTypeSuccess && supplySuccess && create) {
-      const sumAmount = (taxComputation?.result || []).reduce((acc, curr) => {
-        return acc + parseFloat(curr?.amount || 0);
-      }, 0);
+      const sumAmount = totalAmount(taxComputation);
 
       const obj = {
         transaction_id: transactionData?.id,
@@ -159,6 +158,7 @@ const TaxComputation = ({ create, update, taxComputation }) => {
         credit: taxData?.credit,
         account: taxData?.account,
         remarks: taxData?.remarks,
+        credit_from: taxData?.credit_from,
       };
 
       Object.entries(obj).forEach(([key, value]) => {
@@ -187,16 +187,14 @@ const TaxComputation = ({ create, update, taxComputation }) => {
   ]);
 
   const setRequiredFieldsValue = (amount) => {
-    const sumAmount = (taxComputation?.result || []).reduce((acc, curr) => {
-      return acc + parseFloat(curr?.amount || 0);
-    }, 0);
+    const sumAmount = totalAmount(taxComputation);
 
-    const totalAmount = update
+    const totalAmounts = update
       ? sumAmount + parseFloat(amount) - taxData?.amount
       : sumAmount + parseFloat(amount);
 
     const isDebit =
-      watch("mode") === "Debit" ? totalAmount : parseFloat(amount);
+      watch("mode") === "Debit" ? totalAmounts : parseFloat(amount);
 
     if (isDebit > transactionData?.amount) {
       dispatch(setDisableCreate(true));
@@ -372,7 +370,7 @@ const TaxComputation = ({ create, update, taxComputation }) => {
         {watch("mode") === "Credit" && (
           <Autocomplete
             control={control}
-            name={"creditFrom"}
+            name={"credit_from"}
             options={["Gross Amount", "Check Amount"]}
             getOptionLabel={(option) => `${option}`}
             isOptionEqualToValue={(option, value) => option === value}
@@ -381,13 +379,13 @@ const TaxComputation = ({ create, update, taxComputation }) => {
             }}
             renderInput={(params) => (
               <MuiTextField
-                name="creditFrom"
+                name="credit_from"
                 {...params}
                 label="Credit To *"
                 size="small"
                 variant="outlined"
-                error={Boolean(errors.creditFrom)}
-                helperText={errors.creditFrom?.message}
+                error={Boolean(errors.credit_from)}
+                helperText={errors.credit_from?.message}
                 className="transaction-form-textBox"
               />
             )}
@@ -414,7 +412,7 @@ const TaxComputation = ({ create, update, taxComputation }) => {
             money
             control={control}
             name={"vat_local"}
-            label={"Vat Local *"}
+            label={"Tax Based *"}
             color="primary"
             className="transaction-tax-textBox"
             error={Boolean(errors?.vat_local)}
@@ -426,7 +424,7 @@ const TaxComputation = ({ create, update, taxComputation }) => {
             money
             control={control}
             name={"vat_service"}
-            label={"Vat Service *"}
+            label={"Tax Based *"}
             color="primary"
             className="transaction-tax-textBox"
             error={Boolean(errors?.vat_service)}
@@ -438,7 +436,7 @@ const TaxComputation = ({ create, update, taxComputation }) => {
             money
             control={control}
             name={"nvat_local"}
-            label={"Non-Vat Local *"}
+            label={"Tax Based *"}
             color="primary"
             className="transaction-tax-textBox"
             error={Boolean(errors?.nvat_local)}
@@ -450,7 +448,7 @@ const TaxComputation = ({ create, update, taxComputation }) => {
             money
             control={control}
             name={"nvat_service"}
-            label={"Non-Vat Service *"}
+            label={"Tax Based *"}
             color="primary"
             className="transaction-tax-textBox"
             error={Boolean(errors?.nvat_service)}
@@ -461,7 +459,7 @@ const TaxComputation = ({ create, update, taxComputation }) => {
           money
           control={control}
           name={"vat_input_tax"}
-          label={"Vat Input Tax *"}
+          label={"Input Tax *"}
           color="primary"
           className="transaction-tax-textBox"
           error={Boolean(errors?.vat_input_tax)}
@@ -471,7 +469,7 @@ const TaxComputation = ({ create, update, taxComputation }) => {
           money
           control={control}
           name={"wtax_payable_cr"}
-          label={"Wtax Payable Cr *"}
+          label={"Wtax Payable Expanded *"}
           color="primary"
           className="transaction-tax-textBox"
           error={Boolean(errors?.wtax_payable_cr)}

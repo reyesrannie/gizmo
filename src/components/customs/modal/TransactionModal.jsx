@@ -9,6 +9,8 @@ import {
   Typography,
   TextField as MuiTextField,
   IconButton,
+  FormControlLabel,
+  Checkbox,
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { Controller, useForm } from "react-hook-form";
@@ -196,7 +198,6 @@ const TransactionModal = ({
   const {
     control,
     handleSubmit,
-    setError,
     setValue,
     watch,
     clearErrors,
@@ -398,6 +399,13 @@ const TransactionModal = ({
         <Typography className="form-title-text-transaction">
           Supplier Details
         </Typography>
+        <FormControlLabel
+          className="check-box-no-tin-supplier"
+          control={<Checkbox color="secondary" />}
+          label="Offset"
+          checked={watch("is_offset")}
+          onChange={() => setValue("is_offset", !watch("is_offset"))}
+        />
       </Box>
 
       <form

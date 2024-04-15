@@ -4,6 +4,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 const mapTransaction = (submitData) => {
   const obj = {
+    is_offset: submitData?.is_offset,
     tag_no: submitData?.tag_no,
     date_invoice: moment(submitData?.date_invoice).format("YYYY-MM-DD"),
     date_received: moment(submitData?.date_received).format("YYYY-MM-DD"),
@@ -45,7 +46,9 @@ const mapViewTransaction = (
   accountNumber,
   location
 ) => {
+  console.log(transactionData);
   const values = {
+    is_offset: transactionData?.is_offset === 1 ? true : false,
     tag_no: transactionData?.tag_no || "",
     supplier: transactionData?.supplier?.name || "",
     proprietor: transactionData?.supplier?.proprietor || "",

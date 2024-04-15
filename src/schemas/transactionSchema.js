@@ -1,7 +1,13 @@
 import * as Yup from "yup";
 
 const transactionSchema = Yup.object({
-  tag_no: Yup.string().required("Tag number is required"),
+  is_offset: Yup.boolean(),
+  tag_no: Yup.string().when("is_offset", {
+    is: (is_offset) => !is_offset,
+    then: () => Yup.string().required("Tag number is required"),
+    otherwise: () => Yup.string().nullable(),
+  }),
+
   ap: Yup.object().required("AP number required").typeError("AP is required"),
 
   tin: Yup.object().required("TIN is required"),

@@ -70,6 +70,7 @@ import {
   setDisableCheck,
 } from "../../../services/slice/optionsSlice";
 import ComputationMenu from "./ComputationMenu";
+import { totalAccount, totalAmount } from "../../../services/functions/compute";
 
 const TransactionModalAp = ({ view, update, receive, checked }) => {
   const dispatch = useDispatch();
@@ -222,19 +223,11 @@ const TransactionModalAp = ({ view, update, receive, checked }) => {
   });
 
   const validateAmount = (amount) => {
-    const totalAmount = taxComputation?.result?.reduce((acc, curr) => {
-      return curr?.credit !== "0.00"
-        ? acc + 0
-        : acc + parseFloat(curr.total_invoice_amount);
-    }, 0);
+    const total = totalAmount(taxComputation);
 
     dispatch(
-      setDisableCheck(
-        totalAmount?.toFixed(2) !== parseFloat(amount)?.toFixed(2)
-      )
+      setDisableCheck(total?.toFixed(2) !== parseFloat(amount)?.toFixed(2))
     );
-
-    console.log(totalAmount?.toFixed(2));
   };
 
   useEffect(() => {
@@ -784,6 +777,11 @@ const TransactionModalAp = ({ view, update, receive, checked }) => {
                         )}
                       </Box>
                       <Box className="tax-box-value">
+                        {tax.credit_from !== null && (
+                          <Typography className="amount-tax">
+                            Credit From : {tax.credit_from}
+                          </Typography>
+                        )}
                         <Typography className="amount-tax">
                           {tax?.mode} : <span>&#8369;</span>{" "}
                           {tax?.mode === "Debit"
@@ -807,29 +805,22 @@ const TransactionModalAp = ({ view, update, receive, checked }) => {
                 onClick={() => dispatch(setComputationMenu(true))}
               >
                 <Box className="tax-total-value">
-                  <Typography className="amount-tax">
+                  <Typography
+                    className="amount-tax"
+                    color={
+                      parseFloat(totalAmount(taxComputation)) ===
+                      parseFloat(watch("amount"))
+                        ? "black"
+                        : "error"
+                    }
+                  >
                     Total invoice amount : <span>&#8369;</span>{" "}
-                    {convertToPeso(
-                      taxComputation?.result
-                        ?.reduce((acc, curr) => {
-                          return curr?.credit !== "0.00"
-                            ? acc + 0
-                            : acc + parseFloat(curr.total_invoice_amount);
-                        }, 0)
-                        ?.toFixed(2)
-                    )}
+                    {convertToPeso(totalAmount(taxComputation)?.toFixed(2))}
                   </Typography>
                   <Typography className="amount-tax">
-                    Total amount : <span>&#8369;</span>{" "}
-                    {convertToPeso(
-                      taxComputation?.result
-                        ?.reduce((acc, curr) => {
-                          return parseFloat(curr.credit)
-                            ? acc - parseFloat(0)
-                            : acc + parseFloat(curr.account);
-                        }, 0)
-                        ?.toFixed(2)
-                    )}
+                    {voucher === "check" ? "Check amount" : "Total amount"}:{" "}
+                    <span>&#8369;</span>{" "}
+                    {convertToPeso(totalAccount(taxComputation)?.toFixed(2))}
                   </Typography>
                 </Box>
               </Paper>

@@ -29,6 +29,13 @@ import noData from "../../../assets/lottie/NoData.json";
 
 import vat from "../../../assets/svg/vat.svg";
 import Lottie from "lottie-react";
+import {
+  totalAccount,
+  totalAccountData,
+  totalAmountData,
+  totalCredit,
+  totalVat,
+} from "../../../services/functions/compute";
 
 const ComputationMenu = ({ details }) => {
   const dispatch = useDispatch();
@@ -98,45 +105,16 @@ const ComputationMenu = ({ details }) => {
       .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
-  const vpl = taxComputation?.result?.data?.reduce((acc, curr) => {
-    return acc + parseFloat(curr.vat_local);
-  }, 0);
-
-  const vps = taxComputation?.result?.data?.reduce((acc, curr) => {
-    return acc + parseFloat(curr.vat_service);
-  }, 0);
-
-  const npl = taxComputation?.result?.data?.reduce((acc, curr) => {
-    return acc + parseFloat(curr.nvat_local);
-  }, 0);
-
-  const nps = taxComputation?.result?.data?.reduce((acc, curr) => {
-    return acc + parseFloat(curr.nvat_service);
-  }, 0);
-  const debit = taxComputation?.result?.data?.reduce((acc, curr) => {
-    return acc + parseFloat(curr.debit);
-  }, 0);
-  const credit = taxComputation?.result?.data?.reduce((acc, curr) => {
-    return acc + parseFloat(curr.credit);
-  }, 0);
-
-  const amount = taxComputation?.result?.data?.reduce((acc, curr) => {
-    return acc + parseFloat(curr.total_invoice_amount);
-  }, 0);
-
-  const wtax = taxComputation?.result?.data?.reduce((acc, curr) => {
-    return acc + parseFloat(curr.wtax_payable_cr);
-  }, 0);
-
-  const totalAccount = taxComputation?.result?.data?.reduce((acc, curr) => {
-    return parseFloat(curr.credit)
-      ? acc - parseFloat(0)
-      : acc + parseFloat(curr.account);
-  }, 0);
-
-  const vatInput = taxComputation?.result?.data?.reduce((acc, curr) => {
-    return acc + parseFloat(curr.vat_input_tax);
-  }, 0);
+  const vpl = totalVat(taxComputation, "vat_local");
+  const vps = totalVat(taxComputation, "vat_service");
+  const npl = totalVat(taxComputation, "nvat_local");
+  const nps = totalVat(taxComputation, "nvat_service");
+  const debit = totalVat(taxComputation, "debit");
+  const credit = totalCredit(taxComputation, "credit");
+  const amount = totalAmountData(taxComputation);
+  const wtax = totalVat(taxComputation, "wtax_payable_cr");
+  const totalAccounts = totalAccountData(taxComputation);
+  const vatInput = totalVat(taxComputation, "vat_input_tax");
 
   const supplierDetails = supplier?.result?.find(
     (item) => menuData?.transactions?.supplier_id === item?.id
@@ -256,6 +234,7 @@ const ComputationMenu = ({ details }) => {
             <TableRow className="table-header1-import-tag-transaction">
               <TableCell>Line</TableCell>
               <TableCell>Account Title</TableCell>
+              <TableCell>Remarks</TableCell>
               <TableCell>Supplier Type</TableCell>
               <TableCell align="center">Mode</TableCell>
               <TableCell align="center">Amount</TableCell>
@@ -283,7 +262,7 @@ const ComputationMenu = ({ details }) => {
             loadingAtc ||
             status === "pending" ? (
               <TableRow>
-                <TableCell colSpan={14} align="center">
+                <TableCell colSpan={15} align="center">
                   <Lottie
                     animationData={loading}
                     className="loading-tag-transaction"
@@ -292,7 +271,7 @@ const ComputationMenu = ({ details }) => {
               </TableRow>
             ) : isError ? (
               <TableRow>
-                <TableCell colSpan={14} align="center">
+                <TableCell colSpan={15} align="center">
                   <Lottie
                     animationData={noData}
                     className="no-data-tag-transaction"
@@ -313,6 +292,11 @@ const ComputationMenu = ({ details }) => {
                         {tax?.coa?.name}
                       </Typography>
                     </TableCell>
+                    <TableCell>
+                      <Typography className="tag-transaction-company-type">
+                        {tax?.remarks}
+                      </Typography>
+                    </TableCell>
                     <TableCell align="center">
                       <Typography className="tag-transaction-company-type">
                         {tax?.supplierType?.code}
@@ -320,41 +304,69 @@ const ComputationMenu = ({ details }) => {
                     </TableCell>
                     <TableCell align="center">
                       <Typography className="tag-transaction-company-type">
-                        {tax?.debit !== "0.00" ? "Debit" : "Credit"}
+                        {tax?.credit_from === null ? "Debit" : "Credit"}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
                       <Typography className="tag-transaction-company-type">
                         <span>&#8369;</span>{" "}
-                        {convertToPeso(tax?.total_invoice_amount)}
+                        {convertToPeso(
+                          tax?.credit_from !== null &&
+                            tax?.credit_from === "Check Amount"
+                            ? 0
+                            : tax?.total_invoice_amount
+                        )}
                       </Typography>
                     </TableCell>
                     {vpl !== 0 && (
                       <TableCell align="center">
                         <Typography className="tag-transaction-company-type">
-                          <span>&#8369;</span> {convertToPeso(tax?.vat_local)}
+                          <span>&#8369;</span>
+                          {convertToPeso(
+                            tax?.credit_from !== null &&
+                              tax?.credit_from === "Check Amount"
+                              ? 0
+                              : tax?.vat_local
+                          )}
                         </Typography>
                       </TableCell>
                     )}
                     {vps !== 0 && (
                       <TableCell align="center">
                         <Typography className="tag-transaction-company-type">
-                          <span>&#8369;</span> {convertToPeso(tax?.vat_service)}
+                          <span>&#8369;</span>
+                          {convertToPeso(
+                            tax?.credit_from !== null &&
+                              tax?.credit_from === "Check Amount"
+                              ? 0
+                              : tax?.vat_service
+                          )}
                         </Typography>
                       </TableCell>
                     )}
                     {npl !== 0 && (
                       <TableCell align="center">
                         <Typography className="tag-transaction-company-type">
-                          <span>&#8369;</span> {convertToPeso(tax?.nvat_local)}
+                          <span>&#8369;</span>
+                          {convertToPeso(
+                            tax?.credit_from !== null &&
+                              tax?.credit_from === "Check Amount"
+                              ? 0
+                              : tax?.nvat_local
+                          )}
                         </Typography>
                       </TableCell>
                     )}
                     {nps !== 0 && (
                       <TableCell align="center">
                         <Typography className="tag-transaction-company-type">
-                          <span>&#8369;</span>{" "}
-                          {convertToPeso(tax?.nvat_service)}
+                          <span>&#8369;</span>
+                          {convertToPeso(
+                            tax?.credit_from !== null &&
+                              tax?.credit_from === "Check Amount"
+                              ? 0
+                              : tax?.nvat_service
+                          )}
                         </Typography>
                       </TableCell>
                     )}
@@ -389,8 +401,9 @@ const ComputationMenu = ({ details }) => {
                     <TableCell align="center">
                       <Typography className="tag-transaction-company-type">
                         <span>&#8369;</span>
-                        {tax?.credit !== "0.00"
-                          ? -convertToPeso(0)
+                        {tax?.credit_from !== null &&
+                        tax?.credit_from === "Check Amount"
+                          ? `-${convertToPeso(tax?.account)}`
                           : convertToPeso(tax?.account)}
                       </Typography>
                     </TableCell>
@@ -401,7 +414,7 @@ const ComputationMenu = ({ details }) => {
 
             {!isError && !loadingTax && (
               <TableRow className="table-body-tag-transaction">
-                <TableCell align="center" colSpan={4}>
+                <TableCell align="center" colSpan={5}>
                   <Typography className="tag-transaction-company-type">
                     Total
                   </Typography>
@@ -469,7 +482,7 @@ const ComputationMenu = ({ details }) => {
 
                 <TableCell align="center">
                   <Typography className="tag-transaction-company-type">
-                    <span>&#8369;</span> {convertToPeso(totalAccount)}
+                    <span>&#8369;</span> {convertToPeso(totalAccounts)}
                   </Typography>
                 </TableCell>
               </TableRow>

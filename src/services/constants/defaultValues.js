@@ -1,5 +1,6 @@
 export const transactionDefaultValue = () => {
   const defaultValues = {
+    is_offset: false,
     tag_no: "",
     description: "",
     supplier: "",
@@ -52,6 +53,7 @@ export const clearValue = () => {
     store: null,
     coverage_from: null,
     coverage_to: null,
+    is_offset: false,
   };
   return defaultValues;
 };
