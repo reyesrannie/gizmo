@@ -701,36 +701,36 @@ const TransactionModalAp = ({ view, update, receive, checked }) => {
                       </Box>
                       <Box className="tax-box-value">
                         <Typography className="amount-tax">
-                          Vat Input Tax: <span>&#8369;</span>{" "}
+                          Input Tax: <span>&#8369;</span>{" "}
                           {convertToPeso(tax.vat_input_tax)}
                         </Typography>
                         {tax?.nvat_local !== "0.00" && (
                           <Typography className="amount-tax">
-                            Non-Vat Local: <span>&#8369;</span>{" "}
+                            Tax Based: <span>&#8369;</span>{" "}
                             {convertToPeso(tax.nvat_local)}
                           </Typography>
                         )}
                         {tax?.nvat_service !== "0.00" && (
                           <Typography className="amount-tax">
-                            Non-Vat Service: <span>&#8369;</span>{" "}
+                            Tax Based: <span>&#8369;</span>{" "}
                             {convertToPeso(tax.nvat_service)}
                           </Typography>
                         )}
                         {tax?.vat_local !== "0.00" && (
                           <Typography className="amount-tax">
-                            Vat Local: <span>&#8369;</span>{" "}
+                            Tax Based: <span>&#8369;</span>{" "}
                             {convertToPeso(tax.vat_local)}
                           </Typography>
                         )}
                         {tax?.vat_service !== "0.00" && (
                           <Typography className="amount-tax">
-                            Vat Service: <span>&#8369;</span>{" "}
+                            Tax Based: <span>&#8369;</span>{" "}
                             {convertToPeso(tax.vat_service)}
                           </Typography>
                         )}
 
                         <Typography className="amount-tax">
-                          Wtax Payable: <span>&#8369;</span>{" "}
+                          Wtax Payable Expanded: <span>&#8369;</span>{" "}
                           {convertToPeso(tax.wtax_payable_cr)}
                         </Typography>
                       </Box>
@@ -789,7 +789,7 @@ const TransactionModalAp = ({ view, update, receive, checked }) => {
                             : convertToPeso(tax.credit)}
                         </Typography>
                         <Typography className="amount-tax">
-                          Account: <span>&#8369;</span>{" "}
+                          Total amount: <span>&#8369;</span>{" "}
                           {tax?.mode === "Debit"
                             ? convertToPeso(tax.account)
                             : `-${convertToPeso(tax.credit)}`}

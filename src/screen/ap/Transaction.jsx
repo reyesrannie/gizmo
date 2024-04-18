@@ -8,6 +8,7 @@ import { Box, Typography } from "@mui/material";
 import { useTransactionQuery } from "../../services/store/request";
 
 import "../../components/styles/TagTransaction.scss";
+import "../../components/styles/AccountsPayable.scss";
 
 import useTransactionHook from "../../services/hooks/useTransactionHook";
 

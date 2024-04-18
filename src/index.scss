@@ -1,30 +1,37 @@
 @font-face {
-  font-family: "GoldmanRegular";
-  src: local("GoldmanRegular"),
-    url("./assets/fonts/Goldman-Regular.ttf") format("truetype");
-}
-
-@font-face {
   font-family: "Roboto-Light";
-  src: local("Roboto-Light"),
-    url("./assets/fonts/Roboto-Light.ttf") format("truetype");
+  font-weight: 300; /* Light */
+  font-style: normal;
+  src: local("Roboto Light"), local("Roboto-Light"),
+    url("https://fonts.gstatic.com/s/roboto/v27/KFOlCnqEu92Fr1MmSU5fBBc9.ttf")
+      format("truetype");
 }
 
 @font-face {
   font-family: "Roboto-Bold";
-  src: local("Roboto-Bold"),
-    url("./assets/fonts/Roboto-Bold.ttf") format("truetype");
+  font-weight: 700; /* Bold */
+  font-style: normal;
+  src: local("Roboto Bold"), local("Roboto-Bold"),
+    url("https://fonts.gstatic.com/s/roboto/v27/KFOlCnqEu92Fr1MmWUlfBBc9.ttf")
+      format("truetype");
 }
 
 @font-face {
   font-family: "Roboto-Black";
-  src: local("Roboto-Black"),
-    url("./assets/fonts/Roboto-Black.ttf") format("truetype");
+  font-weight: 900; /* Black */
+  font-style: normal;
+  src: local("Roboto Black"), local("Roboto-Black"),
+    url("https://fonts.gstatic.com/s/roboto/v27/KFOlCnqEu92Fr1MmYUtfBBc9.ttf")
+      format("truetype");
 }
+
 @font-face {
   font-family: "Roboto-Medium";
-  src: local("Roboto-Medium"),
-    url("./assets/fonts/Roboto-Medium.ttf") format("truetype");
+  font-weight: 500; /* Medium */
+  font-style: normal;
+  src: local("Roboto Medium"), local("Roboto-Medium"),
+    url("https://fonts.gstatic.com/s/roboto/v27/KFOlCnqEu92Fr1MmWUlvAw.ttf")
+      format("truetype");
 }
 body {
   margin: 0;

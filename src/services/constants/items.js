@@ -107,7 +107,7 @@ const masterlist = [
   {
     path: "/masterlist/ap",
     desc: "A module for managing essential information about Accounts Payable .",
-    name: "Accounts Payable",
+    name: "AP Allocation",
     permission: ["ap"],
     firstIcon: (
       <MonetizationOnOutlinedIcon
@@ -365,7 +365,7 @@ const menu = [
         permission: ["location"],
       },
       {
-        desc: "Accounts Payable",
+        desc: "AP Allocation",
         icon: <MonetizationOnOutlinedIcon />,
         path: "/masterlist/ap",
         permission: ["ap"],
@@ -511,7 +511,7 @@ const routes = [
       },
       {
         path: "/masterlist/ap",
-        name: "Accounts Payable",
+        name: "AP Allocation",
       },
       {
         path: "/masterlist/vat",

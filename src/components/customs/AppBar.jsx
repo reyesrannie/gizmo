@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import {
   Box,
   Dialog,
@@ -14,7 +14,8 @@ import { setAccountMenu, setDrawer } from "../../services/slice/menuSlice";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 
 import "../styles/AppBar.scss";
-
+import loading from "../../assets/lottie/Loading-2.json";
+import Lottie from "lottie-react";
 import logo from "../../assets/logo-appBar.png";
 import { useState } from "react";
 import MenuDrawer from "./MenuDrawer";
@@ -75,7 +76,15 @@ const AppBar = () => {
         elevation={0}
         className={`body-container ${openDrawer ? "open" : ""}`}
       >
-        <Outlet />
+        <Suspense
+          fallback={
+            <Box className="loadingComponentFallBack">
+              <Lottie animationData={loading} loop />
+            </Box>
+          }
+        >
+          <Outlet />
+        </Suspense>
       </Paper>
 
       <Menu

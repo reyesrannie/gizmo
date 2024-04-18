@@ -46,7 +46,6 @@ const mapViewTransaction = (
   accountNumber,
   location
 ) => {
-  console.log(transactionData);
   const values = {
     is_offset: transactionData?.is_offset === 1 ? true : false,
     tag_no: transactionData?.tag_no || "",

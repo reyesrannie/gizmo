@@ -135,7 +135,7 @@ const AccountsPayable = () => {
       </Box>
       <Box className="ap-head-container">
         <Typography className="page-text-indicator-ap">
-          Accounts Payable
+          AP Allocation
         </Typography>
         <Box className="ap-button-container">
           <SearchText onSearchData={onSearchData} />

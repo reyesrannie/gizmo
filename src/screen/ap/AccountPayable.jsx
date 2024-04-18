@@ -2,6 +2,7 @@ import { Box, Typography } from "@mui/material";
 import React from "react";
 
 import "../../components/styles/AccountPayable.scss";
+import "../../components/styles/Tagging.scss";
 
 import Breadcrums from "../../components/customs/Breadcrums";
 import CardNavigation from "../../components/customs/CardNavigation";

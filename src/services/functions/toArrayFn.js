@@ -83,14 +83,6 @@ export const coaArrays = (coa, taxComputation, supTypePercent, coa_id) => {
           wtax: wtax,
         };
       }
-      return {
-        id: 183,
-        name: "WITHHOLDING TAX PAYABLE",
-        mode: "Credit",
-        code: "217110",
-        amount: item?.wtax_payable_cr,
-        wtax: wtax,
-      };
     })
     .filter(Boolean);
 

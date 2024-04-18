@@ -5,6 +5,8 @@ import { masterlist } from "../../services/constants/items";
 import CardNavigation from "../../components/customs/CardNavigation";
 import { hasAccess } from "../../services/functions/access";
 
+import "../../components/styles/UserManagement.scss";
+
 const Masterlist = () => {
   return (
     <Box>

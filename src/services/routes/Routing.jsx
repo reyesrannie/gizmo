@@ -1,35 +1,64 @@
-import React from "react";
+import React, { lazy } from "react";
 import { Navigate, useRoutes } from "react-router-dom";
-import Login from "../../screen/login/Login";
-import AppBar from "../../components/customs/AppBar";
-import Dashboard from "../../screen/dashboard/Dashboard";
 import { decodeUser } from "../functions/saveUser";
-import UserAccounts from "../../screen/user/accounts/UserAccounts";
-import UserManagement from "../../screen/user/UserManagement";
-import RoleManagement from "../../screen/user/accounts/RoleManagement";
-import Masterlist from "../../screen/masterlist/Masterlist";
-import Company from "../../screen/masterlist/charging/Company";
-import Department from "../../screen/masterlist/charging/Department";
-import Location from "../../screen/masterlist/charging/Location";
-import AccountsPayable from "../../screen/masterlist/ap/AccountsPayable";
+import "../../components/styles/LoadingComponentFallback.scss";
 import { hasAccess } from "../functions/access";
-import Vat from "../../screen/masterlist/vat/Vat";
-import Atc from "../../screen/masterlist/atc/Atc";
-import SupplierType from "../../screen/masterlist/supplier/SupplierType";
-import Supplier from "../../screen/masterlist/supplier/Supplier";
-import Tagging from "../../screen/tagging/Tagging";
+import AppBar from "../../components/customs/AppBar";
 import PageNotFound from "../../screen/PageNotFound";
-import TagTransaction from "../../screen/tagging/TagTransaction";
-import DocumentType from "../../screen/masterlist/document/DocumentType";
-import AccountNumber from "../../screen/masterlist/supplier/AccountNumber";
-import AccountPayable from "../../screen/ap/AccountPayable";
-import Transaction from "../../screen/ap/Transaction";
-import AccountTitles from "../../screen/masterlist/coa/AccountTitles";
-import CheckVoucher from "../../screen/ap/CheckVoucher";
-import JournalVoucher from "../../screen/ap/JournalVoucher";
-import Approver from "../../screen/approver/Approver";
-import ApprovingCheck from "../../screen/approver/ApprovingCheck";
-import ApprovingJournal from "../../screen/approver/ApprovingJournal";
+
+const Login = lazy(() => import("../../screen/login/Login"));
+const Dashboard = lazy(() => import("../../screen/dashboard/Dashboard"));
+const Masterlist = lazy(() => import("../../screen/masterlist/Masterlist"));
+const UserManagement = lazy(() => import("../../screen/user/UserManagement"));
+const Company = lazy(() => import("../../screen/masterlist/charging/Company"));
+const Vat = lazy(() => import("../../screen/masterlist/vat/Vat"));
+const Atc = lazy(() => import("../../screen/masterlist/atc/Atc"));
+const Tagging = lazy(() => import("../../screen/tagging/Tagging"));
+const AccountPayable = lazy(() => import("../../screen/ap/AccountPayable"));
+const Transaction = lazy(() => import("../../screen/ap/Transaction"));
+const CheckVoucher = lazy(() => import("../../screen/ap/CheckVoucher"));
+const JournalVoucher = lazy(() => import("../../screen/ap/JournalVoucher"));
+const Approver = lazy(() => import("../../screen/approver/Approver"));
+
+const ApprovingJournal = lazy(() =>
+  import("../../screen/approver/ApprovingJournal")
+);
+const ApprovingCheck = lazy(() =>
+  import("../../screen/approver/ApprovingCheck")
+);
+const AccountTitles = lazy(() =>
+  import("../../screen/masterlist/coa/AccountTitles")
+);
+const AccountNumber = lazy(() =>
+  import("../../screen/masterlist/supplier/AccountNumber")
+);
+const DocumentType = lazy(() =>
+  import("../../screen/masterlist/document/DocumentType")
+);
+const TagTransaction = lazy(() =>
+  import("../../screen/tagging/TagTransaction")
+);
+const Supplier = lazy(() =>
+  import("../../screen/masterlist/supplier/Supplier")
+);
+const SupplierType = lazy(() =>
+  import("../../screen/masterlist/supplier/SupplierType")
+);
+const AccountsPayable = lazy(() =>
+  import("../../screen/masterlist/ap/AccountsPayable")
+);
+const Location = lazy(() =>
+  import("../../screen/masterlist/charging/Location")
+);
+const Department = lazy(() =>
+  import("../../screen/masterlist/charging/Department")
+);
+const RoleManagement = lazy(() =>
+  import("../../screen/user/accounts/RoleManagement")
+);
+const UserAccounts = lazy(() =>
+  import("../../screen/user/accounts/UserAccounts")
+);
 
 const Routing = () => {
   const user = decodeUser();

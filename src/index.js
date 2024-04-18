@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.scss";
 import App from "./App";
-import "./assets/fonts/Goldman-Regular.ttf";
+
 import { Provider } from "react-redux";
 import { store } from "./services/store/store";
 import { BrowserRouter } from "react-router-dom";

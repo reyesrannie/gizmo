@@ -238,14 +238,12 @@ const ComputationMenu = ({ details }) => {
               <TableCell>Supplier Type</TableCell>
               <TableCell align="center">Mode</TableCell>
               <TableCell align="center">Amount</TableCell>
-              {vpl !== 0 && <TableCell align="center">Vat Goods</TableCell>}
-              {vps !== 0 && <TableCell align="center">Vat Service</TableCell>}
-              {npl !== 0 && <TableCell align="center">Non-vat Goods</TableCell>}
-              {nps !== 0 && (
-                <TableCell align="center">Non-vat Service</TableCell>
-              )}
-              <TableCell align="center">VAT</TableCell>
-              <TableCell align="center">WTax Payable Cr.</TableCell>
+              {vpl !== 0 && <TableCell align="center">Tax based</TableCell>}
+              {vps !== 0 && <TableCell align="center">Tax based</TableCell>}
+              {npl !== 0 && <TableCell align="center">Tax based</TableCell>}
+              {nps !== 0 && <TableCell align="center">Tax based</TableCell>}
+              <TableCell align="center">Input Tax</TableCell>
+              <TableCell align="center">WTax Payable Expanded</TableCell>
               {debit !== 0 && <TableCell align="center">Debit</TableCell>}
               {credit !== 0 && <TableCell align="center">Credit</TableCell>}
 

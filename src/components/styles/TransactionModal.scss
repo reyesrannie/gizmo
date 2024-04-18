@@ -252,6 +252,16 @@
   }
 }
 
+.add-transaction-button-receive {
+  &.MuiBox-root {
+    margin-top: 10px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 10px;
+  }
+}
+
 .return-receive-container {
   &.MuiBox-root {
     display: flex;

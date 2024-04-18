@@ -413,7 +413,7 @@ const TransactionModal = ({
         onSubmit={handleSubmit(submitHandler)}
       >
         <AppTextBox
-          disabled={view}
+          disabled={view || watch("is_offset")}
           control={control}
           name={"tag_no"}
           label={"Tag Number *"}
@@ -449,7 +449,7 @@ const TransactionModal = ({
                 endAdornment: (
                   <>
                     {params.InputProps.endAdornment}
-                    {watch("tin") && (
+                    {watch("tin") && !receive && (
                       <IconButton
                         onClick={() => {
                           handleClear(true);
@@ -781,11 +781,7 @@ const TransactionModal = ({
                 disabled={view}
                 control={control}
                 name={"store"}
-                options={
-                  location?.result?.filter(
-                    (item) => watch("account_number")?.location?.id === item?.id
-                  ) || []
-                }
+                options={location?.result}
                 getOptionLabel={(option) => `${option.name}`}
                 isOptionEqualToValue={(option, value) =>
                   option?.code === value?.code
@@ -905,8 +901,8 @@ const TransactionModal = ({
         />
 
         <Box className="add-transaction-button-container">
-          <Box>
-            {update ? (
+          {receive ? (
+            <Box className="add-transaction-button-receive">
               <LoadingButton
                 disabled={singleSuccess || journalSuccess}
                 variant="contained"
@@ -917,10 +913,7 @@ const TransactionModal = ({
               >
                 Archive
               </LoadingButton>
-            ) : (
-              "."
-            )}
-            {receive && (
+
               <LoadingButton
                 variant="contained"
                 color="success"
@@ -930,8 +923,10 @@ const TransactionModal = ({
               >
                 Receive
               </LoadingButton>
-            )}
-          </Box>
+            </Box>
+          ) : (
+            "."
+          )}
           <Box className="archive-transaction-button-container">
             {!view && (
               <LoadingButton

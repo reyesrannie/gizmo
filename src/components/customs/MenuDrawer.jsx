@@ -58,7 +58,6 @@ const MenuDrawer = () => {
                       }`}
                       onClick={() => {
                         navigate(menus.path);
-                        dispatch(resetMenu());
                         dispatch(resetTransaction());
                         isTablet && dispatch(setDrawer(false));
                       }}
@@ -86,7 +85,7 @@ const MenuDrawer = () => {
                       />
                     </ListItemButton>
                     {menus?.children?.map(
-                      (child) =>
+                      (child, index) =>
                         hasAccess(child?.permission) && (
                           <ListItemButton
                             className={`selectedChildList ${
@@ -98,7 +97,7 @@ const MenuDrawer = () => {
                               navigate(child.path);
                               isTablet && dispatch(setDrawer(false));
                             }}
-                            key={child.path}
+                            key={index}
                           >
                             <ListItemIcon
                               className={`list-icon ${
