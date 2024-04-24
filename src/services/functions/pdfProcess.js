@@ -1,39 +1,39 @@
-import { PDFDocument, rgb, PageSizes } from "pdf-lib";
+import { PDFDocument, rgb } from "pdf-lib";
 
 import pdfFileAsset from "../../assets/pdf/2307.pdf";
 import moment from "moment";
 import { formConst } from "../constants/formConst";
 
-const getStartQuarter = (coverage, year) => {
-  if (coverage === "1st Quarter") {
+const getStartQuarter = (quarter, year) => {
+  if (quarter === 1) {
     return new Date(`01-01-${year}`);
-  } else if (coverage === "2nd Quarter") {
+  } else if (quarter === 2) {
     return new Date(`04-01-${year}`);
-  } else if (coverage === "3rd Quarter") {
+  } else if (quarter === 3) {
     return new Date(`07-01-${year}`);
-  } else if (coverage === "4th Quarter") {
+  } else if (quarter === 4) {
     return new Date(`10-01-${year}`);
   }
 };
 
-const getEndQuarter = (coverage, year) => {
-  if (coverage === "1st Quarter") {
+const getEndQuarter = (quarter, year) => {
+  if (quarter === 1) {
     return new Date(`03-31-${year}`);
-  } else if (coverage === "2nd Quarter") {
+  } else if (quarter === 2) {
     return new Date(`06-30-${year}`);
-  } else if (coverage === "3rd Quarter") {
+  } else if (quarter === 3) {
     return new Date(`09-30-${year}`);
-  } else if (coverage === "4th Quarter") {
+  } else if (quarter === 4) {
     return new Date(`12-31-${year}`);
   }
 };
 
 const getMonth = (month) => {
-  if (month === "1st") {
+  if (month === 1) {
     return 226;
-  } else if (month === "2nd") {
+  } else if (month === 2) {
     return 300;
-  } else if (month === "3rd") {
+  } else if (month === 3) {
     return 374;
   }
 };
@@ -89,12 +89,10 @@ export const printPDF = async (data) => {
   const firstPage = pdfDoc.getPage(0);
 
   firstPage.setMediaBox(0, 0, 612, 962);
-  const from = getStartQuarter(
-    data?.coverage,
-    moment(dateToday).format("YYYY")
-  );
 
-  const to = getEndQuarter(data?.coverage, moment(dateToday).format("YYYY"));
+  const from = getStartQuarter(data?.quarter, moment(dateToday).format("YYYY"));
+
+  const to = getEndQuarter(data?.quarter, moment(dateToday).format("YYYY"));
   const parts = data?.supplier?.tin?.split("-");
   const comp = formConst?.compTin?.split("-");
   const tin = parts[0] + " " + parts[1] + " " + parts[2];

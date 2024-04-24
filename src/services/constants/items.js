@@ -107,7 +107,7 @@ const masterlist = [
   {
     path: "/masterlist/ap",
     desc: "A module for managing essential information about Accounts Payable .",
-    name: "AP Allocation",
+    name: "AP Tagging",
     permission: ["ap"],
     firstIcon: (
       <MonetizationOnOutlinedIcon
@@ -160,8 +160,8 @@ const masterlist = [
   },
   {
     path: "/masterlist/suppliertype",
-    desc: "A module for managing Supplier Type .",
-    name: "Supplier Type",
+    desc: "A module for managing VAT Percent .",
+    name: "VAT Percent",
     permission: ["s-type"],
     firstIcon: (
       <PowerInputOutlinedIcon color="secondary" className="icon-card-details" />
@@ -365,7 +365,7 @@ const menu = [
         permission: ["location"],
       },
       {
-        desc: "AP Allocation",
+        desc: "AP Tagging",
         icon: <MonetizationOnOutlinedIcon />,
         path: "/masterlist/ap",
         permission: ["ap"],
@@ -390,7 +390,7 @@ const menu = [
         permission: ["atc"],
       },
       {
-        desc: "Supplier Type",
+        desc: "VAT Percent",
         icon: <PowerInputOutlinedIcon />,
         path: "/masterlist/suppliertype",
         permission: ["s-type"],
@@ -511,7 +511,7 @@ const routes = [
       },
       {
         path: "/masterlist/ap",
-        name: "AP Allocation",
+        name: "AP Tagging",
       },
       {
         path: "/masterlist/vat",
@@ -527,7 +527,7 @@ const routes = [
       },
       {
         path: "/masterlist/suppliertype",
-        name: "Supplier Type",
+        name: "VAT Percent",
       },
       {
         path: "/masterlist/documenttype",

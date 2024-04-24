@@ -8,6 +8,19 @@
   }
 }
 
+.disclaimer-voucher-signature {
+  display: none;
+  font-style: italic;
+  @media print {
+    &.MuiTypography-root {
+      display: flex;
+      font-family: Roboto-Light;
+      font-size: 12px;
+      justify-content: center;
+    }
+  }
+}
+
 .voucher-number-header {
   &.MuiTableCell-root {
     border-bottom: 2px solid black;
@@ -161,6 +174,7 @@
     border-right: 2px solid black;
     border-bottom: none;
     padding: 1px;
+    padding-right: 5px;
     height: 13px;
     .MuiTypography-root {
       font-family: Roboto-Light;
@@ -195,13 +209,13 @@
   &.MuiTypography-root {
     font-family: Roboto-Light;
     font-size: 10px;
-    margin-left: 250px;
+    margin-left: 150px;
   }
   @media print {
     &.MuiTypography-root {
       font-family: Roboto-Light;
       font-size: 10px;
-      margin-left: 200px;
+      margin-left: 150px;
     }
   }
 }

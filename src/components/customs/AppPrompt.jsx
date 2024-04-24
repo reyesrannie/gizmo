@@ -2,6 +2,7 @@ import { Box, Button, Paper, Typography } from "@mui/material";
 import React from "react";
 import "../styles/AppPrompt.scss";
 import { LoadingButton } from "@mui/lab";
+import ShortcutHandler from "../../services/functions/ShortcutHandler";
 
 const AppPrompt = ({
   image,

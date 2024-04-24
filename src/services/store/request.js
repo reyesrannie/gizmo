@@ -1,8 +1,8 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-// const baseURL = process.env.REACT_APP_API_KEY;
+const baseURL = process.env.REACT_APP_API_KEY;
 
-const baseURL = "http://10.10.13.17:8000/api";
+// const baseURL = "http://10.10.13.17:8000/api";
 // const baseURL = "http://127.0.0.1:8000/api";
 
 export const jsonServerAPI = createApi({
@@ -820,7 +820,7 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["SingleCheck", "CheckEntries", "Logs"],
+      invalidatesTags: ["SingleCheck", "CheckEntries", "Logs", "Transaction"],
     }),
     updateCheckEntries: builder.mutation({
       transformResponse: (response) => response,
@@ -829,7 +829,7 @@ export const jsonServerAPI = createApi({
         method: "PUT",
         body: payload,
       }),
-      invalidatesTags: ["SingleCheck", "CheckEntries", "Logs"],
+      invalidatesTags: ["SingleCheck", "CheckEntries", "Logs", "Transaction"],
     }),
     archiveCheckEntries: builder.mutation({
       transformResponse: (response) => response,
@@ -838,7 +838,7 @@ export const jsonServerAPI = createApi({
         method: "PATCH",
         params: payload,
       }),
-      invalidatesTags: ["SingleCheck", "CheckEntries"],
+      invalidatesTags: ["SingleCheck", "CheckEntries", "Transaction"],
     }),
     returnCheckEntries: builder.mutation({
       transformResponse: (response) => response,
@@ -847,7 +847,7 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["SingleCheck", "CheckEntries", "Logs"],
+      invalidatesTags: ["SingleCheck", "CheckEntries", "Logs", "Transaction"],
     }),
     approveCheckEntries: builder.mutation({
       transformResponse: (response) => response,
@@ -856,7 +856,7 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["SingleCheck", "CheckEntries", "Logs"],
+      invalidatesTags: ["SingleCheck", "CheckEntries", "Logs", "Transaction"],
     }),
     checkedCVoucher: builder.mutation({
       transformResponse: (response) => response,
@@ -865,7 +865,7 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["CheckEntries", "Logs", "VPCheckNumber"],
+      invalidatesTags: ["CheckEntries", "Logs", "VPCheckNumber", "Transaction"],
     }),
     journalEntries: builder.query({
       transformResponse: (response) => response,
@@ -883,7 +883,12 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["JournalEntries", "Logs", "VPJournalNumber"],
+      invalidatesTags: [
+        "JournalEntries",
+        "Logs",
+        "VPJournalNumber",
+        "Transaction",
+      ],
     }),
     updateJournalEntries: builder.mutation({
       transformResponse: (response) => response,
@@ -892,7 +897,12 @@ export const jsonServerAPI = createApi({
         method: "PUT",
         body: payload,
       }),
-      invalidatesTags: ["SingleJournal", "JournalEntries", "Logs"],
+      invalidatesTags: [
+        "SingleJournal",
+        "JournalEntries",
+        "Logs",
+        "Transaction",
+      ],
     }),
     archiveJournalEntries: builder.mutation({
       transformResponse: (response) => response,
@@ -901,7 +911,7 @@ export const jsonServerAPI = createApi({
         method: "PATCH",
         params: payload,
       }),
-      invalidatesTags: ["SingleCheck", "JournalEntries"],
+      invalidatesTags: ["SingleCheck", "JournalEntries", "Transaction"],
     }),
     returnJournalEntries: builder.mutation({
       transformResponse: (response) => response,
@@ -910,7 +920,7 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["SingleCheck", "JournalEntries", "Logs"],
+      invalidatesTags: ["SingleCheck", "JournalEntries", "Logs", "Transaction"],
     }),
     approveJournalEntries: builder.mutation({
       transformResponse: (response) => response,
@@ -919,7 +929,7 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["SingleCheck", "JournalEntries", "Logs"],
+      invalidatesTags: ["SingleCheck", "JournalEntries", "Logs", "Transaction"],
     }),
     checkedJVoucher: builder.mutation({
       transformResponse: (response) => response,
@@ -928,7 +938,12 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["JournalEntries", "Logs", "VPJournalNumber"],
+      invalidatesTags: [
+        "JournalEntries",
+        "Logs",
+        "VPJournalNumber",
+        "Transaction",
+      ],
     }),
     checkTransaction: builder.query({
       transformResponse: (response) => response,

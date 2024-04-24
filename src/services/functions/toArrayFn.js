@@ -66,14 +66,38 @@ export const coaArrays = (coa, taxComputation, supTypePercent, coa_id) => {
       : acc + parseFloat(curr.account);
   }, 0);
 
-  const item = coa?.map((item) => mapTitleAccount(item));
+  let zeroCount = 0;
 
+  const item = coa?.map((item) => mapTitleAccount(item));
   const wtaxCount = taxComputation
     ?.map((item) => {
       const wtax = supTypePercent?.find(
         (type) => item?.stype_id === type?.id
       )?.wtax;
-      if (wtax !== "0%" && supTypePercent.length >= 2) {
+
+      if (supTypePercent.length > 1 && wtax === "0%") {
+        zeroCount++;
+      }
+
+      if (wtax !== "0%") {
+        return {
+          id: 183,
+          name: "WITHHOLDING TAX PAYABLE",
+          mode: "Credit",
+          code: "217110",
+          amount: item?.wtax_payable_cr,
+          wtax: wtax,
+        };
+      } else if (supTypePercent.length === 1 && wtax === "0%") {
+        return {
+          id: 183,
+          name: "WITHHOLDING TAX PAYABLE",
+          mode: "Credit",
+          code: "217110",
+          amount: item?.wtax_payable_cr,
+          wtax: wtax,
+        };
+      } else if (supTypePercent.length === zeroCount) {
         return {
           id: 183,
           name: "WITHHOLDING TAX PAYABLE",

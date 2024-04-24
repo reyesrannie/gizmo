@@ -37,6 +37,7 @@ import "../../components/styles/TagTransaction.scss";
 import { useState } from "react";
 
 import {
+  resetMenu,
   setCheckMenu,
   setMenuData,
   setViewMenu,
@@ -179,6 +180,17 @@ const CheckTable = ({
                   <TableRow
                     className="table-body-tag-transaction"
                     key={tag?.id}
+                    onClick={() => {
+                      dispatch(setMenuData(tag));
+                      dispatch(setVoucher("check"));
+
+                      tag?.state === "approved" && dispatch(setViewMenu(true));
+
+                      tag?.state === "For Approval" &&
+                        dispatch(setCheckMenu(true));
+
+                      tag?.state === "returned" && dispatch(setViewMenu(true));
+                    }}
                   >
                     <TableCell>{tag?.transactions?.tag_no}</TableCell>
                     <TableCell>
@@ -344,15 +356,27 @@ const CheckTable = ({
         />
       </Menu>
 
-      <Dialog open={viewMenu} className="transaction-modal-dialog">
+      <Dialog
+        open={viewMenu}
+        className="transaction-modal-dialog"
+        onClose={() => dispatch(resetMenu())}
+      >
         <TransactionModalApprover approved />
       </Dialog>
 
-      <Dialog open={updateMenu} className="transaction-modal-dialog">
+      <Dialog
+        open={updateMenu}
+        className="transaction-modal-dialog"
+        onClose={() => dispatch(resetMenu())}
+      >
         <TransactionModalAp transactionData={menuData} update />
       </Dialog>
 
-      <Dialog open={checkMenu} className="transaction-modal-dialog">
+      <Dialog
+        open={checkMenu}
+        className="transaction-modal-dialog"
+        onClose={() => dispatch(resetMenu())}
+      >
         <TransactionModalApprover transactionData={menuData} checked />
       </Dialog>
     </Box>

@@ -8,6 +8,9 @@ import {
 } from "@mui/material";
 import React from "react";
 import "../styles/AppPrompt.scss";
+import "../styles/TransactionModal.scss";
+import "../styles/RolesModal.scss";
+
 import { LoadingButton } from "@mui/lab";
 import receiveImg from "../../assets/svg/receive.svg";
 import { useDispatch, useSelector } from "react-redux";

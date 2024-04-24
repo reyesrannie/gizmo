@@ -23,6 +23,8 @@ const initialState = {
   updateTax: false,
   taxData: null,
   printable: false,
+  updateCount: 0,
+  viewAccountingEntries: false,
 };
 
 const menutSlice = createSlice({
@@ -95,7 +97,12 @@ const menutSlice = createSlice({
     setPrintable: (state, action) => {
       state.printable = action.payload;
     },
-
+    setUpdateCount: (state, action) => {
+      state.updateCount = action.payload;
+    },
+    setViewAccountingEntries: (state, action) => {
+      state.viewAccountingEntries = action.payload;
+    },
     resetMenu: () => {
       return initialState;
     },
@@ -126,6 +133,8 @@ export const {
   setCheckMenu,
   setPrintable,
   setComputationMenu,
+  setUpdateCount,
+  setViewAccountingEntries,
 } = menutSlice.actions;
 
 export default menutSlice.reducer;

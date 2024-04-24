@@ -1,7 +1,6 @@
 export const transactionDefaultValue = () => {
   const defaultValues = {
     is_offset: false,
-    tag_no: "",
     description: "",
     supplier: "",
     proprietor: "",
@@ -21,7 +20,6 @@ export const transactionDefaultValue = () => {
     ap: null,
     tin: null,
     date_invoice: null,
-    date_recieved: null,
     tag_month_year: null,
     document_type: null,
     account_number: null,

@@ -16,7 +16,7 @@ import { LoadingButton } from "@mui/lab";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useDispatch, useSelector } from "react-redux";
-import { resetMenu } from "../../../services/slice/menuSlice";
+import { resetMenu, setUpdateCount } from "../../../services/slice/menuSlice";
 import {
   useAccountNumberQuery,
   useApQuery,
@@ -32,26 +32,27 @@ import {
   useUpdateTransactionMutation,
 } from "../../../services/store/request";
 import { useSnackbar } from "notistack";
-import {
-  objectError,
-  singleError,
-} from "../../../services/functions/errorResponse";
+import { singleError } from "../../../services/functions/errorResponse";
 import { DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import {
   resetPrompt,
   setEntryReceive,
+  setIsContinue,
   setOpenReason,
   setReceive,
   setWarning,
 } from "../../../services/slice/promptSlice";
 import {
+  mapResponse,
   mapTransaction,
   mapViewTransaction,
 } from "../../../services/functions/mapObject";
 import { resetLogs } from "../../../services/slice/logSlice";
 
 import "../../styles/TransactionModal.scss";
+import "../../styles/UserModal.scss";
+import "../../styles/RolesModal.scss";
 
 import transaction from "../../../assets/svg/transaction.svg";
 import AppTextBox from "../AppTextBox";
@@ -80,14 +81,9 @@ import {
 } from "../../../services/constants/defaultValues";
 import ReceiveEntry from "../ReceiveEntry";
 import { useNavigate } from "react-router-dom";
+import ShortcutHandler from "../../../services/functions/ShortcutHandler";
 
-const TransactionModal = ({
-  transactionData,
-  create,
-  view,
-  update,
-  receive,
-}) => {
+const TransactionModal = ({ create, view, update, receive }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const warning = useSelector((state) => state.prompt.warning);
@@ -96,6 +92,8 @@ const TransactionModal = ({
   const entryReceive = useSelector((state) => state.prompt.entryReceive);
   const isContinue = useSelector((state) => state.prompt.isContinue);
   const navigateTo = useSelector((state) => state.prompt.navigate);
+  const updateCount = useSelector((state) => state.menu.updateCount);
+  const transactionData = useSelector((state) => state.menu.menuData);
 
   const defaultValue = transactionDefaultValue();
 
@@ -327,8 +325,21 @@ const TransactionModal = ({
           ? await updateTransaction(obj).unwrap()
           : await createTransaction(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      dispatch(resetMenu());
+      const resData = await mapResponse(
+        res?.result,
+        ap,
+        tin,
+        document,
+        accountNumber,
+        location
+      );
+      update || receive
+        ? Object.entries(resData).forEach(([key, value]) => {
+            setValue(key, value);
+          })
+        : dispatch(resetMenu());
       dispatch(resetLogs());
+      dispatch(setUpdateCount(0));
     } catch (error) {
       singleError(error, enqueueSnackbar);
     }
@@ -379,8 +390,22 @@ const TransactionModal = ({
     isZero ? handleReceive() : dispatch(setEntryReceive(true));
   };
 
+  const handleShortCut = () => {
+    handleSubmit(submitHandler)();
+  };
+
+  console.log(errors);
+
   return (
     <Paper className="transaction-modal-container">
+      <ShortcutHandler
+        onUpdate={() =>
+          updateCount === 1 ? dispatch(setUpdateCount(1)) : handleShortCut()
+        }
+        onEsc={() => dispatch(resetMenu())}
+        onReceive={() => dispatch(setReceive(true))}
+        onConfirm={() => dispatch(setEntryReceive(true))}
+      />
       <img
         src={transaction}
         alt="transaction"
@@ -399,29 +424,24 @@ const TransactionModal = ({
         <Typography className="form-title-text-transaction">
           Supplier Details
         </Typography>
-        <FormControlLabel
-          className="check-box-no-tin-supplier"
-          control={<Checkbox color="secondary" />}
-          label="Offset"
-          checked={watch("is_offset")}
-          onChange={() => setValue("is_offset", !watch("is_offset"))}
-        />
       </Box>
 
       <form
         className="form-container-transaction"
         onSubmit={handleSubmit(submitHandler)}
       >
-        <AppTextBox
-          disabled={view || watch("is_offset")}
-          control={control}
-          name={"tag_no"}
-          label={"Tag Number *"}
-          color="primary"
-          className="transaction-form-textBox"
-          error={Boolean(errors?.tag_no)}
-          helperText={errors?.tag_no?.message}
-        />
+        {false && (
+          <AppTextBox
+            disabled={view}
+            control={control}
+            name={"tag_no"}
+            label={"Tag Number *"}
+            color="primary"
+            className="transaction-form-textBox"
+            error={Boolean(errors?.tag_no)}
+            helperText={errors?.tag_no?.message}
+          />
+        )}
         <Autocomplete
           disabled={view || receive}
           control={control}
@@ -551,42 +571,18 @@ const TransactionModal = ({
             </Box>
           )}
         />
-        {!receive && (
-          <Controller
-            name="date_recieved"
+        {false && (
+          <AppTextBox
+            disabled={view}
             control={control}
-            render={({ field: { onChange, value, ...restField } }) => (
-              <Box className="date-picker-container-transaction">
-                <DatePicker
-                  disabled={view}
-                  className="transaction-form-date"
-                  label="Date received *"
-                  format="YYYY-MM-DD"
-                  value={value}
-                  onChange={(e) => {
-                    onChange(e);
-                  }}
-                />
-                {errors.date_recieved && (
-                  <Typography variant="caption" color="error">
-                    {errors.date_recieved.message}
-                  </Typography>
-                )}
-              </Box>
-            )}
+            name={"name_in_receipt"}
+            label={"Name in receipt *"}
+            color="primary"
+            className="transaction-form-textBox"
+            error={Boolean(errors?.name_in_receipt)}
+            helperText={errors?.name_in_receipt?.message}
           />
         )}
-
-        <AppTextBox
-          disabled={view}
-          control={control}
-          name={"name_in_receipt"}
-          label={"Name in receipt *"}
-          color="primary"
-          className="transaction-form-textBox"
-          error={Boolean(errors?.name_in_receipt)}
-          helperText={errors?.name_in_receipt?.message}
-        />
         {checkField("invoice_no") && (
           <AppTextBox
             disabled={view}
@@ -847,7 +843,9 @@ const TransactionModal = ({
           control={control}
           name={"ap"}
           options={ap?.result || []}
-          getOptionLabel={(option) => `${option.company_code}`}
+          getOptionLabel={(option) =>
+            `${option.company_code} - ${option.description}`
+          }
           isOptionEqualToValue={(option, value) => option?.code === value?.code}
           renderInput={(params) => (
             <MuiTextField
@@ -873,13 +871,14 @@ const TransactionModal = ({
                 label="Tag year month *"
                 format="YY MM"
                 value={value}
-                views={["month", "year"]}
+                views={["month"]}
                 onChange={(e) => {
                   onChange(e);
                 }}
                 onAccept={(e) =>
                   onDateChange(moment(new Date(e)).format("YYMM"))
                 }
+                minDate={moment(new Date()).subtract("1", "month")}
               />
               {errors.tag_month_year && (
                 <Typography variant="caption" color="error">
@@ -972,7 +971,7 @@ const TransactionModal = ({
         <Lottie animationData={loading} loop />
       </Dialog>
 
-      <Dialog open={isReceive}>
+      <Dialog open={isReceive} onClose={() => dispatch(setReceive(false))}>
         <AppPrompt
           image={receiveImg}
           title={"Receive Transaction?"}
@@ -987,11 +986,14 @@ const TransactionModal = ({
         />
       </Dialog>
 
-      <Dialog open={entryReceive}>
+      <Dialog
+        open={entryReceive}
+        onClose={() => dispatch(setEntryReceive(false))}
+      >
         <ReceiveEntry />
       </Dialog>
 
-      <Dialog open={warning}>
+      <Dialog open={warning} onClose={() => dispatch(setWarning(false))}>
         <AppPrompt
           image={warningImg}
           title={"Archive Transaction?"}
@@ -1006,7 +1008,7 @@ const TransactionModal = ({
         />
       </Dialog>
 
-      <Dialog open={openReason}>
+      <Dialog open={openReason} onClose={() => dispatch(setOpenReason(false))}>
         <ReasonInput
           title={"Reason for archive"}
           reasonDesc={"Please enter the reason for archiving this transaction"}
@@ -1028,7 +1030,7 @@ const TransactionModal = ({
 
       <TransactionDrawer transactionData={transactionData} />
 
-      <Dialog open={isContinue}>
+      <Dialog open={isContinue} onClose={() => dispatch(setIsContinue(false))}>
         <AppPrompt
           image={receiveImg}
           title={"Proceed with Computation?"}

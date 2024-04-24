@@ -1,13 +1,6 @@
 import * as Yup from "yup";
 
 const transactionSchema = Yup.object({
-  is_offset: Yup.boolean(),
-  tag_no: Yup.string().when("is_offset", {
-    is: (is_offset) => !is_offset,
-    then: () => Yup.string().required("Tag number is required"),
-    otherwise: () => Yup.string().nullable(),
-  }),
-
   ap: Yup.object().required("AP number required").typeError("AP is required"),
 
   tin: Yup.object().required("TIN is required"),
@@ -57,9 +50,6 @@ const transactionSchema = Yup.object({
   date_invoice: Yup.date()
     .typeError("Date invoice is required")
     .required("Date invoice is required"),
-  date_recieved: Yup.date()
-    .typeError("Date receive is required")
-    .required("Date receive is required"),
   tag_month_year: Yup.date()
     .typeError("Tag year month is required")
     .required("Tag year month is required"),

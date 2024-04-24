@@ -19,6 +19,8 @@ import {
   setCreateTax,
   setTaxData,
   setUpdateTax,
+  setViewAccountingEntries,
+  setViewMenu,
 } from "../../../services/slice/menuSlice";
 import {
   useAccountNumberQuery,
@@ -61,6 +63,7 @@ import AddIcon from "@mui/icons-material/Add";
 
 import LocalOfferOutlinedIcon from "@mui/icons-material/LocalOfferOutlined";
 import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
+import ViewQuiltOutlinedIcon from "@mui/icons-material/ViewQuiltOutlined";
 
 import apTransactionSchema from "../../../schemas/apTransactionSchema";
 
@@ -71,13 +74,23 @@ import {
 } from "../../../services/slice/optionsSlice";
 import ComputationMenu from "./ComputationMenu";
 import { totalAccount, totalAmount } from "../../../services/functions/compute";
+import TransactionModalApprover from "./TransactionModalApprover";
 
-const TransactionModalAp = ({ view, update, receive, checked }) => {
+const TransactionModalAp = ({
+  view,
+  update,
+  receive,
+  checked,
+  viewVoucher,
+}) => {
   const dispatch = useDispatch();
   const transactionData = useSelector((state) => state.menu.menuData);
   const createTax = useSelector((state) => state.menu.createTax);
   const updateTax = useSelector((state) => state.menu.updateTax);
   const computationMenu = useSelector((state) => state.menu.computationMenu);
+  const viewAccountingEntries = useSelector(
+    (state) => state.menu.viewAccountingEntries
+  );
 
   const disableButton = useSelector((state) => state.options.disableButton);
   const disableCheck = useSelector((state) => state.options.disableCheck);
@@ -132,16 +145,19 @@ const TransactionModalAp = ({ view, update, receive, checked }) => {
     pagination: "none",
   });
 
-  const { data: taxComputation, isLoading: loadingTax } =
-    useTaxComputationQuery(
-      {
-        status: "active",
-        transaction_id: transactionData?.transactions?.id,
-        voucher: voucher,
-        pagination: "none",
-      },
-      { skip: transactionData === null }
-    );
+  const {
+    data: taxComputation,
+    isLoading: loadingTax,
+    isError: errorTaxComputation,
+  } = useTaxComputationQuery(
+    {
+      status: "active",
+      transaction_id: transactionData?.transactions?.id,
+      voucher: voucher,
+      pagination: "none",
+    },
+    { skip: transactionData === null }
+  );
 
   const {
     data: supplierType,
@@ -846,6 +862,17 @@ const TransactionModalAp = ({ view, update, receive, checked }) => {
                 Archive
               </Button>
             )}
+            {!errorTaxComputation && viewVoucher && (
+              <Button
+                variant="contained"
+                color="success"
+                className="add-transaction-button"
+                startIcon={<ViewQuiltOutlinedIcon />}
+                onClick={() => dispatch(setViewAccountingEntries(true))}
+              >
+                View Voucher
+              </Button>
+            )}
           </Box>
           <Box className="archive-transaction-button-container">
             {update && (
@@ -896,7 +923,7 @@ const TransactionModalAp = ({ view, update, receive, checked }) => {
         <Lottie animationData={loading} loop />
       </Dialog>
 
-      <Dialog open={isReturn}>
+      <Dialog open={isReturn} onClose={() => dispatch(setReturn(false))}>
         <AppPrompt
           image={warningImg}
           title={"Archive Entry?"}
@@ -917,15 +944,35 @@ const TransactionModalAp = ({ view, update, receive, checked }) => {
         <></>
       )}
 
-      <Dialog open={createTax} className="transaction-modal-dialog">
+      <Dialog
+        open={createTax}
+        className="transaction-modal-dialog"
+        onClose={() => dispatch(setCreateTax(false))}
+      >
         <TaxComputation create taxComputation={taxComputation} />
       </Dialog>
 
-      <Dialog open={computationMenu} className="transaction-modal-dialog-tax">
+      <Dialog
+        open={computationMenu}
+        className="transaction-modal-dialog-tax"
+        onClose={() => dispatch(setComputationMenu(false))}
+      >
         <ComputationMenu />
       </Dialog>
 
-      <Dialog open={updateTax} className="transaction-modal-dialog">
+      <Dialog
+        open={viewAccountingEntries}
+        className="transaction-modal-dialog"
+        onClose={() => dispatch(setViewAccountingEntries(false))}
+      >
+        <TransactionModalApprover viewAccountingEntries />
+      </Dialog>
+
+      <Dialog
+        open={updateTax}
+        className="transaction-modal-dialog"
+        onClose={() => dispatch(setUpdateTax(false))}
+      >
         <TaxComputation update taxComputation={taxComputation} />
       </Dialog>
     </Paper>

@@ -139,7 +139,7 @@ const SupplierType = () => {
       </Box>
       <Box className="supplierType-head-container">
         <Typography className="page-text-indicator-supplierType">
-          Supplier Type
+          VAT Percent
         </Typography>
         <Box className="supplierType-button-container">
           <SearchText onSearchData={onSearchData} />

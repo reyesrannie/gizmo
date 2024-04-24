@@ -1,5 +1,8 @@
 import React from "react";
 import "../../styles/TransactionModal.scss";
+import "../../styles/TagTransaction.scss";
+import "../../styles/Supplier.scss";
+
 import {
   Paper,
   Typography,
@@ -12,6 +15,7 @@ import {
   Table,
   TableBody,
   Stack,
+  Divider,
 } from "@mui/material";
 
 import { useDispatch, useSelector } from "react-redux";
@@ -185,13 +189,12 @@ const ComputationMenu = ({ details }) => {
                       </Typography>
                     </Stack>
                   </TableCell>
-                  <TableCell align="center">
+                  <TableCell>
                     <Stack>
                       <Typography className="supplier-company-name">
                         {menuData?.transactions?.invoice_no}
                       </Typography>
                       <Typography className="supplier-company-money">
-                        <span>&#8369;</span>
                         {convertToPeso(menuData?.transactions?.purchase_amount)}
                       </Typography>
 
@@ -208,7 +211,7 @@ const ComputationMenu = ({ details }) => {
                       {menuData?.transactions?.description}
                     </Typography>
                   </TableCell>
-                  <TableCell align="center">
+                  <TableCell>
                     <Stack>
                       <Typography className="supplier-company-name">
                         {menuData?.transactions?.ap_tagging} -
@@ -228,6 +231,8 @@ const ComputationMenu = ({ details }) => {
           </TableContainer>
         )}
 
+      <Divider orientation="horizontal" className="transaction-devider-menu" />
+
       <TableContainer className="tag-transaction-table-container">
         <Table stickyHeader>
           <TableHead>
@@ -236,18 +241,15 @@ const ComputationMenu = ({ details }) => {
               <TableCell>Account Title</TableCell>
               <TableCell>Remarks</TableCell>
               <TableCell>Supplier Type</TableCell>
-              <TableCell align="center">Mode</TableCell>
               <TableCell align="center">Amount</TableCell>
-              {vpl !== 0 && <TableCell align="center">Tax based</TableCell>}
-              {vps !== 0 && <TableCell align="center">Tax based</TableCell>}
-              {npl !== 0 && <TableCell align="center">Tax based</TableCell>}
-              {nps !== 0 && <TableCell align="center">Tax based</TableCell>}
               <TableCell align="center">Input Tax</TableCell>
+              <TableCell align="center">Debit</TableCell>
               <TableCell align="center">WTax Payable Expanded</TableCell>
-              {debit !== 0 && <TableCell align="center">Debit</TableCell>}
-              {credit !== 0 && <TableCell align="center">Credit</TableCell>}
+              <TableCell align="center">Credit</TableCell>
 
-              <TableCell align="center">Total Amount</TableCell>
+              <TableCell align="center">
+                {voucher === "check" ? "Check Amount" : "Total Amount"}
+              </TableCell>
             </TableRow>
           </TableHead>
 
@@ -302,12 +304,6 @@ const ComputationMenu = ({ details }) => {
                     </TableCell>
                     <TableCell align="center">
                       <Typography className="tag-transaction-company-type">
-                        {tax?.credit_from === null ? "Debit" : "Credit"}
-                      </Typography>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Typography className="tag-transaction-company-type">
-                        <span>&#8369;</span>{" "}
                         {convertToPeso(
                           tax?.credit_from !== null &&
                             tax?.credit_from === "Check Amount"
@@ -316,89 +312,31 @@ const ComputationMenu = ({ details }) => {
                         )}
                       </Typography>
                     </TableCell>
-                    {vpl !== 0 && (
-                      <TableCell align="center">
-                        <Typography className="tag-transaction-company-type">
-                          <span>&#8369;</span>
-                          {convertToPeso(
-                            tax?.credit_from !== null &&
-                              tax?.credit_from === "Check Amount"
-                              ? 0
-                              : tax?.vat_local
-                          )}
-                        </Typography>
-                      </TableCell>
-                    )}
-                    {vps !== 0 && (
-                      <TableCell align="center">
-                        <Typography className="tag-transaction-company-type">
-                          <span>&#8369;</span>
-                          {convertToPeso(
-                            tax?.credit_from !== null &&
-                              tax?.credit_from === "Check Amount"
-                              ? 0
-                              : tax?.vat_service
-                          )}
-                        </Typography>
-                      </TableCell>
-                    )}
-                    {npl !== 0 && (
-                      <TableCell align="center">
-                        <Typography className="tag-transaction-company-type">
-                          <span>&#8369;</span>
-                          {convertToPeso(
-                            tax?.credit_from !== null &&
-                              tax?.credit_from === "Check Amount"
-                              ? 0
-                              : tax?.nvat_local
-                          )}
-                        </Typography>
-                      </TableCell>
-                    )}
-                    {nps !== 0 && (
-                      <TableCell align="center">
-                        <Typography className="tag-transaction-company-type">
-                          <span>&#8369;</span>
-                          {convertToPeso(
-                            tax?.credit_from !== null &&
-                              tax?.credit_from === "Check Amount"
-                              ? 0
-                              : tax?.nvat_service
-                          )}
-                        </Typography>
-                      </TableCell>
-                    )}
+
                     <TableCell align="center">
                       <Typography className="tag-transaction-company-type">
-                        <span>&#8369;</span>
                         {convertToPeso(tax?.vat_input_tax)}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
                       <Typography className="tag-transaction-company-type">
-                        <span>&#8369;</span>{" "}
+                        {convertToPeso(tax?.debit)}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Typography className="tag-transaction-company-type">
                         {convertToPeso(tax?.wtax_payable_cr)}
                       </Typography>
                     </TableCell>
 
-                    {debit !== 0 && (
-                      <TableCell align="center">
-                        <Typography className="tag-transaction-company-type">
-                          <span>&#8369;</span> {convertToPeso(tax?.debit)}
-                        </Typography>
-                      </TableCell>
-                    )}
-                    {credit !== 0 && (
-                      <TableCell align="center">
-                        <Typography className="tag-transaction-company-type">
-                          <span>&#8369;</span> -{convertToPeso(tax?.credit)}
-                        </Typography>
-                      </TableCell>
-                    )}
+                    <TableCell align="center">
+                      <Typography className="tag-transaction-company-type">
+                        {convertToPeso(tax?.credit)}
+                      </Typography>
+                    </TableCell>
 
                     <TableCell align="center">
                       <Typography className="tag-transaction-company-type">
-                        <span>&#8369;</span>
                         {tax?.credit_from !== null &&
                         tax?.credit_from === "Check Amount"
                           ? `-${convertToPeso(tax?.account)}`
@@ -412,75 +350,44 @@ const ComputationMenu = ({ details }) => {
 
             {!isError && !loadingTax && (
               <TableRow className="table-body-tag-transaction">
-                <TableCell align="center" colSpan={5}>
+                <TableCell align="center" colSpan={4}>
                   <Typography className="tag-transaction-company-type">
                     Total
                   </Typography>
                 </TableCell>
                 <TableCell>
                   <Typography className="tag-transaction-company-type">
-                    <span>&#8369;</span> {convertToPeso(amount)}
+                    {convertToPeso(amount)}
                   </Typography>
                 </TableCell>
-                {vpl !== 0 && (
-                  <TableCell align="center">
-                    <Typography className="tag-transaction-company-type">
-                      <span>&#8369;</span> {convertToPeso(vpl)}
-                    </Typography>
-                  </TableCell>
-                )}
-                {vps !== 0 && (
-                  <TableCell align="center">
-                    <Typography className="tag-transaction-company-type">
-                      <span>&#8369;</span> {convertToPeso(vps)}
-                    </Typography>
-                  </TableCell>
-                )}
-                {npl !== 0 && (
-                  <TableCell align="center">
-                    <Typography className="tag-transaction-company-type">
-                      <span>&#8369;</span> {convertToPeso(npl)}
-                    </Typography>
-                  </TableCell>
-                )}
-                {nps !== 0 && (
-                  <TableCell align="center">
-                    <Typography className="tag-transaction-company-type">
-                      <span>&#8369;</span> {convertToPeso(nps)}
-                    </Typography>
-                  </TableCell>
-                )}
+
                 <TableCell align="center">
                   <Typography className="tag-transaction-company-type">
-                    <span>&#8369;</span>
                     {convertToPeso(vatInput)}
                   </Typography>
                 </TableCell>
 
                 <TableCell align="center">
                   <Typography className="tag-transaction-company-type">
-                    <span>&#8369;</span> {convertToPeso(wtax)}
+                    {convertToPeso(debit)}
                   </Typography>
                 </TableCell>
 
-                {debit !== 0 && (
-                  <TableCell align="center">
-                    <Typography className="tag-transaction-company-type">
-                      <span>&#8369;</span> {convertToPeso(debit)}
-                    </Typography>
-                  </TableCell>
-                )}
-                {credit !== 0 && (
-                  <TableCell align="center">
-                    <Typography className="tag-transaction-company-type">
-                      <span>&#8369;</span> -{convertToPeso(credit)}
-                    </Typography>
-                  </TableCell>
-                )}
+                <TableCell align="center">
+                  <Typography className="tag-transaction-company-type">
+                    {convertToPeso(wtax)}
+                  </Typography>
+                </TableCell>
 
                 <TableCell align="center">
                   <Typography className="tag-transaction-company-type">
-                    <span>&#8369;</span> {convertToPeso(totalAccounts)}
+                    {convertToPeso(credit)}
+                  </Typography>
+                </TableCell>
+
+                <TableCell align="center">
+                  <Typography className="tag-transaction-company-type">
+                    {convertToPeso(totalAccounts)}
                   </Typography>
                 </TableCell>
               </TableRow>

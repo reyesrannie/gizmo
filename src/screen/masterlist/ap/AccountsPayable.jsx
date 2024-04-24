@@ -134,9 +134,7 @@ const AccountsPayable = () => {
         <Breadcrums />
       </Box>
       <Box className="ap-head-container">
-        <Typography className="page-text-indicator-ap">
-          AP Allocation
-        </Typography>
+        <Typography className="page-text-indicator-ap">AP Tagging</Typography>
         <Box className="ap-button-container">
           <SearchText onSearchData={onSearchData} />
           <Button

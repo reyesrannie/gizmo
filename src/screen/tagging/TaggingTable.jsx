@@ -37,6 +37,7 @@ import "../../components/styles/TagTransaction.scss";
 import { useState } from "react";
 
 import {
+  resetMenu,
   setMenuData,
   setUpdateMenu,
   setViewMenu,
@@ -178,6 +179,22 @@ const TaggingTable = ({
                   <TableRow
                     className="table-body-tag-transaction"
                     key={tag?.id}
+                    onClick={() => {
+                      dispatch(setMenuData(tag));
+
+                      tag?.gas_status === "pending" &&
+                        dispatch(setUpdateMenu(true));
+                      tag?.gas_status === "archived" &&
+                        dispatch(setViewMenu(true));
+                      tag?.gas_status === "returned" &&
+                        dispatch(setUpdateMenu(true));
+                      tag?.gas_status === "received" &&
+                        dispatch(setViewMenu(true));
+                      tag?.gas_status === "checked" &&
+                        dispatch(setViewMenu(true));
+                      tag?.gas_status === "approved" &&
+                        dispatch(setViewMenu(true));
+                    }}
                   >
                     <TableCell>{tag?.tag_no}</TableCell>
                     <TableCell>
@@ -365,7 +382,11 @@ const TaggingTable = ({
         <TransactionModal transactionData={menuData} view />
       </Dialog>
 
-      <Dialog open={updateMenu} className="transaction-modal-dialog">
+      <Dialog
+        open={updateMenu}
+        className="transaction-modal-dialog"
+        onClose={() => dispatch(resetMenu())}
+      >
         <TransactionModal transactionData={menuData} update />
       </Dialog>
     </Box>

@@ -36,7 +36,11 @@ import "../../components/styles/TagTransaction.scss";
 
 import { useState } from "react";
 
-import { setMenuData, setReceiveMenu } from "../../services/slice/menuSlice";
+import {
+  resetMenu,
+  setMenuData,
+  setReceiveMenu,
+} from "../../services/slice/menuSlice";
 
 import {
   useDocumentTypeQuery,
@@ -176,6 +180,11 @@ const TransactionTable = ({
                   <TableRow
                     className="table-body-tag-transaction"
                     key={tag?.id}
+                    onClick={() => {
+                      dispatch(setMenuData(tag));
+                      tag?.gas_status === "pending" &&
+                        dispatch(setReceiveMenu(true));
+                    }}
                   >
                     <TableCell>{tag?.tag_no}</TableCell>
                     <TableCell>
@@ -324,7 +333,11 @@ const TransactionTable = ({
         />
       </Menu>
 
-      <Dialog open={receiveMenu} className="transaction-modal-dialog">
+      <Dialog
+        open={receiveMenu}
+        className="transaction-modal-dialog"
+        onClose={() => dispatch(resetMenu())}
+      >
         <TransactionModal transactionData={menuData} receive />
       </Dialog>
     </Box>

@@ -150,6 +150,15 @@
   }
 }
 
+.transaction-devider-menu {
+  &.MuiDivider-root {
+    width: 100%;
+    margin-right: 3px;
+    height: 2px;
+    background-color: #000;
+  }
+}
+
 .transaction-form-textBox {
   &.MuiFormControl-root {
     border-radius: 10px;

@@ -37,8 +37,10 @@ import "../../components/styles/TagTransaction.scss";
 import { useState } from "react";
 
 import {
+  resetMenu,
   setCheckMenu,
   setMenuData,
+  setUpdateMenu,
   setViewMenu,
 } from "../../services/slice/menuSlice";
 
@@ -344,15 +346,27 @@ const JournalTable = ({
         />
       </Menu>
 
-      <Dialog open={viewMenu} className="transaction-modal-dialog">
+      <Dialog
+        open={viewMenu}
+        className="transaction-modal-dialog"
+        onClose={() => dispatch(resetMenu())}
+      >
         <TransactionModalApprover approved />
       </Dialog>
 
-      <Dialog open={updateMenu} className="transaction-modal-dialog">
+      <Dialog
+        open={updateMenu}
+        className="transaction-modal-dialog"
+        onClose={() => dispatch(resetMenu(false))}
+      >
         <TransactionModalAp transactionData={menuData} update />
       </Dialog>
 
-      <Dialog open={checkMenu} className="transaction-modal-dialog">
+      <Dialog
+        open={checkMenu}
+        className="transaction-modal-dialog"
+        onClose={() => dispatch(resetMenu())}
+      >
         <TransactionModalApprover transactionData={menuData} checked />
       </Dialog>
     </Box>

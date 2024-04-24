@@ -183,6 +183,20 @@ const JournalTable = ({
                   <TableRow
                     className="table-body-tag-transaction"
                     key={tag?.id}
+                    onClick={() => {
+                      dispatch(setVoucher("journal"));
+                      dispatch(setMenuData(tag));
+                      tag?.state === "For Computation" &&
+                        dispatch(setUpdateMenu(true));
+
+                      tag?.state === "For Approval" &&
+                        dispatch(setCheckMenu(true));
+
+                      tag?.state === "returned" &&
+                        dispatch(setUpdateMenu(true));
+
+                      tag?.state === "approved" && dispatch(setViewMenu(true));
+                    }}
                   >
                     <TableCell>{tag?.transactions?.tag_no}</TableCell>
                     <TableCell>
@@ -356,20 +370,35 @@ const JournalTable = ({
           disableClearable
         />
       </Menu>
-
-      <Dialog open={receiveMenu} className="transaction-modal-dialog">
+      <Dialog
+        open={receiveMenu}
+        className="transaction-modal-dialog"
+        onClose={() => dispatch(setReceiveMenu(false))}
+      >
         <TransactionModalAp transactionData={menuData} receive />
       </Dialog>
 
-      <Dialog open={viewMenu} className="transaction-modal-dialog">
+      <Dialog
+        open={viewMenu}
+        className="transaction-modal-dialog"
+        onClose={() => dispatch(setViewMenu(false))}
+      >
         <TransactionModalApprover transactionData={menuData} approved ap />
       </Dialog>
 
-      <Dialog open={updateMenu} className="transaction-modal-dialog">
-        <TransactionModalAp transactionData={menuData} update />
+      <Dialog
+        open={updateMenu}
+        className="transaction-modal-dialog"
+        onClose={() => dispatch(setUpdateMenu(false))}
+      >
+        <TransactionModalAp transactionData={menuData} update viewVoucher />
       </Dialog>
 
-      <Dialog open={checkMenu} className="transaction-modal-dialog">
+      <Dialog
+        open={checkMenu}
+        className="transaction-modal-dialog"
+        onClose={() => dispatch(setCheckMenu(false))}
+      >
         <TransactionModalAp transactionData={menuData} checked />
       </Dialog>
     </Box>

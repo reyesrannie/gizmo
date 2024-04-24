@@ -18,7 +18,6 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import Lottie from "lottie-react";
 import loading from "../../../assets/lottie/Loading-2.json";
-import warningImg from "../../../assets/svg/warning.svg";
 
 import "../../styles/TransactionModal.scss";
 import "../../styles/TransactionModalApprover.scss";
@@ -27,6 +26,7 @@ import {
   resetMenu,
   setComputationMenu,
   setPrintable,
+  setViewAccountingEntries,
 } from "../../../services/slice/menuSlice";
 import { resetOption } from "../../../services/slice/optionsSlice";
 import { resetPrompt, setReturn } from "../../../services/slice/promptSlice";
@@ -36,6 +36,7 @@ import {
   useApproveCheckEntriesMutation,
   useApproveJournalEntriesMutation,
   useApproveTransactionMutation,
+  useAtcQuery,
   useReturnCheckEntriesMutation,
   useReturnJournalEntriesMutation,
   useStatusLogsQuery,
@@ -62,10 +63,16 @@ import TransactionDrawer from "../TransactionDrawer";
 import ReasonInput from "../ReasonInput";
 import { enqueueSnackbar } from "notistack";
 import { singleError } from "../../../services/functions/errorResponse";
-import Form2307 from "./Form2307";
 import ComputationMenu from "./ComputationMenu";
+import { printPDF } from "../../../services/functions/pdfProcess";
 
-const TransactionModalApprover = ({ view, update, approved, ap }) => {
+const TransactionModalApprover = ({
+  view,
+  update,
+  approved,
+  ap,
+  viewAccountingEntries,
+}) => {
   const dispatch = useDispatch();
   const isReturn = useSelector((state) => state.prompt.return);
   const menuData = useSelector((state) => state.menu.menuData);
@@ -144,6 +151,11 @@ const TransactionModalApprover = ({ view, update, approved, ap }) => {
       skip: voucher === "journal" || voucher === null || menuData === null,
     }
   );
+
+  const { data: atc } = useAtcQuery({
+    status: "active",
+    pagination: "none",
+  });
 
   const { data: vpJournalNumber, isLoading: loadingJournalVP } =
     useVpJournalNumberQuery(
@@ -334,6 +346,34 @@ const TransactionModalApprover = ({ view, update, approved, ap }) => {
       item?.mode === "Credit" ? total + parseFloat(item?.amount) : total,
     0
   );
+
+  const printPdf = () => {
+    const month = new Date(menuData?.transactions?.date_invoice).getMonth() + 1;
+    const quarter = Math.ceil(month / 3);
+    const quarterStartMonth = 3 * (quarter - 1) + 1; // Calculate the starting month of the quarter
+    const monthInQuarter = month - quarterStartMonth + 1;
+
+    const supplier = tin?.result?.find(
+      (item) => menuData?.transactions?.supplier_id === item?.id
+    );
+    const atc_name = atc?.result?.find((item) => menuData?.atc === item.id);
+    const code = supplier?.company_address;
+
+    const parts = code.split(",");
+    const zipCode = parts[parts.length - 1].trim();
+    const hasValidZipCodeFormat = /^\d{4}$/.test(zipCode);
+
+    const obj = {
+      quarter,
+      code: hasValidZipCodeFormat ? zipCode : null,
+      supplier,
+      month: monthInQuarter,
+      atc: atc_name?.code,
+      tax: taxComputation?.result,
+    };
+
+    printPDF(obj);
+  };
 
   return (
     <Paper className="transaction-modal-container">
@@ -623,6 +663,7 @@ const TransactionModalApprover = ({ view, update, approved, ap }) => {
                       display={"flex"}
                       flexDirection={"row"}
                       justifyContent={"space-between"}
+                      marginRight={1}
                     >
                       {item !== undefined && (
                         <Typography
@@ -814,10 +855,13 @@ const TransactionModalApprover = ({ view, update, approved, ap }) => {
             </TableRow>
           </TableBody>
         </Table>
+        <Typography className="disclaimer-voucher-signature">
+          **This voucher is system-generated and does not require a signature.**
+        </Typography>
       </TableContainer>
       <Box className="add-transaction-button-container">
         <Box className="return-receive-container">
-          {!approved && (
+          {!approved && !viewAccountingEntries && (
             <Button
               variant="contained"
               color="error"
@@ -829,17 +873,19 @@ const TransactionModalApprover = ({ view, update, approved, ap }) => {
             </Button>
           )}
 
-          <Button
-            variant="contained"
-            color="success"
-            className="add-transaction-button"
-            // startIcon={<DeleteForeverOutlinedIcon />}
-            onClick={() => dispatch(setComputationMenu(true))}
-          >
-            Details
-          </Button>
+          {!viewAccountingEntries && (
+            <Button
+              variant="contained"
+              color="success"
+              className="add-transaction-button"
+              // startIcon={<DeleteForeverOutlinedIcon />}
+              onClick={() => dispatch(setComputationMenu(true))}
+            >
+              Details
+            </Button>
+          )}
 
-          {approved && ap && (
+          {approved && ap && !viewAccountingEntries && (
             <ReactToPrint
               trigger={() => (
                 <Button
@@ -854,20 +900,19 @@ const TransactionModalApprover = ({ view, update, approved, ap }) => {
               content={() => componentRef.current}
             />
           )}
-          {approved && ap && !printable && (
+          {approved && ap && !printable && !viewAccountingEntries && (
             <Button
               variant="contained"
               color="success"
               className="add-transaction-button"
-              // startIcon={<DeleteForeverOutlinedIcon />}
-              onClick={() => dispatch(setFromBIR(true))}
+              onClick={() => printPdf()}
             >
               Print 2307
             </Button>
           )}
         </Box>
         <Box className="archive-transaction-button-container">
-          {!approved && (
+          {!approved && !viewAccountingEntries && (
             <LoadingButton
               variant="contained"
               color="warning"
@@ -881,12 +926,18 @@ const TransactionModalApprover = ({ view, update, approved, ap }) => {
             variant="contained"
             color="primary"
             onClick={() => {
-              dispatch(resetMenu());
-              dispatch(resetOption());
+              !viewAccountingEntries && dispatch(resetMenu());
+              !viewAccountingEntries && dispatch(resetOption());
+              viewAccountingEntries &&
+                dispatch(setViewAccountingEntries(false));
             }}
             className="add-transaction-button"
           >
-            {view ? "Close" : update ? "Cancel" : "Cancel"}
+            {view || viewAccountingEntries
+              ? "Close"
+              : update
+              ? "Cancel"
+              : "Cancel"}
           </Button>
         </Box>
       </Box>
@@ -925,11 +976,6 @@ const TransactionModalApprover = ({ view, update, approved, ap }) => {
           confirmOnClick={(e) => returnHandler(e)}
         />
       </Dialog>
-
-      <Dialog open={formBIR} className="transaction-modal-dialog">
-        <Form2307 />
-      </Dialog>
-
       <Dialog open={computationMenu} className="transaction-modal-dialog-tax">
         <ComputationMenu details />
       </Dialog>
