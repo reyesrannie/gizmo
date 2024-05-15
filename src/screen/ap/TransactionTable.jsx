@@ -48,14 +48,12 @@ import {
   useTagYearMonthQuery,
 } from "../../services/store/request";
 import { setFilterBy } from "../../services/slice/transactionSlice";
-import TransactionModalAp from "../../components/customs/modal/TransactionModalAp";
 import TransactionModal from "../../components/customs/modal/TransactionModal";
 
 const TransactionTable = ({
   params,
   onSortTable,
   isLoading,
-  status,
   isError,
   tagTransaction,
   isFetching,
@@ -68,9 +66,6 @@ const TransactionTable = ({
   const dispatch = useDispatch();
   const menuData = useSelector((state) => state.menu.menuData);
   const receiveMenu = useSelector((state) => state.menu.receiveMenu);
-  const updateMenu = useSelector((state) => state.menu.updateMenu);
-  const viewMenu = useSelector((state) => state.menu.viewMenu);
-  const checkMenu = useSelector((state) => state.menu.checkMenu);
 
   const filterBy = useSelector((state) => state.transaction.filterBy);
 
@@ -148,8 +143,7 @@ const TransactionTable = ({
             {loadingDocument ||
             loadingSupplier ||
             isLoading ||
-            loadingTagYearMonth ||
-            status === "pending" ? (
+            loadingTagYearMonth ? (
               <TableRow>
                 <TableCell colSpan={6} align="center">
                   <Lottie
@@ -249,7 +243,7 @@ const TransactionTable = ({
               })
             )}
           </TableBody>
-          {!isFetching && !isError && (
+          {!isError && (
             <TableFooter style={{ position: "sticky", bottom: 0 }}>
               <TableRow className="table-footer-tag-transaction">
                 <TableCell colSpan={6}>

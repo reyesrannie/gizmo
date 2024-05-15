@@ -27,6 +27,33 @@ const initialState = {
   viewAccountingEntries: false,
 };
 
+const initialStateWithoutDrawer = {
+  drawer: true,
+  accountMenu: false,
+  roles: false,
+  rolesView: false,
+  rolesUpdate: false,
+  rolesData: null,
+  createMenu: false,
+  checkMenu: false,
+  computationMenu: false,
+  updateMenu: false,
+  receiveMenu: false,
+  importMenu: false,
+  importHasData: false,
+  importTitle: "",
+  importLoading: false,
+  importError: null,
+  viewMenu: false,
+  menuData: null,
+  createTax: false,
+  updateTax: false,
+  taxData: null,
+  printable: false,
+  updateCount: 0,
+  viewAccountingEntries: false,
+};
+
 const menutSlice = createSlice({
   name: "menu",
   initialState,
@@ -106,6 +133,9 @@ const menutSlice = createSlice({
     resetMenu: () => {
       return initialState;
     },
+    resetMenuWithoutDrawer: () => {
+      return initialStateWithoutDrawer;
+    },
   },
 });
 
@@ -135,6 +165,7 @@ export const {
   setComputationMenu,
   setUpdateCount,
   setViewAccountingEntries,
+  resetMenuWithoutDrawer,
 } = menutSlice.actions;
 
 export default menutSlice.reducer;

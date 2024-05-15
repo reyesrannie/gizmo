@@ -10,6 +10,8 @@ import {
 import React from "react";
 
 import "../../styles/SupplierTypeModal.scss";
+import "../../styles/DocumentTypeModal.scss";
+
 import supplierType from "../../../assets/svg/vat.svg";
 import AppTextBox from "../AppTextBox";
 import loading from "../../../assets/lottie/Loading-2.json";

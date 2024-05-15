@@ -391,7 +391,7 @@ const SupplierType = () => {
 
       <Dialog open={importMenu}>
         <ImportModal
-          title="Supplier type"
+          title="Vat Percent"
           importData={importCompanyHandler}
           isLoading={loadingImport}
         />

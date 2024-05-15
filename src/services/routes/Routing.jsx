@@ -211,7 +211,7 @@ const Routing = () => {
           ),
         },
         {
-          path: "account-titles",
+          path: "titles",
           element: hasAccess(["account-titles"]) ? (
             <AccountTitles />
           ) : (

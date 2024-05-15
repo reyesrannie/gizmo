@@ -75,6 +75,7 @@ import {
 import ComputationMenu from "./ComputationMenu";
 import { totalAccount, totalAmount } from "../../../services/functions/compute";
 import TransactionModalApprover from "./TransactionModalApprover";
+import socket from "../../../services/functions/serverSocket";
 
 const TransactionModalAp = ({
   view,
@@ -327,14 +328,18 @@ const TransactionModalAp = ({
       cip_no: submitData?.cip_no,
       remarks: submitData?.remarks,
       coa_id: submitData?.coa_id?.id,
+      tag_no: transactionData?.transactions?.tag_no,
     };
-
     try {
       const res =
         voucher === "check"
           ? await checkedCV(obj).unwrap()
           : await checkedJV(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
+      socket.emit("transaction_approval", {
+        ...obj,
+        message: `The transaction ${obj?.tag_no} is now for approval`,
+      });
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
@@ -528,7 +533,7 @@ const TransactionModalAp = ({
           />
         )}
         <AppTextBox
-          disabled={checked}
+          disabled={checked || disableCheck}
           control={control}
           name={"cip_no"}
           label={"CIP No. (Optional)"}
@@ -539,7 +544,7 @@ const TransactionModalAp = ({
         />
         {voucher === "journal" && (
           <Autocomplete
-            disabled={checked}
+            disabled={checked || disableCheck}
             control={control}
             name={"coa_id"}
             options={accountTitles?.result || []}
@@ -564,6 +569,7 @@ const TransactionModalAp = ({
         {update && (
           <Autocomplete
             control={control}
+            disabled={disableCheck}
             name={"atc_id"}
             options={atc?.result || []}
             getOptionLabel={(option) => `${option.code} - ${option.name}`}
@@ -587,6 +593,7 @@ const TransactionModalAp = ({
 
         {update && (
           <Autocomplete
+            disabled={disableCheck}
             control={control}
             name={"location_id"}
             options={location?.result || []}
@@ -610,7 +617,7 @@ const TransactionModalAp = ({
         )}
 
         <AppTextBox
-          disabled={checked}
+          disabled={true}
           money
           control={control}
           name={"amount"}

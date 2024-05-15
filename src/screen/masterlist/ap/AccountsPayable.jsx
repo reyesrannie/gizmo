@@ -389,7 +389,7 @@ const AccountsPayable = () => {
 
       <Dialog open={importMenu}>
         <ImportModal
-          title="Accounts Payable"
+          title="AP Tagging Import"
           importData={importCompanyHandler}
           isLoading={loadingImport}
         />

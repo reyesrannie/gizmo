@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 import Breadcrums from "../../components/customs/Breadcrums";
 import SearchText from "../../components/customs/SearchText";
@@ -29,7 +29,6 @@ const Transaction = () => {
     isLoading,
     isError,
     isFetching,
-    status,
   } = useTransactionQuery(params);
 
   return (
@@ -51,7 +50,6 @@ const Transaction = () => {
         isLoading={isLoading}
         onPageChange={onPageChange}
         onRowChange={onRowChange}
-        status={status}
         tagTransaction={tagTransaction}
         onOrderBy={onOrderBy}
         state="pending"

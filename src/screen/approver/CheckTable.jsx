@@ -148,8 +148,7 @@ const CheckTable = ({
             {loadingDocument ||
             loadingSupplier ||
             isLoading ||
-            loadingTagYearMonth ||
-            status === "pending" ? (
+            loadingTagYearMonth ? (
               <TableRow>
                 <TableCell colSpan={6} align="center">
                   <Lottie

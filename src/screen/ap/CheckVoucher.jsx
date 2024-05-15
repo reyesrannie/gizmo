@@ -6,6 +6,7 @@ import SearchText from "../../components/customs/SearchText";
 import {
   Accordion,
   AccordionSummary,
+  Badge,
   Box,
   IconButton,
   Typography,
@@ -23,18 +24,16 @@ import {
   setFilterBy,
   setHeader,
   setIsExpanded,
-  setTransactionHeader,
 } from "../../services/slice/transactionSlice";
 import CheckTable from "./CheckTable";
 import useApHook from "../../services/hooks/useApHook";
+import CountDistribute from "../../services/functions/CountDistribute";
 
 const CheckVoucher = () => {
   const dispatch = useDispatch();
 
   const isExpanded = useSelector((state) => state.transaction.isExpanded);
-  const transactionHeader = useSelector(
-    (state) => state.transaction.transactionHeader
-  );
+  const header = useSelector((state) => state.transaction.header) || "Received";
 
   const {
     params,
@@ -54,6 +53,8 @@ const CheckVoucher = () => {
     status,
   } = useCheckEntriesQuery(params);
 
+  const { countHeaderAPCH } = CountDistribute();
+
   return (
     <Box>
       <Box>
@@ -68,16 +69,21 @@ const CheckVoucher = () => {
           >
             <AccordionSummary onClick={() => dispatch(setIsExpanded(false))}>
               <Typography className="page-text-indicator-tag-transaction">
-                {transactionHeader}
+                <Badge
+                  badgeContent={header ? countHeaderAPCH(header) : 0}
+                  color="error"
+                >
+                  {header}
+                </Badge>
               </Typography>
             </AccordionSummary>
             {apHeader?.map(
               (head, index) =>
-                transactionHeader !== head?.name && (
+                header !== head?.name && (
                   <AccordionSummary
                     key={index}
                     onClick={() => {
-                      dispatch(setTransactionHeader(head.name));
+                      dispatch(setHeader(head.name));
                       dispatch(setIsExpanded(false));
                       onOrderBy("");
                       dispatch(setFilterBy(""));
@@ -85,7 +91,14 @@ const CheckVoucher = () => {
                     }}
                   >
                     <Typography className="page-text-accord-tag-transaction">
-                      {head?.name}
+                      <Badge
+                        badgeContent={
+                          head?.name ? countHeaderAPCH(head?.name) : 0
+                        }
+                        color="error"
+                      >
+                        {head?.name}
+                      </Badge>
                     </Typography>
                   </AccordionSummary>
                 )
@@ -103,7 +116,7 @@ const CheckVoucher = () => {
           <SearchText onSearchData={onSearchData} />
         </Box>
       </Box>
-      {transactionHeader === "Received" && (
+      {header === "Received" && (
         <CheckTable
           params={params}
           onSortTable={onSortTable}
@@ -118,7 +131,7 @@ const CheckVoucher = () => {
           state={"received"}
         />
       )}
-      {transactionHeader === "Checked" && (
+      {header === "Checked" && (
         <CheckTable
           params={params}
           onSortTable={onSortTable}
@@ -133,7 +146,7 @@ const CheckVoucher = () => {
           state="checked"
         />
       )}
-      {transactionHeader === "Returned" && (
+      {header === "Returned" && (
         <CheckTable
           params={params}
           onSortTable={onSortTable}
@@ -148,7 +161,7 @@ const CheckVoucher = () => {
           state="returned"
         />
       )}
-      {transactionHeader === "Approved" && (
+      {header === "Approved" && (
         <CheckTable
           params={params}
           onSortTable={onSortTable}
@@ -163,7 +176,7 @@ const CheckVoucher = () => {
           state={"approved"}
         />
       )}
-      {transactionHeader === "History" && (
+      {header === "History" && (
         <CheckTable
           params={params}
           onSortTable={onSortTable}

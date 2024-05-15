@@ -24,6 +24,7 @@ import NewspaperOutlinedIcon from "@mui/icons-material/NewspaperOutlined";
 import FactCheckOutlinedIcon from "@mui/icons-material/FactCheckOutlined";
 import PlaylistAddCheckOutlinedIcon from "@mui/icons-material/PlaylistAddCheckOutlined";
 import TaskOutlinedIcon from "@mui/icons-material/TaskOutlined";
+import MediationOutlinedIcon from "@mui/icons-material/MediationOutlined";
 
 import "../../components/styles/CardNavigation.scss";
 const user = [
@@ -198,9 +199,9 @@ const masterlist = [
     ),
   },
   {
-    path: "/masterlist/account-titles",
+    path: "/masterlist/titles",
     desc: "A module for managing Account Titles .",
-    name: "Account Titles",
+    name: "Titles",
     permission: ["account-titles"],
     firstIcon: (
       <DonutSmallOutlinedIcon color="secondary" className="icon-card-details" />
@@ -410,8 +411,35 @@ const menu = [
       {
         desc: "Account Titles",
         icon: <DonutSmallOutlinedIcon />,
-        path: "/masterlist/account-number",
+        path: "/masterlist/titles",
         permission: ["account-titles"],
+        child: [
+          {
+            desc: "Great Grandparent",
+            icon: <MediationOutlinedIcon />,
+            permission: ["ggp-titles"],
+          },
+          {
+            desc: "Grandparent",
+            icon: <MediationOutlinedIcon />,
+            permission: ["gp-titles"],
+          },
+          {
+            desc: "Parent",
+            icon: <MediationOutlinedIcon />,
+            permission: ["p-titles"],
+          },
+          {
+            desc: "Child",
+            icon: <MediationOutlinedIcon />,
+            permission: ["c-titles"],
+          },
+          {
+            desc: "Grandchild",
+            icon: <MediationOutlinedIcon />,
+            permission: ["gc-titles"],
+          },
+        ],
       },
     ],
   },
@@ -429,7 +457,6 @@ const menu = [
       },
     ],
   },
-
   {
     desc: "Accounts Payable",
     icon: <PointOfSaleOutlinedIcon />,
@@ -538,7 +565,7 @@ const routes = [
         name: "Account Number",
       },
       {
-        path: "/masterlist/account-titles",
+        path: "/masterlist/titles",
         name: "Account Titles",
       },
     ],

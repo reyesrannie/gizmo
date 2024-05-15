@@ -39,7 +39,7 @@ const DepartmentModal = ({ departmentData, view, update }) => {
   const {
     data: location,
     isLoading: loadingLocation,
-    isSuccess,
+    // isSuccess,
   } = useLocationQuery({
     status: "active",
     pagination: "none",
@@ -68,17 +68,17 @@ const DepartmentModal = ({ departmentData, view, update }) => {
   });
 
   useEffect(() => {
-    if (isSuccess) {
-      setValue("name", departmentData?.name || "");
-      setValue("code", departmentData?.code || "");
-      setValue(
-        "scope_location",
-        departmentData?.scope_locations?.map((loc) =>
-          location?.result?.find((item) => loc.location_code === item.code)
-        ) || []
-      );
-    }
-  }, [isSuccess, departmentData, location, setValue]);
+    // if (isSuccess) {
+    setValue("name", departmentData?.name || "");
+    setValue("code", departmentData?.code || "");
+    setValue(
+      "scope_location",
+      departmentData?.scope_locations?.map((loc) =>
+        location?.result?.find((item) => loc.location_code === item.code)
+      ) || []
+    );
+    // }
+  }, [departmentData, location, setValue]);
 
   const submitHandler = async (submitData) => {
     const obj = {

@@ -9,8 +9,6 @@ import {
   Typography,
   TextField as MuiTextField,
   IconButton,
-  FormControlLabel,
-  Checkbox,
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { Controller, useForm } from "react-hook-form";
@@ -82,6 +80,7 @@ import {
 import ReceiveEntry from "../ReceiveEntry";
 import { useNavigate } from "react-router-dom";
 import ShortcutHandler from "../../../services/functions/ShortcutHandler";
+import socket from "../../../services/functions/serverSocket";
 
 const TransactionModal = ({ create, view, update, receive }) => {
   const dispatch = useDispatch();
@@ -325,6 +324,16 @@ const TransactionModal = ({ create, view, update, receive }) => {
           ? await updateTransaction(obj).unwrap()
           : await createTransaction(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
+      socket.emit(
+        update || receive ? "transaction_updated" : "transaction_created",
+        {
+          ...obj,
+          message:
+            update || receive
+              ? `The transaction ${obj?.tag_no} has been updated`
+              : `A new transaction has been created.`,
+        }
+      );
       const resData = await mapResponse(
         res?.result,
         ap,
@@ -348,12 +357,17 @@ const TransactionModal = ({ create, view, update, receive }) => {
   const handleArchive = async (submitData) => {
     const obj = {
       ...submitData,
+      tag_no: transactionData?.tag_no,
       id: transactionData?.id,
     };
 
     try {
       const res = await archiveTransaction(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
+      socket.emit("transaction_received", {
+        ...obj,
+        message: `The transaction ${obj?.tag_no} has been archived`,
+      });
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
@@ -369,6 +383,7 @@ const TransactionModal = ({ create, view, update, receive }) => {
 
   const handleReceive = async () => {
     const obj = {
+      tag_no: transactionData?.tag_no,
       id: transactionData?.id,
     };
 
@@ -393,8 +408,6 @@ const TransactionModal = ({ create, view, update, receive }) => {
   const handleShortCut = () => {
     handleSubmit(submitHandler)();
   };
-
-  console.log(errors);
 
   return (
     <Paper className="transaction-modal-container">
@@ -671,17 +684,19 @@ const TransactionModal = ({ create, view, update, receive }) => {
             helperText={errors?.cost?.message}
           />
         )}
-        <AppTextBox
-          disabled={view}
-          multiline
-          minRows={1}
-          control={control}
-          name={"description"}
-          className="transaction-form-field-textBox "
-          label="Description (Optional)"
-          error={Boolean(errors.description)}
-          helperText={errors.description?.message}
-        />
+        {receive && (
+          <AppTextBox
+            disabled={view}
+            multiline
+            minRows={1}
+            control={control}
+            name={"description"}
+            className="transaction-form-field-textBox "
+            label="Description (Optional)"
+            error={Boolean(errors.description)}
+            helperText={errors.description?.message}
+          />
+        )}
 
         {checkField("coverage") && (
           <>
@@ -887,16 +902,6 @@ const TransactionModal = ({ create, view, update, receive }) => {
               )}
             </Box>
           )}
-        />
-        <AppTextBox
-          disabled
-          control={control}
-          name={"g_tag_number"}
-          label={"Tag *"}
-          color="primary"
-          className="transaction-form-textBox"
-          error={Boolean(errors?.g_tag_number)}
-          helperText={errors?.g_tag_number?.message}
         />
 
         <Box className="add-transaction-button-container">

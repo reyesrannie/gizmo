@@ -18,6 +18,7 @@
   &.MuiPaper-root {
     margin: 0;
     border-radius: 10px;
+    overflow: visible !important;
   }
   &.MuiAccordion-root {
     display: flex;
@@ -29,6 +30,8 @@
 .menuDrawer.open {
   &.MuiDrawer-root {
     width: 220px;
+    overflow: visible !important;
+
     .MuiPaper-root {
       width: 240px;
     }
@@ -69,10 +72,27 @@
         margin-left: 11px;
       }
     }
+
+    .selectedChildList-child {
+      &.MuiListItemButton-root {
+        width: 210px;
+        transition: width 0.2s ease;
+        border-radius: 10px;
+        margin-top: 2px;
+        padding-left: 12px;
+      }
+    }
   }
 }
 
 .selectedChildList.selected {
+  &.MuiListItemButton-root {
+    background-color: #3a4c6b;
+    gap: 0;
+  }
+}
+
+.selectedChildList-child.selected {
   &.MuiListItemButton-root {
     background-color: #3a4c6b;
     gap: 0;

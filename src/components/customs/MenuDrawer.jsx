@@ -1,5 +1,6 @@
 import {
   Accordion,
+  Badge,
   Divider,
   Drawer,
   List,
@@ -9,21 +10,44 @@ import {
   Toolbar,
   useMediaQuery,
 } from "@mui/material";
-import React from "react";
+import React, { useEffect } from "react";
 import "../styles/MenuDrawer.scss";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router";
-import { resetMenu, setDrawer } from "../../services/slice/menuSlice";
+import {
+  resetMenuWithoutDrawer,
+  setDrawer,
+} from "../../services/slice/menuSlice";
 import { menu } from "../../services/constants/items";
 import { hasAccess } from "../../services/functions/access";
-import { resetTransaction } from "../../services/slice/transactionSlice";
+import {
+  resetTransaction,
+  setHeader,
+} from "../../services/slice/transactionSlice";
+import CountDistribute from "../../services/functions/CountDistribute";
 
 const MenuDrawer = () => {
+  const { menuCount, childMenuCount } = CountDistribute();
   const openDrawer = useSelector((state) => state.menu.drawer);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
   const isTablet = useMediaQuery("(max-width:768px)");
+  const header = useSelector((state) => state.transaction.header);
+
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      if (event.target.classList.value === "") dispatch(setDrawer(false));
+    };
+
+    if (openDrawer) {
+      document.addEventListener("click", handleOutsideClick);
+    }
+
+    return () => {
+      document.removeEventListener("click", handleOutsideClick);
+    };
+  }, [dispatch, openDrawer]);
 
   return (
     <Drawer
@@ -58,6 +82,7 @@ const MenuDrawer = () => {
                       }`}
                       onClick={() => {
                         navigate(menus.path);
+                        dispatch(resetMenuWithoutDrawer());
                         dispatch(resetTransaction());
                         isTablet && dispatch(setDrawer(false));
                       }}
@@ -71,8 +96,15 @@ const MenuDrawer = () => {
                             : ""
                         } `}
                       >
-                        {menus.icon}
+                        <Badge
+                          badgeContent={menus ? menuCount(menus.desc) : 0}
+                          color="error"
+                          max={10}
+                        >
+                          {menus.icon}
+                        </Badge>
                       </ListItemIcon>
+
                       <ListItemText
                         className={`listText ${
                           location.pathname === menus.path ||
@@ -84,20 +116,31 @@ const MenuDrawer = () => {
                         primary={menus.desc}
                       />
                     </ListItemButton>
-                    {menus?.children?.map(
-                      (child, index) =>
-                        hasAccess(child?.permission) && (
+
+                    {menus?.children?.map((child, index) => {
+                      return hasAccess(child?.permission) && child?.child ? (
+                        <Accordion
+                          key={index}
+                          expanded={
+                            location.pathname === child.path ||
+                            location.pathname
+                              .split("/")
+                              .slice(0, 2)
+                              .join("/") === child.path
+                          }
+                          className="accordion-drawer"
+                          elevation={0}
+                        >
                           <ListItemButton
-                            className={`selectedChildList ${
+                            className={`selectedChildList-child ${
                               location.pathname === child.path ? "selected" : ""
                             }`}
                             onClick={() => {
-                              dispatch(resetMenu());
                               dispatch(resetTransaction());
+                              dispatch(resetMenuWithoutDrawer());
                               navigate(child.path);
                               isTablet && dispatch(setDrawer(false));
                             }}
-                            key={index}
                           >
                             <ListItemIcon
                               className={`list-icon ${
@@ -106,7 +149,15 @@ const MenuDrawer = () => {
                                   : ""
                               } `}
                             >
-                              {child.icon}
+                              <Badge
+                                badgeContent={
+                                  menus ? childMenuCount(child.desc) : 0
+                                }
+                                color="error"
+                                max={10}
+                              >
+                                {child.icon}
+                              </Badge>
                             </ListItemIcon>
                             <ListItemText
                               className={`listText ${
@@ -117,8 +168,83 @@ const MenuDrawer = () => {
                               primary={child.desc}
                             />
                           </ListItemButton>
-                        )
-                    )}
+                          {child?.child?.map((grandChild, index) => {
+                            return (
+                              <ListItemButton
+                                className={`selectedChildList ${
+                                  header === grandChild.desc ? "selected" : ""
+                                }`}
+                                onClick={() => {
+                                  dispatch(setHeader(grandChild?.desc));
+                                  dispatch(resetMenuWithoutDrawer());
+                                  isTablet && dispatch(setDrawer(false));
+                                }}
+                                key={index}
+                              >
+                                <ListItemIcon
+                                  className={`list-icon ${
+                                    header === grandChild.desc ? "selected" : ""
+                                  } `}
+                                >
+                                  <Badge
+                                    badgeContent={
+                                      menus
+                                        ? childMenuCount(grandChild.desc)
+                                        : 0
+                                    }
+                                    color="error"
+                                    max={10}
+                                  >
+                                    {grandChild.icon}
+                                  </Badge>
+                                </ListItemIcon>
+                                <ListItemText
+                                  className={`listText ${
+                                    header === grandChild.desc ? "selected" : ""
+                                  }`}
+                                  primary={grandChild.desc}
+                                />
+                              </ListItemButton>
+                            );
+                          })}
+                        </Accordion>
+                      ) : (
+                        <ListItemButton
+                          className={`selectedChildList ${
+                            location.pathname === child.path ? "selected" : ""
+                          }`}
+                          onClick={() => {
+                            dispatch(resetTransaction());
+                            dispatch(resetMenuWithoutDrawer());
+                            navigate(child.path);
+                            isTablet && dispatch(setDrawer(false));
+                          }}
+                          key={index}
+                        >
+                          <ListItemIcon
+                            className={`list-icon ${
+                              location.pathname === child.path ? "selected" : ""
+                            } `}
+                          >
+                            <Badge
+                              badgeContent={
+                                menus ? childMenuCount(child.desc) : 0
+                              }
+                              color="error"
+                              max={10}
+                            >
+                              {child.icon}
+                            </Badge>
+                          </ListItemIcon>
+                          <ListItemText
+                            className={`listText ${
+                              location.pathname === child.path ? "selected" : ""
+                            }`}
+                            primary={child.desc}
+                          />
+                        </ListItemButton>
+                      );
+                    })}
 
                     <Divider />
                   </Accordion>
@@ -133,7 +259,7 @@ const MenuDrawer = () => {
                     }`}
                     onClick={() => {
                       navigate(menus.path);
-                      dispatch(resetMenu());
+                      dispatch(resetMenuWithoutDrawer());
                       dispatch(resetTransaction());
                       isTablet && dispatch(setDrawer(false));
                     }}
@@ -147,7 +273,13 @@ const MenuDrawer = () => {
                           : ""
                       } `}
                     >
-                      {menus.icon}
+                      <Badge
+                        badgeContent={menus ? menuCount(menus.desc) : 0}
+                        color="error"
+                        max={10}
+                      >
+                        {menus.icon}
+                      </Badge>
                     </ListItemIcon>
                     <ListItemText
                       className={`listText ${

@@ -1,4 +1,4 @@
-import React, { Suspense } from "react";
+import React, { Suspense, useEffect } from "react";
 import {
   Box,
   Dialog,
@@ -23,14 +23,63 @@ import { Outlet } from "react-router-dom";
 import { decodeUser } from "../../services/functions/saveUser";
 import AccountMenu from "./AccountMenu";
 import ChangePassword from "./modal/ChangePassword";
+import socket from "../../services/functions/serverSocket";
+import { useSnackbar } from "notistack";
+import { jsonServerAPI } from "../../services/store/request";
+import { events } from "../../services/constants/socketItems";
 
 const AppBar = () => {
+  const { enqueueSnackbar } = useSnackbar();
   const dispatch = useDispatch();
   const changePass = useSelector((state) => state.auth.changePass);
   const openDrawer = useSelector((state) => state.menu.drawer);
   const openAccountMenu = useSelector((state) => state.menu.accountMenu);
   const userData = decodeUser();
   const [anchorEl, setAnchorEl] = useState(null);
+
+  useEffect(() => {
+    const updateHandler = (value, data) => {
+      if (
+        userData?.scope_tagging?.some(
+          (item) => item?.ap_id === data?.ap_tagging_id
+        )
+      ) {
+        enqueueSnackbar(data?.message, { variant: "success" });
+      }
+      if (
+        value?.event === "transaction_received" &&
+        userData?.role?.access_permission?.includes("tagging")
+      ) {
+        enqueueSnackbar(data?.message, { variant: "success" });
+      }
+      if (
+        value?.event === "transaction_archived" &&
+        userData?.role?.access_permission?.includes("tagging")
+      ) {
+        enqueueSnackbar(data?.message, { variant: "success" });
+      }
+      if (
+        value?.event === "transaction_approval" &&
+        userData?.role?.access_permission?.includes("approver")
+      ) {
+        enqueueSnackbar(data?.message, { variant: "success" });
+      }
+
+      dispatch(jsonServerAPI?.util?.invalidateTags(value?.tags));
+    };
+
+    const eventListeners = {};
+    Object.entries(events).forEach(([key, value]) => {
+      eventListeners[key] = (data) => updateHandler(value, data);
+      socket.on(value?.event, eventListeners[key]);
+    });
+
+    return () => {
+      Object.entries(events).forEach(([key, value]) => {
+        socket.off(value?.event, eventListeners[key]);
+      });
+    };
+  }, [socket, userData]);
 
   return (
     <Box className="appbar-container open">

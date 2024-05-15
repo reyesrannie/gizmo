@@ -6,6 +6,7 @@ import SearchText from "../../components/customs/SearchText";
 import {
   Accordion,
   AccordionSummary,
+  Badge,
   Box,
   IconButton,
   Typography,
@@ -23,18 +24,16 @@ import {
   setFilterBy,
   setHeader,
   setIsExpanded,
-  setTransactionHeader,
 } from "../../services/slice/transactionSlice";
 import JournalTable from "./JournalTable";
 import useApHook from "../../services/hooks/useApHook";
+import CountDistribute from "../../services/functions/CountDistribute";
 
 const JournalVoucher = () => {
   const dispatch = useDispatch();
 
   const isExpanded = useSelector((state) => state.transaction.isExpanded);
-  const transactionHeader = useSelector(
-    (state) => state.transaction.transactionHeader
-  );
+  const header = useSelector((state) => state.transaction.header) || "Received";
 
   const {
     params,
@@ -54,6 +53,8 @@ const JournalVoucher = () => {
     status,
   } = useJournalEntriesQuery(params);
 
+  const { countHeaderAPJL } = CountDistribute();
+
   return (
     <Box>
       <Box>
@@ -68,16 +69,21 @@ const JournalVoucher = () => {
           >
             <AccordionSummary onClick={() => dispatch(setIsExpanded(false))}>
               <Typography className="page-text-indicator-tag-transaction">
-                {transactionHeader}
+                <Badge
+                  badgeContent={header ? countHeaderAPJL(header) : 0}
+                  color="error"
+                >
+                  {header}
+                </Badge>
               </Typography>
             </AccordionSummary>
             {apHeader?.map(
               (head, index) =>
-                transactionHeader !== head?.name && (
+                header !== head?.name && (
                   <AccordionSummary
                     key={index}
                     onClick={() => {
-                      dispatch(setTransactionHeader(head.name));
+                      dispatch(setHeader(head.name));
                       dispatch(setIsExpanded(false));
                       onOrderBy("");
                       dispatch(setFilterBy(""));
@@ -85,7 +91,14 @@ const JournalVoucher = () => {
                     }}
                   >
                     <Typography className="page-text-accord-tag-transaction">
-                      {head?.name}
+                      <Badge
+                        badgeContent={
+                          head?.name ? countHeaderAPJL(head?.name) : 0
+                        }
+                        color="error"
+                      >
+                        {head?.name}
+                      </Badge>
                     </Typography>
                   </AccordionSummary>
                 )
@@ -103,7 +116,7 @@ const JournalVoucher = () => {
           <SearchText onSearchData={onSearchData} />
         </Box>
       </Box>
-      {transactionHeader === "Received" && (
+      {header === "Received" && (
         <JournalTable
           params={params}
           onSortTable={onSortTable}
@@ -118,7 +131,22 @@ const JournalVoucher = () => {
           state={"received"}
         />
       )}
-      {transactionHeader === "Archived" && (
+      {header === "Approved" && (
+        <JournalTable
+          params={params}
+          onSortTable={onSortTable}
+          isError={isError}
+          isFetching={isFetching}
+          isLoading={isLoading}
+          onPageChange={onPageChange}
+          onRowChange={onRowChange}
+          status={status}
+          tagTransaction={tagTransaction}
+          onOrderBy={onOrderBy}
+          state={"approved"}
+        />
+      )}
+      {header === "Archived" && (
         <JournalTable
           params={params}
           onSortTable={onSortTable}
@@ -133,7 +161,7 @@ const JournalVoucher = () => {
           state="archived"
         />
       )}
-      {transactionHeader === "Returned" && (
+      {header === "Returned" && (
         <JournalTable
           params={params}
           onSortTable={onSortTable}
@@ -148,7 +176,7 @@ const JournalVoucher = () => {
           state="returned"
         />
       )}
-      {transactionHeader === "History" && (
+      {header === "History" && (
         <JournalTable
           params={params}
           onSortTable={onSortTable}
@@ -163,7 +191,7 @@ const JournalVoucher = () => {
           state={""}
         />
       )}
-      {transactionHeader === "Checked" && (
+      {header === "Checked" && (
         <JournalTable
           params={params}
           onSortTable={onSortTable}

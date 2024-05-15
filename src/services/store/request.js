@@ -1,9 +1,9 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-const baseURL = process.env.REACT_APP_API_KEY;
+// const baseURL = process.env.REACT_APP_API_KEY;
 
-// const baseURL = "http://10.10.13.17:8000/api";
-// const baseURL = "http://127.0.0.1:8000/api";
+const baseURL = "http://10.10.13.17:8000/api";
+// const baseURL = "http://10.10.10.16:8000/api";
 
 export const jsonServerAPI = createApi({
   reducerPath: "jsonServerAPI",
@@ -42,8 +42,12 @@ export const jsonServerAPI = createApi({
     "SingleJournal",
     "CheckEntries",
     "JournalEntries",
+    "CountTransaction",
+    "CountCheck",
+    "CountVoucher",
   ],
   endpoints: (builder) => ({
+    //Authentication and users
     login: builder.mutation({
       transformResponse: (response) => response.result,
       query: (payload) => ({
@@ -81,6 +85,11 @@ export const jsonServerAPI = createApi({
         "SingleJournal",
         "CheckEntries",
         "JournalEntries",
+        "GGPAccountTitles",
+        "GPAccountTitles",
+        "PAccountTitles",
+        "CAccountTitles",
+        "GCAccountTitles",
       ],
     }),
     passwordChange: builder.mutation({
@@ -135,6 +144,9 @@ export const jsonServerAPI = createApi({
       }),
       invalidatesTags: ["Users"],
     }),
+    //end of Authentication
+
+    //Roles
     role: builder.query({
       transformResponse: (response) => response,
       query: (payload) => ({
@@ -172,6 +184,8 @@ export const jsonServerAPI = createApi({
       }),
       invalidatesTags: ["Role"],
     }),
+
+    //Company
     company: builder.query({
       transformResponse: (response) => response,
       query: (payload) => ({
@@ -217,6 +231,8 @@ export const jsonServerAPI = createApi({
       }),
       invalidatesTags: ["Company"],
     }),
+
+    //Department
     department: builder.query({
       transformResponse: (response) => response,
       query: (payload) => ({
@@ -262,6 +278,8 @@ export const jsonServerAPI = createApi({
       }),
       invalidatesTags: ["Department"],
     }),
+
+    //Location
     location: builder.query({
       transformResponse: (response) => response,
       query: (payload) => ({
@@ -307,6 +325,8 @@ export const jsonServerAPI = createApi({
       }),
       invalidatesTags: ["Location"],
     }),
+
+    //AP
     ap: builder.query({
       transformResponse: (response) => response,
       query: (payload) => ({
@@ -352,6 +372,8 @@ export const jsonServerAPI = createApi({
       }),
       invalidatesTags: ["AP"],
     }),
+
+    //VAT
     vat: builder.query({
       transformResponse: (response) => response,
       query: (payload) => ({
@@ -397,6 +419,8 @@ export const jsonServerAPI = createApi({
       }),
       invalidatesTags: ["VAT"],
     }),
+
+    //ATC
     atc: builder.query({
       transformResponse: (response) => response,
       query: (payload) => ({
@@ -442,6 +466,8 @@ export const jsonServerAPI = createApi({
       }),
       invalidatesTags: ["ATC"],
     }),
+
+    //SupplierType
     supplierType: builder.query({
       transformResponse: (response) => response,
       query: (payload) => ({
@@ -487,6 +513,8 @@ export const jsonServerAPI = createApi({
       }),
       invalidatesTags: ["SupplierType"],
     }),
+
+    //Supplier
     supplier: builder.query({
       transformResponse: (response) => response,
       query: (payload) => ({
@@ -532,6 +560,8 @@ export const jsonServerAPI = createApi({
       }),
       invalidatesTags: ["Supplier"],
     }),
+
+    //DocumentType
     documentType: builder.query({
       transformResponse: (response) => response,
       query: (payload) => ({
@@ -578,6 +608,7 @@ export const jsonServerAPI = createApi({
       invalidatesTags: ["DocumentType"],
     }),
 
+    //Account Number
     accountNumber: builder.query({
       transformResponse: (response) => response,
       query: (payload) => ({
@@ -623,6 +654,8 @@ export const jsonServerAPI = createApi({
       }),
       invalidatesTags: ["AccountNumber"],
     }),
+
+    //Account Title
     accountTitles: builder.query({
       transformResponse: (response) => response,
       query: (payload) => ({
@@ -668,6 +701,244 @@ export const jsonServerAPI = createApi({
       }),
       invalidatesTags: ["AccountTitles"],
     }),
+
+    //Great GrandParent
+    ggpTitles: builder.query({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/ac-ggp`,
+        method: "GET",
+        params: payload,
+      }),
+      providesTags: ["GGPAccountTitles"],
+    }),
+    createggpTitles: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/ac-ggp`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["GGPAccountTitles"],
+    }),
+    importggpTitles: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/import/ac-ggp`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["GGPAccountTitles"],
+    }),
+    updateggpTitles: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/ac-ggp/${payload.id}`,
+        method: "PUT",
+        body: payload,
+      }),
+      invalidatesTags: ["GGPAccountTitles"],
+    }),
+    archiveggpTitles: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/archive/ac-ggp/${payload.id}`,
+        method: "PATCH",
+        body: payload,
+      }),
+      invalidatesTags: ["GGPAccountTitles"],
+    }),
+
+    //Grand Parent
+    gpTitles: builder.query({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/ac-gp`,
+        method: "GET",
+        params: payload,
+      }),
+      providesTags: ["GPAccountTitles"],
+    }),
+    creategpTitles: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/ac-gp`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["GPAccountTitles"],
+    }),
+    importgpTitles: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/import/ac-gp`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["GPAccountTitles"],
+    }),
+    updategpTitles: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/ac-gp/${payload.id}`,
+        method: "PUT",
+        body: payload,
+      }),
+      invalidatesTags: ["GPAccountTitles"],
+    }),
+    archivegpTitles: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/archive/ac-gp/${payload.id}`,
+        method: "PATCH",
+        body: payload,
+      }),
+      invalidatesTags: ["GPAccountTitles"],
+    }),
+
+    //Parent
+    pTitles: builder.query({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/ac-p`,
+        method: "GET",
+        params: payload,
+      }),
+      providesTags: ["PAccountTitles"],
+    }),
+    createpTitles: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/ac-p`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["PAccountTitles"],
+    }),
+    importpTitles: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/import/ac-p`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["PAccountTitles"],
+    }),
+    updatepTitles: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/ac-p/${payload.id}`,
+        method: "PUT",
+        body: payload,
+      }),
+      invalidatesTags: ["PAccountTitles"],
+    }),
+    archivepTitles: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/archive/ac-p/${payload.id}`,
+        method: "PATCH",
+        body: payload,
+      }),
+      invalidatesTags: ["PAccountTitles"],
+    }),
+
+    //Child
+
+    cTitles: builder.query({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/ac-c`,
+        method: "GET",
+        params: payload,
+      }),
+      providesTags: ["CAccountTitles"],
+    }),
+    createcTitles: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/ac-c`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["CAccountTitles"],
+    }),
+    importcTitles: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/import/ac-c`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["CAccountTitles"],
+    }),
+    updatecTitles: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/ac-c/${payload.id}`,
+        method: "PUT",
+        body: payload,
+      }),
+      invalidatesTags: ["CAccountTitles"],
+    }),
+    archivecTitles: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/archive/ac-c/${payload.id}`,
+        method: "PATCH",
+        body: payload,
+      }),
+      invalidatesTags: ["CAccountTitles"],
+    }),
+
+    //GrandChild
+    gcTitles: builder.query({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/ac-gc`,
+        method: "GET",
+        params: payload,
+      }),
+      providesTags: ["GCAccountTitles"],
+    }),
+    creategcTitles: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/ac-gc`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["GCAccountTitles"],
+    }),
+    importgcTitles: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/import/ac-gc`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["GCAccountTitles"],
+    }),
+    updategcTitles: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/ac-gc/${payload.id}`,
+        method: "PUT",
+        body: payload,
+      }),
+      invalidatesTags: ["GCAccountTitles"],
+    }),
+    archivegcTitles: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/archive/ac-gc/${payload.id}`,
+        method: "PATCH",
+        body: payload,
+      }),
+      invalidatesTags: ["GCAccountTitles"],
+    }),
+
+    //GTAG
     tagMonthYear: builder.query({
       transformResponse: (response) => response,
       query: (payload) => ({
@@ -677,6 +948,8 @@ export const jsonServerAPI = createApi({
       }),
       providesTags: ["GTAG"],
     }),
+
+    //VP Check
     vpCheckNumber: builder.query({
       transformResponse: (response) => response,
       query: (payload) => ({
@@ -686,6 +959,8 @@ export const jsonServerAPI = createApi({
       }),
       providesTags: ["VPCheckNumber"],
     }),
+
+    //VP Journal
     vpJournalNumber: builder.query({
       transformResponse: (response) => response,
       query: (payload) => ({
@@ -695,6 +970,8 @@ export const jsonServerAPI = createApi({
       }),
       providesTags: ["VPJournalNumber"],
     }),
+
+    //Transaction
     transaction: builder.query({
       transformResponse: (response) => response,
       query: (payload) => ({
@@ -711,7 +988,14 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["Transaction", "GTAG", "VPCheckNumber"],
+      invalidatesTags: [
+        "Transaction",
+        "GTAG",
+        "VPCheckNumber",
+        "CountTransaction",
+        "CountCheck",
+        "CountVoucher",
+      ],
     }),
     approveTransaction: builder.mutation({
       transformResponse: (response) => response,
@@ -720,7 +1004,14 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["Transaction", "GTAG", "VPCheckNumber"],
+      invalidatesTags: [
+        "Transaction",
+        "GTAG",
+        "VPCheckNumber",
+        "CountTransaction",
+        "CountCheck",
+        "CountVoucher",
+      ],
     }),
     updateTransaction: builder.mutation({
       transformResponse: (response) => response,
@@ -729,7 +1020,14 @@ export const jsonServerAPI = createApi({
         method: "PUT",
         body: payload,
       }),
-      invalidatesTags: ["Transaction", "Logs", "VPCheckNumber"],
+      invalidatesTags: [
+        "Transaction",
+        "Logs",
+        "VPCheckNumber",
+        "CountTransaction",
+        "CountCheck",
+        "CountVoucher",
+      ],
     }),
     archiveTransaction: builder.mutation({
       transformResponse: (response) => response,
@@ -738,7 +1036,14 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["Transaction", "Logs", "VPCheckNumber"],
+      invalidatesTags: [
+        "Transaction",
+        "Logs",
+        "VPCheckNumber",
+        "CountTransaction",
+        "CountCheck",
+        "CountVoucher",
+      ],
     }),
     receiveTransaction: builder.mutation({
       transformResponse: (response) => response,
@@ -747,7 +1052,14 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["Transaction", "Logs", "VPCheckNumber"],
+      invalidatesTags: [
+        "Transaction",
+        "Logs",
+        "VPCheckNumber",
+        "CountTransaction",
+        "CountCheck",
+        "CountVoucher",
+      ],
     }),
     returnTransaction: builder.mutation({
       transformResponse: (response) => response,
@@ -756,8 +1068,17 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["Transaction", "Logs", "VPCheckNumber"],
+      invalidatesTags: [
+        "Transaction",
+        "Logs",
+        "VPCheckNumber",
+        "CountTransaction",
+        "CountCheck",
+        "CountVoucher",
+      ],
     }),
+
+    //Tag Series
     tagYearMonth: builder.query({
       transformResponse: (response) => response,
       query: (payload) => ({
@@ -766,6 +1087,8 @@ export const jsonServerAPI = createApi({
         params: payload,
       }),
     }),
+
+    //Status Logs
     statusLogs: builder.query({
       transformResponse: (response) => response,
       query: (payload) => ({
@@ -776,6 +1099,7 @@ export const jsonServerAPI = createApi({
       providesTags: ["Logs"],
     }),
 
+    //Tax Computation
     taxComputation: builder.query({
       transformResponse: (response) => response,
       query: (payload) => ({
@@ -804,6 +1128,7 @@ export const jsonServerAPI = createApi({
       invalidatesTags: ["TaxComputation", "VPCheckNumber", "VPJournalNumber"],
     }),
 
+    //Check
     checkEntries: builder.query({
       transformResponse: (response) => response,
       query: (payload) => ({
@@ -820,7 +1145,15 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["SingleCheck", "CheckEntries", "Logs", "Transaction"],
+      invalidatesTags: [
+        "SingleCheck",
+        "CheckEntries",
+        "Logs",
+        "Transaction",
+        "CountTransaction",
+        "CountCheck",
+        "CountVoucher",
+      ],
     }),
     updateCheckEntries: builder.mutation({
       transformResponse: (response) => response,
@@ -829,7 +1162,15 @@ export const jsonServerAPI = createApi({
         method: "PUT",
         body: payload,
       }),
-      invalidatesTags: ["SingleCheck", "CheckEntries", "Logs", "Transaction"],
+      invalidatesTags: [
+        "SingleCheck",
+        "CheckEntries",
+        "Logs",
+        "Transaction",
+        "CountTransaction",
+        "CountCheck",
+        "CountVoucher",
+      ],
     }),
     archiveCheckEntries: builder.mutation({
       transformResponse: (response) => response,
@@ -838,7 +1179,14 @@ export const jsonServerAPI = createApi({
         method: "PATCH",
         params: payload,
       }),
-      invalidatesTags: ["SingleCheck", "CheckEntries", "Transaction"],
+      invalidatesTags: [
+        "SingleCheck",
+        "CheckEntries",
+        "Transaction",
+        "CountTransaction",
+        "CountCheck",
+        "CountVoucher",
+      ],
     }),
     returnCheckEntries: builder.mutation({
       transformResponse: (response) => response,
@@ -847,7 +1195,15 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["SingleCheck", "CheckEntries", "Logs", "Transaction"],
+      invalidatesTags: [
+        "SingleCheck",
+        "CheckEntries",
+        "Logs",
+        "Transaction",
+        "CountTransaction",
+        "CountCheck",
+        "CountVoucher",
+      ],
     }),
     approveCheckEntries: builder.mutation({
       transformResponse: (response) => response,
@@ -856,7 +1212,16 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["SingleCheck", "CheckEntries", "Logs", "Transaction"],
+      invalidatesTags: [
+        "SingleCheck",
+        "CheckEntries",
+        "Logs",
+        "Transaction",
+        "CountTransaction",
+        "CountCheck",
+        "CountVoucher",
+        "VPCheckNumber",
+      ],
     }),
     checkedCVoucher: builder.mutation({
       transformResponse: (response) => response,
@@ -865,8 +1230,18 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["CheckEntries", "Logs", "VPCheckNumber", "Transaction"],
+      invalidatesTags: [
+        "CheckEntries",
+        "Logs",
+        "VPCheckNumber",
+        "Transaction",
+        "CountTransaction",
+        "CountCheck",
+        "CountVoucher",
+      ],
     }),
+
+    //Journal
     journalEntries: builder.query({
       transformResponse: (response) => response,
       query: (payload) => ({
@@ -888,6 +1263,9 @@ export const jsonServerAPI = createApi({
         "Logs",
         "VPJournalNumber",
         "Transaction",
+        "CountTransaction",
+        "CountCheck",
+        "CountVoucher",
       ],
     }),
     updateJournalEntries: builder.mutation({
@@ -902,6 +1280,9 @@ export const jsonServerAPI = createApi({
         "JournalEntries",
         "Logs",
         "Transaction",
+        "CountTransaction",
+        "CountCheck",
+        "CountVoucher",
       ],
     }),
     archiveJournalEntries: builder.mutation({
@@ -911,7 +1292,14 @@ export const jsonServerAPI = createApi({
         method: "PATCH",
         params: payload,
       }),
-      invalidatesTags: ["SingleCheck", "JournalEntries", "Transaction"],
+      invalidatesTags: [
+        "SingleCheck",
+        "JournalEntries",
+        "Transaction",
+        "CountTransaction",
+        "CountCheck",
+        "CountVoucher",
+      ],
     }),
     returnJournalEntries: builder.mutation({
       transformResponse: (response) => response,
@@ -920,7 +1308,15 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["SingleCheck", "JournalEntries", "Logs", "Transaction"],
+      invalidatesTags: [
+        "SingleCheck",
+        "JournalEntries",
+        "Logs",
+        "Transaction",
+        "CountTransaction",
+        "CountCheck",
+        "CountVoucher",
+      ],
     }),
     approveJournalEntries: builder.mutation({
       transformResponse: (response) => response,
@@ -929,8 +1325,19 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["SingleCheck", "JournalEntries", "Logs", "Transaction"],
+      invalidatesTags: [
+        "SingleCheck",
+        "JournalEntries",
+        "Logs",
+        "Transaction",
+        "CountTransaction",
+        "CountCheck",
+        "CountVoucher",
+        "VPJournalNumber",
+      ],
     }),
+
+    //Journal Voucher
     checkedJVoucher: builder.mutation({
       transformResponse: (response) => response,
       query: (payload) => ({
@@ -943,8 +1350,13 @@ export const jsonServerAPI = createApi({
         "Logs",
         "VPJournalNumber",
         "Transaction",
+        "CountTransaction",
+        "CountCheck",
+        "CountVoucher",
       ],
     }),
+
+    //Check
     checkTransaction: builder.query({
       transformResponse: (response) => response,
       query: (payload) => ({
@@ -954,6 +1366,8 @@ export const jsonServerAPI = createApi({
       }),
       providesTags: ["SingleCheck"],
     }),
+
+    //Journal
     journalTransaction: builder.query({
       transformResponse: (response) => response,
       query: (payload) => ({
@@ -962,6 +1376,39 @@ export const jsonServerAPI = createApi({
         params: payload,
       }),
       providesTags: ["SingleJournal"],
+    }),
+
+    //Count Transaction
+    transactCount: builder.query({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/transaction-count/transaction`,
+        method: "GET",
+        params: payload,
+      }),
+      providesTags: ["CountTransaction"],
+    }),
+
+    //Check Count
+    checkCount: builder.query({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/check-count/transaction`,
+        method: "GET",
+        params: payload,
+      }),
+      providesTags: ["CountCheck"],
+    }),
+
+    //Journal Count
+    journalCount: builder.query({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/journal-count/transaction`,
+        method: "GET",
+        params: payload,
+      }),
+      providesTags: ["CountVoucher"],
     }),
   }),
 });
@@ -1050,6 +1497,36 @@ export const {
   useImportAccountTitlesMutation,
   useUpdateAccountTitlesMutation,
 
+  useGgpTitlesQuery,
+  useCreateggpTitlesMutation,
+  useArchiveggpTitlesMutation,
+  useUpdateggpTitlesMutation,
+  useImportggpTitlesMutation,
+
+  useGpTitlesQuery,
+  useCreategpTitlesMutation,
+  useUpdategpTitlesMutation,
+  useArchivegpTitlesMutation,
+  useImportgpTitlesMutation,
+
+  usePTitlesQuery,
+  useCreatepTitlesMutation,
+  useUpdatepTitlesMutation,
+  useArchivepTitlesMutation,
+  useImportpTitlesMutation,
+
+  useCTitlesQuery,
+  useCreatecTitlesMutation,
+  useUpdatecTitlesMutation,
+  useArchivecTitlesMutation,
+  useImportcTitlesMutation,
+
+  useGcTitlesQuery,
+  useCreategcTitlesMutation,
+  useUpdategcTitlesMutation,
+  useArchivegcTitlesMutation,
+  useImportgcTitlesMutation,
+
   useTransactionQuery,
   useCreateTransactionMutation,
   useUpdateTransactionMutation,
@@ -1087,4 +1564,8 @@ export const {
 
   useCheckedCVoucherMutation,
   useCheckedJVoucherMutation,
+
+  useCheckCountQuery,
+  useJournalCountQuery,
+  useTransactCountQuery,
 } = jsonServerAPI;

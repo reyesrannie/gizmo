@@ -37,6 +37,7 @@ import { supplierTypeReqFields } from "../../../services/constants/requiredField
 import { enqueueSnackbar } from "notistack";
 import { objectError } from "../../../services/functions/errorResponse";
 import { totalAmount } from "../../../services/functions/compute";
+import "../../styles/RolesModal.scss";
 
 const TaxComputation = ({ create, update, taxComputation }) => {
   const dispatch = useDispatch();
@@ -542,7 +543,12 @@ const TaxComputation = ({ create, update, taxComputation }) => {
             color="warning"
             type="submit"
             className="add-transaction-button"
-            disabled={disableCreate}
+            disabled={
+              disableCreate ||
+              watch("amount") === 0 ||
+              watch("amount") === "0" ||
+              watch("amount") === "0.00"
+            }
           >
             {update ? "Update" : "Create"}
           </Button>

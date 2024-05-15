@@ -4,15 +4,15 @@ const usersSchema = Yup.object({
   id_no: Yup.object()
     .required("ID no. is required")
     .typeError("ID no. is required"),
-  company: Yup.object()
-    .required("Company is required")
-    .typeError("Company is required"),
-  department: Yup.object()
-    .required("Department is required")
-    .typeError("Department is required"),
-  location: Yup.object()
-    .required("Location is required")
-    .typeError("Location is required"),
+  // company: Yup.object()
+  //   .required("Company is required")
+  //   .typeError("Company is required"),
+  // department: Yup.object()
+  //   .required("Department is required")
+  //   .typeError("Department is required"),
+  // location: Yup.object()
+  //   .required("Location is required")
+  //   .typeError("Location is required"),
   role_id: Yup.object()
     .required("Role is required")
     .typeError("Role is required"),

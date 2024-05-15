@@ -65,6 +65,7 @@ import { enqueueSnackbar } from "notistack";
 import { singleError } from "../../../services/functions/errorResponse";
 import ComputationMenu from "./ComputationMenu";
 import { printPDF } from "../../../services/functions/pdfProcess";
+import socket from "../../../services/functions/serverSocket";
 
 const TransactionModalApprover = ({
   view,
@@ -144,7 +145,6 @@ const TransactionModalApprover = ({
 
   const { data: vpCheckNumber, isLoading: loadingVp } = useVpCheckNumberQuery(
     {
-      ap_tagging_id: menuData?.apTagging?.id,
       yearMonth: menuData?.tag_year,
     },
     {
@@ -160,7 +160,6 @@ const TransactionModalApprover = ({
   const { data: vpJournalNumber, isLoading: loadingJournalVP } =
     useVpJournalNumberQuery(
       {
-        ap_tagging_id: menuData?.apTagging?.id,
         yearMonth: menuData?.tag_year,
       },
       {
@@ -271,6 +270,7 @@ const TransactionModalApprover = ({
     const obj = {
       ...submitData,
       id: menuData?.id,
+      ap_tagging_id: menuData?.apTagging?.id,
     };
     try {
       const res =
@@ -278,6 +278,10 @@ const TransactionModalApprover = ({
           ? await returnCheckEntry(obj).unwrap()
           : await returnJournalkEntry(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
+      socket.emit("transaction_returned", {
+        ...obj,
+        message: `The transaction ${obj?.tag_no} is returned`,
+      });
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
@@ -295,17 +299,8 @@ const TransactionModalApprover = ({
     const obj = {
       id: menuData?.id,
       voucher_number:
-        voucher === "check"
-          ? `CV${menuData?.apTagging?.vp}${formattedDate}-${vpCheck
-              .toString()
-              .padStart(4, "0")}`
-          : `JV${menuData?.apTagging?.vp}${formattedDate}-${vpJournal
-              .toString()
-              .padStart(4, "0")}`,
-      vp_no:
-        voucher === "check"
-          ? vpCheck.toString().padStart(4, "0")
-          : vpJournal.toString().padStart(4, "0"),
+        voucher === "check" ? `CVRL${formattedDate}` : `JVRL${formattedDate}`,
+      ap_tagging_id: menuData?.apTagging?.id,
     };
 
     const transactId = {
@@ -319,7 +314,10 @@ const TransactionModalApprover = ({
       menuData?.transactions?.gas_status !== "approved" &&
         (await approveTransaction(transactId).unwrap());
       enqueueSnackbar(res?.message, { variant: "success" });
-
+      socket.emit("transaction_approved", {
+        ...obj,
+        message: `The transaction ${obj?.tag_no} is approved`,
+      });
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
@@ -365,7 +363,7 @@ const TransactionModalApprover = ({
 
     const obj = {
       quarter,
-      code: hasValidZipCodeFormat ? zipCode : null,
+      code: hasValidZipCodeFormat ? zipCode : "",
       supplier,
       month: monthInQuarter,
       atc: atc_name?.code,
@@ -388,8 +386,7 @@ const TransactionModalApprover = ({
               >
                 <Typography>
                   {menuData?.voucher_number === null &&
-                    (voucher === "check" ? "CV" : "JV") +
-                      menuData?.apTagging?.vp +
+                    (voucher === "check" ? "CVRL" : "JVRL") +
                       formattedDate +
                       "-" +
                       (voucher === "check"
@@ -824,8 +821,7 @@ const TransactionModalApprover = ({
               <TableCell align="center" className="voucher-payment-footer">
                 <Typography>
                   {menuData?.voucher_number === null &&
-                    (voucher === "check" ? "CV" : "JV") +
-                      menuData?.apTagging?.vp +
+                    (voucher === "check" ? "CVRL" : "JVRL") +
                       formattedDate +
                       "-" +
                       (voucher === "check"

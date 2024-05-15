@@ -350,46 +350,52 @@ const ComputationMenu = ({ details }) => {
 
             {!isError && !loadingTax && (
               <TableRow className="table-body-tag-transaction">
-                <TableCell align="center" colSpan={4}>
+                <TableCell align="center" colSpan={6} />
+                <TableCell align="center">
+                  <Typography className="tag-transaction-company-type">
+                    Total Debit
+                  </Typography>
+                </TableCell>
+                <TableCell align="right">
+                  <Typography className="tag-transaction-company-type">
+                    {convertToPeso(vatInput + debit)}
+                  </Typography>
+                </TableCell>
+                <TableCell colSpan={2} />
+              </TableRow>
+            )}
+
+            {!isError && !loadingTax && (
+              <TableRow className="table-body-tag-transaction">
+                <TableCell align="center" colSpan={6} />
+                <TableCell align="center">
+                  <Typography className="tag-transaction-company-type">
+                    Total Credit
+                  </Typography>
+                </TableCell>
+                <TableCell align="right">
+                  <Typography className="tag-transaction-company-type">
+                    {convertToPeso(wtax + credit)}
+                  </Typography>
+                </TableCell>
+                <TableCell colSpan={2} />
+              </TableRow>
+            )}
+
+            {!isError && !loadingTax && (
+              <TableRow className="table-body-tag-transaction">
+                <TableCell align="center" colSpan={6} />
+                <TableCell align="right">
                   <Typography className="tag-transaction-company-type">
                     Total
                   </Typography>
                 </TableCell>
-                <TableCell>
+                <TableCell align="right">
                   <Typography className="tag-transaction-company-type">
-                    {convertToPeso(amount)}
+                    {convertToPeso(vatInput + debit - (wtax + credit))}
                   </Typography>
                 </TableCell>
-
-                <TableCell align="center">
-                  <Typography className="tag-transaction-company-type">
-                    {convertToPeso(vatInput)}
-                  </Typography>
-                </TableCell>
-
-                <TableCell align="center">
-                  <Typography className="tag-transaction-company-type">
-                    {convertToPeso(debit)}
-                  </Typography>
-                </TableCell>
-
-                <TableCell align="center">
-                  <Typography className="tag-transaction-company-type">
-                    {convertToPeso(wtax)}
-                  </Typography>
-                </TableCell>
-
-                <TableCell align="center">
-                  <Typography className="tag-transaction-company-type">
-                    {convertToPeso(credit)}
-                  </Typography>
-                </TableCell>
-
-                <TableCell align="center">
-                  <Typography className="tag-transaction-company-type">
-                    {convertToPeso(totalAccounts)}
-                  </Typography>
-                </TableCell>
+                <TableCell colSpan={2} />
               </TableRow>
             )}
           </TableBody>

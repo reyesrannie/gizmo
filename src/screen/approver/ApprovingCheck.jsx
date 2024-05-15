@@ -20,7 +20,7 @@ import "../../components/styles/TagTransaction.scss";
 
 import { approverHeader } from "../../services/constants/headers";
 import {
-  setApprovedHeader,
+  setHeader,
   setFilterBy,
   setIsExpanded,
 } from "../../services/slice/transactionSlice";
@@ -32,9 +32,8 @@ const ApprovingCheck = () => {
   const dispatch = useDispatch();
 
   const isExpanded = useSelector((state) => state.transaction.isExpanded);
-  const approvedHeader = useSelector(
-    (state) => state.transaction.approvedHeader
-  );
+  const header =
+    useSelector((state) => state.transaction.header) || "For Approval";
 
   const {
     params,
@@ -68,16 +67,16 @@ const ApprovingCheck = () => {
           >
             <AccordionSummary onClick={() => dispatch(setIsExpanded(false))}>
               <Typography className="page-text-indicator-tag-transaction">
-                {approvedHeader}
+                {header}
               </Typography>
             </AccordionSummary>
             {approverHeader?.map(
               (head, index) =>
-                approvedHeader !== head?.name && (
+                header !== head?.name && (
                   <AccordionSummary
                     key={index}
                     onClick={() => {
-                      dispatch(setApprovedHeader(head.name));
+                      dispatch(setHeader(head.name));
                       dispatch(setIsExpanded(false));
                       onOrderBy("");
                       dispatch(setFilterBy(""));
@@ -103,7 +102,7 @@ const ApprovingCheck = () => {
           <SearchText onSearchData={onSearchData} />
         </Box>
       </Box>
-      {approvedHeader === "For Approval" && (
+      {header === "For Approval" && (
         <CheckTable
           params={params}
           onSortTable={onSortTable}
@@ -118,7 +117,7 @@ const ApprovingCheck = () => {
           state={"For Approval"}
         />
       )}
-      {approvedHeader === "Checked" && (
+      {header === "Checked" && (
         <CheckTable
           params={params}
           onSortTable={onSortTable}
@@ -133,7 +132,7 @@ const ApprovingCheck = () => {
           state="checked"
         />
       )}
-      {approvedHeader === "Returned" && (
+      {header === "Returned" && (
         <CheckTable
           params={params}
           onSortTable={onSortTable}
@@ -148,7 +147,7 @@ const ApprovingCheck = () => {
           state="returned"
         />
       )}
-      {approvedHeader === "History" && (
+      {header === "History" && (
         <CheckTable
           params={params}
           onSortTable={onSortTable}

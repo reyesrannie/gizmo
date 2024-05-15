@@ -6,6 +6,7 @@ import SearchText from "../../components/customs/SearchText";
 import {
   Accordion,
   AccordionSummary,
+  Badge,
   Box,
   Button,
   IconButton,
@@ -26,17 +27,20 @@ import { taggingHeader } from "../../services/constants/headers";
 import TaggingTable from "./TaggingTable";
 import useTransactionHook from "../../services/hooks/useTransactionHook";
 import {
-  resetTransaction,
   setFilterBy,
   setHeader,
   setIsExpanded,
 } from "../../services/slice/transactionSlice";
+import CountDistribute from "../../services/functions/CountDistribute";
 
 const TagTransaction = () => {
   const dispatch = useDispatch();
 
   const isExpanded = useSelector((state) => state.transaction.isExpanded);
-  const header = useSelector((state) => state.transaction.header);
+  const header =
+    useSelector((state) => state.transaction.header) || "Tag Transaction";
+
+  const { countHeaderTagging } = CountDistribute();
 
   const {
     params,
@@ -53,7 +57,6 @@ const TagTransaction = () => {
     isLoading,
     isError,
     isFetching,
-    status,
   } = useTransactionQuery(params);
 
   return (
@@ -70,7 +73,12 @@ const TagTransaction = () => {
           >
             <AccordionSummary onClick={() => dispatch(setIsExpanded(false))}>
               <Typography className="page-text-indicator-tag-transaction">
-                {header}
+                <Badge
+                  badgeContent={header ? countHeaderTagging(header) : 0}
+                  color="error"
+                >
+                  {header}
+                </Badge>
               </Typography>
             </AccordionSummary>
             {taggingHeader?.map(
@@ -87,7 +95,14 @@ const TagTransaction = () => {
                     }}
                   >
                     <Typography className="page-text-accord-tag-transaction">
-                      {head?.name}
+                      <Badge
+                        badgeContent={
+                          head?.name ? countHeaderTagging(head?.name) : 0
+                        }
+                        color="error"
+                      >
+                        {head?.name}
+                      </Badge>
                     </Typography>
                   </AccordionSummary>
                 )
@@ -133,7 +148,6 @@ const TagTransaction = () => {
           isLoading={isLoading}
           onPageChange={onPageChange}
           onRowChange={onRowChange}
-          status={status}
           tagTransaction={tagTransaction}
           onOrderBy={onOrderBy}
           state="pending"
@@ -149,7 +163,6 @@ const TagTransaction = () => {
           isLoading={isLoading}
           onPageChange={onPageChange}
           onRowChange={onRowChange}
-          status={status}
           tagTransaction={tagTransaction}
           onOrderBy={onOrderBy}
           state="archived"
@@ -164,7 +177,6 @@ const TagTransaction = () => {
           isLoading={isLoading}
           onPageChange={onPageChange}
           onRowChange={onRowChange}
-          status={status}
           tagTransaction={tagTransaction}
           onOrderBy={onOrderBy}
           state="returned"
@@ -179,7 +191,6 @@ const TagTransaction = () => {
           isLoading={isLoading}
           onPageChange={onPageChange}
           onRowChange={onRowChange}
-          status={status}
           tagTransaction={tagTransaction}
           onOrderBy={onOrderBy}
           state={""}

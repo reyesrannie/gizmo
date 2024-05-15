@@ -19,4 +19,13 @@ const approverHeader = [
   { name: "History", status: "" },
 ];
 
-export { taggingHeader, apHeader, approverHeader };
+const coaHeader = [
+  { name: "Account Titles" },
+  { name: "Great Grandparent" },
+  { name: "Grandparent" },
+  { name: "Parent" },
+  { name: "Child" },
+  { name: "Grandchild" },
+];
+
+export { taggingHeader, apHeader, approverHeader, coaHeader };

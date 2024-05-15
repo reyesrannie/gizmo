@@ -39,7 +39,7 @@ const getMonth = (month) => {
 };
 
 const addDoubleSpaces = (text) => {
-  return text.split("").join("  ");
+  return text?.split("").join("  ");
 };
 
 const addressCount = (text) => {
