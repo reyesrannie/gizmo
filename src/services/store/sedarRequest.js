@@ -20,7 +20,7 @@ export const jsonSedarAPI = createApi({
     sedar: builder.query({
       transformResponse: (response) => response?.data,
       query: (payload) => ({
-        url: `/data/employees`,
+        url: `/data/employee/filter/active`,
         method: "GET",
         params: payload,
       }),

@@ -85,22 +85,9 @@ const AppBar = () => {
     <Box className="appbar-container open">
       <MuiAppBar className="appBar" color="secondary">
         <Box className={`menuBarBox`}>
-          {/* {!openDrawer && (
-            <IconButton
-              onClick={() =>
-                isTablet
-                  ? dispatch(setDrawer(false))
-                  : dispatch(setDrawer(true))
-              }
-            >
-              <MenuOutlinedIcon />
-            </IconButton>
-          )}
-          {openDrawer && ( */}
           <IconButton onClick={() => dispatch(setDrawer(!openDrawer))}>
             <MenuOutlinedIcon />
           </IconButton>
-          {/* )} */}
           <Box>
             <img src={logo} alt="logo" className="appBarLogo" />
           </Box>

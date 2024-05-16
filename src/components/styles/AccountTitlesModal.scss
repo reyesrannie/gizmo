@@ -55,6 +55,28 @@
   }
 }
 
+.add-accountTitles-textBox-autocomplete {
+  &.MuiFormControl-root {
+    border-radius: 10px;
+    min-width: 350px;
+    min-height: 63px;
+
+    .MuiInputBase-root {
+      border-radius: 10px;
+      font-family: Roboto-Medium;
+      letter-spacing: 1px;
+    }
+    .MuiFormLabel-root {
+      font-family: Roboto-Medium;
+      letter-spacing: 1px;
+    }
+    .MuiFormHelperText-root {
+      font-family: Roboto-Light;
+      letter-spacing: 1px;
+    }
+  }
+}
+
 .add-accountTitles-button-container {
   &.MuiBox-root {
     margin-top: 10px;

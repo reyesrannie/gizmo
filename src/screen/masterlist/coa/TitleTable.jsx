@@ -1,12 +1,6 @@
 import React from "react";
 
-import Breadcrums from "../../../components/customs/Breadcrums";
-import SearchText from "../../../components/customs/SearchText";
-import useParamsHook from "../../../services/hooks/useParamsHook";
-
 import {
-  Accordion,
-  AccordionSummary,
   Box,
   Button,
   Checkbox,
@@ -34,14 +28,20 @@ import Lottie from "lottie-react";
 
 import { useDispatch, useSelector } from "react-redux";
 import {
-  useAccountTitlesQuery,
   useArchiveAccountTitlesMutation,
-  useArchiveVATMutation,
+  useArchivecTitlesMutation,
+  useArchivegcTitlesMutation,
+  useArchiveggpTitlesMutation,
+  useArchivegpTitlesMutation,
+  useArchivepTitlesMutation,
   useImportAccountTitlesMutation,
-  useImportVATMutation,
+  useImportcTitlesMutation,
+  useImportgcTitlesMutation,
+  useImportggpTitlesMutation,
+  useImportgpTitlesMutation,
+  useImportpTitlesMutation,
 } from "../../../services/store/request";
 
-import AddToPhotosOutlinedIcon from "@mui/icons-material/AddToPhotosOutlined";
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
 import ModeEditOutlineOutlinedIcon from "@mui/icons-material/ModeEditOutlineOutlined";
 import SettingsBackupRestoreOutlinedIcon from "@mui/icons-material/SettingsBackupRestoreOutlined";
@@ -56,6 +56,8 @@ import StatusIndicator from "../../../components/customs/StatusIndicator";
 import warning from "../../../assets/svg/warning.svg";
 import "../../../components/styles/AccountTitles.scss";
 import "../../../components/styles/TagTransaction.scss";
+import "../../../components/styles/RolesModal.scss";
+
 import { useState } from "react";
 import { resetPrompt, setWarning } from "../../../services/slice/promptSlice";
 import { useSnackbar } from "notistack";
@@ -63,7 +65,6 @@ import { singleError } from "../../../services/functions/errorResponse";
 import AppPrompt from "../../../components/customs/AppPrompt";
 import {
   resetMenu,
-  setCreateMenu,
   setImportError,
   setImportMenu,
   setMenuData,
@@ -72,12 +73,6 @@ import {
 import { generateExcel } from "../../../services/functions/exportFile";
 import ImportModal from "../../../components/customs/modal/ImportModal";
 import AccountTitlesModal from "../../../components/customs/modal/AccountTitlesModal";
-import {
-  setHeader,
-  setIsExpanded,
-} from "../../../services/slice/transactionSlice";
-import { coaHeader } from "../../../services/constants/headers";
-import ArrowDropDownCircleOutlinedIcon from "@mui/icons-material/ArrowDropDownCircleOutlined";
 
 const TitleTable = ({
   params,
@@ -102,14 +97,33 @@ const TitleTable = ({
   const importMenu = useSelector((state) => state.menu.importMenu);
   const openWarning = useSelector((state) => state.prompt.warning);
 
+  const header =
+    useSelector((state) => state.transaction.header) || "Account Titles";
+
   const [archiveTitle, { isLoading: archiveLoading }] =
     useArchiveAccountTitlesMutation();
   const [importTitle, { isLoading: loadingImport }] =
     useImportAccountTitlesMutation();
 
-  const handleArchive = async () => {
+  const [archiveGGP, { isLoading: ggpLoading }] = useArchiveggpTitlesMutation();
+  const [importGGPTitle, { isLoading: loadingGGP }] =
+    useImportggpTitlesMutation();
+
+  const [archiveGP, { isLoading: gpLoading }] = useArchivegpTitlesMutation();
+  const [importGPTitle, { isLoading: loadingGP }] = useImportgpTitlesMutation();
+
+  const [archiveP, { isLoading: pLoading }] = useArchivepTitlesMutation();
+  const [importPTitle, { isLoading: loadingP }] = useImportpTitlesMutation();
+
+  const [archiveC, { isLoading: cLoading }] = useArchivecTitlesMutation();
+  const [importCTitle, { isLoading: loadingC }] = useImportcTitlesMutation();
+
+  const [archiveGC, { isLoading: gcLoading }] = useArchivegcTitlesMutation();
+  const [importGCTitle, { isLoading: loadingGC }] = useImportgcTitlesMutation();
+
+  const handleArchive = async (importFunction) => {
     try {
-      const res = await archiveTitle(menuData).unwrap();
+      const res = await importFunction(menuData).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
       dispatch(resetMenu());
       dispatch(resetPrompt());
@@ -118,9 +132,9 @@ const TitleTable = ({
     }
   };
 
-  const importCompanyHandler = async (submitData) => {
+  const importHandler = async (submitData, importFunction) => {
     try {
-      const res = await importTitle(submitData).unwrap();
+      const res = await importFunction(submitData).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
       dispatch(resetMenu());
       dispatch(resetPrompt());
@@ -130,13 +144,51 @@ const TitleTable = ({
     }
   };
 
+  const archiveAccountTitleHandler = async () => {
+    switch (header) {
+      case "Account Titles":
+        return handleArchive(archiveTitle);
+      case "Great Grandparent":
+        return handleArchive(archiveGGP);
+      case "Grandparent":
+        return handleArchive(archiveGP);
+      case "Parent":
+        return handleArchive(archiveP);
+      case "Child":
+        return handleArchive(archiveC);
+      case "Grandchild":
+        return handleArchive(archiveGC);
+      default:
+        return;
+    }
+  };
+
+  const importCompanyHandler = async (submitData) => {
+    switch (header) {
+      case "Account Titles":
+        return importHandler(submitData, importTitle);
+      case "Great Grandparent":
+        return importHandler(submitData, importGGPTitle);
+      case "Grandparent":
+        return importHandler(submitData, importGPTitle);
+      case "Parent":
+        return importHandler(submitData, importPTitle);
+      case "Child":
+        return importHandler(submitData, importCTitle);
+      case "Grandchild":
+        return importHandler(submitData, importGCTitle);
+      default:
+        return;
+    }
+  };
+
   return (
     <Box className="accountTitle-body-container">
       <TableContainer className="accountTitle-table-container">
         <Table stickyHeader>
           <TableHead>
             <TableRow className="table-header1-accountTitle">
-              <TableCell colSpan={6}>
+              <TableCell colSpan={header === "Account Titles" ? 7 : 6}>
                 <Stack flexDirection={"row"} justifyContent="space-between">
                   <FormControlLabel
                     className="check-box-archive-accountTitle"
@@ -211,6 +263,21 @@ const TitleTable = ({
                   Name
                 </TableSortLabel>
               </TableCell>
+              {header === "Account Titles" && (
+                <TableCell>
+                  <TableSortLabel
+                    active={
+                      params?.sorts === "type" || params?.sorts === "-type"
+                    }
+                    onClick={() =>
+                      onSortTable(params?.sorts === "type" ? "-type" : "type")
+                    }
+                    direction={params?.sorts === "type" ? "asc" : "desc"}
+                  >
+                    Level
+                  </TableSortLabel>
+                </TableCell>
+              )}
               <TableCell align="center"> Status</TableCell>
               <TableCell align="center">
                 <TableSortLabel
@@ -237,7 +304,10 @@ const TitleTable = ({
           <TableBody>
             {isLoading || status === "pending" ? (
               <TableRow>
-                <TableCell colSpan={6} align="center">
+                <TableCell
+                  colSpan={header === "Account Titles" ? 7 : 6}
+                  align="center"
+                >
                   <Lottie
                     animationData={loading}
                     className="loading-accountTitle"
@@ -246,7 +316,10 @@ const TitleTable = ({
               </TableRow>
             ) : isError ? (
               <TableRow>
-                <TableCell colSpan={6} align="center">
+                <TableCell
+                  colSpan={header === "Account Titles" ? 7 : 6}
+                  align="center"
+                >
                   <Lottie
                     animationData={noData}
                     className="no-data-accountTitle"
@@ -260,6 +333,9 @@ const TitleTable = ({
                   <TableCell>{comp?.code}</TableCell>
 
                   <TableCell>{comp?.name}</TableCell>
+                  {header === "Account Titles" && (
+                    <TableCell>{comp?.type}</TableCell>
+                  )}
                   <TableCell align="center">
                     {params?.status === "active" && (
                       <StatusIndicator
@@ -294,7 +370,7 @@ const TitleTable = ({
           {!isFetching && !isError && (
             <TableFooter style={{ position: "sticky", bottom: 0 }}>
               <TableRow className="table-footer-accountTitle">
-                <TableCell colSpan={6}>
+                <TableCell colSpan={header === "Account Titles" ? 7 : 6}>
                   <TablePagination
                     rowsPerPageOptions={[
                       5,
@@ -359,8 +435,18 @@ const TitleTable = ({
         </MenuItem>
       </Menu>
 
-      <Dialog open={archiveLoading} className="loading-role-create">
-        <Lottie animationData={loadingLight} loop={archiveLoading} />
+      <Dialog
+        open={
+          archiveLoading ||
+          ggpLoading ||
+          gpLoading ||
+          pLoading ||
+          cLoading ||
+          gcLoading
+        }
+        className="loading-role-create"
+      >
+        <Lottie animationData={loadingLight} loop />
       </Dialog>
 
       <Dialog open={createMenu}>
@@ -373,9 +459,17 @@ const TitleTable = ({
 
       <Dialog open={importMenu}>
         <ImportModal
-          title="Account Titles"
+          title={header}
           importData={importCompanyHandler}
-          isLoading={loadingImport}
+          isLoading={
+            loadingImport ||
+            loadingImport ||
+            loadingGGP ||
+            loadingGP ||
+            loadingP ||
+            loadingC ||
+            loadingGC
+          }
         />
       </Dialog>
 
@@ -403,7 +497,7 @@ const TitleTable = ({
             dispatch(resetPrompt());
             dispatch(resetMenu());
           }}
-          confirmOnClick={() => handleArchive()}
+          confirmOnClick={() => archiveAccountTitleHandler()}
         />
       </Dialog>
     </Box>

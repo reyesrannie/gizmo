@@ -18,9 +18,9 @@ const errorResponses = () => {
   };
 
   const singleError = (error, setToast) => {
-    if (error.status === 422) {
+    if (error?.status === 422) {
       setToast(error?.data?.message, { variant: "error" });
-    } else if (error.status === "FETCH_ERROR") {
+    } else if (error?.status === "FETCH_ERROR") {
       setToast("Connection failed please check your internet", {
         variant: "error",
       });
