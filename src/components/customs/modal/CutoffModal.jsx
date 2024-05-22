@@ -11,31 +11,47 @@ import Lottie from "lottie-react";
 import { LoadingButton } from "@mui/lab";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { resetMenu } from "../../../services/slice/menuSlice";
 import {
-  useCreateCompanyMutation,
-  useUpdateCompanyMutation,
+  useApproveCutOffMutation,
+  useCreateCutOffMutation,
+  useUpdateCutOffMutation,
 } from "../../../services/store/request";
 import { useSnackbar } from "notistack";
 import { objectError } from "../../../services/functions/errorResponse";
 import { DatePicker } from "@mui/x-date-pickers";
 import cutoffSchema from "../../../schemas/cutoffSchema";
+import dayjs from "dayjs";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import moment from "moment";
+import socket from "../../../services/functions/serverSocket";
+import ReasonInput from "../ReasonInput";
+import { resetPrompt, setWarning } from "../../../services/slice/promptSlice";
+import { hasAccess } from "../../../services/functions/access";
 
-const CutoffModal = ({ companyData, view, update }) => {
+const CutoffModal = ({ view, update }) => {
   const dispatch = useDispatch();
+  const menuData = useSelector((state) => state.menu.menuData);
+  const openWarning = useSelector((state) => state.prompt.warning);
+
   const { enqueueSnackbar } = useSnackbar();
 
-  const [createCompany, { isLoading }] = useCreateCompanyMutation();
-  const [updateCompany, { isLoading: updateLoading }] =
-    useUpdateCompanyMutation();
+  const [createCutOff, { isLoading }] = useCreateCutOffMutation();
+  const [updateCutOff, { isLoading: updateLoading }] =
+    useUpdateCutOffMutation();
+  const [approveCutOff, { isLoading: approveLoading }] =
+    useApproveCutOffMutation();
 
   const defaultValues = {
     date: null,
   };
 
+  const oldDate = dayjs(menuData?.date, "YYYY-MM-DD").toDate();
+  const cutOffDate =
+    dayjs(new Date(oldDate), { locale: AdapterDayjs.locale }) || null;
   const defaultData = {
-    date: companyData?.date,
+    date: cutOffDate,
   };
 
   const {
@@ -52,28 +68,55 @@ const CutoffModal = ({ companyData, view, update }) => {
   const submitHandler = async (submitData) => {
     const obj = {
       ...submitData,
-      id: view || update ? companyData?.id : null,
+      date: moment(submitData?.date).format("YYYY-MM-DD"),
+      id: view || update ? menuData?.id : null,
     };
 
-    console.log(obj);
+    try {
+      const res = update
+        ? await updateCutOff(obj).unwrap()
+        : await createCutOff(obj).unwrap();
+      enqueueSnackbar(res?.message, { variant: "success" });
+      socket.emit(update ? "cutoff_updated" : "cutoff_created");
+      dispatch(resetMenu());
+    } catch (error) {
+      objectError(error, setError, enqueueSnackbar);
+    }
+  };
 
-    // if (update) {
-    //   try {
-    //     const res = await updateCompany(obj).unwrap();
-    //     enqueueSnackbar(res?.message, { variant: "success" });
-    //     dispatch(resetMenu());
-    //   } catch (error) {
-    //     objectError(error, setError, enqueueSnackbar);
-    //   }
-    // } else {
-    //   try {
-    //     const res = await createCompany(obj).unwrap();
-    //     enqueueSnackbar(res?.message, { variant: "success" });
-    //     dispatch(resetMenu());
-    //   } catch (error) {
-    //     objectError(error, setError, enqueueSnackbar);
-    //   }
-    // }
+  const returnHandler = async (submitData) => {
+    const obj = {
+      ...submitData,
+      date: moment(menuData?.date).format("YYYY-MM-DD"),
+      id: view || update ? menuData?.id : null,
+    };
+
+    try {
+      const res = await updateCutOff(obj).unwrap();
+      enqueueSnackbar(res?.message, { variant: "success" });
+      socket.emit("cutoff_updated");
+      dispatch(resetMenu());
+      dispatch(resetPrompt());
+    } catch (error) {
+      objectError(error, setError, enqueueSnackbar);
+    }
+  };
+
+  const approveHandler = async (submitData) => {
+    const obj = {
+      date: moment(menuData?.date).format("YYYY-MM-DD"),
+      id: view || update ? menuData?.id : null,
+    };
+
+    try {
+      const res = await approveCutOff(obj).unwrap();
+      enqueueSnackbar(res?.message, { variant: "success" });
+      socket.emit("cutoff_approved");
+      dispatch(resetMenu());
+      dispatch(resetPrompt());
+    } catch (error) {
+      objectError(error, setError, enqueueSnackbar);
+    }
   };
 
   return (
@@ -86,7 +129,23 @@ const CutoffModal = ({ companyData, view, update }) => {
       />
 
       <Typography className="company-text">
-        {view ? "Cutoff" : update ? "Update Cutoff" : "Add Cutoff"}
+        {!update && "Add Cutoff"}
+        {update &&
+          menuData?.state === "closed" &&
+          hasAccess(["cutOff_requestor"]) &&
+          "Re-open Cutoff"}
+        {update &&
+          menuData?.state === "pending" &&
+          hasAccess(["cutOff_requestor"]) &&
+          "Update Cutoff"}
+        {update &&
+          menuData?.state === "pending" &&
+          hasAccess(["cutOff_approver"]) &&
+          "Approve Close"}
+        {update &&
+          menuData?.state === "closed" &&
+          hasAccess(["cutOff_approver"]) &&
+          "Approve Reopen"}
       </Typography>
       <Divider orientation="horizontal" className="company-devider" />
 
@@ -100,6 +159,9 @@ const CutoffModal = ({ companyData, view, update }) => {
           render={({ field: { onChange, value, ...restField } }) => (
             <Box className="date-picker-container-transaction">
               <DatePicker
+                disabled={
+                  menuData?.state === "closed" || hasAccess(["cutOff_approver"])
+                }
                 className="transaction-form-date"
                 label="Tag year month *"
                 format="YY MM"
@@ -119,15 +181,37 @@ const CutoffModal = ({ companyData, view, update }) => {
         />
 
         <Box className="add-company-button-container">
-          {!view && (
+          {!view && hasAccess(["cutOff_requestor"]) && (
             <LoadingButton
               variant="contained"
               color="warning"
-              type="submit"
+              type={
+                update && menuData?.state === "closed" ? "button" : "submit"
+              }
               className="add-company-button"
               disabled={!watch("date")}
+              onClick={() =>
+                update &&
+                menuData?.state === "closed" &&
+                dispatch(setWarning(true))
+              }
             >
-              {update ? "Update" : "Add"}
+              {!update && "Add"}
+              {update && menuData?.state === "pending" && "Update"}
+              {update && menuData?.state === "closed" && "Re-open"}
+            </LoadingButton>
+          )}
+          {!view && hasAccess(["cutOff_approver"]) && (
+            <LoadingButton
+              variant="contained"
+              color="warning"
+              className="add-company-button"
+              disabled={!watch("date") || menuData?.requested_at === null}
+              onClick={() =>
+                menuData?.requested_at !== null && approveHandler()
+              }
+            >
+              Approve
             </LoadingButton>
           )}
           <Button
@@ -142,10 +226,26 @@ const CutoffModal = ({ companyData, view, update }) => {
       </form>
 
       <Dialog
-        open={isLoading || updateLoading}
+        open={isLoading || updateLoading || approveLoading}
         className="loading-company-create"
       >
-        <Lottie animationData={loading} loop={isLoading || updateLoading} />
+        <Lottie animationData={loading} loop />
+      </Dialog>
+
+      <Dialog open={openWarning}>
+        <ReasonInput
+          title={"Reason for Re-open"}
+          reasonDesc={"Please enter the reason for opening this month"}
+          warning={
+            "Please note that this request will be forwarded to Approver for further processing. Kindly provide a reason for this action."
+          }
+          confirmButton={"Confirm"}
+          cancelButton={"Cancel"}
+          cancelOnClick={() => {
+            dispatch(resetPrompt());
+          }}
+          confirmOnClick={(e) => returnHandler(e)}
+        />
       </Dialog>
     </Paper>
   );

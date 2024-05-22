@@ -3,14 +3,18 @@ import {
   Box,
   Button,
   Dialog,
+  IconButton,
   ListItemIcon,
   Menu,
   MenuItem,
   Stack,
   Table,
+  TableBody,
   TableCell,
   TableContainer,
+  TableFooter,
   TableHead,
+  TablePagination,
   TableRow,
   TableSortLabel,
   Typography,
@@ -26,15 +30,27 @@ import SearchText from "../../components/customs/SearchText";
 
 import AddToPhotosOutlinedIcon from "@mui/icons-material/AddToPhotosOutlined";
 import ModeEditOutlineOutlinedIcon from "@mui/icons-material/ModeEditOutlineOutlined";
-import SettingsBackupRestoreOutlinedIcon from "@mui/icons-material/SettingsBackupRestoreOutlined";
-import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
-import { setCreateMenu, setUpdateMenu } from "../../services/slice/menuSlice";
+import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
+
+import {
+  setCreateMenu,
+  setMenuData,
+  setUpdateMenu,
+} from "../../services/slice/menuSlice";
 import { generateExcel } from "../../services/functions/exportFile";
-import { setWarning } from "../../services/slice/promptSlice";
 
 import "../../components/styles/AccountsPayable.scss";
 import CutoffModal from "../../components/customs/modal/CutoffModal";
+import { useCutOffQuery } from "../../services/store/request";
+import loading from "../../assets/lottie/Loading-2.json";
+import noData from "../../assets/lottie/NoData.json";
+import StatusIndicator from "../../components/customs/StatusIndicator";
+import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
+
+import Lottie from "lottie-react";
+import moment from "moment";
+import { hasAccess } from "../../services/functions/access";
 
 const Cutoff = () => {
   const excelItems = ["ID", "CODE", "NAME", "CREATED AT", "DATE MODIFIED"];
@@ -43,10 +59,8 @@ const Cutoff = () => {
   const { enqueueSnackbar } = useSnackbar();
   const dispatch = useDispatch();
   const menuData = useSelector((state) => state.menu.menuData);
-  const openWarning = useSelector((state) => state.prompt.warning);
   const createMenu = useSelector((state) => state.menu.createMenu);
   const updateMenu = useSelector((state) => state.menu.updateMenu);
-  const importMenu = useSelector((state) => state.menu.importMenu);
 
   const {
     params,
@@ -57,6 +71,14 @@ const Cutoff = () => {
     onSortTable,
   } = useParamsHook();
 
+  const {
+    data: cutOff,
+    isLoading,
+    status,
+    isError,
+    isFetching,
+  } = useCutOffQuery({ ...params });
+
   return (
     <Box>
       <Box>
@@ -66,15 +88,17 @@ const Cutoff = () => {
         <Typography className="page-text-indicator-ap">Cut Off</Typography>
         <Box className="ap-button-container">
           <SearchText onSearchData={onSearchData} />
-          <Button
-            variant="contained"
-            color="secondary"
-            className="button-add-ap"
-            startIcon={<AddToPhotosOutlinedIcon />}
-            onClick={() => dispatch(setCreateMenu(true))}
-          >
-            Add
-          </Button>
+          {hasAccess(["cutOff_requestor"]) && (
+            <Button
+              variant="contained"
+              color="secondary"
+              className="button-add-ap"
+              startIcon={<AddToPhotosOutlinedIcon />}
+              onClick={() => dispatch(setCreateMenu(true))}
+            >
+              Add
+            </Button>
+          )}
         </Box>
       </Box>
       <Box className="ap-body-container">
@@ -93,7 +117,7 @@ const Cutoff = () => {
                         onClick={() =>
                           generateExcel(
                             "Accounts Payable",
-                            // ap?.result?.data,
+                            // cutOff?.result?.data,
                             excelItems,
                             "AP"
                           )
@@ -117,83 +141,89 @@ const Cutoff = () => {
                     ID No.
                   </TableSortLabel>
                 </TableCell>
-                <TableCell>
+                <TableCell align="center">
                   <TableSortLabel
-                    active={params.sorts === "code" || params.sorts === "-code"}
+                    active={params.sorts === "date" || params.sorts === "-date"}
                     onClick={() =>
-                      onSortTable(params.sorts === "code" ? "-code" : "code")
+                      onSortTable(params.sorts === "date" ? "-date" : "date")
                     }
-                    direction={params.sorts === "code" ? "asc" : "desc"}
+                    direction={params.sorts === "date" ? "asc" : "desc"}
                   >
-                    Date
+                    Cut off Date
                   </TableSortLabel>
                 </TableCell>
 
+                <TableCell align="center">Date Modified</TableCell>
+                <TableCell align="center">Date Created</TableCell>
                 <TableCell align="center"> Status</TableCell>
-                <TableCell align="center">
-                  <TableSortLabel
-                    active={
-                      params.sorts === "updated_at" ||
-                      params.sorts === "-updated_at"
-                    }
-                    onClick={() =>
-                      onSortTable(
-                        params.sorts === "updated_at"
-                          ? "-updated_at"
-                          : "updated_at"
-                      )
-                    }
-                    direction={params.sorts === "updated_at" ? "asc" : "desc"}
-                  >
-                    Date Created
-                  </TableSortLabel>
-                </TableCell>
                 <TableCell align="center">Action</TableCell>
               </TableRow>
             </TableHead>
 
-            {/* <TableBody>
+            <TableBody>
               {isLoading || status === "pending" ? (
                 <TableRow>
-                  <TableCell colSpan={5} align="center">
+                  <TableCell colSpan={6} align="center">
                     <Lottie animationData={loading} className="loading-ap" />
                   </TableCell>
                 </TableRow>
               ) : isError ? (
                 <TableRow>
-                  <TableCell colSpan={7} align="center">
+                  <TableCell colSpan={6} align="center">
                     <Lottie animationData={noData} className="no-data-ap" />
                   </TableCell>
                 </TableRow>
               ) : (
-                ap?.result?.data?.map((comp) => (
-                  <TableRow className="table-body-ap" key={comp?.id}>
-                    <TableCell>{comp?.id}</TableCell>
-                    <TableCell>{comp?.company_code}</TableCell>
-
-                    <TableCell>{comp?.description}</TableCell>
-                    <TableCell>{comp?.vp}</TableCell>
+                cutOff?.result?.data?.map((cut) => (
+                  <TableRow
+                    className="table-body-ap"
+                    key={cut?.id}
+                    onClick={() => {
+                      dispatch(setMenuData(cut));
+                      dispatch(setUpdateMenu(true));
+                    }}
+                  >
+                    <TableCell>{cut?.id}</TableCell>
                     <TableCell align="center">
-                      {params.status === "active" && (
+                      {moment(cut?.date).format("MMMM YYYY")}
+                    </TableCell>
+                    <TableCell align="center">
+                      {moment(cut?.updated_at).format("MMM DD YYYY")}
+                    </TableCell>
+
+                    <TableCell align="center">
+                      {moment(cut?.created_at).format("MMM DD YYYY")}
+                    </TableCell>
+
+                    <TableCell align="center">
+                      {cut.state === "pending" && (
                         <StatusIndicator
-                          status="Active"
-                          className="active-indicator"
+                          status="For closing"
+                          className="pending-indicator"
                         />
                       )}
-                      {params.status === "inactive" && (
+
+                      {cut.state === "closed" && cut.requested_at === null && (
                         <StatusIndicator
-                          status="Inactive"
+                          status="Closed"
                           className="inActive-indicator"
                         />
                       )}
-                    </TableCell>
-                    <TableCell align="center">
-                      {moment(comp?.updated_at).format("MMM DD YYYY")}
+                      {cut.state === "closed" && cut.requested_at !== null && (
+                        <StatusIndicator
+                          status="Re-open Request"
+                          className="pending-indicator"
+                        />
+                      )}
                     </TableCell>
                     <TableCell align="center">
                       <IconButton
+                        disabled={
+                          cut?.requested_at === null &&
+                          hasAccess(["cutOff_approver"])
+                        }
                         onClick={(e) => {
-                          dispatch(setMenuData(comp));
+                          dispatch(setMenuData(cut));
                           setAnchorE1(e.currentTarget);
                         }}
                       >
@@ -203,9 +233,9 @@ const Cutoff = () => {
                   </TableRow>
                 ))
               )}
-            </TableBody> */}
+            </TableBody>
 
-            {/* {!isFetching && !isError && (
+            {!isFetching && !isError && (
               <TableFooter style={{ position: "sticky", bottom: 0 }}>
                 <TableRow className="table-footer-ap">
                   <TableCell colSpan={7}>
@@ -217,12 +247,14 @@ const Cutoff = () => {
                         {
                           label: "All",
                           value:
-                            ap?.result?.total > 100 ? ap?.result?.total : 100,
+                            cutOff?.result?.total > 100
+                              ? cutOff?.result?.total
+                              : 100,
                         },
                       ]}
-                      count={ap?.result?.total || 0}
-                      rowsPerPage={ap?.result?.per_page || 10}
-                      page={ap?.result?.current_page - 1 || 0}
+                      count={cutOff?.result?.total || 0}
+                      rowsPerPage={cutOff?.result?.per_page || 10}
+                      page={cutOff?.result?.current_page - 1 || 0}
                       onPageChange={onPageChange}
                       onRowsPerPageChange={onRowChange}
                       component="div"
@@ -230,7 +262,7 @@ const Cutoff = () => {
                   </TableCell>
                 </TableRow>
               </TableFooter>
-            )} */}
+            )}
           </Table>
         </TableContainer>
       </Box>
@@ -242,7 +274,7 @@ const Cutoff = () => {
           setAnchorE1(null);
         }}
       >
-        {params?.status === "active" && (
+        {hasAccess(["cutOff_requestor"]) && (
           <MenuItem
             onClick={() => {
               dispatch(setUpdateMenu(true));
@@ -252,67 +284,31 @@ const Cutoff = () => {
             <ListItemIcon>
               <ModeEditOutlineOutlinedIcon className="ap-menu-icons" />
             </ListItemIcon>
-            <Typography className="ap-menu-text">Update AP</Typography>
+            <Typography className="ap-menu-text">Update Cutoff</Typography>
           </MenuItem>
         )}
-        <MenuItem
-          onClick={() => {
-            setAnchorE1(null);
-            dispatch(setWarning(true));
-          }}
-        >
-          <ListItemIcon>
-            {params.status === "inactive" ? (
-              <SettingsBackupRestoreOutlinedIcon className="ap-menu-icons" />
-            ) : (
-              <DeleteForeverOutlinedIcon className="ap-menu-icons" />
-            )}
-          </ListItemIcon>
-          <Typography className="ap-menu-text">
-            {params.status === "inactive" ? "Restore" : "Archive"}
-          </Typography>
-        </MenuItem>
+        {hasAccess(["cutOff_approver"]) && menuData?.requested_at !== null && (
+          <MenuItem
+            onClick={() => {
+              setAnchorE1(null);
+              dispatch(setUpdateMenu(true));
+            }}
+          >
+            <ListItemIcon>
+              <CheckCircleOutlineOutlinedIcon className="ap-menu-icons" />
+            </ListItemIcon>
+            <Typography className="ap-menu-text">Approve</Typography>
+          </MenuItem>
+        )}
       </Menu>
 
       <Dialog open={createMenu}>
         <CutoffModal />
       </Dialog>
 
-      {/* <Dialog open={updateMenu}>
-        <AccountsPayableModal apData={menuData} update />
-      </Dialog> */}
-
-      {/* <Dialog open={importMenu}>
-        <ImportModal
-          title="AP Tagging Import"
-          importData={importCompanyHandler}
-          isLoading={loadingImport}
-        />
-      </Dialog> */}
-
-      {/* <Dialog open={openWarning}>
-        <AppPrompt
-          image={warning}
-          title={
-            params.status === "active" ? "Archive the AP?" : "Restore the AP?"
-          }
-          message={
-            params.status === "active"
-              ? "You are about to archive this AP"
-              : "You are about to restore this AP"
-          }
-          nextLineMessage={"Please confirm to continue"}
-          confirmButton={
-            params.status === "active" ? "Yes, Archive it!" : "Yes, Restore it!"
-          }
-          cancelButton={"Cancel"}
-          cancelOnClick={() => {
-            dispatch(resetPrompt());
-            dispatch(resetMenu());
-          }}
-          confirmOnClick={() => handleArchive()}
-        />
-      </Dialog> */}
+      <Dialog open={updateMenu}>
+        <CutoffModal update />
+      </Dialog>
     </Box>
   );
 };

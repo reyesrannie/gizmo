@@ -21,6 +21,7 @@ import {
   useArchiveTransactionMutation,
   useCheckTransactionQuery,
   useCreateTransactionMutation,
+  useCutOffQuery,
   useDocumentTypeQuery,
   useJournalTransactionQuery,
   useLocationQuery,
@@ -167,6 +168,15 @@ const TransactionModal = ({ create, view, update, receive }) => {
     isLoading: loadingLocation,
     isSuccess: locationSuccess,
   } = useLocationQuery({
+    status: "active",
+    pagination: "none",
+  });
+
+  const {
+    data: cutOff,
+    isLoading: loadingCutOff,
+    isSuccess: cutOffSuccess,
+  } = useCutOffQuery({
     status: "active",
     pagination: "none",
   });
@@ -483,6 +493,22 @@ const TransactionModal = ({ create, view, update, receive }) => {
     return hasChanges;
   };
 
+  const disabledMonths =
+    cutOff?.result
+      ?.filter((item) => item?.state === "closed")
+      ?.map((item) => {
+        const date = dayjs(item?.date, "YYYY-MM-DD").toDate();
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
+          2,
+          "0"
+        )}`;
+      }) ?? [];
+
+  const shouldDisableMonth = (date) => {
+    const month = dayjs(date, "YYYY-MM-DD").format("YYYY-MM");
+    return disabledMonths.includes(month);
+  };
+
   return (
     <Paper className="transaction-modal-container">
       <ShortcutHandler
@@ -622,7 +648,6 @@ const TransactionModal = ({ create, view, update, receive }) => {
             Add Document
           </Button>
         </Box>
-
         {watch("tin") && (
           <Autocomplete
             disabled={view}
@@ -706,7 +731,6 @@ const TransactionModal = ({ create, view, update, receive }) => {
             helperText={errors?.ref_no?.message}
           />
         )}
-
         <AppTextBox
           money
           disabled={singleSuccess || view || journalSuccess}
@@ -770,7 +794,6 @@ const TransactionModal = ({ create, view, update, receive }) => {
             helperText={errors?.cost?.message}
           />
         )}
-
         {documents?.length !== 0 &&
           documents?.map((item, index) => {
             return (
@@ -801,7 +824,6 @@ const TransactionModal = ({ create, view, update, receive }) => {
             helperText={errors.description?.message}
           />
         )}
-
         {checkField("coverage") && (
           <>
             <Box className="form-title-transaction">
@@ -917,7 +939,6 @@ const TransactionModal = ({ create, view, update, receive }) => {
             )}
           </>
         )}
-
         <Box className="form-title-transaction">
           {singleSuccess || journalSuccess ? (
             <Box className="note-transaction-container">
@@ -990,14 +1011,14 @@ const TransactionModal = ({ create, view, update, receive }) => {
                 label="Tag year month *"
                 format="YY MM"
                 value={value}
-                views={["month"]}
+                views={["month", "year"]}
                 onChange={(e) => {
                   onChange(e);
                 }}
                 onAccept={(e) =>
                   onDateChange(moment(new Date(e)).format("YYMM"))
                 }
-                minDate={moment(new Date()).subtract("1", "month")}
+                shouldDisableMonth={shouldDisableMonth}
               />
               {errors.tag_month_year && (
                 <Typography variant="caption" color="error">

@@ -9,7 +9,9 @@ export const arrayFieldOne = (menuData, sumAmount, voucher, document) => {
     {
       date: moment(menuData?.transactions?.date_invoice).format("MM/DD/YY"),
       remarks: menuData?.remarks,
-      invoice: `${doc} ${menuData?.transactions?.invoice_no} ${menuData?.transactions?.reference_no}`,
+      invoice: `${menuData?.transactions?.invoice_no || ""} ${
+        menuData?.transactions?.reference_no || ""
+      }`,
       amount: sumAmount,
     },
     undefined,

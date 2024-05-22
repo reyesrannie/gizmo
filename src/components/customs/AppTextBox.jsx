@@ -27,6 +27,7 @@ function AppTextBox({
   tin,
   remove = false,
   handleRemove,
+  enableEnter = false,
   ...textField
 }) {
   const [showPassword, setShowPassword] = useState(false);
@@ -84,7 +85,7 @@ function AppTextBox({
             ) : (
               <TextField
                 onKeyDown={(event) => {
-                  if (event?.key === "Enter") {
+                  if (!enableEnter && event?.key === "Enter") {
                     event?.preventDefault();
                   }
                 }}

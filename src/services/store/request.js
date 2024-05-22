@@ -1,8 +1,8 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-const baseURL = process.env.REACT_APP_API_KEY;
+// const baseURL = process.env.REACT_APP_API_KEY;
 
-// const baseURL = "http://10.10.13.17:8000/api";
+const baseURL = "http://10.10.13.17:8000/api";
 // const baseURL = "http://10.10.10.16:8000/api";
 
 export const jsonServerAPI = createApi({
@@ -45,6 +45,7 @@ export const jsonServerAPI = createApi({
     "CountTransaction",
     "CountCheck",
     "CountVoucher",
+    "CutOFF",
   ],
   endpoints: (builder) => ({
     //Authentication and users
@@ -1410,6 +1411,44 @@ export const jsonServerAPI = createApi({
       }),
       providesTags: ["CountVoucher"],
     }),
+
+    //cutoff
+    cutOff: builder.query({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/cut-off`,
+        method: "GET",
+        params: payload,
+      }),
+      providesTags: ["CutOFF"],
+    }),
+    createCutOff: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/cut-off`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["CutOFF"],
+    }),
+    updateCutOff: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/cut-off/${payload.id}`,
+        method: "PUT",
+        body: payload,
+      }),
+      invalidatesTags: ["CutOFF"],
+    }),
+    approveCutOff: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/approved/cut-off/${payload.id}`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["CutOFF"],
+    }),
   }),
 });
 
@@ -1568,4 +1607,9 @@ export const {
   useCheckCountQuery,
   useJournalCountQuery,
   useTransactCountQuery,
+
+  useCutOffQuery,
+  useCreateCutOffMutation,
+  useUpdateCutOffMutation,
+  useApproveCutOffMutation,
 } = jsonServerAPI;

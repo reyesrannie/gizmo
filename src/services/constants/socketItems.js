@@ -69,4 +69,16 @@ export const events = [
       "JournalEntries",
     ],
   },
+  {
+    event: "cutoff_updated",
+    tags: ["CutOFF"],
+  },
+  {
+    event: "cutoff_created",
+    tags: ["CutOFF"],
+  },
+  {
+    event: "cutoff_approved",
+    tags: ["CutOFF"],
+  },
 ];

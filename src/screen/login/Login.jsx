@@ -114,6 +114,7 @@ const Login = () => {
                   error={Boolean(errors?.password)}
                   helperText={errors?.password?.message}
                   className="login-textbox"
+                  enableEnter
                 />
                 <LoadingButton
                   name="Submit"
