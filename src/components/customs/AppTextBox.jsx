@@ -4,6 +4,7 @@ import { Controller } from "react-hook-form";
 import { useState } from "react";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import DoNotDisturbOnOutlinedIcon from "@mui/icons-material/DoNotDisturbOnOutlined";
 import { NumericFormat } from "react-number-format";
 
 function AppTextBox({
@@ -24,6 +25,8 @@ function AppTextBox({
   inputProps,
   money,
   tin,
+  remove = false,
+  handleRemove,
   ...textField
 }) {
   const [showPassword, setShowPassword] = useState(false);
@@ -53,6 +56,11 @@ function AppTextBox({
           <>
             {money ? (
               <NumericFormat
+                onKeyDown={(event) => {
+                  if (event?.key === "Enter") {
+                    event?.preventDefault();
+                  }
+                }}
                 customInput={TextField}
                 decimalScale={2}
                 thousandSeparator={","}
@@ -75,6 +83,11 @@ function AppTextBox({
               />
             ) : (
               <TextField
+                onKeyDown={(event) => {
+                  if (event?.key === "Enter") {
+                    event?.preventDefault();
+                  }
+                }}
                 maxRows={6}
                 autoFocus={false}
                 autoComplete="off"
@@ -99,17 +112,23 @@ function AppTextBox({
                   ),
                   endAdornment: secure ? (
                     <InputAdornment position="end">
-                      <IconButton
-                        onClick={handleClickShowPassword}
-                        onMouseDown={handleMouseDownPassword}
-                        edge="end"
-                      >
-                        {showPassword ? (
-                          <VisibilityOff fontSize="small" />
-                        ) : (
-                          <Visibility fontSize="small" />
-                        )}
-                      </IconButton>
+                      {remove ? (
+                        <IconButton onClick={handleRemove} edge="end">
+                          <DoNotDisturbOnOutlinedIcon color="error" />
+                        </IconButton>
+                      ) : (
+                        <IconButton
+                          onClick={handleClickShowPassword}
+                          onMouseDown={handleMouseDownPassword}
+                          edge="end"
+                        >
+                          {showPassword ? (
+                            <VisibilityOff fontSize="small" />
+                          ) : (
+                            <Visibility fontSize="small" />
+                          )}
+                        </IconButton>
+                      )}
                     </InputAdornment>
                   ) : (
                     <InputAdornment position="end">{endIcon}</InputAdornment>

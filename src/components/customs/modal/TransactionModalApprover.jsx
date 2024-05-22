@@ -37,6 +37,7 @@ import {
   useApproveJournalEntriesMutation,
   useApproveTransactionMutation,
   useAtcQuery,
+  useDocumentTypeQuery,
   useReturnCheckEntriesMutation,
   useReturnJournalEntriesMutation,
   useStatusLogsQuery,
@@ -89,6 +90,15 @@ const TransactionModalApprover = ({
     isLoading: loadingTIN,
     isSuccess: supplySuccess,
   } = useSupplierQuery({
+    status: "active",
+    pagination: "none",
+  });
+
+  const {
+    data: document,
+    isLoading: loadingDocument,
+    isSuccess: documentSuccess,
+  } = useDocumentTypeQuery({
     status: "active",
     pagination: "none",
   });
@@ -189,7 +199,8 @@ const TransactionModalApprover = ({
       successTitles &&
       typeSuccess &&
       successLogs &&
-      successUser
+      successUser &&
+      documentSuccess
     ) {
       const sumAmount = taxComputation?.result?.reduce((acc, curr) => {
         return parseFloat(curr.credit)
@@ -227,7 +238,7 @@ const TransactionModalApprover = ({
       );
 
       const rowThree = arrayFieldThree(menuData);
-      const row = arrayFieldOne(menuData, sumAmount, voucher);
+      const row = arrayFieldOne(menuData, sumAmount, voucher, document);
       const arrayCoa = coaArrays(
         coa,
         taxComputation?.result,
@@ -260,6 +271,8 @@ const TransactionModalApprover = ({
     accountTitles,
     successTitles,
     supplierType,
+    documentSuccess,
+    document,
   ]);
 
   const convertToPeso = (value) => {

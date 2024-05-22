@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 import {
   Box,
@@ -71,6 +71,7 @@ import ClearIcon from "@mui/icons-material/Clear";
 import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
 import FmdBadOutlinedIcon from "@mui/icons-material/FmdBadOutlined";
 import HandshakeOutlinedIcon from "@mui/icons-material/HandshakeOutlined";
+import AddIcon from "@mui/icons-material/Add";
 
 import ReasonInput from "../ReasonInput";
 import {
@@ -81,10 +82,19 @@ import ReceiveEntry from "../ReceiveEntry";
 import { useNavigate } from "react-router-dom";
 import ShortcutHandler from "../../../services/functions/ShortcutHandler";
 import socket from "../../../services/functions/serverSocket";
+import {
+  resetTransaction,
+  setAddDocuments,
+  setClearSearch,
+  setDocuments,
+} from "../../../services/slice/transactionSlice";
+import { AdditionalFunction } from "../../../services/functions/AdditionalFunction";
+import { convertToArray } from "../../../services/functions/toArrayFn";
 
 const TransactionModal = ({ create, view, update, receive }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [oldValues, setOldValues] = useState(null);
   const warning = useSelector((state) => state.prompt.warning);
   const openReason = useSelector((state) => state.prompt.openReason);
   const isReceive = useSelector((state) => state.prompt.receive);
@@ -93,10 +103,12 @@ const TransactionModal = ({ create, view, update, receive }) => {
   const navigateTo = useSelector((state) => state.prompt.navigate);
   const updateCount = useSelector((state) => state.menu.updateCount);
   const transactionData = useSelector((state) => state.menu.menuData);
+  const documents = useSelector((state) => state.transaction.documents);
+  const addDocuments = useSelector((state) => state.transaction.addDocuments);
 
   const defaultValue = transactionDefaultValue();
-
   const { enqueueSnackbar } = useSnackbar();
+  const { insertDocument, deepEqual } = AdditionalFunction();
 
   const [createTransaction, { isLoading }] = useCreateTransactionMutation();
   const [updateTransaction, { isLoading: updateLoading }] =
@@ -199,6 +211,7 @@ const TransactionModal = ({ create, view, update, receive }) => {
     watch,
     clearErrors,
     formState: { errors },
+    getValues,
   } = useForm({
     resolver: yupResolver(transactionSchema),
     defaultValues: defaultValue,
@@ -252,7 +265,7 @@ const TransactionModal = ({ create, view, update, receive }) => {
 
   useEffect(() => {
     if (gTagSuccess && create) {
-      const tagNoG = parseInt(gtag?.result) + 1 || 1;
+      const tagNoG = parseInt(gtag?.result, 10) + 1 || 1;
       setValue("g_tag_number", tagNoG.toString().padStart(4, "0"));
     }
 
@@ -266,14 +279,18 @@ const TransactionModal = ({ create, view, update, receive }) => {
       !create
     ) {
       const tagMonthYear = dayjs(transactionData?.tag_year, "YYMM").toDate();
+
+      const docs = insertDocument(transactionData);
       const mapData = mapViewTransaction(
         transactionData,
         ap,
         tin,
         document,
         accountNumber,
-        location
+        location,
+        docs
       );
+
       const values = {
         ...mapData,
         tag_month_year:
@@ -285,8 +302,10 @@ const TransactionModal = ({ create, view, update, receive }) => {
       Object.entries(values).forEach(([key, value]) => {
         setValue(key, value);
       });
+      setOldValues(values);
     }
   }, [
+    documents,
     gTagSuccess,
     gtag,
     supplySuccess,
@@ -305,17 +324,44 @@ const TransactionModal = ({ create, view, update, receive }) => {
     view,
     receive,
     setValue,
+    setOldValues,
   ]);
+
+  useEffect(() => {
+    if (transactionData?.reference_no !== "") {
+      const docs = insertDocument(transactionData);
+      const toArrayItems = convertToArray(docs);
+      const addToDocs =
+        document?.result?.filter((item) =>
+          toArrayItems?.some((doc) => item?.code === doc?.code)
+        ) || [];
+
+      dispatch(setDocuments(addToDocs));
+    }
+  }, [transactionData, insertDocument, document, dispatch, setAddDocuments]);
 
   const checkField = (field) => {
     return watch("document_type")?.required_fields?.includes(field);
   };
 
+  const getFormattedString = (arr, values) => {
+    return arr
+      .map((item) => {
+        const code = item.code;
+        const value = values[code];
+        return value ? `${code} ${value}` : null;
+      })
+      .filter(Boolean)
+      .join(", ");
+  };
+
   const submitHandler = async (submitData) => {
+    const addedDocs = getFormattedString(documents, submitData);
     const mappedData = mapTransaction(submitData);
     const obj = {
       ...mappedData,
       id: !create ? transactionData?.id : null,
+      reference_no: addedDocs,
     };
 
     try {
@@ -334,14 +380,17 @@ const TransactionModal = ({ create, view, update, receive }) => {
               : `A new transaction has been created.`,
         }
       );
+      const docs = insertDocument(res?.result);
       const resData = await mapResponse(
         res?.result,
         ap,
         tin,
         document,
         accountNumber,
-        location
+        location,
+        docs
       );
+      setOldValues(resData);
       update || receive
         ? Object.entries(resData).forEach(([key, value]) => {
             setValue(key, value);
@@ -409,6 +458,31 @@ const TransactionModal = ({ create, view, update, receive }) => {
     handleSubmit(submitHandler)();
   };
 
+  const handleRemove = (item) => {
+    const docs = documents?.filter((doc) => doc?.code !== item?.code);
+    setValue(item?.code, "");
+    dispatch(setDocuments(docs));
+  };
+
+  const checkChanges = () => {
+    const item = getValues();
+    const propertiesToCheck = [
+      "tin",
+      "reference_no",
+      "document_type",
+      "date_invoice",
+      "amount",
+      "description",
+      "ap",
+    ];
+
+    const hasChanges = !propertiesToCheck.every((prop) =>
+      deepEqual(item?.[prop], oldValues?.[prop])
+    );
+
+    return hasChanges;
+  };
+
   return (
     <Paper className="transaction-modal-container">
       <ShortcutHandler
@@ -416,7 +490,7 @@ const TransactionModal = ({ create, view, update, receive }) => {
           updateCount === 1 ? dispatch(setUpdateCount(1)) : handleShortCut()
         }
         onEsc={() => dispatch(resetMenu())}
-        onReceive={() => dispatch(setReceive(true))}
+        onReceive={() => dispatch(setReceive(!checkChanges()))}
         onConfirm={() => dispatch(setEntryReceive(true))}
       />
       <img
@@ -456,7 +530,7 @@ const TransactionModal = ({ create, view, update, receive }) => {
           />
         )}
         <Autocomplete
-          disabled={view || receive}
+          disabled={view}
           control={control}
           name={"tin"}
           options={tin?.result || []}
@@ -482,7 +556,7 @@ const TransactionModal = ({ create, view, update, receive }) => {
                 endAdornment: (
                   <>
                     {params.InputProps.endAdornment}
-                    {watch("tin") && !receive && (
+                    {watch("tin") && (
                       <IconButton
                         onClick={() => {
                           handleClear(true);
@@ -536,7 +610,19 @@ const TransactionModal = ({ create, view, update, receive }) => {
           <Typography className="form-title-text-transaction">
             Receipt Details
           </Typography>
+
+          <Button
+            endIcon={<AddIcon />}
+            color="secondary"
+            variant="contained"
+            size="small"
+            className="add-tax-document"
+            onClick={() => dispatch(setAddDocuments(true))}
+          >
+            Add Document
+          </Button>
         </Box>
+
         {watch("tin") && (
           <Autocomplete
             disabled={view}
@@ -570,7 +656,7 @@ const TransactionModal = ({ create, view, update, receive }) => {
                 disabled={view}
                 className="transaction-form-date"
                 label="Date Invoice *"
-                format="YYYY-MM-DD"
+                format="MMMM DD, YYYY"
                 value={value}
                 onChange={(e) => {
                   onChange(e);
@@ -684,6 +770,24 @@ const TransactionModal = ({ create, view, update, receive }) => {
             helperText={errors?.cost?.message}
           />
         )}
+
+        {documents?.length !== 0 &&
+          documents?.map((item, index) => {
+            return (
+              <AppTextBox
+                key={index}
+                disabled={view}
+                control={control}
+                name={`${item?.code}`}
+                label={`${item?.code}`}
+                color="primary"
+                className="transaction-form-textBox"
+                handleRemove={() => handleRemove(item)}
+                secure
+                remove
+              />
+            );
+          })}
         {receive && (
           <AppTextBox
             disabled={view}
@@ -919,10 +1023,11 @@ const TransactionModal = ({ create, view, update, receive }) => {
               </LoadingButton>
 
               <LoadingButton
+                disabled={checkChanges()}
                 variant="contained"
                 color="success"
                 className="add-transaction-button"
-                onClick={() => dispatch(setReceive(true))}
+                onClick={() => dispatch(setReceive(!checkChanges()))}
                 startIcon={<HandshakeOutlinedIcon />}
               >
                 Receive
@@ -947,7 +1052,10 @@ const TransactionModal = ({ create, view, update, receive }) => {
             <Button
               variant="contained"
               color="primary"
-              onClick={() => dispatch(resetMenu())}
+              onClick={() => {
+                dispatch(resetMenu());
+                dispatch(resetTransaction());
+              }}
               className="add-transaction-button"
             >
               {view ? "Close" : "Cancel"}
@@ -1029,6 +1137,62 @@ const TransactionModal = ({ create, view, update, receive }) => {
         />
       </Dialog>
 
+      <Dialog open={openReason} onClose={() => dispatch(setOpenReason(false))}>
+        <ReasonInput
+          title={"Reason for archive"}
+          reasonDesc={"Please enter the reason for archiving this transaction"}
+          warning={
+            "Note that this transaction will be permanently archived once confirmed."
+          }
+          confirmButton={"Confirm"}
+          cancelButton={"Cancel"}
+          cancelOnClick={() => {
+            dispatch(resetPrompt());
+          }}
+          confirmOnClick={handleArchive}
+        />
+      </Dialog>
+
+      <Dialog
+        open={addDocuments}
+        className="additional-documents"
+        onClose={() => dispatch(setAddDocuments(false))}
+      >
+        <Autocomplete
+          disabled={view}
+          control={control}
+          name={"addedDocuments"}
+          options={
+            document?.result.filter(
+              (item) => !documents?.some((doc) => item?.code === doc?.code)
+            ) || []
+          }
+          getOptionLabel={(option) => `${option.name}`}
+          isOptionEqualToValue={(option, value) => option?.code === value?.code}
+          onClose={() => {
+            if (watch("addedDocuments")) {
+              dispatch(setDocuments([...documents, watch("addedDocuments")]));
+              dispatch(setAddDocuments(false));
+              setValue("addedDocuments", null);
+            }
+            setValue("addedDocuments", null);
+            dispatch(setAddDocuments(false));
+          }}
+          renderInput={(params) => (
+            <MuiTextField
+              name="addedDocuments"
+              {...params}
+              label="Document type"
+              size="small"
+              variant="outlined"
+              error={Boolean(errors.addedDocuments)}
+              helperText={errors.addedDocuments?.message}
+              className="transaction-form-textBox"
+            />
+          )}
+        />
+      </Dialog>
+
       <Dialog open={archiveLoading} className="loading-role-create">
         <Lottie animationData={loadingLight} loop={archiveLoading} />
       </Dialog>
@@ -1043,6 +1207,7 @@ const TransactionModal = ({ create, view, update, receive }) => {
           confirmButton={"Yes, Continue!"}
           cancelButton={"Later"}
           cancelOnClick={() => {
+            dispatch(setClearSearch(true));
             dispatch(resetPrompt());
             dispatch(resetMenu());
           }}

@@ -60,6 +60,8 @@ const UserAccounts = lazy(() =>
   import("../../screen/user/accounts/UserAccounts")
 );
 
+const CutOff = lazy(() => import("../../screen/cutoff/Cutoff"));
+
 const Routing = () => {
   const user = decodeUser();
   const routes = useRoutes([
@@ -74,6 +76,14 @@ const Routing = () => {
         {
           path: "",
           element: hasAccess(["dashboard"]) ? <Dashboard /> : <></>,
+        },
+        {
+          path: "cutoff",
+          element: hasAccess(["cutOff_requestor", "cutOff_approver"]) ? (
+            <CutOff />
+          ) : (
+            <></>
+          ),
         },
       ],
     },

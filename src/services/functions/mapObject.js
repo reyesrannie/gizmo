@@ -1,6 +1,7 @@
 import moment from "moment";
 import dayjs from "dayjs";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { AdditionalFunction } from "./AdditionalFunction";
 
 const mapTransaction = (submitData) => {
   const obj = {
@@ -43,7 +44,8 @@ const mapViewTransaction = (
   tin,
   document,
   accountNumber,
-  location
+  location,
+  docs
 ) => {
   const values = {
     is_offset: transactionData?.is_offset === 1 ? true : false,
@@ -53,7 +55,7 @@ const mapViewTransaction = (
     company_address: transactionData?.supplier?.address || "",
     name_in_receipt: transactionData?.supplier?.receipt_name || "",
     invoice_no: transactionData?.invoice_no || "",
-    ref_no: transactionData?.reference_no || "",
+    reference_no: transactionData?.reference_no || "",
     amount_withheld: transactionData?.amount_check || "",
     amount_check: transactionData?.amount_withheld || "",
     amount: transactionData?.purchase_amount || "",
@@ -94,6 +96,7 @@ const mapViewTransaction = (
       dayjs(new Date(transactionData?.coverage_to), {
         locale: AdapterDayjs.locale,
       }) || null,
+    ...docs,
   };
 
   return values;
@@ -138,12 +141,9 @@ const mapResponse = async (
   tin,
   document,
   accountNumber,
-  location
+  location,
+  docs
 ) => {
-  const acLoc = accountNumber?.result?.find(
-    (item) => transactionData?.account_number_id === item.id
-  )?.location;
-
   const values = {
     is_offset: transactionData?.is_offset || false,
     tag_no: transactionData?.tag_no || "",
@@ -160,7 +160,7 @@ const mapResponse = async (
       tin?.result?.find((item) => transactionData?.supplier_id === item.id)
         ?.receipt_name || "",
     invoice_no: transactionData?.invoice_no || "",
-    ref_no: transactionData?.reference_no || "",
+    reference_no: transactionData?.reference_no || "",
     amount_withheld: transactionData?.amount_check || "",
     amount_check: transactionData?.amount_withheld || "",
     amount: transactionData?.purchase_amount || "",
@@ -199,6 +199,7 @@ const mapResponse = async (
       dayjs(new Date(transactionData?.coverage_to), {
         locale: AdapterDayjs.locale,
       }) || null,
+    ...docs,
   };
 
   return values;

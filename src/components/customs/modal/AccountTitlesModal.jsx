@@ -44,7 +44,7 @@ import { objectError } from "../../../services/functions/errorResponse";
 import accountTitlesSchema from "../../../schemas/accountTitlesSchema";
 import Autocomplete from "../AutoComplete";
 
-const AccountTitlesModal = ({ accountTitlesData, view, update }) => {
+const AccountTitlesModal = ({ accountTitlesData, view, update, create }) => {
   const dispatch = useDispatch();
   const header =
     useSelector((state) => state.transaction.header) || "Account Titles";
@@ -123,7 +123,7 @@ const AccountTitlesModal = ({ accountTitlesData, view, update }) => {
   const defaultValues = {
     name: "",
     code: "",
-    ggp: "",
+    ggp: null,
     gp: null,
     p: null,
     c: null,
@@ -180,6 +180,16 @@ const AccountTitlesModal = ({ accountTitlesData, view, update }) => {
     }
   }, [update, ggpTitle, ggpSuccess, gpSuccess, pSuccess, cSuccess, gcSuccess]);
 
+  const handle = async (obj, handler) => {
+    try {
+      const res = await handler(obj).unwrap();
+      enqueueSnackbar(res?.message, { variant: "success" });
+      dispatch(resetMenu());
+    } catch (error) {
+      objectError(error, setError, enqueueSnackbar);
+    }
+  };
+
   const submitHandler = async (submitData) => {
     const obj = {
       code: submitData?.code,
@@ -192,83 +202,21 @@ const AccountTitlesModal = ({ accountTitlesData, view, update }) => {
       ac_gc_id: submitData?.gc?.id || null,
     };
 
-    header === "Account Titles" && handleAccountTitle(obj);
-    header === "Great Grandparent" && handleGGP(obj);
-    header === "Grandparent" && handleGP(obj);
-    header === "Parent" && handleP(obj);
-    header === "Child" && handleC(obj);
-    header === "Grandchild" && handleGc(obj);
-  };
-
-  const handleAccountTitle = async (obj) => {
-    try {
-      const res = update
-        ? await updateAccountTitle(obj).unwrap()
-        : await createAccountTitle(obj).unwrap();
-      enqueueSnackbar(res?.message, { variant: "success" });
-      dispatch(resetMenu());
-    } catch (error) {
-      objectError(error, setError, enqueueSnackbar);
-    }
-  };
-
-  const handleGGP = async (obj) => {
-    try {
-      const res = update
-        ? await updateGGP(obj).unwrap()
-        : await createGGP(obj).unwrap();
-      enqueueSnackbar(res?.message, { variant: "success" });
-      dispatch(resetMenu());
-    } catch (error) {
-      objectError(error, setError, enqueueSnackbar);
-    }
-  };
-
-  const handleGP = async (obj) => {
-    try {
-      const res = update
-        ? await updateGP(obj).unwrap()
-        : await createGP(obj).unwrap();
-      enqueueSnackbar(res?.message, { variant: "success" });
-      dispatch(resetMenu());
-    } catch (error) {
-      objectError(error, setError, enqueueSnackbar);
-    }
-  };
-
-  const handleP = async (obj) => {
-    try {
-      const res = update
-        ? await updateP(obj).unwrap()
-        : await createP(obj).unwrap();
-      enqueueSnackbar(res?.message, { variant: "success" });
-      dispatch(resetMenu());
-    } catch (error) {
-      objectError(error, setError, enqueueSnackbar);
-    }
-  };
-
-  const handleC = async (obj) => {
-    try {
-      const res = update
-        ? await updateC(obj).unwrap()
-        : await createC(obj).unwrap();
-      enqueueSnackbar(res?.message, { variant: "success" });
-      dispatch(resetMenu());
-    } catch (error) {
-      objectError(error, setError, enqueueSnackbar);
-    }
-  };
-
-  const handleGc = async (obj) => {
-    try {
-      const res = update
-        ? await updateGC(obj).unwrap()
-        : await createGC(obj).unwrap();
-      enqueueSnackbar(res?.message, { variant: "success" });
-      dispatch(resetMenu());
-    } catch (error) {
-      objectError(error, setError, enqueueSnackbar);
+    switch (header) {
+      case "Account Titles":
+        return handle(obj, update ? updateAccountTitle : createAccountTitle);
+      case "Great Grandparent":
+        return handle(obj, update ? updateGGP : createGGP);
+      case "Grandparent":
+        return handle(obj, update ? updateGP : createGP);
+      case "Parent":
+        return handle(obj, update ? updateP : createP);
+      case "Child":
+        return handle(obj, update ? updateC : createC);
+      case "Grandchild":
+        return handle(obj, update ? updateGC : createGC);
+      default:
+        return;
     }
   };
   return (
@@ -325,7 +273,7 @@ const AccountTitlesModal = ({ accountTitlesData, view, update }) => {
               <MuiTextField
                 name="ggp"
                 {...params}
-                label="Great Grandfather *"
+                label="Great Grandparent *"
                 size="small"
                 variant="outlined"
                 error={Boolean(errors.ggp)}
@@ -349,7 +297,7 @@ const AccountTitlesModal = ({ accountTitlesData, view, update }) => {
               <MuiTextField
                 name="gp"
                 {...params}
-                label="Grandfather *"
+                label="Grandparent *"
                 size="small"
                 variant="outlined"
                 error={Boolean(errors.gp)}
@@ -457,7 +405,15 @@ const AccountTitlesModal = ({ accountTitlesData, view, update }) => {
       </form>
 
       <Dialog
-        open={isLoading || updateLoading}
+        open={
+          isLoading ||
+          updateLoading ||
+          ggpLoadingCreate ||
+          gpLoadingCreate ||
+          pLoadingCreate ||
+          cLoadingCreate ||
+          gcLoadingCreate
+        }
         className="loading-accountTitles-create"
       >
         <Lottie animationData={loading} loop={isLoading || updateLoading} />

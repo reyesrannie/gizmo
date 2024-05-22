@@ -48,14 +48,24 @@ const useParamsHook = () => {
     }));
   };
 
+  const onReset = () => {
+    setParams(() => ({
+      status: "active",
+      page: 1,
+      per_page: 10,
+      pagination: null,
+      sorts: null,
+    }));
+  };
+
   return {
     params,
     onPageChange,
     onRowChange,
-    // onDateRange,
     onSearchData,
     onStatusChange,
     onSortTable,
+    onReset,
   };
 };
 

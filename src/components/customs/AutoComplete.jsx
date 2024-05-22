@@ -3,6 +3,7 @@ import {
   Autocomplete as MuiAutocomplete,
   createFilterOptions,
 } from "@mui/material";
+import { useRef } from "react";
 
 const Autocomplete = ({
   disabled,
@@ -17,6 +18,7 @@ const Autocomplete = ({
 }) => {
   const { multiple } = autocomplete;
   const defaultFilterOptions = createFilterOptions();
+  const allOptionsRef = useRef([]);
 
   const filterOptions = (options, state) => {
     const filteredOptions = defaultFilterOptions(options, state).slice(0);
@@ -33,6 +35,7 @@ const Autocomplete = ({
       ? sortedOptions.slice(0, limit)
       : sortedOptions;
 
+    allOptionsRef.current = limitedOptions; // Update the ref with all available options
     return limitedOptions;
   };
 
@@ -45,6 +48,11 @@ const Autocomplete = ({
 
         return (
           <MuiAutocomplete
+            onKeyDown={(event) => {
+              if (event?.key === "Enter" && value !== null) {
+                event?.preventDefault();
+              }
+            }}
             loading={loading}
             autoFocus={false}
             disabled={disabled}

@@ -27,8 +27,7 @@ import AddToPhotosOutlinedIcon from "@mui/icons-material/AddToPhotosOutlined";
 
 import "../../../components/styles/AccountTitles.scss";
 import "../../../components/styles/TagTransaction.scss";
-import { useState } from "react";
-import { useSnackbar } from "notistack";
+
 import { setCreateMenu } from "../../../services/slice/menuSlice";
 
 import {
@@ -40,13 +39,7 @@ import ArrowDropDownCircleOutlinedIcon from "@mui/icons-material/ArrowDropDownCi
 import TitleTable from "./TitleTable";
 
 const AccountTitles = () => {
-  const excelItems = ["ID", "CODE", "NAME", "CREATED AT", "DATE MODIFIED"];
-  const [anchorE1, setAnchorE1] = useState(null);
-  const { enqueueSnackbar } = useSnackbar();
   const dispatch = useDispatch();
-  const menuData = useSelector((state) => state.menu.menuData);
-  const createMenu = useSelector((state) => state.menu.createMenu);
-  const updateMenu = useSelector((state) => state.menu.updateMenu);
 
   const header =
     useSelector((state) => state.transaction.header) || "Account Titles";
@@ -58,6 +51,7 @@ const AccountTitles = () => {
     onRowChange,
     onSearchData,
     onSortTable,
+    onReset,
   } = useParamsHook();
 
   const {
@@ -145,6 +139,7 @@ const AccountTitles = () => {
                   <AccordionSummary
                     key={index}
                     onClick={() => {
+                      onReset();
                       dispatch(setHeader(head.name));
                       dispatch(setIsExpanded(false));
                     }}

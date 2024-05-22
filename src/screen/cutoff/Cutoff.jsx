@@ -1,71 +1,42 @@
+import React, { useState } from "react";
 import {
   Box,
   Button,
-  Checkbox,
   Dialog,
-  FormControlLabel,
-  IconButton,
   ListItemIcon,
   Menu,
   MenuItem,
   Stack,
   Table,
-  TableBody,
   TableCell,
   TableContainer,
-  TableFooter,
   TableHead,
-  TablePagination,
   TableRow,
   TableSortLabel,
   Typography,
 } from "@mui/material";
-import React, { useState } from "react";
+
+import "../../components/styles/Dashboard.scss";
+
+import Breadcrums from "../../components/customs/Breadcrums";
 import { useSnackbar } from "notistack";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  resetMenu,
-  setCreateMenu,
-  setImportError,
-  setImportMenu,
-  setMenuData,
-  setUpdateMenu,
-} from "../../../services/slice/menuSlice";
-import { resetPrompt, setWarning } from "../../../services/slice/promptSlice";
-import { singleError } from "../../../services/functions/errorResponse";
-import Lottie from "lottie-react";
-import moment from "moment";
-
-import Breadcrums from "../../../components/customs/Breadcrums";
-import SearchText from "../../../components/customs/SearchText";
-import loading from "../../../assets/lottie/Loading-2.json";
-import loadingLight from "../../../assets/lottie/Loading.json";
-import noData from "../../../assets/lottie/NoData.json";
-import StatusIndicator from "../../../components/customs/StatusIndicator";
-import warning from "../../../assets/svg/warning.svg";
-import AppPrompt from "../../../components/customs/AppPrompt";
-
-import "../../../components/styles/AccountsPayable.scss";
+import useParamsHook from "../../services/hooks/useParamsHook";
+import SearchText from "../../components/customs/SearchText";
 
 import AddToPhotosOutlinedIcon from "@mui/icons-material/AddToPhotosOutlined";
-import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
 import ModeEditOutlineOutlinedIcon from "@mui/icons-material/ModeEditOutlineOutlined";
 import SettingsBackupRestoreOutlinedIcon from "@mui/icons-material/SettingsBackupRestoreOutlined";
 import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
-import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
+import { setCreateMenu, setUpdateMenu } from "../../services/slice/menuSlice";
+import { generateExcel } from "../../services/functions/exportFile";
+import { setWarning } from "../../services/slice/promptSlice";
 
-import useParamsHook from "../../../services/hooks/useParamsHook";
-import {
-  useApQuery,
-  useArchiveAPMutation,
-  useImportAPMutation,
-} from "../../../services/store/request";
-import AccountsPayableModal from "../../../components/customs/modal/AccountsPayableModal";
-import { generateExcel } from "../../../services/functions/exportFile";
-import ImportModal from "../../../components/customs/modal/ImportModal";
+import "../../components/styles/AccountsPayable.scss";
+import CutoffModal from "../../components/customs/modal/CutoffModal";
 
-const AccountsPayable = () => {
+const Cutoff = () => {
   const excelItems = ["ID", "CODE", "NAME", "CREATED AT", "DATE MODIFIED"];
 
   const [anchorE1, setAnchorE1] = useState(null);
@@ -86,54 +57,13 @@ const AccountsPayable = () => {
     onSortTable,
   } = useParamsHook();
 
-  const [archiveAp, { isLoading: archiveLoading }] = useArchiveAPMutation();
-
-  const [importAp, { isLoading: loadingImport }] = useImportAPMutation();
-
-  const {
-    data: ap,
-    isLoading,
-    isError,
-    isFetching,
-    status,
-  } = useApQuery(params);
-
-  const handleArchive = async () => {
-    try {
-      const res = await archiveAp(menuData).unwrap();
-      enqueueSnackbar(res?.message, { variant: "success" });
-      dispatch(resetMenu());
-      dispatch(resetPrompt());
-    } catch (error) {
-      singleError(error, enqueueSnackbar);
-    }
-  };
-
-  const importCompanyHandler = async (submitData) => {
-    const obj = submitData?.map((items) => ({
-      company_code: items.code,
-      description: items.name,
-      vp: items.vp,
-    }));
-
-    try {
-      const res = await importAp(obj).unwrap();
-      enqueueSnackbar(res?.message, { variant: "success" });
-      dispatch(resetMenu());
-      dispatch(resetPrompt());
-    } catch (error) {
-      dispatch(setImportError(error?.data?.errors));
-      singleError(error, enqueueSnackbar);
-    }
-  };
-
   return (
     <Box>
       <Box>
         <Breadcrums />
       </Box>
       <Box className="ap-head-container">
-        <Typography className="page-text-indicator-ap">AP Tagging</Typography>
+        <Typography className="page-text-indicator-ap">Cut Off</Typography>
         <Box className="ap-button-container">
           <SearchText onSearchData={onSearchData} />
           <Button
@@ -154,17 +84,7 @@ const AccountsPayable = () => {
               <TableRow className="table-header1-ap">
                 <TableCell colSpan={7}>
                   <Stack flexDirection={"row"} justifyContent="space-between">
-                    <FormControlLabel
-                      className="check-box-archive-ap"
-                      control={<Checkbox color="secondary" />}
-                      label="Archive"
-                      checked={params?.status === "inactive"}
-                      onChange={() =>
-                        onStatusChange(
-                          params?.status === "active" ? "inactive" : "active"
-                        )
-                      }
-                    />
+                    <Box></Box>
                     <Box>
                       <Button
                         variant="contained"
@@ -173,22 +93,13 @@ const AccountsPayable = () => {
                         onClick={() =>
                           generateExcel(
                             "Accounts Payable",
-                            ap?.result?.data,
+                            // ap?.result?.data,
                             excelItems,
                             "AP"
                           )
                         }
                       >
                         Export
-                      </Button>
-                      <Button
-                        variant="contained"
-                        color="secondary"
-                        className="button-export-ap"
-                        startIcon={<FileDownloadOutlinedIcon />}
-                        onClick={() => dispatch(setImportMenu(true))}
-                      >
-                        Import
                       </Button>
                     </Box>
                   </Stack>
@@ -214,21 +125,10 @@ const AccountsPayable = () => {
                     }
                     direction={params.sorts === "code" ? "asc" : "desc"}
                   >
-                    Code
+                    Date
                   </TableSortLabel>
                 </TableCell>
-                <TableCell>
-                  <TableSortLabel
-                    active={params.sorts === "name" || params.sorts === "-name"}
-                    onClick={() =>
-                      onSortTable(params.sorts === "name" ? "-name" : "name")
-                    }
-                    direction={params.sorts === "name" ? "asc" : "desc"}
-                  >
-                    Name
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell> Allocation</TableCell>
+
                 <TableCell align="center"> Status</TableCell>
                 <TableCell align="center">
                   <TableSortLabel
@@ -245,17 +145,17 @@ const AccountsPayable = () => {
                     }
                     direction={params.sorts === "updated_at" ? "asc" : "desc"}
                   >
-                    Date Modified
+                    Date Created
                   </TableSortLabel>
                 </TableCell>
                 <TableCell align="center">Action</TableCell>
               </TableRow>
             </TableHead>
 
-            <TableBody>
+            {/* <TableBody>
               {isLoading || status === "pending" ? (
                 <TableRow>
-                  <TableCell colSpan={7} align="center">
+                  <TableCell colSpan={5} align="center">
                     <Lottie animationData={loading} className="loading-ap" />
                   </TableCell>
                 </TableRow>
@@ -303,9 +203,9 @@ const AccountsPayable = () => {
                   </TableRow>
                 ))
               )}
-            </TableBody>
+            </TableBody> */}
 
-            {!isFetching && !isError && (
+            {/* {!isFetching && !isError && (
               <TableFooter style={{ position: "sticky", bottom: 0 }}>
                 <TableRow className="table-footer-ap">
                   <TableCell colSpan={7}>
@@ -330,7 +230,7 @@ const AccountsPayable = () => {
                   </TableCell>
                 </TableRow>
               </TableFooter>
-            )}
+            )} */}
           </Table>
         </TableContainer>
       </Box>
@@ -374,27 +274,23 @@ const AccountsPayable = () => {
         </MenuItem>
       </Menu>
 
-      <Dialog open={archiveLoading} className="loading-role-create">
-        <Lottie animationData={loadingLight} loop={archiveLoading} />
-      </Dialog>
-
       <Dialog open={createMenu}>
-        <AccountsPayableModal />
+        <CutoffModal />
       </Dialog>
 
-      <Dialog open={updateMenu}>
+      {/* <Dialog open={updateMenu}>
         <AccountsPayableModal apData={menuData} update />
-      </Dialog>
+      </Dialog> */}
 
-      <Dialog open={importMenu}>
+      {/* <Dialog open={importMenu}>
         <ImportModal
           title="AP Tagging Import"
           importData={importCompanyHandler}
           isLoading={loadingImport}
         />
-      </Dialog>
+      </Dialog> */}
 
-      <Dialog open={openWarning}>
+      {/* <Dialog open={openWarning}>
         <AppPrompt
           image={warning}
           title={
@@ -416,9 +312,9 @@ const AccountsPayable = () => {
           }}
           confirmOnClick={() => handleArchive()}
         />
-      </Dialog>
+      </Dialog> */}
     </Box>
   );
 };
 
-export default AccountsPayable;
+export default Cutoff;

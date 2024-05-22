@@ -56,7 +56,6 @@ const TransactionTable = ({
   isLoading,
   isError,
   tagTransaction,
-  isFetching,
   onPageChange,
   onRowChange,
   onOrderBy,

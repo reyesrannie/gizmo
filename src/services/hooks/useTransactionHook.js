@@ -66,6 +66,17 @@ const useTransactionHook = () => {
     }));
   };
 
+  const resetParams = () => {
+    setParams(() => ({
+      page: 1,
+      per_page: 10,
+      pagination: null,
+      sorts: null,
+      tagYear: "",
+      state: "pending",
+    }));
+  };
+
   return {
     params,
     onPageChange,
@@ -75,6 +86,7 @@ const useTransactionHook = () => {
     onSortTable,
     onStateChange,
     onOrderBy,
+    resetParams,
   };
 };
 

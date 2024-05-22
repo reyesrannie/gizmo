@@ -25,6 +25,7 @@ import FactCheckOutlinedIcon from "@mui/icons-material/FactCheckOutlined";
 import PlaylistAddCheckOutlinedIcon from "@mui/icons-material/PlaylistAddCheckOutlined";
 import TaskOutlinedIcon from "@mui/icons-material/TaskOutlined";
 import MediationOutlinedIcon from "@mui/icons-material/MediationOutlined";
+import LockPersonOutlinedIcon from "@mui/icons-material/LockPersonOutlined";
 
 import "../../components/styles/CardNavigation.scss";
 const user = [
@@ -502,6 +503,13 @@ const menu = [
         permission: ["approver"],
       },
     ],
+  },
+  {
+    desc: "Cutoff",
+    icon: <LockPersonOutlinedIcon />,
+    path: "/cutoff",
+    permission: ["cutOff_requestor", "cutOff_approver"],
+    children: [],
   },
 ];
 

@@ -1,11 +1,15 @@
 import moment from "moment";
 
-export const arrayFieldOne = (menuData, sumAmount, voucher) => {
+export const arrayFieldOne = (menuData, sumAmount, voucher, document) => {
+  const doc = document?.result?.find(
+    (item) => item?.id === menuData?.transactions?.document_type_id
+  )?.code;
+
   const obj = [
     {
       date: moment(menuData?.transactions?.date_invoice).format("MM/DD/YY"),
       remarks: menuData?.remarks,
-      invoice: menuData?.transactions?.invoice_no,
+      invoice: `${doc} ${menuData?.transactions?.invoice_no} ${menuData?.transactions?.reference_no}`,
       amount: sumAmount,
     },
     undefined,
@@ -146,4 +150,11 @@ export const coaArrays = (coa, taxComputation, supTypePercent, coa_id) => {
   ];
 
   return defaultValues;
+};
+
+export const convertToArray = (item) => {
+  if (item && typeof item === "object" && !Array.isArray(item)) {
+    return Object.keys(item).map((key) => ({ code: key }));
+  }
+  return [];
 };

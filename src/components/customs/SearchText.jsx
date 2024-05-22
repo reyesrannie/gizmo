@@ -1,13 +1,22 @@
 import { Divider, IconButton, InputBase, Paper } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import "../styles/SearchText.scss";
 
 import SearchIcon from "@mui/icons-material/Search";
 import HighlightOffOutlinedIcon from "@mui/icons-material/HighlightOffOutlined";
+import { useSelector } from "react-redux";
 
 const SearchText = ({ onSearchData }) => {
+  const clearSearch = useSelector((state) => state.transaction.clearSearch);
   const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    if (clearSearch) {
+      setSearch("");
+      onSearchData("");
+    }
+  }, [clearSearch]);
 
   return (
     <Paper className="search-container">

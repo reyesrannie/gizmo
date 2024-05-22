@@ -13,9 +13,13 @@ const CountDistribute = () => {
   });
   const { data: badgeCheck } = useCheckCountQuery({
     ap: userData?.scope_tagging?.map((item) => item?.ap_code),
+    min: userData?.amount?.min_amount || null,
+    max: userData?.amount?.max_amount || null,
   });
   const { data: badgeJournal } = useJournalCountQuery({
     ap: userData?.scope_tagging?.map((item) => item?.ap_code),
+    min: userData?.amount?.min_amount || null,
+    max: userData?.amount?.max_amount || null,
   });
 
   const menuCount = (path) => {

@@ -9,9 +9,6 @@ const ShortcutHandler = ({ onUpdate, onReceive, onConfirm }) => {
       } else if (event.ctrlKey && event.key === "r") {
         event.preventDefault();
         onReceive();
-      } else if (event.key === "Enter") {
-        event.preventDefault();
-        onConfirm();
       }
     }
 

@@ -63,6 +63,20 @@ const accessPermission = [
   },
   {
     id: 6,
+    access: "Cut OFF",
+    children: [
+      {
+        access_permission: "cutOff_requestor",
+        label: "Request Cutoff",
+      },
+      {
+        access_permission: "cutOff_approver",
+        label: "Approver Cutoff",
+      },
+    ],
+  },
+  {
+    id: 7,
     access: "Allocation",
     children: [
       {
