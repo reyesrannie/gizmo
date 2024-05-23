@@ -64,7 +64,6 @@ const AppBar = () => {
       ) {
         enqueueSnackbar(data?.message, { variant: "success" });
       }
-
       dispatch(jsonServerAPI?.util?.invalidateTags(value?.tags));
     };
 

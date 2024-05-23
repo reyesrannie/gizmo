@@ -1241,6 +1241,24 @@ export const jsonServerAPI = createApi({
         "CountVoucher",
       ],
     }),
+    voidCVoucher: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/for-voiding/transaction-check/${payload.id}`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["CheckEntries", "Logs", "CountCheck"],
+    }),
+    voidedCVoucher: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/voided/transaction-check/${payload.id}`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["CheckEntries", "Logs", "CountCheck"],
+    }),
 
     //Journal
     journalEntries: builder.query({
@@ -1338,7 +1356,6 @@ export const jsonServerAPI = createApi({
       ],
     }),
 
-    //Journal Voucher
     checkedJVoucher: builder.mutation({
       transformResponse: (response) => response,
       query: (payload) => ({
@@ -1355,6 +1372,25 @@ export const jsonServerAPI = createApi({
         "CountCheck",
         "CountVoucher",
       ],
+    }),
+
+    voidJVoucher: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/for-voiding/transaction-journal/${payload.id}`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["JournalEntries", "Logs", "CountVoucher"],
+    }),
+    voidedJVoucher: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/voided/transaction-journal/${payload.id}`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["JournalEntries", "Logs", "CountVoucher"],
     }),
 
     //Check
@@ -1590,6 +1626,8 @@ export const {
   useArchiveCheckEntriesMutation,
   useReturnCheckEntriesMutation,
   useApproveCheckEntriesMutation,
+  useVoidCVoucherMutation,
+  useVoidedCVoucherMutation,
 
   useJournalEntriesQuery,
   useCreateJournalEntriesMutation,
@@ -1597,6 +1635,8 @@ export const {
   useArchiveJournalEntriesMutation,
   useReturnJournalEntriesMutation,
   useApproveJournalEntriesMutation,
+  useVoidJVoucherMutation,
+  useVoidedJVoucherMutation,
 
   useCheckTransactionQuery,
   useJournalTransactionQuery,

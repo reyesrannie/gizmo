@@ -638,6 +638,7 @@ const TransactionModal = ({ create, view, update, receive }) => {
           </Typography>
 
           <Button
+            disabled={view}
             endIcon={<AddIcon />}
             color="secondary"
             variant="contained"

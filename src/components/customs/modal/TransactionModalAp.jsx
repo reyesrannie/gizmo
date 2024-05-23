@@ -642,7 +642,7 @@ const TransactionModalAp = ({
 
         {voucher === "journal" && (
           <AppTextBox
-            disabled={checked}
+            disabled={checked || disableCheck}
             multiline
             minRows={1}
             control={control}

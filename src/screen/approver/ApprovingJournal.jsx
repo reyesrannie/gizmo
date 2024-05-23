@@ -6,6 +6,7 @@ import SearchText from "../../components/customs/SearchText";
 import {
   Accordion,
   AccordionSummary,
+  Badge,
   Box,
   IconButton,
   Typography,
@@ -27,6 +28,7 @@ import {
 
 import JournalTable from "./JournalTable";
 import useApproverHook from "../../services/hooks/useApproverHook";
+import CountDistribute from "../../services/functions/CountDistribute";
 
 const ApprovingJournal = () => {
   const dispatch = useDispatch();
@@ -34,6 +36,8 @@ const ApprovingJournal = () => {
   const isExpanded = useSelector((state) => state.transaction.isExpanded);
   const header =
     useSelector((state) => state.transaction.header) || "For Approval";
+
+  const { countHeaderApproverJV, countApproveJournal } = CountDistribute();
 
   const {
     params,
@@ -52,6 +56,8 @@ const ApprovingJournal = () => {
     isFetching,
     status,
   } = useJournalEntriesQuery(params);
+
+  const hasBadge = countApproveJournal();
 
   return (
     <Box>
@@ -84,7 +90,14 @@ const ApprovingJournal = () => {
                     }}
                   >
                     <Typography className="page-text-accord-tag-transaction">
-                      {head?.name}
+                      <Badge
+                        badgeContent={
+                          head?.name ? countHeaderApproverJV(head?.name) : 0
+                        }
+                        color="error"
+                      >
+                        {head?.name}
+                      </Badge>
                     </Typography>
                   </AccordionSummary>
                 )
@@ -95,7 +108,9 @@ const ApprovingJournal = () => {
               dispatch(setIsExpanded(!isExpanded));
             }}
           >
-            <ArrowDropDownCircleOutlinedIcon />
+            <Badge variant="dot" color="error" invisible={hasBadge}>
+              <ArrowDropDownCircleOutlinedIcon />
+            </Badge>
           </IconButton>
         </Box>
         <Box className="tag-transaction-button-container">
@@ -115,6 +130,36 @@ const ApprovingJournal = () => {
           tagTransaction={tagTransaction}
           onOrderBy={onOrderBy}
           state={"For Approval"}
+        />
+      )}
+      {header === "Void" && (
+        <JournalTable
+          params={params}
+          onSortTable={onSortTable}
+          isError={isError}
+          isFetching={isFetching}
+          isLoading={isLoading}
+          onPageChange={onPageChange}
+          onRowChange={onRowChange}
+          status={status}
+          tagTransaction={tagTransaction}
+          onOrderBy={onOrderBy}
+          state={"For Voiding"}
+        />
+      )}
+      {header === "Pending Void" && (
+        <JournalTable
+          params={params}
+          onSortTable={onSortTable}
+          isError={isError}
+          isFetching={isFetching}
+          isLoading={isLoading}
+          onPageChange={onPageChange}
+          onRowChange={onRowChange}
+          status={status}
+          tagTransaction={tagTransaction}
+          onOrderBy={onOrderBy}
+          state={"voiding"}
         />
       )}
       {header === "Checked" && (

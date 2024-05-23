@@ -7,6 +7,7 @@ const initialState = {
   receive: false,
   entryReceive: false,
   openReason: false,
+  openVoid: false,
   openReasonReturn: false,
   disableProceed: false,
   isContinue: false,
@@ -48,6 +49,9 @@ const promptSlice = createSlice({
     setNavigate: (state, action) => {
       state.navigate = action.payload;
     },
+    setOpenVoid: (state, action) => {
+      state.openVoid = action.payload;
+    },
     resetPrompt: () => {
       return initialState;
     },
@@ -66,6 +70,7 @@ export const {
   setDisableProceed,
   setIsContinue,
   setNavigate,
+  setOpenVoid,
 } = promptSlice.actions;
 
 export default promptSlice.reducer;

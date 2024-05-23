@@ -40,7 +40,9 @@ import {
   resetMenu,
   setCheckMenu,
   setMenuData,
+  setViewAccountingEntries,
   setViewMenu,
+  setVoidMenu,
 } from "../../services/slice/menuSlice";
 
 import {
@@ -72,6 +74,11 @@ const CheckTable = ({
   const updateMenu = useSelector((state) => state.menu.updateMenu);
   const viewMenu = useSelector((state) => state.menu.viewMenu);
   const checkMenu = useSelector((state) => state.menu.checkMenu);
+  const voidMenu = useSelector((state) => state.menu.voidMenu);
+  const viewAccountingEntries = useSelector(
+    (state) => state.menu.viewAccountingEntries
+  );
+
   const filterBy = useSelector((state) => state.transaction.filterBy);
 
   const { data: supplier, isLoading: loadingSupplier } = useSupplierQuery({
@@ -185,6 +192,12 @@ const CheckTable = ({
 
                       tag?.state === "approved" && dispatch(setViewMenu(true));
 
+                      tag?.state === "For Voiding" &&
+                        dispatch(setVoidMenu(true));
+
+                      tag?.state === "voided" &&
+                        dispatch(setViewAccountingEntries(true));
+
                       tag?.state === "For Approval" &&
                         dispatch(setCheckMenu(true));
 
@@ -243,6 +256,20 @@ const CheckTable = ({
                           className="received-indicator"
                         />
                       )}
+
+                      {tag?.state === "For Voiding" && (
+                        <StatusIndicator
+                          status="For Voiding"
+                          className="pending-indicator"
+                        />
+                      )}
+
+                      {tag?.state === "voided" && (
+                        <StatusIndicator
+                          status="Void"
+                          className="inActive-indicator"
+                        />
+                      )}
                     </TableCell>
                     <TableCell align="center">
                       {moment(tag?.updated_at).format("MMM DD YYYY")}
@@ -261,6 +288,12 @@ const CheckTable = ({
 
                           tag?.state === "returned" &&
                             dispatch(setViewMenu(true));
+
+                          tag?.state === "For Voiding" &&
+                            dispatch(setVoidMenu(true));
+
+                          tag?.state === "voided" &&
+                            dispatch(setViewAccountingEntries(true));
                         }}
                       >
                         <RemoveRedEyeOutlinedIcon className="tag-transaction-icon-actions" />
@@ -369,6 +402,22 @@ const CheckTable = ({
         onClose={() => dispatch(resetMenu())}
       >
         <TransactionModalAp transactionData={menuData} update />
+      </Dialog>
+
+      <Dialog
+        open={voidMenu}
+        className="transaction-modal-dialog"
+        onClose={() => dispatch(resetMenu())}
+      >
+        <TransactionModalApprover transactionData={menuData} voiding />
+      </Dialog>
+
+      <Dialog
+        open={viewAccountingEntries}
+        className="transaction-modal-dialog"
+        onClose={() => dispatch(setViewAccountingEntries(false))}
+      >
+        <TransactionModalApprover viewAccountingEntries voiding />
       </Dialog>
 
       <Dialog

@@ -10,12 +10,15 @@ const apHeader = [
   { name: "Checked", status: "For Approval" },
   { name: "Returned", status: "returned" },
   { name: "Approved", status: "approved" },
+  { name: "Void", status: "voided" },
   { name: "History", status: "" },
 ];
 
 const approverHeader = [
   { name: "For Approval", status: "For Approval" },
   { name: "Returned", status: "returned" },
+  { name: "Void", status: "voided" },
+  { name: "Pending Void", status: "For Voiding" },
   { name: "History", status: "" },
 ];
 

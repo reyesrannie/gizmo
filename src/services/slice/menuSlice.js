@@ -25,6 +25,7 @@ const initialState = {
   printable: false,
   updateCount: 0,
   viewAccountingEntries: false,
+  voidMenu: false,
 };
 
 const initialStateWithoutDrawer = {
@@ -52,6 +53,7 @@ const initialStateWithoutDrawer = {
   printable: false,
   updateCount: 0,
   viewAccountingEntries: false,
+  voidMenu: false,
 };
 
 const menutSlice = createSlice({
@@ -130,6 +132,9 @@ const menutSlice = createSlice({
     setViewAccountingEntries: (state, action) => {
       state.viewAccountingEntries = action.payload;
     },
+    setVoidMenu: (state, action) => {
+      state.voidMenu = action.payload;
+    },
     resetMenu: () => {
       return initialState;
     },
@@ -164,6 +169,7 @@ export const {
   setPrintable,
   setComputationMenu,
   setUpdateCount,
+  setVoidMenu,
   setViewAccountingEntries,
   resetMenuWithoutDrawer,
 } = menutSlice.actions;

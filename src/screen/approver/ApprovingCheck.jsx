@@ -6,6 +6,7 @@ import SearchText from "../../components/customs/SearchText";
 import {
   Accordion,
   AccordionSummary,
+  Badge,
   Box,
   IconButton,
   Typography,
@@ -27,6 +28,7 @@ import {
 
 import CheckTable from "./CheckTable";
 import useApproverHook from "../../services/hooks/useApproverHook";
+import CountDistribute from "../../services/functions/CountDistribute";
 
 const ApprovingCheck = () => {
   const dispatch = useDispatch();
@@ -52,6 +54,10 @@ const ApprovingCheck = () => {
     isFetching,
     status,
   } = useCheckEntriesQuery(params);
+
+  const { countHeaderApproverCH, countApproveCheck } = CountDistribute();
+
+  const hasBadge = countApproveCheck();
 
   return (
     <Box>
@@ -84,7 +90,14 @@ const ApprovingCheck = () => {
                     }}
                   >
                     <Typography className="page-text-accord-tag-transaction">
-                      {head?.name}
+                      <Badge
+                        badgeContent={
+                          head?.name ? countHeaderApproverCH(head?.name) : 0
+                        }
+                        color="error"
+                      >
+                        {head?.name}
+                      </Badge>
                     </Typography>
                   </AccordionSummary>
                 )
@@ -95,7 +108,9 @@ const ApprovingCheck = () => {
               dispatch(setIsExpanded(!isExpanded));
             }}
           >
-            <ArrowDropDownCircleOutlinedIcon />
+            <Badge variant="dot" color="error" invisible={hasBadge}>
+              <ArrowDropDownCircleOutlinedIcon />
+            </Badge>
           </IconButton>
         </Box>
         <Box className="tag-transaction-button-container">
@@ -145,6 +160,36 @@ const ApprovingCheck = () => {
           tagTransaction={tagTransaction}
           onOrderBy={onOrderBy}
           state="returned"
+        />
+      )}
+      {header === "Void" && (
+        <CheckTable
+          params={params}
+          onSortTable={onSortTable}
+          isError={isError}
+          isFetching={isFetching}
+          isLoading={isLoading}
+          onPageChange={onPageChange}
+          onRowChange={onRowChange}
+          status={status}
+          tagTransaction={tagTransaction}
+          onOrderBy={onOrderBy}
+          state={"For Voiding"}
+        />
+      )}
+      {header === "Pending Void" && (
+        <CheckTable
+          params={params}
+          onSortTable={onSortTable}
+          isError={isError}
+          isFetching={isFetching}
+          isLoading={isLoading}
+          onPageChange={onPageChange}
+          onRowChange={onRowChange}
+          status={status}
+          tagTransaction={tagTransaction}
+          onOrderBy={onOrderBy}
+          state={"For Voiding"}
         />
       )}
       {header === "History" && (

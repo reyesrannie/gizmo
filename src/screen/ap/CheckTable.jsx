@@ -41,6 +41,7 @@ import {
   setMenuData,
   setReceiveMenu,
   setUpdateMenu,
+  setViewAccountingEntries,
   setViewMenu,
 } from "../../services/slice/menuSlice";
 
@@ -58,7 +59,6 @@ const CheckTable = ({
   params,
   onSortTable,
   isLoading,
-  status,
   isError,
   tagTransaction,
   isFetching,
@@ -75,6 +75,9 @@ const CheckTable = ({
   const viewMenu = useSelector((state) => state.menu.viewMenu);
   const checkMenu = useSelector((state) => state.menu.checkMenu);
   const filterBy = useSelector((state) => state.transaction.filterBy);
+  const viewAccountingEntries = useSelector(
+    (state) => state.menu.viewAccountingEntries
+  );
 
   const { data: supplier, isLoading: loadingSupplier } = useSupplierQuery({
     status: "active",
@@ -190,6 +193,12 @@ const CheckTable = ({
                       tag?.state === "returned" &&
                         dispatch(setUpdateMenu(true));
 
+                      tag?.state === "For Voiding" &&
+                        dispatch(setViewAccountingEntries(true));
+
+                      tag?.state === "voided" &&
+                        dispatch(setViewAccountingEntries(true));
+
                       tag?.state === "For Approval" &&
                         dispatch(setCheckMenu(true));
 
@@ -257,6 +266,20 @@ const CheckTable = ({
                           className="inActive-indicator"
                         />
                       )}
+
+                      {tag?.state === "For Voiding" && (
+                        <StatusIndicator
+                          status="For Voiding"
+                          className="pending-indicator"
+                        />
+                      )}
+
+                      {tag?.state === "voided" && (
+                        <StatusIndicator
+                          status="Void"
+                          className="inActive-indicator"
+                        />
+                      )}
                     </TableCell>
                     <TableCell align="center">
                       {moment(tag?.updated_at).format("MMM DD YYYY")}
@@ -274,6 +297,12 @@ const CheckTable = ({
 
                           tag?.state === "For Approval" &&
                             dispatch(setCheckMenu(true));
+
+                          tag?.state === "For Voiding" &&
+                            dispatch(setViewAccountingEntries(true));
+
+                          tag?.state === "voided" &&
+                            dispatch(setViewAccountingEntries(true));
 
                           tag?.state === "approved" &&
                             dispatch(setViewMenu(true));
@@ -393,6 +422,14 @@ const CheckTable = ({
         onClose={() => dispatch(setUpdateMenu(false))}
       >
         <TransactionModalAp transactionData={menuData} update viewVoucher />
+      </Dialog>
+
+      <Dialog
+        open={viewAccountingEntries}
+        className="transaction-modal-dialog"
+        onClose={() => dispatch(setViewAccountingEntries(false))}
+      >
+        <TransactionModalApprover viewAccountingEntries />
       </Dialog>
 
       <Dialog

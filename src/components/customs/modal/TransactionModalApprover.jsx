@@ -29,7 +29,11 @@ import {
   setViewAccountingEntries,
 } from "../../../services/slice/menuSlice";
 import { resetOption } from "../../../services/slice/optionsSlice";
-import { resetPrompt, setReturn } from "../../../services/slice/promptSlice";
+import {
+  resetPrompt,
+  setOpenVoid,
+  setReturn,
+} from "../../../services/slice/promptSlice";
 
 import {
   useAccountTitlesQuery,
@@ -45,6 +49,10 @@ import {
   useSupplierTypeQuery,
   useTaxComputationQuery,
   useUsersQuery,
+  useVoidCVoucherMutation,
+  useVoidJVoucherMutation,
+  useVoidedCVoucherMutation,
+  useVoidedJVoucherMutation,
   useVpCheckNumberQuery,
   useVpJournalNumberQuery,
 } from "../../../services/store/request";
@@ -74,6 +82,7 @@ const TransactionModalApprover = ({
   approved,
   ap,
   viewAccountingEntries,
+  voiding,
 }) => {
   const dispatch = useDispatch();
   const isReturn = useSelector((state) => state.prompt.return);
@@ -83,7 +92,7 @@ const TransactionModalApprover = ({
 
   const voucher = useSelector((state) => state.options.voucher);
   const voucherData = useSelector((state) => state.transaction.voucherData);
-  const formBIR = useSelector((state) => state.transaction.formBIR);
+  const openVoid = useSelector((state) => state.prompt.openVoid);
 
   const {
     data: tin,
@@ -192,6 +201,18 @@ const TransactionModalApprover = ({
   const [approveTransaction, { isLoading: loadingApproveTransaction }] =
     useApproveTransactionMutation();
 
+  const [voidCVoucher, { isLoading: loadingVoidCV }] =
+    useVoidCVoucherMutation();
+
+  const [voidJVoucher, { isLoading: loadingVoidJV }] =
+    useVoidJVoucherMutation();
+
+  const [voidedCVoucher, { isLoading: loadingVoidedCV }] =
+    useVoidedCVoucherMutation();
+
+  const [voidedJVoucher, { isLoading: loadingVoidedJV }] =
+    useVoidedJVoucherMutation();
+
   useEffect(() => {
     if (
       taxSuccess &&
@@ -211,9 +232,7 @@ const TransactionModalApprover = ({
       const supplier = tin?.result?.find(
         (item) => menuData?.transactions?.supplier_id === item?.id
       );
-      dispatch(
-        setPrintable(supplier?.tin?.length < 10 && supplier?.tin !== undefined)
-      );
+      checkAtc(supplier);
 
       const coa = taxComputation?.result?.map((item) => {
         const checkCOa = accountTitles?.result?.find(
@@ -279,6 +298,16 @@ const TransactionModalApprover = ({
     return value?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
+  const checkAtc = (supplier) => {
+    const hasAtc = atc?.result?.find((item) => item?.id === menuData?.atc);
+    if (hasAtc?.code === "N/A") {
+      dispatch(setPrintable(true));
+    }
+    if (supplier?.tin?.length < 10 && supplier?.tin !== undefined) {
+      dispatch(setPrintable(true));
+    }
+  };
+
   const returnHandler = async (submitData) => {
     const obj = {
       ...submitData,
@@ -293,7 +322,30 @@ const TransactionModalApprover = ({
       enqueueSnackbar(res?.message, { variant: "success" });
       socket.emit("transaction_returned", {
         ...obj,
-        message: `The transaction ${obj?.tag_no} is returned`,
+        message: `The transaction ${menuData?.transactions?.tag_no} is returned`,
+      });
+      dispatch(resetMenu());
+      dispatch(resetPrompt());
+    } catch (error) {
+      singleError(error, enqueueSnackbar);
+    }
+  };
+
+  const voidHandler = async (submitData) => {
+    const obj = {
+      ...submitData,
+      id: menuData?.id,
+      ap_tagging_id: menuData?.apTagging?.id,
+    };
+    try {
+      const res =
+        voucher === "check"
+          ? await voidCVoucher(obj).unwrap()
+          : await voidJVoucher(obj).unwrap();
+      enqueueSnackbar(res?.message, { variant: "success" });
+      socket.emit("transaction_for_void", {
+        ...obj,
+        message: `The transaction ${menuData?.transactions?.tag_no} is for void`,
       });
       dispatch(resetMenu());
       dispatch(resetPrompt());
@@ -329,7 +381,29 @@ const TransactionModalApprover = ({
       enqueueSnackbar(res?.message, { variant: "success" });
       socket.emit("transaction_approved", {
         ...obj,
-        message: `The transaction ${obj?.tag_no} is approved`,
+        message: `The transaction ${menuData?.transactions?.tag_no} is approved`,
+      });
+      dispatch(resetMenu());
+      dispatch(resetPrompt());
+    } catch (error) {
+      singleError(error, enqueueSnackbar);
+    }
+  };
+
+  const voidedHandler = async () => {
+    const obj = {
+      id: menuData?.id,
+    };
+
+    try {
+      const res =
+        voucher === "check"
+          ? await voidedCVoucher(obj).unwrap()
+          : await voidedJVoucher(obj).unwrap();
+      enqueueSnackbar(res?.message, { variant: "success" });
+      socket.emit("transaction_voided", {
+        ...obj,
+        message: `The transaction ${menuData?.transactions?.tag_no} is void`,
       });
       dispatch(resetMenu());
       dispatch(resetPrompt());
@@ -809,24 +883,24 @@ const TransactionModalApprover = ({
                 colSpan={2}
                 rowSpan={2}
                 className={`voucher-payment-footer-approve ${
-                  approved ? `approved` : ""
+                  voiding || approved ? `approved` : ""
                 }`}
               >
                 <Typography> Approved by:</Typography>
 
-                {approved && (
-                  <Stack
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
-                  >
+                <Stack
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  {menuData?.approvedBy?.first_name !== undefined && (
                     <Typography>
                       {`${menuData?.approvedBy?.first_name} ${
                         menuData?.approvedBy?.last_name
                       } ${menuData?.approvedBy?.suffix || ""}`}
                     </Typography>
-                  </Stack>
-                )}
+                  )}
+                </Stack>
               </TableCell>
               <TableCell align="left" className="voucher-payment-footer">
                 <Typography>{voucher === "check" ? "CV" : "JV"} NO.</Typography>
@@ -868,6 +942,12 @@ const TransactionModalApprover = ({
           **This voucher is system-generated and does not require a signature.**
         </Typography>
       </TableContainer>
+
+      {menuData?.state === "voided" && (
+        <Box className="voided">
+          <Typography>VOID</Typography>
+        </Box>
+      )}
       <Box className="add-transaction-button-container">
         <Box className="return-receive-container">
           {!approved && !viewAccountingEntries && (
@@ -921,7 +1001,7 @@ const TransactionModalApprover = ({
           )}
         </Box>
         <Box className="archive-transaction-button-container">
-          {!approved && !viewAccountingEntries && (
+          {!approved && !viewAccountingEntries && !voiding && (
             <LoadingButton
               variant="contained"
               color="warning"
@@ -930,6 +1010,26 @@ const TransactionModalApprover = ({
             >
               Approve
             </LoadingButton>
+          )}
+          {!approved && !viewAccountingEntries && voiding && (
+            <LoadingButton
+              variant="contained"
+              color="warning"
+              onClick={voidedHandler}
+              className="add-transaction-button"
+            >
+              Approve Void
+            </LoadingButton>
+          )}
+          {approved && ap && !printable && !viewAccountingEntries && (
+            <Button
+              variant="contained"
+              color="error"
+              className="add-transaction-button"
+              onClick={() => dispatch(setOpenVoid(true))}
+            >
+              Void
+            </Button>
           )}
           <Button
             variant="contained"
@@ -963,7 +1063,11 @@ const TransactionModalApprover = ({
           loadingApproveJournal ||
           loadingVp ||
           loadingJournalVP ||
-          loadingApproveTransaction
+          loadingApproveTransaction ||
+          loadingVoidCV ||
+          loadingVoidJV ||
+          loadingVoidedCV ||
+          loadingVoidedJV
         }
         className="loading-transaction-create"
       >
@@ -989,13 +1093,21 @@ const TransactionModalApprover = ({
         <ComputationMenu details />
       </Dialog>
 
-      {/* <Dialog open={createTax} className="transaction-modal-dialog">
-        <TaxComputation create taxComputation={taxComputation} />
+      <Dialog open={openVoid}>
+        <ReasonInput
+          title={"Reason for Void"}
+          reasonDesc={"Please enter the void reason  "}
+          warning={
+            "Please note that this entry will be forwarded to Approver for further processing. Kindly provide a reason for this action."
+          }
+          confirmButton={"Confirm"}
+          cancelButton={"Cancel"}
+          cancelOnClick={() => {
+            dispatch(resetPrompt());
+          }}
+          confirmOnClick={(e) => voidHandler(e)}
+        />
       </Dialog>
-
-      <Dialog open={updateTax} className="transaction-modal-dialog">
-        <TaxComputation update taxComputation={taxComputation} />
-      </Dialog> */}
 
       <TransactionDrawer transactionData={menuData?.transactions} />
     </Paper>

@@ -53,7 +53,9 @@ const JournalVoucher = () => {
     status,
   } = useJournalEntriesQuery(params);
 
-  const { countHeaderAPJL } = CountDistribute();
+  const { countHeaderAPJL, countJournal } = CountDistribute();
+
+  const hasBadge = countJournal();
 
   return (
     <Box>
@@ -109,7 +111,9 @@ const JournalVoucher = () => {
               dispatch(setIsExpanded(!isExpanded));
             }}
           >
-            <ArrowDropDownCircleOutlinedIcon />
+            <Badge variant="dot" invisible={hasBadge} color="error">
+              <ArrowDropDownCircleOutlinedIcon />
+            </Badge>
           </IconButton>
         </Box>
         <Box className="tag-transaction-button-container">
@@ -129,6 +133,22 @@ const JournalVoucher = () => {
           tagTransaction={tagTransaction}
           onOrderBy={onOrderBy}
           state={"received"}
+        />
+      )}
+
+      {header === "Void" && (
+        <JournalTable
+          params={params}
+          onSortTable={onSortTable}
+          isError={isError}
+          isFetching={isFetching}
+          isLoading={isLoading}
+          onPageChange={onPageChange}
+          onRowChange={onRowChange}
+          status={status}
+          tagTransaction={tagTransaction}
+          onOrderBy={onOrderBy}
+          state={"voided"}
         />
       )}
       {header === "Approved" && (

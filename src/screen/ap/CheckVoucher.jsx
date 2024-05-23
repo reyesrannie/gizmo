@@ -53,7 +53,9 @@ const CheckVoucher = () => {
     status,
   } = useCheckEntriesQuery(params);
 
-  const { countHeaderAPCH } = CountDistribute();
+  const { countHeaderAPCH, countCheck } = CountDistribute();
+
+  const hasBadge = countCheck();
 
   return (
     <Box>
@@ -109,7 +111,9 @@ const CheckVoucher = () => {
               dispatch(setIsExpanded(!isExpanded));
             }}
           >
-            <ArrowDropDownCircleOutlinedIcon />
+            <Badge variant="dot" color="error" invisible={hasBadge}>
+              <ArrowDropDownCircleOutlinedIcon />
+            </Badge>
           </IconButton>
         </Box>
         <Box className="tag-transaction-button-container">
@@ -129,6 +133,21 @@ const CheckVoucher = () => {
           tagTransaction={tagTransaction}
           onOrderBy={onOrderBy}
           state={"received"}
+        />
+      )}
+      {header === "Void" && (
+        <CheckTable
+          params={params}
+          onSortTable={onSortTable}
+          isError={isError}
+          isFetching={isFetching}
+          isLoading={isLoading}
+          onPageChange={onPageChange}
+          onRowChange={onRowChange}
+          status={status}
+          tagTransaction={tagTransaction}
+          onOrderBy={onOrderBy}
+          state={"voided"}
         />
       )}
       {header === "Checked" && (

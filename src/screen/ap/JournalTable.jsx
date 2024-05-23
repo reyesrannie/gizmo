@@ -41,6 +41,7 @@ import {
   setMenuData,
   setReceiveMenu,
   setUpdateMenu,
+  setViewAccountingEntries,
   setViewMenu,
 } from "../../services/slice/menuSlice";
 
@@ -75,6 +76,9 @@ const JournalTable = ({
   const viewMenu = useSelector((state) => state.menu.viewMenu);
   const checkMenu = useSelector((state) => state.menu.checkMenu);
   const filterBy = useSelector((state) => state.transaction.filterBy);
+  const viewAccountingEntries = useSelector(
+    (state) => state.menu.viewAccountingEntries
+  );
 
   const { data: supplier, isLoading: loadingSupplier } = useSupplierQuery({
     status: "active",
@@ -194,6 +198,9 @@ const JournalTable = ({
                       tag?.state === "returned" &&
                         dispatch(setUpdateMenu(true));
 
+                      tag?.state === "For Voiding" &&
+                        dispatch(setViewAccountingEntries(true));
+
                       tag?.state === "approved" && dispatch(setViewMenu(true));
                     }}
                   >
@@ -256,6 +263,12 @@ const JournalTable = ({
                           className="received-indicator"
                         />
                       )}
+                      {tag?.state === "For Voiding" && (
+                        <StatusIndicator
+                          status="For Voiding"
+                          className="pending-indicator"
+                        />
+                      )}
                     </TableCell>
                     <TableCell align="center">
                       {moment(tag?.updated_at).format("MMM DD YYYY")}
@@ -276,6 +289,9 @@ const JournalTable = ({
 
                           tag?.state === "approved" &&
                             dispatch(setViewMenu(true));
+
+                          tag?.state === "For Voiding" &&
+                            dispatch(setViewAccountingEntries(true));
                         }}
                       >
                         <RemoveRedEyeOutlinedIcon className="tag-transaction-icon-actions" />
@@ -391,6 +407,14 @@ const JournalTable = ({
         onClose={() => dispatch(setUpdateMenu(false))}
       >
         <TransactionModalAp transactionData={menuData} update viewVoucher />
+      </Dialog>
+
+      <Dialog
+        open={viewAccountingEntries}
+        className="transaction-modal-dialog"
+        onClose={() => dispatch(setViewAccountingEntries(false))}
+      >
+        <TransactionModalApprover viewAccountingEntries />
       </Dialog>
 
       <Dialog

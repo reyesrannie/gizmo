@@ -21,6 +21,21 @@
   }
 }
 
+.voided {
+  &.MuiBox-root {
+    position: absolute;
+    transform: rotate(-40deg) translate(-30%, 60%);
+    text-align: center;
+    .MuiTypography-root {
+      opacity: 0.5;
+      font-family: Roboto-Black;
+      color: rgb(172, 172, 172);
+      font-size: 120px;
+      letter-spacing: 15px;
+    }
+  }
+}
+
 .voucher-number-header {
   &.MuiTableCell-root {
     border-bottom: 2px solid black;

@@ -40,7 +40,9 @@ import {
   resetMenu,
   setCheckMenu,
   setMenuData,
+  setViewAccountingEntries,
   setViewMenu,
+  setVoidMenu,
 } from "../../services/slice/menuSlice";
 
 import {
@@ -73,6 +75,10 @@ const JournalTable = ({
   const viewMenu = useSelector((state) => state.menu.viewMenu);
   const checkMenu = useSelector((state) => state.menu.checkMenu);
   const filterBy = useSelector((state) => state.transaction.filterBy);
+  const voidMenu = useSelector((state) => state.menu.voidMenu);
+  const viewAccountingEntries = useSelector(
+    (state) => state.menu.viewAccountingEntries
+  );
 
   const { data: supplier, isLoading: loadingSupplier } = useSupplierQuery({
     status: "active",
@@ -179,6 +185,23 @@ const JournalTable = ({
                   <TableRow
                     className="table-body-tag-transaction"
                     key={tag?.id}
+                    onClick={() => {
+                      dispatch(setMenuData(tag));
+                      dispatch(setVoucher("journal"));
+
+                      tag?.state === "approved" && dispatch(setViewMenu(true));
+
+                      tag?.state === "For Approval" &&
+                        dispatch(setCheckMenu(true));
+
+                      tag?.state === "returned" && dispatch(setViewMenu(true));
+
+                      tag?.state === "For Voiding" &&
+                        dispatch(setVoidMenu(true));
+
+                      tag?.state === "voided" &&
+                        dispatch(setViewAccountingEntries(true));
+                    }}
                   >
                     <TableCell>{tag?.transactions?.tag_no}</TableCell>
                     <TableCell>
@@ -232,6 +255,20 @@ const JournalTable = ({
                           className="received-indicator"
                         />
                       )}
+
+                      {tag?.state === "For Voiding" && (
+                        <StatusIndicator
+                          status="For Voiding"
+                          className="pending-indicator"
+                        />
+                      )}
+
+                      {tag?.state === "voided" && (
+                        <StatusIndicator
+                          status="Void"
+                          className="inActive-indicator"
+                        />
+                      )}
                     </TableCell>
                     <TableCell align="center">
                       {moment(tag?.updated_at).format("MMM DD YYYY")}
@@ -250,6 +287,12 @@ const JournalTable = ({
 
                           tag?.state === "returned" &&
                             dispatch(setViewMenu(true));
+
+                          tag?.state === "For Voiding" &&
+                            dispatch(setVoidMenu(true));
+
+                          tag?.state === "voided" &&
+                            dispatch(setViewAccountingEntries(true));
                         }}
                       >
                         <RemoveRedEyeOutlinedIcon className="tag-transaction-icon-actions" />
@@ -358,6 +401,22 @@ const JournalTable = ({
         onClose={() => dispatch(resetMenu(false))}
       >
         <TransactionModalAp transactionData={menuData} update />
+      </Dialog>
+
+      <Dialog
+        open={voidMenu}
+        className="transaction-modal-dialog"
+        onClose={() => dispatch(resetMenu())}
+      >
+        <TransactionModalApprover transactionData={menuData} voiding />
+      </Dialog>
+
+      <Dialog
+        open={viewAccountingEntries}
+        className="transaction-modal-dialog"
+        onClose={() => dispatch(setViewAccountingEntries(false))}
+      >
+        <TransactionModalApprover viewAccountingEntries voiding />
       </Dialog>
 
       <Dialog

@@ -31,12 +31,15 @@ const CountDistribute = () => {
           badgeCheck?.result?.approved +
           badgeJournal?.result?.approved +
           badgeCheck?.result?.returned +
-          badgeJournal?.result?.returned || 0
+          badgeCheck?.result?.voided || 0
       );
     } else if (path === "Approver") {
       return (
         badgeCheck?.result["For Approval"] +
-          badgeJournal?.result["For Approval"] || 0
+          badgeCheck?.result["For Computation"] +
+          badgeCheck?.result["For Voiding"] +
+          badgeJournal?.result["For Approval"] +
+          badgeJournal?.result["For Voiding"] || 0
       );
     }
     return 0;
@@ -51,7 +54,8 @@ const CountDistribute = () => {
       return (
         badgeCheck?.result["For Computation"] +
           badgeCheck?.result?.approved +
-          badgeCheck?.result?.returned || 0
+          badgeCheck?.result?.returned +
+          badgeCheck?.result?.voided || 0
       );
     } else if (path === "Journal Voucher") {
       return (
@@ -60,9 +64,15 @@ const CountDistribute = () => {
           badgeJournal?.result?.returned || 0
       );
     } else if (path === "Check Approval") {
-      return badgeCheck?.result["For Approval"] || 0;
+      return (
+        badgeCheck?.result["For Approval"] +
+          badgeCheck?.result["For Voiding"] || 0
+      );
     } else if (path === "Journal Approval") {
-      return badgeJournal?.result["For Approval"] || 0;
+      return (
+        badgeJournal?.result["For Approval"] +
+          badgeJournal?.result["For Voiding"] || 0
+      );
     }
     return 0;
   };
@@ -73,7 +83,6 @@ const CountDistribute = () => {
     }
     return 0;
   };
-
   const countHeaderAPCH = (path) => {
     if (path === "Received") {
       return badgeCheck?.result["For Computation"] || 0;
@@ -83,6 +92,9 @@ const CountDistribute = () => {
     }
     if (path === "Returned") {
       return badgeCheck?.result?.returned || 0;
+    }
+    if (path === "Void") {
+      return badgeCheck?.result?.voided || 0;
     }
     return 0;
   };
@@ -97,27 +109,77 @@ const CountDistribute = () => {
     if (path === "Returned") {
       return badgeJournal?.result?.returned || 0;
     }
+    if (path === "Void") {
+      return badgeJournal?.result?.voided || 0;
+    }
     return 0;
   };
 
   const countHeaderApproverCH = (path) => {
-    if (path === "Received") {
-      return badgeJournal?.result["For Computation"] || 0;
+    if (path === "For Approval") {
+      return badgeCheck?.result["For Approval"] || 0;
     }
-    if (path === "Approved") {
-      return badgeJournal?.result?.approved || 0;
-    }
-    if (path === "Returned") {
-      return badgeJournal?.result?.returned || 0;
+    if (path === "Pending Void") {
+      return badgeCheck?.result["For Voiding"] || 0;
     }
     return 0;
   };
+
+  const countHeaderApproverJV = (path) => {
+    if (path === "For Approval") {
+      return badgeJournal?.result["For Approval"] || 0;
+    }
+    if (path === "Pending Void") {
+      return badgeJournal?.result["For Voiding"] || 0;
+    }
+    return 0;
+  };
+
+  const countCheck = () => {
+    const total =
+      badgeCheck?.result["For Computation"] +
+        badgeCheck?.result?.voided +
+        badgeCheck?.result?.approved +
+        badgeCheck?.result?.returned || 0;
+    return total === 0 ? true : false;
+  };
+
+  const countJournal = () => {
+    const total =
+      badgeJournal?.result["For Computation"] +
+        badgeJournal?.result?.voided +
+        badgeJournal?.result?.approved +
+        badgeJournal?.result?.returned || 0;
+
+    return total === 0 ? true : false;
+  };
+
+  const countApproveCheck = () => {
+    const total =
+      badgeCheck?.result["For Computation"] +
+        badgeCheck?.result["For Voiding"] || 0;
+    return total === 0 ? true : false;
+  };
+
+  const countApproveJournal = () => {
+    const total =
+      badgeJournal?.result["For Computation"] +
+        badgeJournal?.result["For Voiding"] || 0;
+    return total === 0 ? true : false;
+  };
+
   return {
     menuCount,
     childMenuCount,
     countHeaderTagging,
     countHeaderAPCH,
     countHeaderAPJL,
+    countCheck,
+    countJournal,
+    countHeaderApproverJV,
+    countHeaderApproverCH,
+    countApproveCheck,
+    countApproveJournal,
   };
 };
 
