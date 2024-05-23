@@ -51,6 +51,7 @@ import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutli
 import Lottie from "lottie-react";
 import moment from "moment";
 import { hasAccess } from "../../services/functions/access";
+import TransactionDrawer from "../../components/customs/TransactionDrawer";
 
 const Cutoff = () => {
   const excelItems = ["ID", "CODE", "NAME", "CREATED AT", "DATE MODIFIED"];

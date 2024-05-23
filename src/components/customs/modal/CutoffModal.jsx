@@ -29,6 +29,7 @@ import socket from "../../../services/functions/serverSocket";
 import ReasonInput from "../ReasonInput";
 import { resetPrompt, setWarning } from "../../../services/slice/promptSlice";
 import { hasAccess } from "../../../services/functions/access";
+import TransactionDrawer from "../TransactionDrawer";
 
 const CutoffModal = ({ view, update }) => {
   const dispatch = useDispatch();
@@ -247,6 +248,8 @@ const CutoffModal = ({ view, update }) => {
           confirmOnClick={(e) => returnHandler(e)}
         />
       </Dialog>
+
+      <TransactionDrawer cutOff />
     </Paper>
   );
 };

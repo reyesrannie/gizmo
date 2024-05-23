@@ -21,6 +21,7 @@ import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
 import SwapHorizontalCircleOutlinedIcon from "@mui/icons-material/SwapHorizontalCircleOutlined";
 import RecommendOutlinedIcon from "@mui/icons-material/RecommendOutlined";
 import {
+  useCutOffLogsQuery,
   useStatusLogsQuery,
   useUsersQuery,
 } from "../../services/store/request";
@@ -57,12 +58,24 @@ const CustomIndicator = ({ props, item }) => {
       {completed && item?.status === "approved" && (
         <RecommendOutlinedIcon color="success" />
       )}
+      {completed && item?.state === "pending" && (
+        <CheckCircleOutlinedIcon color="secondary" />
+      )}
+      {completed && item?.state === "closed" && item?.requested_at === null && (
+        <CheckCircleOutlinedIcon color="success" />
+      )}
+      {completed && item?.state === "closed" && item?.requested_at !== null && (
+        <CheckCircleOutlinedIcon color="secondary" />
+      )}
+
       {!completed && <CircleOutlinedIcon color="warning" />}
     </Box>
   );
 };
 
-const TransactionDrawer = ({ transactionData }) => {
+const TransactionDrawer = ({ transactionData, cutOff = false }) => {
+  const menuData = useSelector((state) => state.menu.menuData);
+
   const { data: logs } = useStatusLogsQuery(
     {
       transaction_id: transactionData?.id,
@@ -70,6 +83,15 @@ const TransactionDrawer = ({ transactionData }) => {
       pagination: "none",
     },
     { skip: transactionData === null }
+  );
+
+  const { data: cutOffLogs } = useCutOffLogsQuery(
+    {
+      cutoff_id: menuData?.id,
+      sorts: "created_at",
+      pagination: "none",
+    },
+    { skip: !cutOff }
   );
 
   const paperRef = useRef(null);
@@ -121,220 +143,340 @@ const TransactionDrawer = ({ transactionData }) => {
       <Box
         className={`logs-transaction-item-container ${logsOpen ? "open" : ""}`}
       >
-        <Stepper activeStep={logs?.result.length} orientation="vertical">
-          {logs?.result?.map((item, index) => {
-            const createdBy = user?.result?.find(
-              (items) => item?.created_by_id === items.id
-            );
-            const updatedBy = user?.result?.find(
-              (items) => item?.updated_by_id === items.id
-            );
+        {!cutOff && (
+          <Stepper activeStep={logs?.result.length} orientation="vertical">
+            {logs?.result?.map((item, index) => {
+              const createdBy = user?.result?.find(
+                (items) => item?.created_by_id === items.id
+              );
+              const updatedBy = user?.result?.find(
+                (items) => item?.updated_by_id === items.id
+              );
 
-            return (
-              <Step key={index}>
-                <StepLabel
-                  StepIconComponent={(props) => (
-                    <CustomIndicator props={props} item={item} />
-                  )}
-                >
-                  <Box className="logs-transaction-container">
-                    {item?.created_by_id !== null && (
-                      <>
-                        <Typography className="logs-title-transaction">
-                          Transaction Created
-                        </Typography>
-                        <Box className={"logs-details-transaction"}>
-                          <Typography className="logs-indicator-transaction">
-                            Created By:
-                          </Typography>
-                          <Typography className="logs-details-text-transaction">
-                            {`${createdBy?.first_name}  ${createdBy?.last_name}`}
-                          </Typography>
-                        </Box>
-                      </>
+              return (
+                <Step key={index}>
+                  <StepLabel
+                    StepIconComponent={(props) => (
+                      <CustomIndicator props={props} item={item} />
                     )}
+                  >
+                    <Box className="logs-transaction-container">
+                      {item?.created_by_id !== null && (
+                        <>
+                          <Typography className="logs-title-transaction">
+                            Transaction Created
+                          </Typography>
+                          <Box className={"logs-details-transaction"}>
+                            <Typography className="logs-indicator-transaction">
+                              Created By:
+                            </Typography>
+                            <Typography className="logs-details-text-transaction">
+                              {`${createdBy?.first_name}  ${createdBy?.last_name}`}
+                            </Typography>
+                          </Box>
+                        </>
+                      )}
 
-                    {item?.created_by_id === null && (
-                      <>
-                        <Typography className="logs-title-transaction">
-                          Transaction Updated
-                        </Typography>
-                        <Box className={"logs-details-transaction"}>
-                          <Typography className="logs-indicator-transaction">
-                            Updated By:
+                      {item?.created_by_id === null && (
+                        <>
+                          <Typography className="logs-title-transaction">
+                            Transaction Updated
                           </Typography>
-                          <Typography className="logs-details-text-transaction">
-                            {`${updatedBy?.first_name}  ${updatedBy?.last_name}`}
-                          </Typography>
-                        </Box>
-                      </>
-                    )}
-                    <Box className={"logs-details-transaction"}>
-                      <Typography className="logs-indicator-transaction">
-                        Status:
-                      </Typography>
-                      {item?.status === "pending" && (
-                        <Typography
-                          color="secondary"
-                          className="logs-indicator-transaction"
-                        >
-                          {item?.status?.toUpperCase()}
-                        </Typography>
+                          <Box className={"logs-details-transaction"}>
+                            <Typography className="logs-indicator-transaction">
+                              Updated By:
+                            </Typography>
+                            <Typography className="logs-details-text-transaction">
+                              {`${updatedBy?.first_name}  ${updatedBy?.last_name}`}
+                            </Typography>
+                          </Box>
+                        </>
                       )}
-                      {item?.status === "For Computation" && (
-                        <Typography
-                          color="blueviolet"
-                          className="logs-indicator-transaction"
-                        >
-                          {item?.status?.toUpperCase()}
-                        </Typography>
-                      )}
-                      {item?.status === "archived" && (
-                        <Typography
-                          color="error"
-                          className="logs-indicator-transaction"
-                        >
-                          {item?.status?.toUpperCase()}
-                        </Typography>
-                      )}
-                      {item?.status === "received" && (
-                        <Typography
-                          color="green"
-                          className="logs-indicator-transaction"
-                        >
-                          {item?.status?.toUpperCase()} by AP
-                        </Typography>
-                      )}
-                      {item?.status === "returned" && (
-                        <Typography
-                          color="error"
-                          className="logs-indicator-transaction"
-                        >
-                          {item?.status?.toUpperCase()}
-                        </Typography>
-                      )}
-                      {item?.status === "checked" && (
-                        <Typography
-                          color="#B6622d"
-                          className="logs-indicator-transaction"
-                        >
-                          {item?.status?.toUpperCase()}
-                        </Typography>
-                      )}
-                      {item?.status === "For Approval" && (
-                        <Typography
-                          color="#B6622d"
-                          className="logs-indicator-transaction"
-                        >
-                          {item?.status?.toUpperCase()}
-                        </Typography>
-                      )}
-                      {item?.status === "approved" && (
-                        <Typography
-                          color="green"
-                          className="logs-indicator-transaction"
-                        >
-                          {item?.status?.toUpperCase()}
-                        </Typography>
-                      )}
-                    </Box>
-                    {item?.voucher_type !== null && (
                       <Box className={"logs-details-transaction"}>
                         <Typography className="logs-indicator-transaction">
-                          Entry:
+                          Status:
                         </Typography>
-                        <Typography className="logs-details-text-transaction">
-                          {item?.voucher_type}
-                        </Typography>
-                      </Box>
-                    )}
-
-                    {item?.amount !== null && (
-                      <Box className={"logs-details-transaction"}>
-                        <Typography className="logs-indicator-transaction">
-                          Amount:
-                        </Typography>
-                        <Typography
-                          color="green"
-                          className="logs-details-text-transaction"
-                        >
-                          <span>&#8369;</span>
-                          {item?.amount
-                            ?.toString()
-                            .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-                        </Typography>
-                      </Box>
-                    )}
-                    {item?.edited_amount_from !== item?.edited_amount_to &&
-                      item?.edited_amount_from !== null && (
-                        <Box className={"logs-details-transaction"}>
-                          <Typography className="logs-indicator-transaction">
-                            Prev. Amount:
-                          </Typography>
+                        {item?.status === "pending" && (
                           <Typography
-                            color="red"
-                            className="logs-details-text-transaction"
+                            color="secondary"
+                            className="logs-indicator-transaction"
                           >
-                            <span>&#8369;</span>
-                            {item?.edited_amount_from
-                              ?.toString()
-                              .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                            {item?.status?.toUpperCase()}
+                          </Typography>
+                        )}
+                        {item?.status === "For Computation" && (
+                          <Typography
+                            color="blueviolet"
+                            className="logs-indicator-transaction"
+                          >
+                            {item?.status?.toUpperCase()}
+                          </Typography>
+                        )}
+                        {item?.status === "archived" && (
+                          <Typography
+                            color="error"
+                            className="logs-indicator-transaction"
+                          >
+                            {item?.status?.toUpperCase()}
+                          </Typography>
+                        )}
+                        {item?.status === "received" && (
+                          <Typography
+                            color="green"
+                            className="logs-indicator-transaction"
+                          >
+                            {item?.status?.toUpperCase()} by AP
+                          </Typography>
+                        )}
+                        {item?.status === "returned" && (
+                          <Typography
+                            color="error"
+                            className="logs-indicator-transaction"
+                          >
+                            {item?.status?.toUpperCase()}
+                          </Typography>
+                        )}
+                        {item?.status === "checked" && (
+                          <Typography
+                            color="#B6622d"
+                            className="logs-indicator-transaction"
+                          >
+                            {item?.status?.toUpperCase()}
+                          </Typography>
+                        )}
+                        {item?.status === "For Approval" && (
+                          <Typography
+                            color="#B6622d"
+                            className="logs-indicator-transaction"
+                          >
+                            {item?.status?.toUpperCase()}
+                          </Typography>
+                        )}
+                        {item?.status === "approved" && (
+                          <Typography
+                            color="green"
+                            className="logs-indicator-transaction"
+                          >
+                            {item?.status?.toUpperCase()}
+                          </Typography>
+                        )}
+                      </Box>
+                      {item?.voucher_type !== null && (
+                        <Box className={"logs-details-transaction"}>
+                          <Typography className="logs-indicator-transaction">
+                            Entry:
+                          </Typography>
+                          <Typography className="logs-details-text-transaction">
+                            {item?.voucher_type}
                           </Typography>
                         </Box>
                       )}
-                    {item?.edited_amount_from !== item?.edited_amount_to &&
-                      item?.edited_amount_to !== null && (
+
+                      {item?.amount !== null && (
                         <Box className={"logs-details-transaction"}>
                           <Typography className="logs-indicator-transaction">
-                            New Amount:
+                            Amount:
                           </Typography>
                           <Typography
                             color="green"
                             className="logs-details-text-transaction"
                           >
                             <span>&#8369;</span>
-                            {item?.edited_amount_to
+                            {item?.amount
                               ?.toString()
                               .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                           </Typography>
                         </Box>
                       )}
-                    {item?.status === "archived" && (
-                      <Box className={"logs-details-transaction"}>
-                        <Typography className="logs-indicator-transaction">
-                          Reason:
-                        </Typography>
-                        <Typography className="logs-details-text-transaction">
-                          {item?.reason}
-                        </Typography>
-                      </Box>
-                    )}
-                    {item?.status === "returned" && (
-                      <Box className={"logs-details-transaction"}>
-                        <Typography className="logs-indicator-transaction">
-                          Reason:
-                        </Typography>
-                        <Typography className="logs-details-text-transaction">
-                          {item?.reason}
-                        </Typography>
-                      </Box>
-                    )}
-                    <Box className={"logs-details-transaction"}>
-                      <Typography className="logs-indicator-transaction">
-                        Date:
-                      </Typography>
-                      <Typography className="logs-details-text-transaction">
-                        {moment(item?.updated_at).format(
-                          "MMM DD, YYYY, hh:mm A"
+                      {item?.edited_amount_from !== item?.edited_amount_to &&
+                        item?.edited_amount_from !== null && (
+                          <Box className={"logs-details-transaction"}>
+                            <Typography className="logs-indicator-transaction">
+                              Prev. Amount:
+                            </Typography>
+                            <Typography
+                              color="red"
+                              className="logs-details-text-transaction"
+                            >
+                              <span>&#8369;</span>
+                              {item?.edited_amount_from
+                                ?.toString()
+                                .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                            </Typography>
+                          </Box>
                         )}
-                      </Typography>
+                      {item?.edited_amount_from !== item?.edited_amount_to &&
+                        item?.edited_amount_to !== null && (
+                          <Box className={"logs-details-transaction"}>
+                            <Typography className="logs-indicator-transaction">
+                              New Amount:
+                            </Typography>
+                            <Typography
+                              color="green"
+                              className="logs-details-text-transaction"
+                            >
+                              <span>&#8369;</span>
+                              {item?.edited_amount_to
+                                ?.toString()
+                                .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                            </Typography>
+                          </Box>
+                        )}
+                      {item?.status === "archived" && (
+                        <Box className={"logs-details-transaction"}>
+                          <Typography className="logs-indicator-transaction">
+                            Reason:
+                          </Typography>
+                          <Typography className="logs-details-text-transaction">
+                            {item?.reason}
+                          </Typography>
+                        </Box>
+                      )}
+                      {item?.status === "returned" && (
+                        <Box className={"logs-details-transaction"}>
+                          <Typography className="logs-indicator-transaction">
+                            Reason:
+                          </Typography>
+                          <Typography className="logs-details-text-transaction">
+                            {item?.reason}
+                          </Typography>
+                        </Box>
+                      )}
+                      <Box className={"logs-details-transaction"}>
+                        <Typography className="logs-indicator-transaction">
+                          Date:
+                        </Typography>
+                        <Typography className="logs-details-text-transaction">
+                          {moment(item?.updated_at).format(
+                            "MMM DD, YYYY, hh:mm A"
+                          )}
+                        </Typography>
+                      </Box>
                     </Box>
-                  </Box>
-                </StepLabel>
-              </Step>
-            );
-          })}
-        </Stepper>
+                  </StepLabel>
+                </Step>
+              );
+            })}
+          </Stepper>
+        )}
+
+        {cutOff && (
+          <Stepper
+            activeStep={cutOffLogs?.result.length}
+            orientation="vertical"
+          >
+            {cutOffLogs?.result?.map((item, index) => {
+              const createdBy = user?.result?.find(
+                (items) => item?.created_by_id === items.id
+              );
+              const updatedBy = user?.result?.find(
+                (items) => item?.updated_by_id === items.id
+              );
+
+              console.log(item);
+
+              return (
+                <Step key={index}>
+                  <StepLabel
+                    StepIconComponent={(props) => (
+                      <CustomIndicator props={props} item={item} />
+                    )}
+                  >
+                    <Box className="logs-transaction-container">
+                      {item?.created_by_id !== null && (
+                        <>
+                          <Typography className="logs-title-transaction">
+                            Cutoff Created
+                          </Typography>
+                          <Box className={"logs-details-transaction"}>
+                            <Typography className="logs-indicator-transaction">
+                              Created By:
+                            </Typography>
+                            <Typography className="logs-details-text-transaction">
+                              {`${createdBy?.first_name}  ${createdBy?.last_name}`}
+                            </Typography>
+                          </Box>
+                        </>
+                      )}
+
+                      {item?.created_by_id === null && (
+                        <>
+                          <Typography className="logs-title-transaction">
+                            Cutoff Updated
+                          </Typography>
+                          <Box className={"logs-details-transaction"}>
+                            <Typography className="logs-indicator-transaction">
+                              Updated By:
+                            </Typography>
+                            <Typography className="logs-details-text-transaction">
+                              {`${updatedBy?.first_name}  ${updatedBy?.last_name}`}
+                            </Typography>
+                          </Box>
+                        </>
+                      )}
+                      <Box className={"logs-details-transaction"}>
+                        <Typography className="logs-indicator-transaction">
+                          Status:
+                        </Typography>
+                        {item?.state === "pending" && (
+                          <Typography
+                            color="secondary"
+                            className="logs-indicator-transaction"
+                          >
+                            {item?.state?.toUpperCase()}
+                          </Typography>
+                        )}
+
+                        {item?.state === "closed" &&
+                          item?.requested_at === null && (
+                            <Typography
+                              color="green"
+                              className="logs-indicator-transaction"
+                            >
+                              {item?.state?.toUpperCase()}
+                            </Typography>
+                          )}
+
+                        {item?.state === "closed" &&
+                          item?.requested_at !== null && (
+                            <Typography
+                              color="secondary"
+                              className="logs-indicator-transaction"
+                            >
+                              RE-OPEN REQUESTED
+                            </Typography>
+                          )}
+                      </Box>
+
+                      {item?.state === "closed" &&
+                        item?.requested_at !== null && (
+                          <Box className={"logs-details-transaction"}>
+                            <Typography className="logs-indicator-transaction">
+                              Reason:
+                            </Typography>
+                            <Typography className="logs-details-text-transaction">
+                              {item?.reason}
+                            </Typography>
+                          </Box>
+                        )}
+
+                      <Box className={"logs-details-transaction"}>
+                        <Typography className="logs-indicator-transaction">
+                          Date:
+                        </Typography>
+                        <Typography className="logs-details-text-transaction">
+                          {moment(item?.updated_at).format(
+                            "MMM DD, YYYY, hh:mm A"
+                          )}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </StepLabel>
+                </Step>
+              );
+            })}
+          </Stepper>
+        )}
       </Box>
     </Paper>
   );

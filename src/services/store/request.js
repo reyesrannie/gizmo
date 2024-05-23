@@ -91,6 +91,7 @@ export const jsonServerAPI = createApi({
         "PAccountTitles",
         "CAccountTitles",
         "GCAccountTitles",
+        "CutOFFLogs",
       ],
     }),
     passwordChange: builder.mutation({
@@ -1465,7 +1466,7 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["CutOFF"],
+      invalidatesTags: ["CutOFF", "CutOFFLogs"],
     }),
     updateCutOff: builder.mutation({
       transformResponse: (response) => response,
@@ -1474,7 +1475,7 @@ export const jsonServerAPI = createApi({
         method: "PUT",
         body: payload,
       }),
-      invalidatesTags: ["CutOFF"],
+      invalidatesTags: ["CutOFF", "CutOFFLogs"],
     }),
     approveCutOff: builder.mutation({
       transformResponse: (response) => response,
@@ -1483,7 +1484,16 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["CutOFF"],
+      invalidatesTags: ["CutOFF", "CutOFFLogs"],
+    }),
+    cutOffLogs: builder.query({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/cutoff-log`,
+        method: "GET",
+        params: payload,
+      }),
+      providesTags: ["CutOFFLogs"],
     }),
   }),
 });
@@ -1652,4 +1662,5 @@ export const {
   useCreateCutOffMutation,
   useUpdateCutOffMutation,
   useApproveCutOffMutation,
+  useCutOffLogsQuery,
 } = jsonServerAPI;

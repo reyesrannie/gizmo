@@ -107,14 +107,14 @@ export const events = [
   },
   {
     event: "cutoff_updated",
-    tags: ["CutOFF"],
+    tags: ["CutOFF", "CutOFFLogs"],
   },
   {
     event: "cutoff_created",
-    tags: ["CutOFF"],
+    tags: ["CutOFF", "CutOFFLogs"],
   },
   {
     event: "cutoff_approved",
-    tags: ["CutOFF"],
+    tags: ["CutOFF", "CutOFFLogs"],
   },
 ];
