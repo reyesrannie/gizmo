@@ -85,6 +85,24 @@ const accessPermission = [
       },
     ],
   },
+  {
+    id: 8,
+    access: "Scheduled",
+    children: [
+      {
+        access_permission: "sched_transact_requestor",
+        label: "Request Schedule",
+      },
+      {
+        access_permission: "sched_transact_ap",
+        label: "AP Schedule",
+      },
+      {
+        access_permission: "sched_transact_approver",
+        label: "Approver Schedule",
+      },
+    ],
+  },
 ];
 
 export default accessPermission;

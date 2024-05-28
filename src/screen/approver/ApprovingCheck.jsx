@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 import Breadcrums from "../../components/customs/Breadcrums";
 import SearchText from "../../components/customs/SearchText";
@@ -58,6 +58,15 @@ const ApprovingCheck = () => {
   const { countHeaderApproverCH, countApproveCheck } = CountDistribute();
 
   const hasBadge = countApproveCheck();
+
+  useEffect(() => {
+    if (header) {
+      const statusChange = approverHeader?.find(
+        (item) => item?.name === header
+      );
+      onStateChange(statusChange?.status);
+    }
+  }, [header]);
 
   return (
     <Box>

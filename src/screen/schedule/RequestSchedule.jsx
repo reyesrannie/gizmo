@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 
 import Breadcrums from "../../components/customs/Breadcrums";
 import SearchText from "../../components/customs/SearchText";
@@ -8,32 +8,40 @@ import {
   AccordionSummary,
   Badge,
   Box,
+  Button,
+  Dialog,
   IconButton,
   Typography,
 } from "@mui/material";
 
 import { useDispatch, useSelector } from "react-redux";
-import { useCheckEntriesQuery } from "../../services/store/request";
+import { useSchedTransactionQuery } from "../../services/store/request";
 
 import ArrowDropDownCircleOutlinedIcon from "@mui/icons-material/ArrowDropDownCircleOutlined";
+import AddToPhotosOutlinedIcon from "@mui/icons-material/AddToPhotosOutlined";
 
 import "../../components/styles/TagTransaction.scss";
 
-import { apHeader } from "../../services/constants/headers";
+import { requestorSchedule } from "../../services/constants/headers";
 import {
   setFilterBy,
   setHeader,
   setIsExpanded,
 } from "../../services/slice/transactionSlice";
-import CheckTable from "./CheckTable";
-import useApHook from "../../services/hooks/useApHook";
+import "../../components/styles/TransactionModal.scss";
+// import CheckTable from "./CheckTable";
 import CountDistribute from "../../services/functions/CountDistribute";
+import ScheduleModal from "../../components/customs/modal/ScheduleModal";
+import { resetMenu, setCreateMenu } from "../../services/slice/menuSlice";
+import useTransactionHook from "../../services/hooks/useTransactionHook";
+import ScheduleTable from "./ScheduleTable";
 
-const CheckVoucher = () => {
+const RequestSchedule = () => {
   const dispatch = useDispatch();
 
   const isExpanded = useSelector((state) => state.transaction.isExpanded);
-  const header = useSelector((state) => state.transaction.header) || "Received";
+  const header = useSelector((state) => state.transaction.header) || "Pending";
+  const createMenu = useSelector((state) => state.menu.createMenu);
 
   const {
     params,
@@ -43,7 +51,7 @@ const CheckVoucher = () => {
     onSortTable,
     onOrderBy,
     onStateChange,
-  } = useApHook();
+  } = useTransactionHook();
 
   const {
     data: tagTransaction,
@@ -51,18 +59,11 @@ const CheckVoucher = () => {
     isError,
     isFetching,
     status,
-  } = useCheckEntriesQuery(params);
+  } = useSchedTransactionQuery(params);
 
   const { countHeaderAPCH, countCheck } = CountDistribute();
 
   const hasBadge = countCheck();
-
-  useEffect(() => {
-    if (header) {
-      const statusChange = apHeader?.find((item) => item?.name === header);
-      onStateChange(statusChange?.status);
-    }
-  }, [header]);
 
   return (
     <Box>
@@ -86,7 +87,7 @@ const CheckVoucher = () => {
                 </Badge>
               </Typography>
             </AccordionSummary>
-            {apHeader?.map(
+            {requestorSchedule?.map(
               (head, index) =>
                 header !== head?.name && (
                   <AccordionSummary
@@ -96,6 +97,7 @@ const CheckVoucher = () => {
                       dispatch(setIsExpanded(false));
                       onOrderBy("");
                       dispatch(setFilterBy(""));
+                      onStateChange(head?.status);
                     }}
                   >
                     <Typography className="page-text-accord-tag-transaction">
@@ -124,10 +126,19 @@ const CheckVoucher = () => {
         </Box>
         <Box className="tag-transaction-button-container">
           <SearchText onSearchData={onSearchData} />
+          <Button
+            variant="contained"
+            color="secondary"
+            className="button-add-tag-transaction"
+            startIcon={<AddToPhotosOutlinedIcon />}
+            onClick={() => dispatch(setCreateMenu(true))}
+          >
+            Add
+          </Button>
         </Box>
       </Box>
-      {header === "Received" && (
-        <CheckTable
+      {header === "Pending" && (
+        <ScheduleTable
           params={params}
           onSortTable={onSortTable}
           isError={isError}
@@ -142,7 +153,7 @@ const CheckVoucher = () => {
         />
       )}
       {header === "Void" && (
-        <CheckTable
+        <ScheduleTable
           params={params}
           onSortTable={onSortTable}
           isError={isError}
@@ -157,7 +168,7 @@ const CheckVoucher = () => {
         />
       )}
       {header === "Checked" && (
-        <CheckTable
+        <ScheduleTable
           params={params}
           onSortTable={onSortTable}
           isError={isError}
@@ -172,7 +183,7 @@ const CheckVoucher = () => {
         />
       )}
       {header === "Returned" && (
-        <CheckTable
+        <ScheduleTable
           params={params}
           onSortTable={onSortTable}
           isError={isError}
@@ -187,7 +198,7 @@ const CheckVoucher = () => {
         />
       )}
       {header === "Approved" && (
-        <CheckTable
+        <ScheduleTable
           params={params}
           onSortTable={onSortTable}
           isError={isError}
@@ -202,7 +213,7 @@ const CheckVoucher = () => {
         />
       )}
       {header === "History" && (
-        <CheckTable
+        <ScheduleTable
           params={params}
           onSortTable={onSortTable}
           isError={isError}
@@ -216,8 +227,15 @@ const CheckVoucher = () => {
           state={""}
         />
       )}
+      <Dialog
+        open={createMenu}
+        className="transaction-modal-dialog"
+        onClose={() => resetMenu(false)}
+      >
+        <ScheduleModal create />
+      </Dialog>
     </Box>
   );
 };
 
-export default CheckVoucher;
+export default RequestSchedule;

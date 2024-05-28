@@ -36,7 +36,6 @@ const CountDistribute = () => {
     } else if (path === "Approver") {
       return (
         badgeCheck?.result["For Approval"] +
-          badgeCheck?.result["For Computation"] +
           badgeCheck?.result["For Voiding"] +
           badgeJournal?.result["For Approval"] +
           badgeJournal?.result["For Voiding"] || 0
@@ -168,6 +167,58 @@ const CountDistribute = () => {
     return total === 0 ? true : false;
   };
 
+  const countGrandChildcheck = (path, child) => {
+    if (child === "Check Voucher") {
+      if (path === "Received") {
+        return badgeCheck?.result["For Computation"] || 0;
+      }
+      if (path === "Approved") {
+        return badgeCheck?.result?.approved || 0;
+      }
+      if (path === "Returned") {
+        return badgeCheck?.result?.returned || 0;
+      }
+      if (path === "Void") {
+        return badgeCheck?.result?.voided || 0;
+      }
+      return 0;
+    }
+    if (child === "Journal Voucher") {
+      if (path === "Received") {
+        return badgeCheck?.result["For Computation"] || 0;
+      }
+      if (path === "Approved") {
+        return badgeCheck?.result?.approved || 0;
+      }
+      if (path === "Returned") {
+        return badgeCheck?.result?.returned || 0;
+      }
+      if (path === "Void") {
+        return badgeCheck?.result?.voided || 0;
+      }
+      return 0;
+    }
+    if (child === "Check Approval") {
+      if (path === "For Approval") {
+        return badgeCheck?.result["For Approval"] || 0;
+      }
+      if (path === "Pending Void") {
+        return badgeCheck?.result["For Voiding"] || 0;
+      }
+      return 0;
+    }
+    if (child === "Journal Approval") {
+      if (path === "For Approval") {
+        return badgeJournal?.result["For Approval"] || 0;
+      }
+      if (path === "Pending Void") {
+        return badgeJournal?.result["For Voiding"] || 0;
+      }
+      return 0;
+    }
+    return 0;
+  };
+
   return {
     menuCount,
     childMenuCount,
@@ -180,6 +231,7 @@ const CountDistribute = () => {
     countHeaderApproverCH,
     countApproveCheck,
     countApproveJournal,
+    countGrandChildcheck,
   };
 };
 

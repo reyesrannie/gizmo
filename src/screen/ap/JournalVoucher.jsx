@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 import Breadcrums from "../../components/customs/Breadcrums";
 import SearchText from "../../components/customs/SearchText";
@@ -57,6 +57,13 @@ const JournalVoucher = () => {
 
   const hasBadge = countJournal();
 
+  useEffect(() => {
+    if (header) {
+      const statusChange = apHeader?.find((item) => item?.name === header);
+      onStateChange(statusChange?.status);
+    }
+  }, [header]);
+
   return (
     <Box>
       <Box>
@@ -89,7 +96,6 @@ const JournalVoucher = () => {
                       dispatch(setIsExpanded(false));
                       onOrderBy("");
                       dispatch(setFilterBy(""));
-                      onStateChange(head?.status);
                     }}
                   >
                     <Typography className="page-text-accord-tag-transaction">

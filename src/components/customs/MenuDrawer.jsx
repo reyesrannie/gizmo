@@ -27,7 +27,7 @@ import {
 import CountDistribute from "../../services/functions/CountDistribute";
 
 const MenuDrawer = () => {
-  const { menuCount, childMenuCount } = CountDistribute();
+  const { menuCount, childMenuCount, countGrandChildcheck } = CountDistribute();
   const openDrawer = useSelector((state) => state.menu.drawer);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -189,7 +189,10 @@ const MenuDrawer = () => {
                                   <Badge
                                     badgeContent={
                                       menus
-                                        ? childMenuCount(grandChild.desc)
+                                        ? countGrandChildcheck(
+                                            grandChild?.desc,
+                                            child?.desc
+                                          )
                                         : 0
                                     }
                                     color="error"

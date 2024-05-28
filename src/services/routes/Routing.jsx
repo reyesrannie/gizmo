@@ -60,6 +60,11 @@ const UserAccounts = lazy(() =>
   import("../../screen/user/accounts/UserAccounts")
 );
 
+const Schedule = lazy(() => import("../../screen/schedule/Schedule"));
+const RequestSchedule = lazy(() =>
+  import("../../screen/schedule/RequestSchedule")
+);
+
 const CutOff = lazy(() => import("../../screen/cutoff/Cutoff"));
 
 const Routing = () => {
@@ -302,6 +307,41 @@ const Routing = () => {
           path: "approvecheck",
           element: hasAccess(["approver"]) ? (
             <ApprovingCheck />
+          ) : (
+            <Navigate to={"/"} />
+          ),
+        },
+        {
+          path: "approvejournal",
+          element: hasAccess(["approver"]) ? (
+            <ApprovingJournal />
+          ) : (
+            <Navigate to={"/"} />
+          ),
+        },
+      ],
+    },
+
+    {
+      path: "/sched_transact",
+      element: user ? <AppBar /> : <Navigate to={"/login"} />,
+      children: [
+        {
+          path: "",
+          element: hasAccess([
+            "sched_transact_requestor",
+            "sched_transact_ap",
+            "sched_transact_approver",
+          ]) ? (
+            <Schedule />
+          ) : (
+            <Navigate to={"/"} />
+          ),
+        },
+        {
+          path: "request",
+          element: hasAccess(["sched_transact_requestor"]) ? (
+            <RequestSchedule />
           ) : (
             <Navigate to={"/"} />
           ),

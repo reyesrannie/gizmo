@@ -22,6 +22,14 @@ const approverHeader = [
   { name: "History", status: "" },
 ];
 
+const requestorSchedule = [
+  { name: "For Approval", status: "For Approval" },
+  { name: "Returned", status: "returned" },
+  { name: "Void", status: "voided" },
+  { name: "Pending Void", status: "For Voiding" },
+  { name: "History", status: "" },
+];
+
 const coaHeader = [
   { name: "Account Titles" },
   { name: "Great Grandparent" },
@@ -31,4 +39,10 @@ const coaHeader = [
   { name: "Grandchild" },
 ];
 
-export { taggingHeader, apHeader, approverHeader, coaHeader };
+export {
+  taggingHeader,
+  apHeader,
+  approverHeader,
+  coaHeader,
+  requestorSchedule,
+};

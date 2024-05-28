@@ -26,8 +26,10 @@ import PlaylistAddCheckOutlinedIcon from "@mui/icons-material/PlaylistAddCheckOu
 import TaskOutlinedIcon from "@mui/icons-material/TaskOutlined";
 import MediationOutlinedIcon from "@mui/icons-material/MediationOutlined";
 import LockPersonOutlinedIcon from "@mui/icons-material/LockPersonOutlined";
+import PendingActionsOutlinedIcon from "@mui/icons-material/PendingActionsOutlined";
 
 import "../../components/styles/CardNavigation.scss";
+import { apHeader, approverHeader, taggingHeader } from "./headers";
 const user = [
   {
     path: "/account/roles",
@@ -302,6 +304,48 @@ const approver = [
   },
 ];
 
+const schedule = [
+  {
+    path: "/sched_transact/request",
+    desc: "Request Schedule Transaction",
+    name: "Request Schedule",
+    permission: ["sched_transact_requestor"],
+    firstIcon: (
+      <LocalOfferOutlinedIcon color="secondary" className="icon-card-details" />
+    ),
+    lastIcon: (
+      <NavigationOutlinedIcon className="icon-last" color="secondary" />
+    ),
+  },
+  {
+    path: "/sched_transact/ap",
+    desc: "AP Scheduled Transaction",
+    name: "AP Schedule",
+    permission: ["sched_transact_ap"],
+    firstIcon: (
+      <CreditScoreOutlinedIcon
+        color="secondary"
+        className="icon-card-details"
+      />
+    ),
+    lastIcon: (
+      <NavigationOutlinedIcon className="icon-last" color="secondary" />
+    ),
+  },
+  {
+    path: "/sched_transact/approve",
+    desc: "Approve Schedule Transaction",
+    name: "Approve Schedule",
+    permission: ["sched_transact_approver"],
+    firstIcon: (
+      <NewspaperOutlinedIcon color="secondary" className="icon-card-details" />
+    ),
+    lastIcon: (
+      <NavigationOutlinedIcon className="icon-last" color="secondary" />
+    ),
+  },
+];
+
 const menu = [
   {
     desc: "Dashboard",
@@ -418,27 +462,22 @@ const menu = [
           {
             desc: "Great Grandparent",
             icon: <MediationOutlinedIcon />,
-            permission: ["ggp-titles"],
           },
           {
             desc: "Grandparent",
             icon: <MediationOutlinedIcon />,
-            permission: ["gp-titles"],
           },
           {
             desc: "Parent",
             icon: <MediationOutlinedIcon />,
-            permission: ["p-titles"],
           },
           {
             desc: "Child",
             icon: <MediationOutlinedIcon />,
-            permission: ["c-titles"],
           },
           {
             desc: "Grandchild",
             icon: <MediationOutlinedIcon />,
-            permission: ["gc-titles"],
           },
         ],
       },
@@ -455,6 +494,9 @@ const menu = [
         icon: <LocalOfferOutlinedIcon />,
         path: "/tagging/tagtransact",
         permission: ["tagging"],
+        child: taggingHeader?.map((item) => {
+          return { desc: item?.name, icon: <MediationOutlinedIcon /> };
+        }),
       },
     ],
   },
@@ -475,12 +517,18 @@ const menu = [
         icon: <CreditScoreOutlinedIcon />,
         path: "/ap/check",
         permission: ["ap_tag"],
+        child: apHeader?.map((item) => {
+          return { desc: item?.name, icon: <MediationOutlinedIcon /> };
+        }),
       },
       {
         desc: "Journal Voucher",
         icon: <NewspaperOutlinedIcon />,
         path: "/ap/journal",
         permission: ["ap_tag"],
+        child: apHeader?.map((item) => {
+          return { desc: item?.name, icon: <MediationOutlinedIcon /> };
+        }),
       },
     ],
   },
@@ -495,12 +543,18 @@ const menu = [
         icon: <PlaylistAddCheckOutlinedIcon />,
         path: "/approver/approvecheck",
         permission: ["approver"],
+        child: approverHeader?.map((item) => {
+          return { desc: item?.name, icon: <MediationOutlinedIcon /> };
+        }),
       },
       {
         desc: "Journal Approval",
         icon: <TaskOutlinedIcon />,
         path: "/approver/approvejournal",
         permission: ["approver"],
+        child: approverHeader?.map((item) => {
+          return { desc: item?.name, icon: <MediationOutlinedIcon /> };
+        }),
       },
     ],
   },
@@ -510,6 +564,36 @@ const menu = [
     path: "/cutoff",
     permission: ["cutOff_requestor", "cutOff_approver"],
     children: [],
+  },
+  {
+    desc: "Scheduled",
+    icon: <PendingActionsOutlinedIcon />,
+    path: "/sched_transact",
+    permission: [
+      "sched_transact_requestor",
+      "sched_transact_ap",
+      "sched_transact_approver",
+    ],
+    children: [
+      {
+        desc: "Request Schedule",
+        icon: <LocalOfferOutlinedIcon />,
+        permission: ["sched_transact_requestor"],
+        path: "/sched_transact/request",
+      },
+      {
+        desc: "AP Schedule",
+        icon: <CreditScoreOutlinedIcon />,
+        permission: ["sched_transact_ap"],
+        path: "/sched_transact/ap",
+      },
+      {
+        desc: "Approve Schedule",
+        icon: <NewspaperOutlinedIcon />,
+        permission: ["sched_transact_approver"],
+        path: "/sched_transact/approve",
+      },
+    ],
   },
 ];
 
@@ -620,6 +704,33 @@ const routes = [
       },
     ],
   },
+  {
+    path: "/sched_transact",
+    name: "Scheduled",
+    children: [
+      {
+        path: "/sched_transact/request",
+        name: "Request Schedule",
+      },
+      {
+        path: "/sched_transact/ap",
+        name: "AP Schedule",
+      },
+      {
+        path: "/sched_transact/ap",
+        name: "Approve Schedule",
+      },
+    ],
+  },
 ];
 
-export { user, masterlist, tagging, apTransaction, approver, menu, routes };
+export {
+  user,
+  masterlist,
+  tagging,
+  apTransaction,
+  approver,
+  menu,
+  routes,
+  schedule,
+};

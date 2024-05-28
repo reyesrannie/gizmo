@@ -46,6 +46,7 @@ export const jsonServerAPI = createApi({
     "CountCheck",
     "CountVoucher",
     "CutOFF",
+    "SchedTransact",
   ],
   endpoints: (builder) => ({
     //Authentication and users
@@ -1495,6 +1496,35 @@ export const jsonServerAPI = createApi({
       }),
       providesTags: ["CutOFFLogs"],
     }),
+
+    //scheduled Transaction
+    schedTransaction: builder.query({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/sched-transaction`,
+        method: "GET",
+        params: payload,
+      }),
+      providesTags: ["SchedTransact"],
+    }),
+    createScheduleTransaction: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/sched-transaction`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["SchedTransact"],
+    }),
+    updateScheduleTransaction: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/sched-transaction/${payload.id}`,
+        method: "PUT",
+        body: payload,
+      }),
+      invalidatesTags: ["SchedTransact"],
+    }),
   }),
 });
 
@@ -1663,4 +1693,8 @@ export const {
   useUpdateCutOffMutation,
   useApproveCutOffMutation,
   useCutOffLogsQuery,
+
+  useSchedTransactionQuery,
+  useCreateScheduleTransactionMutation,
+  useUpdateScheduleTransactionMutation,
 } = jsonServerAPI;

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 import Breadcrums from "../../components/customs/Breadcrums";
 import SearchText from "../../components/customs/SearchText";
@@ -37,6 +37,7 @@ const TagTransaction = () => {
   const dispatch = useDispatch();
 
   const isExpanded = useSelector((state) => state.transaction.isExpanded);
+
   const header =
     useSelector((state) => state.transaction.header) || "Tag Transaction";
 
@@ -58,6 +59,13 @@ const TagTransaction = () => {
     isError,
     isFetching,
   } = useTransactionQuery(params);
+
+  useEffect(() => {
+    if (header) {
+      const statusChange = taggingHeader?.find((item) => item?.name === header);
+      onStateChange(statusChange?.status);
+    }
+  }, [header]);
 
   return (
     <Box>
