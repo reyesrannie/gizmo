@@ -1,5 +1,56 @@
 export const events = [
   {
+    event: "company_updated",
+    tags: ["Company"],
+  },
+  {
+    event: "department_updated",
+    tags: ["Department"],
+  },
+  {
+    event: "location_updated",
+    tags: ["Location"],
+  },
+  {
+    event: "ap_tagging_updated",
+    tags: ["AP"],
+  },
+  {
+    event: "supplier_updated",
+    tags: ["Supplier"],
+  },
+  {
+    event: "vat_updated",
+    tags: ["VAT"],
+  },
+  {
+    event: "atc_updated",
+    tags: ["ATC"],
+  },
+  {
+    event: "supplier_type_updated",
+    tags: ["SupplierType"],
+  },
+  {
+    event: "document_type_updated",
+    tags: ["DocumentType"],
+  },
+  {
+    event: "account_number_updated",
+    tags: ["AccountNumber"],
+  },
+  {
+    event: "account_title_updated",
+    tags: [
+      "GGPAccountTitles",
+      "GPAccountTitles",
+      "PAccountTitles",
+      "CAccountTitles",
+      "GAccountTitles",
+      "AccountTitles",
+    ],
+  },
+  {
     event: "transaction_updated",
     tags: ["Transaction", "CountTransaction", "CountCheck", "CountVoucher"],
   },
@@ -124,23 +175,23 @@ export const events = [
 
   {
     event: "schedule_updated",
-    tags: ["SchedTransact"],
+    tags: ["SchedTransact", "CountSchedule"],
   },
   {
     event: "schedule_received",
-    tags: ["SchedTransact"],
+    tags: ["SchedTransact", "CountSchedule"],
   },
   {
     event: "schedule_approval",
-    tags: ["SchedTransact"],
+    tags: ["SchedTransact", "CountSchedule"],
   },
   {
     event: "schedule_returned",
-    tags: ["SchedTransact"],
+    tags: ["SchedTransact", "CountSchedule"],
   },
   {
     event: "schedule_approved",
-    tags: ["SchedTransact"],
+    tags: ["SchedTransact", "CountSchedule"],
   },
   {
     event: "schedule_generate",
@@ -159,6 +210,7 @@ export const events = [
       "SingleJournal",
       "CheckEntries",
       "JournalEntries",
+      "CountSchedule",
     ],
   },
 ];

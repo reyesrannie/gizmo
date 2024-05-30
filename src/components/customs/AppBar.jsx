@@ -48,12 +48,15 @@ const AppBar = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const { isCoverageToday } = DateChecker();
 
-  const { data: scheduledTransaction, isSuccess: successSched } =
-    useSchedTransactionQuery({
-      pagination: "none",
-      state: "approved",
-      access: "ap",
-    });
+  const {
+    data: scheduledTransaction,
+    isSuccess: successSched,
+    isError: errorSched,
+  } = useSchedTransactionQuery({
+    pagination: "none",
+    state: "approved",
+    access: "ap",
+  });
 
   useEffect(() => {
     const updateHandler = (value, data) => {
@@ -103,7 +106,10 @@ const AppBar = () => {
       const isToday = isCoverageToday(scheduledTransaction?.result);
       dispatch(setOpenNotification(isToday));
     }
-  }, [successSched, scheduledTransaction]);
+    if (errorSched) {
+      dispatch(setOpenNotification(false));
+    }
+  }, [successSched, scheduledTransaction, errorSched]);
 
   return (
     <Box className="appbar-container open">

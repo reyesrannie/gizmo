@@ -51,6 +51,7 @@ import noData from "../../../assets/lottie/NoData.json";
 import StatusIndicator from "../../../components/customs/StatusIndicator";
 import warning from "../../../assets/svg/warning.svg";
 import "../../../components/styles/Atc.scss";
+import "../../../components/styles/RolesModal.scss";
 
 import { useState } from "react";
 import { resetPrompt, setWarning } from "../../../services/slice/promptSlice";
@@ -68,6 +69,7 @@ import {
 import { generateExcel } from "../../../services/functions/exportFile";
 import AtcModal from "../../../components/customs/modal/AtcModal";
 import ImportModal from "../../../components/customs/modal/ImportModal";
+import socket from "../../../services/functions/serverSocket";
 
 const Atc = () => {
   const excelItems = ["ID", "CODE", "NAME", "CREATED AT", "DATE MODIFIED"];
@@ -104,6 +106,7 @@ const Atc = () => {
     try {
       const res = await archiveAtc(menuData).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
+      socket.emit("atc_updated");
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
@@ -115,6 +118,7 @@ const Atc = () => {
     try {
       const res = await importATC(submitData).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
+      socket.emit("atc_updated");
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {

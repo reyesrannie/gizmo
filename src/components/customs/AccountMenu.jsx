@@ -14,10 +14,14 @@ import PowerSettingsNewOutlinedIcon from "@mui/icons-material/PowerSettingsNewOu
 
 import "../styles/AccountMenu.scss";
 import { useDispatch } from "react-redux";
-import { setChangePass } from "../../services/slice/authSlice";
+import { resetAuth, setChangePass } from "../../services/slice/authSlice";
 import { decodeUser } from "../../services/functions/saveUser";
 import { useNavigate } from "react-router-dom";
 import { useLogoutMutation } from "../../services/store/request";
+import { resetLogs } from "../../services/slice/logSlice";
+import { resetOption } from "../../services/slice/optionsSlice";
+import { resetTransaction } from "../../services/slice/transactionSlice";
+import { resetPrompt } from "../../services/slice/promptSlice";
 
 const AccountMenu = ({ onClose }) => {
   const userData = decodeUser();
@@ -29,6 +33,11 @@ const AccountMenu = ({ onClose }) => {
     logout();
     localStorage.removeItem("GIZMO");
     localStorage.removeItem("GIZMO_token");
+    dispatch(resetAuth());
+    dispatch(resetLogs());
+    dispatch(resetOption());
+    dispatch(resetTransaction());
+    dispatch(resetPrompt());
     navigate("/");
   };
 

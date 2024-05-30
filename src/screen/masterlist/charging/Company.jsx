@@ -51,6 +51,7 @@ import noData from "../../../assets/lottie/NoData.json";
 import StatusIndicator from "../../../components/customs/StatusIndicator";
 import warning from "../../../assets/svg/warning.svg";
 import "../../../components/styles/Company.scss";
+import "../../../components/styles/RolesModal.scss";
 
 import { useState } from "react";
 import { resetPrompt, setWarning } from "../../../services/slice/promptSlice";
@@ -68,6 +69,7 @@ import {
 import CompanyModal from "../../../components/customs/modal/CompanyModal";
 import { generateExcel } from "../../../services/functions/exportFile";
 import ImportModal from "../../../components/customs/modal/ImportModal";
+import socket from "../../../services/functions/serverSocket";
 
 const Company = () => {
   const excelItems = ["ID", "CODE", "NAME", "CREATED AT", "DATE MODIFIED"];
@@ -107,6 +109,7 @@ const Company = () => {
     try {
       const res = await archiveCompany(menuData).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
+      socket.emit("company_updated");
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
@@ -118,6 +121,7 @@ const Company = () => {
     try {
       const res = await importCompany(submitData).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
+      socket.emit("company_updated");
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {

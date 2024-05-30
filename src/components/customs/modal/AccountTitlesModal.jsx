@@ -43,6 +43,7 @@ import { useSnackbar } from "notistack";
 import { objectError } from "../../../services/functions/errorResponse";
 import accountTitlesSchema from "../../../schemas/accountTitlesSchema";
 import Autocomplete from "../AutoComplete";
+import socket from "../../../services/functions/serverSocket";
 
 const AccountTitlesModal = ({ accountTitlesData, view, update, create }) => {
   const dispatch = useDispatch();
@@ -184,6 +185,7 @@ const AccountTitlesModal = ({ accountTitlesData, view, update, create }) => {
     try {
       const res = await handler(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
+      socket.emit("account_title_updated");
       dispatch(resetMenu());
     } catch (error) {
       objectError(error, setError, enqueueSnackbar);

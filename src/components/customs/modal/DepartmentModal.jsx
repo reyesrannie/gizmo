@@ -31,6 +31,7 @@ import { objectError } from "../../../services/functions/errorResponse";
 import departmentSchema from "../../../schemas/departmentSchema";
 import Autocomplete from "../AutoComplete";
 import { useEffect } from "react";
+import socket from "../../../services/functions/serverSocket";
 
 const DepartmentModal = ({ departmentData, view, update }) => {
   const dispatch = useDispatch();
@@ -99,6 +100,8 @@ const DepartmentModal = ({ departmentData, view, update }) => {
       try {
         const res = await updateDepartment(obj).unwrap();
         enqueueSnackbar(res.message, { variant: "success" });
+        socket.emit("department_updated");
+
         dispatch(resetMenu());
       } catch (error) {
         objectError(error, setError, enqueueSnackbar);
@@ -107,6 +110,8 @@ const DepartmentModal = ({ departmentData, view, update }) => {
       try {
         const res = await createDepartment(obj).unwrap();
         enqueueSnackbar(res.message, { variant: "success" });
+        socket.emit("department_updated");
+
         dispatch(resetMenu());
       } catch (error) {
         objectError(error, setError, enqueueSnackbar);

@@ -46,6 +46,7 @@ import warning from "../../../assets/svg/warning.svg";
 import AppPrompt from "../../../components/customs/AppPrompt";
 
 import "../../../components/styles/AccountsPayable.scss";
+import "../../../components/styles/RolesModal.scss";
 
 import AddToPhotosOutlinedIcon from "@mui/icons-material/AddToPhotosOutlined";
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
@@ -64,6 +65,7 @@ import {
 import AccountsPayableModal from "../../../components/customs/modal/AccountsPayableModal";
 import { generateExcel } from "../../../services/functions/exportFile";
 import ImportModal from "../../../components/customs/modal/ImportModal";
+import socket from "../../../services/functions/serverSocket";
 
 const AccountsPayable = () => {
   const excelItems = ["ID", "CODE", "NAME", "CREATED AT", "DATE MODIFIED"];
@@ -102,6 +104,7 @@ const AccountsPayable = () => {
     try {
       const res = await archiveAp(menuData).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
+      socket.emit("ap_tagging_updated");
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
@@ -119,6 +122,7 @@ const AccountsPayable = () => {
     try {
       const res = await importAp(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
+      socket.emit("ap_tagging_updated");
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {

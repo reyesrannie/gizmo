@@ -81,20 +81,20 @@ export const jsonServerAPI = createApi({
         "AccountNumber",
         "Transaction",
         "Logs",
-        "TaxComputation",
+        "AccountTitles",
         "GTAG",
         "VPCheckNumber",
+        "VPJournalNumber",
         "SingleCheck",
         "SingleJournal",
         "CheckEntries",
         "JournalEntries",
-        "GGPAccountTitles",
-        "GPAccountTitles",
-        "PAccountTitles",
-        "CAccountTitles",
-        "GCAccountTitles",
-        "CutOFFLogs",
-        "ScheduleLogs",
+        "CountTransaction",
+        "CountCheck",
+        "CountVoucher",
+        "CutOFF",
+        "SchedTransact",
+        "CountSchedule",
       ],
     }),
     passwordChange: builder.mutation({
@@ -1601,6 +1601,16 @@ export const jsonServerAPI = createApi({
         "CountSchedule",
       ],
     }),
+    completeSchedTransaction: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/completed/schedule/${payload.id}`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["SchedTransact", "CountSchedule"],
+    }),
+
     countSchedule: builder.query({
       transformResponse: (response) => response,
       query: (payload) => ({
@@ -1788,6 +1798,7 @@ export const {
   useApproveSchedTransactionMutation,
   useReturnSchedTransactionMutation,
   useResetSchedTransactionMutation,
+  useCompleteSchedTransactionMutation,
   useGenerateTransactionMutation,
   useCountScheduleQuery,
 } = jsonServerAPI;

@@ -52,6 +52,9 @@ const CustomIndicator = ({ props, item }) => {
       {completed && item?.status === "returned" && (
         <SwapHorizontalCircleOutlinedIcon color="error" />
       )}
+      {completed && item?.state === "returned" && (
+        <SwapHorizontalCircleOutlinedIcon color="error" />
+      )}
       {completed && item?.status === "checked" && (
         <CheckCircleOutlinedIcon color="warning" />
       )}
@@ -65,6 +68,9 @@ const CustomIndicator = ({ props, item }) => {
         <RecommendOutlinedIcon color="success" />
       )}
       {completed && item?.state === "approved" && (
+        <RecommendOutlinedIcon color="success" />
+      )}
+      {completed && item?.state === "completed" && (
         <RecommendOutlinedIcon color="success" />
       )}
       {completed && item?.state === "pending" && (
@@ -507,6 +513,8 @@ const TransactionDrawer = ({
                 (items) => item?.updated_by_id === items.id
               );
 
+              console.log(item);
+
               return (
                 <Step key={index}>
                   <StepLabel
@@ -585,9 +593,25 @@ const TransactionDrawer = ({
                             {item?.state?.toUpperCase()}
                           </Typography>
                         )}
+                        {item?.state === "returned" && (
+                          <Typography
+                            color="error"
+                            className="logs-indicator-transaction"
+                          >
+                            {item?.state?.toUpperCase()}
+                          </Typography>
+                        )}
+                        {item?.state === "completed" && (
+                          <Typography
+                            color="green"
+                            className="logs-indicator-transaction"
+                          >
+                            {item?.state?.toUpperCase()}
+                          </Typography>
+                        )}
                       </Box>
 
-                      {item?.state === "closed" &&
+                      {item?.state === "returned" &&
                         item?.requested_at !== null && (
                           <Box className={"logs-details-transaction"}>
                             <Typography className="logs-indicator-transaction">

@@ -19,6 +19,7 @@ import {
 } from "../../../services/store/request";
 import Lottie from "lottie-react";
 import { objectError } from "../../../services/functions/errorResponse";
+import socket from "../../../services/functions/serverSocket";
 
 const LocationModal = ({ locationData, view, update }) => {
   const dispatch = useDispatch();
@@ -59,6 +60,7 @@ const LocationModal = ({ locationData, view, update }) => {
       try {
         const res = await updateLocation(obj).unwrap();
         enqueueSnackbar(res?.message, { variant: "success" });
+        socket.emit("location_updated");
         dispatch(resetMenu());
       } catch (error) {
         objectError(error, setError, enqueueSnackbar);
@@ -67,6 +69,7 @@ const LocationModal = ({ locationData, view, update }) => {
       try {
         const res = await createLocation(obj).unwrap();
         enqueueSnackbar(res?.message, { variant: "success" });
+        socket.emit("location_updated");
         dispatch(resetMenu());
       } catch (error) {
         objectError(error, setError, enqueueSnackbar);

@@ -51,6 +51,7 @@ import noData from "../../../assets/lottie/NoData.json";
 import StatusIndicator from "../../../components/customs/StatusIndicator";
 import warning from "../../../assets/svg/warning.svg";
 import "../../../components/styles/SupplierType.scss";
+import "../../../components/styles/RolesModal.scss";
 
 import { useState } from "react";
 import { resetPrompt, setWarning } from "../../../services/slice/promptSlice";
@@ -68,6 +69,7 @@ import {
 import { generateExcel } from "../../../services/functions/exportFile";
 import SupplierTypeModal from "../../../components/customs/modal/SupplierTypeModal";
 import ImportModal from "../../../components/customs/modal/ImportModal";
+import socket from "../../../services/functions/serverSocket";
 
 const SupplierType = () => {
   const excelItems = ["ID", "CODE", "NAME", "CREATED AT", "DATE MODIFIED"];
@@ -107,6 +109,7 @@ const SupplierType = () => {
     try {
       const res = await archiveSupplierType(menuData).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
+      socket.emit("supplier_type_updated");
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
@@ -124,6 +127,7 @@ const SupplierType = () => {
     try {
       const res = await importSupplierType(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
+      socket.emit("supplier_type_updated");
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {

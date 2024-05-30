@@ -32,6 +32,7 @@ import StatusIndicator from "../../../components/customs/StatusIndicator";
 import warning from "../../../assets/svg/warning.svg";
 import AppPrompt from "../../../components/customs/AppPrompt";
 import "../../../components/styles/Location.scss";
+import "../../../components/styles/RolesModal.scss";
 
 import AddToPhotosOutlinedIcon from "@mui/icons-material/AddToPhotosOutlined";
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
@@ -65,6 +66,7 @@ import LocationModal from "../../../components/customs/modal/LocationModal";
 import { singleError } from "../../../services/functions/errorResponse";
 import { generateExcel } from "../../../services/functions/exportFile";
 import ImportModal from "../../../components/customs/modal/ImportModal";
+import socket from "../../../services/functions/serverSocket";
 
 const Location = () => {
   const excelItems = ["ID", "CODE", "NAME", "CREATED AT", "DATE MODIFIED"];
@@ -104,6 +106,7 @@ const Location = () => {
     try {
       const res = await archiveLocation(menuData).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
+      socket.emit("location_updated");
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
@@ -115,6 +118,7 @@ const Location = () => {
     try {
       const res = await importLocation(submitData).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
+      socket.emit("location_updated");
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {

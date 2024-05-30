@@ -73,6 +73,7 @@ import {
 import { generateExcel } from "../../../services/functions/exportFile";
 import ImportModal from "../../../components/customs/modal/ImportModal";
 import AccountTitlesModal from "../../../components/customs/modal/AccountTitlesModal";
+import socket from "../../../services/functions/serverSocket";
 
 const TitleTable = ({
   params,
@@ -125,6 +126,7 @@ const TitleTable = ({
     try {
       const res = await importFunction(menuData).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
+      socket.emit("account_title_updated");
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
@@ -136,6 +138,7 @@ const TitleTable = ({
     try {
       const res = await importFunction(submitData).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
+      socket.emit("account_title_updated");
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {

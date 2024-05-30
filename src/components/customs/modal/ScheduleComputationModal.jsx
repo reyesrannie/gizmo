@@ -26,6 +26,7 @@ import {
   useAccountTitlesQuery,
   useAtcQuery,
   useCheckedScheduleTransactionMutation,
+  useCompleteSchedTransactionMutation,
   useDocumentTypeQuery,
   useGenerateTransactionMutation,
   useLocationQuery,
@@ -36,13 +37,14 @@ import {
 } from "../../../services/store/request";
 import { useSnackbar } from "notistack";
 import { singleError } from "../../../services/functions/errorResponse";
-import { resetPrompt } from "../../../services/slice/promptSlice";
+import { resetPrompt, setWarning } from "../../../services/slice/promptSlice";
 import {
   mapAPScheduleTransaction,
   mapScheduleTransactionData,
 } from "../../../services/functions/mapObject";
 
 import "../../styles/TransactionModal.scss";
+import warningImg from "../../../assets/svg/warning.svg";
 
 import transaction from "../../../assets/svg/transaction.svg";
 import AppTextBox from "../AppTextBox";
@@ -71,11 +73,14 @@ import { DatePicker } from "@mui/x-date-pickers";
 import DateChecker from "../../../services/functions/DateChecker";
 import { setHeader } from "../../../services/slice/transactionSlice";
 import { useNavigate } from "react-router-dom";
+import AppPrompt from "../AppPrompt";
 
 const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const transactionData = useSelector((state) => state.menu.menuData);
+  const warning = useSelector((state) => state.prompt.warning);
+
   const createTax = useSelector((state) => state.menu.createTax);
   const updateTax = useSelector((state) => state.menu.updateTax);
   const computationMenu = useSelector((state) => state.menu.computationMenu);
@@ -175,6 +180,9 @@ const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
 
   const [generateTransaction, { isLoading: loadingGenerate }] =
     useGenerateTransactionMutation();
+
+  const [completeTransaction, { isLoading: loadingComplete }] =
+    useCompleteSchedTransactionMutation();
 
   const {
     control,
@@ -327,6 +335,22 @@ const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
       dispatch(resetPrompt());
       dispatch(setHeader("Approved"));
       navigate("/ap/check");
+    } catch (error) {
+      singleError(error, enqueueSnackbar);
+    }
+  };
+
+  const handleComplete = async () => {
+    const obj = {
+      id: transactionData?.id,
+    };
+
+    try {
+      const res = await completeTransaction(obj).unwrap();
+      enqueueSnackbar(res?.message, { variant: "success" });
+      socket.emit("schedule_updated");
+      dispatch(resetMenu());
+      dispatch(resetPrompt());
     } catch (error) {
       singleError(error, enqueueSnackbar);
     }
@@ -797,6 +821,19 @@ const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
                 Reset
               </Button>
             )}
+            {transactionData?.state !== "completed" && view && ap && (
+              <Button
+                disabled={
+                  transactionData?.month_total === transactionData?.month_paid
+                }
+                variant="contained"
+                color="primary"
+                className="add-transaction-button"
+                onClick={() => dispatch(setWarning(true))}
+              >
+                Complete Transaction
+              </Button>
+            )}
 
             {!errorTaxComputation && (
               <Button
@@ -822,19 +859,22 @@ const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
                 Checked
               </LoadingButton>
             )}
-            {view && ap && isToday && (
-              <Button
-                disabled={
-                  transactionData?.month_total === transactionData?.month_paid
-                }
-                variant="contained"
-                color="warning"
-                className="add-transaction-button"
-                onClick={handleGenerate}
-              >
-                Generate Voucher
-              </Button>
-            )}
+            {transactionData?.state !== "completed" &&
+              view &&
+              ap &&
+              isToday && (
+                <Button
+                  disabled={
+                    transactionData?.month_total === transactionData?.month_paid
+                  }
+                  variant="contained"
+                  color="warning"
+                  className="add-transaction-button"
+                  onClick={handleGenerate}
+                >
+                  Generate Voucher
+                </Button>
+              )}
             <Button
               variant="contained"
               color="primary"
@@ -862,14 +902,15 @@ const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
           loadingTax ||
           loadingCheck ||
           loadingReset ||
-          loadingGenerate
+          loadingGenerate ||
+          loadingComplete
         }
         className="loading-transaction-create"
       >
         <Lottie animationData={loading} loop />
       </Dialog>
 
-      {view || update ? <TransactionDrawer schedule /> : <></>}
+      <TransactionDrawer schedule />
 
       <Dialog
         open={createTax}
@@ -901,6 +942,27 @@ const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
         onClose={() => dispatch(setUpdateTax(false))}
       >
         <TaxComputation update taxComputation={taxComputation} />
+      </Dialog>
+
+      <Dialog
+        open={warning}
+        className="transaction-modal-dialog"
+        onClose={() => dispatch(setWarning(false))}
+      >
+        <AppPrompt
+          image={warningImg}
+          title={"Complete Transaction?"}
+          message={"Once the transaction is complete, it cannot be reset."}
+          nextLineMessage={
+            "You need to create a separate transaction to cover the remaining balance."
+          }
+          confirmButton={"Yes, Complete it!"}
+          cancelButton={"Cancel"}
+          cancelOnClick={() => {
+            dispatch(resetPrompt());
+          }}
+          confirmOnClick={handleComplete}
+        />
       </Dialog>
     </Paper>
   );

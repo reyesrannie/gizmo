@@ -51,6 +51,7 @@ import noData from "../../../assets/lottie/NoData.json";
 import StatusIndicator from "../../../components/customs/StatusIndicator";
 import warning from "../../../assets/svg/warning.svg";
 import "../../../components/styles/DocumentType.scss";
+import "../../../components/styles/RolesModal.scss";
 
 import { useState } from "react";
 import { resetPrompt, setWarning } from "../../../services/slice/promptSlice";
@@ -68,6 +69,7 @@ import {
 import { generateExcel } from "../../../services/functions/exportFile";
 import ImportModal from "../../../components/customs/modal/ImportModal";
 import DocumentTypeModal from "../../../components/customs/modal/DocumentTypeModal";
+import socket from "../../../services/functions/serverSocket";
 
 const DocumentType = () => {
   const excelItems = ["ID", "CODE", "NAME", "CREATED AT", "DATE MODIFIED"];
@@ -107,6 +109,7 @@ const DocumentType = () => {
     try {
       const res = await archiveDocumentType(menuData).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
+      socket.emit("document_type_updated");
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
@@ -118,6 +121,7 @@ const DocumentType = () => {
     try {
       const res = await importDocumentType(submitData).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
+      socket.emit("document_type_updated");
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {

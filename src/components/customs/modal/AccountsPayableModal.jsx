@@ -19,6 +19,7 @@ import {
 import { useSnackbar } from "notistack";
 import { objectError } from "../../../services/functions/errorResponse";
 import apSchema from "../../../schemas/apSchema";
+import socket from "../../../services/functions/serverSocket";
 
 const AccountsPayableModal = ({ apData, view, update }) => {
   const dispatch = useDispatch();
@@ -61,6 +62,7 @@ const AccountsPayableModal = ({ apData, view, update }) => {
         ? await updateAP(obj).unwrap()
         : await createAP(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
+      socket.emit("ap_tagging_updated");
       dispatch(resetMenu());
     } catch (error) {
       objectError(error, setError, enqueueSnackbar);

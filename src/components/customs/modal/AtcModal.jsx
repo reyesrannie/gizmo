@@ -19,6 +19,7 @@ import {
 import { useSnackbar } from "notistack";
 import { objectError } from "../../../services/functions/errorResponse";
 import atcSchema from "../../../schemas/atcSchema";
+import socket from "../../../services/functions/serverSocket";
 
 const AtcModal = ({ atcData, view, update }) => {
   const dispatch = useDispatch();
@@ -58,6 +59,7 @@ const AtcModal = ({ atcData, view, update }) => {
       try {
         const res = await updateAtc(obj).unwrap();
         enqueueSnackbar(res?.message, { variant: "success" });
+        socket.emit("atc_updated");
         dispatch(resetMenu());
       } catch (error) {
         objectError(error, setError, enqueueSnackbar);
@@ -66,6 +68,7 @@ const AtcModal = ({ atcData, view, update }) => {
       try {
         const res = await createAtc(obj).unwrap();
         enqueueSnackbar(res?.message, { variant: "success" });
+        socket.emit("atc_updated");
         dispatch(resetMenu());
       } catch (error) {
         objectError(error, setError, enqueueSnackbar);

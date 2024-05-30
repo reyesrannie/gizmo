@@ -9,6 +9,7 @@ import { useSelector } from "react-redux";
 
 const CountDistribute = () => {
   const userData = useSelector((state) => state.auth.userData);
+  const ap = userData?.scope_tagging?.map((item) => item?.ap_code);
   const { data: badgeTagging } = useTransactCountQuery({
     ap: userData?.scope_tagging?.map((item) => item?.ap_code),
   });
@@ -23,9 +24,9 @@ const CountDistribute = () => {
     max: userData?.amount?.max_amount || null,
   });
   const { data: scheduleTransaction } = useCountScheduleQuery({
-    ap: userData?.scope_tagging?.map((item) => item?.ap_code),
-    min: userData?.amount?.min_amount || null,
-    max: userData?.amount?.max_amount || null,
+    ap: ap,
+    min: ap?.length === 0 ? userData?.amount?.min_amount : "",
+    max: ap?.length === 0 ? userData?.amount?.max_amount : "",
   });
 
   const menuCount = (path) => {
@@ -46,6 +47,26 @@ const CountDistribute = () => {
           badgeJournal?.result["For Approval"] +
           badgeJournal?.result["For Voiding"] || 0
       );
+    } else if (path === "Scheduled") {
+      if (ap?.length === 0) {
+        return scheduleTransaction?.result["For Approval"] || 0;
+      }
+      if (ap?.length !== 0) {
+        return (
+          scheduleTransaction?.result["For Computation"] +
+            scheduleTransaction?.result["returned"] +
+            scheduleTransaction?.result["approved"] +
+            scheduleTransaction?.result["pending"] || 0
+        );
+      } else {
+        return (
+          scheduleTransaction?.result["For Computation"] +
+            scheduleTransaction?.result["For Approval"] +
+            scheduleTransaction?.result["returned"] +
+            scheduleTransaction?.result["approved"] +
+            scheduleTransaction?.result["pending"] || 0
+        );
+      }
     }
     return 0;
   };

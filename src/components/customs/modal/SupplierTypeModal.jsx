@@ -31,6 +31,7 @@ import { objectError } from "../../../services/functions/errorResponse";
 import supplierTypeSchema from "../../../schemas/supplierTypeSchema";
 import Autocomplete from "../AutoComplete";
 import { supplierTypeReqFields } from "../../../services/constants/requiredFields";
+import socket from "../../../services/functions/serverSocket";
 
 const SupplierTypeModal = ({ stypeData, view, update }) => {
   const dispatch = useDispatch();
@@ -80,6 +81,8 @@ const SupplierTypeModal = ({ stypeData, view, update }) => {
       try {
         const res = await updateSupplierType(obj).unwrap();
         enqueueSnackbar(res?.message, { variant: "success" });
+        socket.emit("supplier_type_updated");
+
         dispatch(resetMenu());
       } catch (error) {
         objectError(error, setError, enqueueSnackbar);
@@ -88,6 +91,8 @@ const SupplierTypeModal = ({ stypeData, view, update }) => {
       try {
         const res = await createSupplierType(obj).unwrap();
         enqueueSnackbar(res?.message, { variant: "success" });
+        socket.emit("supplier_type_updated");
+
         dispatch(resetMenu());
       } catch (error) {
         objectError(error, setError, enqueueSnackbar);
