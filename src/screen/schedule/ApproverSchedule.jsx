@@ -8,7 +8,6 @@ import {
   AccordionSummary,
   Badge,
   Box,
-  Button,
   Dialog,
   IconButton,
   Typography,
@@ -18,11 +17,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { useSchedTransactionQuery } from "../../services/store/request";
 
 import ArrowDropDownCircleOutlinedIcon from "@mui/icons-material/ArrowDropDownCircleOutlined";
-import AddToPhotosOutlinedIcon from "@mui/icons-material/AddToPhotosOutlined";
 
 import "../../components/styles/TagTransaction.scss";
 
-import { schedTaggingHeader } from "../../services/constants/headers";
+import {
+  approverScheduleHeader,
+  schedAPHeader,
+} from "../../services/constants/headers";
 import {
   setFilterBy,
   setHeader,
@@ -32,15 +33,16 @@ import "../../components/styles/TransactionModal.scss";
 // import CheckTable from "./CheckTable";
 import CountDistribute from "../../services/functions/CountDistribute";
 import ScheduleModal from "../../components/customs/modal/ScheduleModal";
-import { resetMenu, setCreateMenu } from "../../services/slice/menuSlice";
-import useTransactionHook from "../../services/hooks/useTransactionHook";
+import { resetMenu } from "../../services/slice/menuSlice";
 import ScheduleTable from "./ScheduleTable";
+import useApproverHook from "../../services/hooks/useApproverHook";
 
-const RequestSchedule = () => {
+const ApproverSchedule = () => {
   const dispatch = useDispatch();
 
   const isExpanded = useSelector((state) => state.transaction.isExpanded);
-  const header = useSelector((state) => state.transaction.header) || "Pending";
+  const header =
+    useSelector((state) => state.transaction.header) || "For Approval";
   const createMenu = useSelector((state) => state.menu.createMenu);
 
   const {
@@ -51,7 +53,7 @@ const RequestSchedule = () => {
     onSortTable,
     onOrderBy,
     onStateChange,
-  } = useTransactionHook();
+  } = useApproverHook();
 
   const {
     data: tagTransaction,
@@ -61,13 +63,13 @@ const RequestSchedule = () => {
     status,
   } = useSchedTransactionQuery(params);
 
-  const { countHeaderAPCH, countCheck } = CountDistribute();
+  const { countGrandChildcheck, countScheduleApprover } = CountDistribute();
 
-  const hasBadge = countCheck();
+  const hasBadge = countScheduleApprover();
 
   useEffect(() => {
     if (header) {
-      const statusChange = schedTaggingHeader?.find(
+      const statusChange = approverScheduleHeader?.find(
         (item) => item?.name === header
       );
       onStateChange(statusChange?.status);
@@ -89,14 +91,18 @@ const RequestSchedule = () => {
             <AccordionSummary onClick={() => dispatch(setIsExpanded(false))}>
               <Typography className="page-text-indicator-tag-transaction">
                 <Badge
-                  badgeContent={header ? countHeaderAPCH(header) : 0}
+                  badgeContent={
+                    header
+                      ? countGrandChildcheck(header, "Approver Schedule")
+                      : 0
+                  }
                   color="error"
                 >
                   {header}
                 </Badge>
               </Typography>
             </AccordionSummary>
-            {schedTaggingHeader?.map(
+            {approverScheduleHeader?.map(
               (head, index) =>
                 header !== head?.name && (
                   <AccordionSummary
@@ -112,7 +118,12 @@ const RequestSchedule = () => {
                     <Typography className="page-text-accord-tag-transaction">
                       <Badge
                         badgeContent={
-                          head?.name ? countHeaderAPCH(head?.name) : 0
+                          head?.name
+                            ? countGrandChildcheck(
+                                head?.name,
+                                "Approver Schedule"
+                              )
+                            : 0
                         }
                         color="error"
                       >
@@ -135,18 +146,9 @@ const RequestSchedule = () => {
         </Box>
         <Box className="tag-transaction-button-container">
           <SearchText onSearchData={onSearchData} />
-          <Button
-            variant="contained"
-            color="secondary"
-            className="button-add-tag-transaction"
-            startIcon={<AddToPhotosOutlinedIcon />}
-            onClick={() => dispatch(setCreateMenu(true))}
-          >
-            Add
-          </Button>
         </Box>
       </Box>
-      {header === "Pending" && (
+      {header === "For Approval" && (
         <ScheduleTable
           params={params}
           onSortTable={onSortTable}
@@ -158,39 +160,11 @@ const RequestSchedule = () => {
           status={status}
           tagTransaction={tagTransaction}
           onOrderBy={onOrderBy}
-          state={"received"}
+          state={"For Approval"}
+          approver
         />
       )}
-      {header === "Void" && (
-        <ScheduleTable
-          params={params}
-          onSortTable={onSortTable}
-          isError={isError}
-          isFetching={isFetching}
-          isLoading={isLoading}
-          onPageChange={onPageChange}
-          onRowChange={onRowChange}
-          status={status}
-          tagTransaction={tagTransaction}
-          onOrderBy={onOrderBy}
-          state={"voided"}
-        />
-      )}
-      {header === "Checked" && (
-        <ScheduleTable
-          params={params}
-          onSortTable={onSortTable}
-          isError={isError}
-          isFetching={isFetching}
-          isLoading={isLoading}
-          onPageChange={onPageChange}
-          onRowChange={onRowChange}
-          status={status}
-          tagTransaction={tagTransaction}
-          onOrderBy={onOrderBy}
-          state="checked"
-        />
-      )}
+
       {header === "Returned" && (
         <ScheduleTable
           params={params}
@@ -204,23 +178,10 @@ const RequestSchedule = () => {
           tagTransaction={tagTransaction}
           onOrderBy={onOrderBy}
           state="returned"
+          approver
         />
       )}
-      {header === "Approved" && (
-        <ScheduleTable
-          params={params}
-          onSortTable={onSortTable}
-          isError={isError}
-          isFetching={isFetching}
-          isLoading={isLoading}
-          onPageChange={onPageChange}
-          onRowChange={onRowChange}
-          status={status}
-          tagTransaction={tagTransaction}
-          onOrderBy={onOrderBy}
-          state={"approved"}
-        />
-      )}
+
       {header === "History" && (
         <ScheduleTable
           params={params}
@@ -234,6 +195,7 @@ const RequestSchedule = () => {
           tagTransaction={tagTransaction}
           onOrderBy={onOrderBy}
           state={""}
+          approver
         />
       )}
       <Dialog
@@ -247,4 +209,4 @@ const RequestSchedule = () => {
   );
 };
 
-export default RequestSchedule;
+export default ApproverSchedule;

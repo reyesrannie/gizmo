@@ -236,8 +236,10 @@ const mapScheduledTransaction = (
     vat: transactionData?.vat_amount || "",
     cost: transactionData?.cost || "",
     description: transactionData?.description || "",
-    supplier_type_id: transactionData?.supplierType?.id || "",
+    supplier_type_id: transactionData?.supplier_type_id || "",
     atc_id: transactionData?.atc?.id || "",
+    month_total: transactionData?.month_total || "",
+    month_amount: transactionData?.month_amount || "",
 
     ap:
       ap?.result?.find((item) => transactionData?.ap_tagging_id === item.id) ||
@@ -302,6 +304,47 @@ const mapScheduleTransactionData = (submitData) => {
   return obj;
 };
 
+const mapAPScheduleTransaction = (
+  transactionData,
+  tin,
+  document,
+  accountNumber
+) => {
+  const supplierTin =
+    tin?.result?.find((item) => transactionData?.supplier_id === item.id) ||
+    null;
+  const documentType =
+    document?.result?.find(
+      (item) => transactionData?.document_type_id === item.id
+    ) || null;
+
+  const values = {
+    supplier: supplierTin?.company_name || "",
+    proprietor: supplierTin?.proprietor || "",
+    company_address: supplierTin?.company_address || "",
+    invoice_no: transactionData?.invoice_no || "",
+    description: transactionData?.description || "",
+    month_paid: transactionData?.month_paid || "0",
+    month_total: transactionData?.month_total || "",
+    tin: supplierTin,
+    document_type: documentType,
+    account_number:
+      accountNumber?.result?.find(
+        (item) => transactionData?.accountNumber?.id === item.id
+      ) || null,
+    coverage_from:
+      dayjs(new Date(transactionData?.coverage_from), {
+        locale: AdapterDayjs.locale,
+      }) || null,
+    coverage_to:
+      dayjs(new Date(transactionData?.coverage_to), {
+        locale: AdapterDayjs.locale,
+      }) || null,
+  };
+
+  return values;
+};
+
 export {
   mapTransaction,
   mapViewTransaction,
@@ -309,4 +352,5 @@ export {
   mapResponse,
   mapScheduledTransaction,
   mapScheduleTransactionData,
+  mapAPScheduleTransaction,
 };

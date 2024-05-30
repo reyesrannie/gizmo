@@ -372,11 +372,19 @@ const TaggingTable = ({
         />
       </Menu>
 
-      <Dialog open={createMenu} className="transaction-modal-dialog">
+      <Dialog
+        open={createMenu}
+        className="transaction-modal-dialog"
+        onClose={() => dispatch(resetMenu())}
+      >
         <TransactionModal create />
       </Dialog>
 
-      <Dialog open={viewMenu} className="transaction-modal-dialog">
+      <Dialog
+        open={viewMenu}
+        className="transaction-modal-dialog"
+        onClose={() => dispatch(resetMenu())}
+      >
         <TransactionModal transactionData={menuData} view />
       </Dialog>
 

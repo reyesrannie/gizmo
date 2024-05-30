@@ -12,6 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setAccountMenu, setDrawer } from "../../services/slice/menuSlice";
 
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
+import moment from "moment";
 
 import "../styles/AppBar.scss";
 import loading from "../../assets/lottie/Loading-2.json";
@@ -25,8 +26,14 @@ import AccountMenu from "./AccountMenu";
 import ChangePassword from "./modal/ChangePassword";
 import socket from "../../services/functions/serverSocket";
 import { useSnackbar } from "notistack";
-import { jsonServerAPI } from "../../services/store/request";
+import {
+  jsonServerAPI,
+  useSchedTransactionQuery,
+} from "../../services/store/request";
 import { events } from "../../services/constants/socketItems";
+import NotificationSchedule from "./NotificationSchedule";
+import { setOpenNotification } from "../../services/slice/promptSlice";
+import DateChecker from "../../services/functions/DateChecker";
 
 const AppBar = () => {
   const { enqueueSnackbar } = useSnackbar();
@@ -34,8 +41,19 @@ const AppBar = () => {
   const changePass = useSelector((state) => state.auth.changePass);
   const openDrawer = useSelector((state) => state.menu.drawer);
   const openAccountMenu = useSelector((state) => state.menu.accountMenu);
+  const openNotification = useSelector(
+    (state) => state.prompt.openNotification
+  );
   const userData = decodeUser();
   const [anchorEl, setAnchorEl] = useState(null);
+  const { isCoverageToday } = DateChecker();
+
+  const { data: scheduledTransaction, isSuccess: successSched } =
+    useSchedTransactionQuery({
+      pagination: "none",
+      state: "approved",
+      access: "ap",
+    });
 
   useEffect(() => {
     const updateHandler = (value, data) => {
@@ -80,6 +98,13 @@ const AppBar = () => {
     };
   }, [socket, userData]);
 
+  useEffect(() => {
+    if (successSched) {
+      const isToday = isCoverageToday(scheduledTransaction?.result);
+      dispatch(setOpenNotification(isToday));
+    }
+  }, [successSched, scheduledTransaction]);
+
   return (
     <Box className="appbar-container open">
       <MuiAppBar className="appBar" color="secondary">
@@ -120,8 +145,8 @@ const AppBar = () => {
         >
           <Outlet />
         </Suspense>
+        {openNotification && <NotificationSchedule />}
       </Paper>
-
       <Menu
         anchorEl={anchorEl}
         open={openAccountMenu}

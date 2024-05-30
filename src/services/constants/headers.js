@@ -22,14 +22,6 @@ const approverHeader = [
   { name: "History", status: "" },
 ];
 
-const requestorSchedule = [
-  { name: "For Approval", status: "For Approval" },
-  { name: "Returned", status: "returned" },
-  { name: "Void", status: "voided" },
-  { name: "Pending Void", status: "For Voiding" },
-  { name: "History", status: "" },
-];
-
 const coaHeader = [
   { name: "Account Titles" },
   { name: "Great Grandparent" },
@@ -39,10 +31,32 @@ const coaHeader = [
   { name: "Grandchild" },
 ];
 
+const schedTaggingHeader = [
+  { name: "Pending", status: "pending" },
+  { name: "History", status: "" },
+];
+
+const schedAPHeader = [
+  { name: "Pending", status: "pending" },
+  { name: "Received", status: "For Computation" },
+  { name: "Checked", status: "For Approval" },
+  { name: "Returned", status: "returned" },
+  { name: "Approved", status: "approved" },
+  { name: "History", status: "" },
+];
+
+const approverScheduleHeader = [
+  { name: "For Approval", status: "For Approval" },
+  { name: "Returned", status: "returned" },
+  { name: "History", status: "" },
+];
+
 export {
   taggingHeader,
   apHeader,
   approverHeader,
   coaHeader,
-  requestorSchedule,
+  schedTaggingHeader,
+  schedAPHeader,
+  approverScheduleHeader,
 };

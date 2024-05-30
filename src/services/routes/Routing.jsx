@@ -65,6 +65,11 @@ const RequestSchedule = lazy(() =>
   import("../../screen/schedule/RequestSchedule")
 );
 
+const APSchedule = lazy(() => import("../../screen/schedule/APSchedule"));
+const ApproverSchedule = lazy(() =>
+  import("../../screen/schedule/ApproverSchedule")
+);
+
 const CutOff = lazy(() => import("../../screen/cutoff/Cutoff"));
 
 const Routing = () => {
@@ -347,9 +352,17 @@ const Routing = () => {
           ),
         },
         {
-          path: "approvejournal",
-          element: hasAccess(["approver"]) ? (
-            <ApprovingJournal />
+          path: "ap",
+          element: hasAccess(["sched_transact_ap"]) ? (
+            <APSchedule />
+          ) : (
+            <Navigate to={"/"} />
+          ),
+        },
+        {
+          path: "approve",
+          element: hasAccess(["sched_transact_approver"]) ? (
+            <ApproverSchedule />
           ) : (
             <Navigate to={"/"} />
           ),

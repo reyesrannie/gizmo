@@ -1,11 +1,9 @@
 import {
-  AppBar,
   Box,
   Button,
   Divider,
   Paper,
   Step,
-  StepConnector,
   StepLabel,
   Stepper,
   Typography,
@@ -22,7 +20,9 @@ import SwapHorizontalCircleOutlinedIcon from "@mui/icons-material/SwapHorizontal
 import RecommendOutlinedIcon from "@mui/icons-material/RecommendOutlined";
 import {
   useCutOffLogsQuery,
+  useSchedTransactionQuery,
   useStatusLogsQuery,
+  useStatusScheduleLogsQuery,
   useUsersQuery,
 } from "../../services/store/request";
 import moment from "moment";
@@ -43,6 +43,9 @@ const CustomIndicator = ({ props, item }) => {
       {completed && item?.status === "For Computation" && (
         <CheckCircleOutlinedIcon color="info" />
       )}
+      {completed && item?.state === "For Computation" && (
+        <CheckCircleOutlinedIcon color="info" />
+      )}
       {completed && item?.status === "archived" && (
         <CancelOutlinedIcon color="error" />
       )}
@@ -55,7 +58,13 @@ const CustomIndicator = ({ props, item }) => {
       {completed && item?.status === "For Approval" && (
         <CheckCircleOutlinedIcon color="warning" />
       )}
+      {completed && item?.state === "For Approval" && (
+        <CheckCircleOutlinedIcon color="warning" />
+      )}
       {completed && item?.status === "approved" && (
+        <RecommendOutlinedIcon color="success" />
+      )}
+      {completed && item?.state === "approved" && (
         <RecommendOutlinedIcon color="success" />
       )}
       {completed && item?.state === "pending" && (
@@ -73,7 +82,11 @@ const CustomIndicator = ({ props, item }) => {
   );
 };
 
-const TransactionDrawer = ({ transactionData, cutOff = false }) => {
+const TransactionDrawer = ({
+  transactionData,
+  cutOff = false,
+  schedule = false,
+}) => {
   const menuData = useSelector((state) => state.menu.menuData);
 
   const { data: logs } = useStatusLogsQuery(
@@ -82,7 +95,7 @@ const TransactionDrawer = ({ transactionData, cutOff = false }) => {
       sorts: "created_at",
       pagination: "none",
     },
-    { skip: transactionData === null }
+    { skip: transactionData === null || transactionData === undefined }
   );
 
   const { data: cutOffLogs } = useCutOffLogsQuery(
@@ -92,6 +105,14 @@ const TransactionDrawer = ({ transactionData, cutOff = false }) => {
       pagination: "none",
     },
     { skip: !cutOff }
+  );
+
+  const { data: schedLogs } = useStatusScheduleLogsQuery(
+    {
+      schedule_id: menuData?.id,
+      pagination: "none",
+    },
+    { skip: !schedule }
   );
 
   const paperRef = useRef(null);
@@ -143,7 +164,7 @@ const TransactionDrawer = ({ transactionData, cutOff = false }) => {
       <Box
         className={`logs-transaction-item-container ${logsOpen ? "open" : ""}`}
       >
-        {!cutOff && (
+        {!schedule && !cutOff && (
           <Stepper activeStep={logs?.result.length} orientation="vertical">
             {logs?.result?.map((item, index) => {
               const createdBy = user?.result?.find(
@@ -360,7 +381,7 @@ const TransactionDrawer = ({ transactionData, cutOff = false }) => {
           </Stepper>
         )}
 
-        {cutOff && (
+        {!schedule && cutOff && (
           <Stepper
             activeStep={cutOffLogs?.result.length}
             orientation="vertical"
@@ -444,6 +465,126 @@ const TransactionDrawer = ({ transactionData, cutOff = false }) => {
                               RE-OPEN REQUESTED
                             </Typography>
                           )}
+                      </Box>
+
+                      {item?.state === "closed" &&
+                        item?.requested_at !== null && (
+                          <Box className={"logs-details-transaction"}>
+                            <Typography className="logs-indicator-transaction">
+                              Reason:
+                            </Typography>
+                            <Typography className="logs-details-text-transaction">
+                              {item?.reason}
+                            </Typography>
+                          </Box>
+                        )}
+
+                      <Box className={"logs-details-transaction"}>
+                        <Typography className="logs-indicator-transaction">
+                          Date:
+                        </Typography>
+                        <Typography className="logs-details-text-transaction">
+                          {moment(item?.updated_at).format(
+                            "MMM DD, YYYY, hh:mm A"
+                          )}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </StepLabel>
+                </Step>
+              );
+            })}
+          </Stepper>
+        )}
+
+        {schedule && !cutOff && (
+          <Stepper activeStep={schedLogs?.result.length} orientation="vertical">
+            {schedLogs?.result?.map((item, index) => {
+              const createdBy = user?.result?.find(
+                (items) => item?.created_by_id === items.id
+              );
+              const updatedBy = user?.result?.find(
+                (items) => item?.updated_by_id === items.id
+              );
+
+              return (
+                <Step key={index}>
+                  <StepLabel
+                    StepIconComponent={(props) => (
+                      <CustomIndicator props={props} item={item} />
+                    )}
+                  >
+                    <Box className="logs-transaction-container">
+                      {item?.created_by_id !== null && (
+                        <>
+                          <Typography className="logs-title-transaction">
+                            Schedule Created
+                          </Typography>
+                          <Box className={"logs-details-transaction"}>
+                            <Typography className="logs-indicator-transaction">
+                              Created By:
+                            </Typography>
+                            <Typography className="logs-details-text-transaction">
+                              {`${createdBy?.first_name}  ${createdBy?.last_name}`}
+                            </Typography>
+                          </Box>
+                        </>
+                      )}
+
+                      {item?.created_by_id === null && (
+                        <>
+                          <Typography className="logs-title-transaction">
+                            Schedule Updated
+                          </Typography>
+                          <Box className={"logs-details-transaction"}>
+                            <Typography className="logs-indicator-transaction">
+                              Updated By:
+                            </Typography>
+                            <Typography className="logs-details-text-transaction">
+                              {`${updatedBy?.first_name}  ${updatedBy?.last_name}`}
+                            </Typography>
+                          </Box>
+                        </>
+                      )}
+                      <Box className={"logs-details-transaction"}>
+                        <Typography className="logs-indicator-transaction">
+                          Status:
+                        </Typography>
+                        {item?.state === "pending" && (
+                          <Typography
+                            color="secondary"
+                            className="logs-indicator-transaction"
+                          >
+                            {item?.state?.toUpperCase()}
+                          </Typography>
+                        )}
+
+                        {item?.state === "For Computation" && (
+                          <Typography
+                            color="secondary"
+                            className="logs-indicator-transaction"
+                          >
+                            {item?.state?.toUpperCase()}
+                          </Typography>
+                        )}
+
+                        {item?.state === "For Approval" && (
+                          <Typography
+                            color="secondary"
+                            className="logs-indicator-transaction"
+                          >
+                            {item?.state?.toUpperCase()}
+                          </Typography>
+                        )}
+
+                        {item?.state === "approved" && (
+                          <Typography
+                            color="green"
+                            className="logs-indicator-transaction"
+                          >
+                            {item?.state?.toUpperCase()}
+                          </Typography>
+                        )}
                       </Box>
 
                       {item?.state === "closed" &&

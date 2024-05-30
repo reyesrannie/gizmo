@@ -26,6 +26,8 @@ const initialState = {
   updateCount: 0,
   viewAccountingEntries: false,
   voidMenu: false,
+  schedComputation: false,
+  approveMenu: false,
 };
 
 const initialStateWithoutDrawer = {
@@ -54,6 +56,8 @@ const initialStateWithoutDrawer = {
   updateCount: 0,
   viewAccountingEntries: false,
   voidMenu: false,
+  schedComputation: false,
+  approveMenu: false,
 };
 
 const menutSlice = createSlice({
@@ -135,6 +139,14 @@ const menutSlice = createSlice({
     setVoidMenu: (state, action) => {
       state.voidMenu = action.payload;
     },
+
+    setSchedComputation: (state, action) => {
+      state.schedComputation = action.payload;
+    },
+    setApproveMenu: (state, action) => {
+      state.approveMenu = action.payload;
+    },
+
     resetMenu: () => {
       return initialState;
     },
@@ -170,8 +182,10 @@ export const {
   setComputationMenu,
   setUpdateCount,
   setVoidMenu,
+  setSchedComputation,
   setViewAccountingEntries,
   resetMenuWithoutDrawer,
+  setApproveMenu,
 } = menutSlice.actions;
 
 export default menutSlice.reducer;

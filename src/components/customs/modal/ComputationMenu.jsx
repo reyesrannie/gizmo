@@ -41,7 +41,7 @@ import {
   totalVat,
 } from "../../../services/functions/compute";
 
-const ComputationMenu = ({ details }) => {
+const ComputationMenu = ({ details, schedule }) => {
   const dispatch = useDispatch();
   const menuData = useSelector((state) => state.menu.menuData);
   const voucher = useSelector((state) => state.options.voucher);
@@ -55,8 +55,9 @@ const ComputationMenu = ({ details }) => {
   } = useTaxComputationQuery(
     {
       status: "active",
-      transaction_id: menuData?.transactions?.id,
-      voucher: voucher,
+      transaction_id: schedule ? "" : menuData?.transactions?.id,
+      schedule_id: schedule ? menuData?.id : "",
+      voucher: schedule ? "" : voucher,
     },
     { skip: menuData === null }
   );
@@ -120,23 +121,31 @@ const ComputationMenu = ({ details }) => {
   const totalAccounts = totalAccountData(taxComputation);
   const vatInput = totalVat(taxComputation, "vat_input_tax");
 
-  const supplierDetails = supplier?.result?.find(
-    (item) => menuData?.transactions?.supplier_id === item?.id
-  );
+  const supplierDetails = schedule
+    ? supplier?.result?.find((item) => menuData?.supplier_type_id === item?.id)
+    : supplier?.result?.find(
+        (item) => menuData?.transactions?.supplier_id === item?.id
+      );
 
-  const documentDetails = document?.result?.find(
-    (item) => menuData?.transactions?.document_type_id === item?.id
-  );
+  const documentDetails = schedule
+    ? document?.result?.find((item) => menuData?.document_type_id === item?.id)
+    : document?.result?.find(
+        (item) => menuData?.transactions?.document_type_id === item?.id
+      );
 
-  const apDetails = ap?.result?.find(
-    (item) => menuData?.transactions?.ap_tagging === item?.company_code
-  );
+  const apDetails = schedule
+    ? ap?.result?.find((item) => menuData?.ap_tagging_id === item?.id)
+    : ap?.result?.find(
+        (item) => menuData?.transactions?.ap_tagging === item?.company_code
+      );
 
-  const locationDetails = location?.result?.find(
-    (item) => menuData?.location === item?.id
-  );
+  const locationDetails = schedule
+    ? location?.result?.find((item) => menuData?.location_id === item?.id)
+    : location?.result?.find((item) => menuData?.location === item?.id);
 
-  const atcDetails = atc?.result?.find((item) => menuData?.atc === item?.id);
+  const atcDetails = schedule
+    ? atc?.result?.find((item) => menuData?.atc_id === item?.id)
+    : atc?.result?.find((item) => menuData?.atc === item?.id);
 
   return (
     <Paper className="transaction-modal-container">
@@ -192,10 +201,14 @@ const ComputationMenu = ({ details }) => {
                   <TableCell>
                     <Stack>
                       <Typography className="supplier-company-name">
-                        {menuData?.transactions?.invoice_no}
+                        {!schedule && menuData?.transactions?.invoice_no}
                       </Typography>
                       <Typography className="supplier-company-money">
-                        {convertToPeso(menuData?.transactions?.purchase_amount)}
+                        {convertToPeso(
+                          schedule
+                            ? menuData?.month_amount
+                            : menuData?.transactions?.purchase_amount
+                        )}
                       </Typography>
 
                       <Typography className="supplier-company-address">
@@ -208,14 +221,16 @@ const ComputationMenu = ({ details }) => {
                   </TableCell>
                   <TableCell align="center">
                     <Typography className="supplier-company-address">
-                      {menuData?.transactions?.description}
+                      {schedule
+                        ? menuData?.description
+                        : menuData?.transactions?.description}
                     </Typography>
                   </TableCell>
                   <TableCell>
                     <Stack>
                       <Typography className="supplier-company-name">
-                        {menuData?.transactions?.ap_tagging} -
-                        {menuData?.transactions?.tag_year}
+                        {!schedule && menuData?.transactions?.ap_tagging} -
+                        {!schedule && menuData?.transactions?.tag_year}
                       </Typography>
                       <Typography className="supplier-company-tin">
                         {apDetails?.description}

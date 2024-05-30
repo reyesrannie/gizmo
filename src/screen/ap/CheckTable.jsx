@@ -150,7 +150,8 @@ const CheckTable = ({
           </TableHead>
 
           <TableBody>
-            {loadingDocument ||
+            {isFetching ||
+            loadingDocument ||
             loadingSupplier ||
             isLoading ||
             loadingTagYearMonth ? (

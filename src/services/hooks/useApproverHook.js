@@ -10,6 +10,7 @@ const useApproverHook = () => {
     sorts: null,
     tagYear: "",
     state: "For Approval",
+    access: "approver",
   });
 
   const onPageChange = (_, page) => {

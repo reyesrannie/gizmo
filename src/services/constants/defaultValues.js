@@ -26,6 +26,8 @@ export const transactionDefaultValue = () => {
     coverage_from: null,
     coverage_to: null,
     addedDocuments: null,
+    month_total: "",
+    month_amount: "",
     EB: "",
     PRM: "",
     BS: "",

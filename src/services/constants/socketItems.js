@@ -117,4 +117,48 @@ export const events = [
     event: "cutoff_approved",
     tags: ["CutOFF", "CutOFFLogs"],
   },
+  {
+    event: "schedule_created",
+    tags: ["SchedTransact"],
+  },
+
+  {
+    event: "schedule_updated",
+    tags: ["SchedTransact"],
+  },
+  {
+    event: "schedule_received",
+    tags: ["SchedTransact"],
+  },
+  {
+    event: "schedule_approval",
+    tags: ["SchedTransact"],
+  },
+  {
+    event: "schedule_returned",
+    tags: ["SchedTransact"],
+  },
+  {
+    event: "schedule_approved",
+    tags: ["SchedTransact"],
+  },
+  {
+    event: "schedule_generate",
+    tags: [
+      "SchedTransact",
+      "Transaction",
+      "CountTransaction",
+      "CountCheck",
+      "CountVoucher",
+      "Logs",
+      "AccountTitles",
+      "GTAG",
+      "VPCheckNumber",
+      "VPJournalNumber",
+      "SingleCheck",
+      "SingleJournal",
+      "CheckEntries",
+      "JournalEntries",
+    ],
+  },
 ];

@@ -21,6 +21,7 @@ import {
   useCreateScheduleTransactionMutation,
   useDocumentTypeQuery,
   useLocationQuery,
+  useReceiveScheduleTransactionMutation,
   useReceiveTransactionMutation,
   useSupplierQuery,
   useUpdateScheduleTransactionMutation,
@@ -36,7 +37,6 @@ import {
   setReceive,
 } from "../../../services/slice/promptSlice";
 import {
-  mapResponse,
   mapScheduleTransactionData,
   mapScheduledTransaction,
 } from "../../../services/functions/mapObject";
@@ -146,7 +146,7 @@ const ScheduleModal = ({ create, view, update, receive }) => {
   });
 
   const [receiveTransaction, { isLoading: receiveLoading }] =
-    useReceiveTransactionMutation();
+    useReceiveScheduleTransactionMutation();
 
   const {
     control,
@@ -304,16 +304,7 @@ const ScheduleModal = ({ create, view, update, receive }) => {
           ? await updateTransaction(obj).unwrap()
           : await createTransaction(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      socket.emit(
-        update || receive ? "transaction_updated" : "transaction_created",
-        {
-          ...obj,
-          message:
-            update || receive
-              ? `The transaction ${obj?.tag_no} has been updated`
-              : `A new transaction has been created.`,
-        }
-      );
+      socket.emit(update || receive ? "schedule_updated" : "schedule_created");
       const docs = insertDocument(res?.result);
       const resData = await mapScheduledTransaction(
         res?.result,
@@ -346,6 +337,7 @@ const ScheduleModal = ({ create, view, update, receive }) => {
     try {
       const res = await receiveTransaction(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
+      socket.emit("schedule_received");
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
@@ -613,6 +605,33 @@ const ScheduleModal = ({ create, view, update, receive }) => {
           error={Boolean(errors?.amount)}
           helperText={errors?.amount?.message}
         />
+
+        {receive && (
+          <AppTextBox
+            disabled
+            control={control}
+            name={"month_total"}
+            label={"Total Month/s"}
+            color="primary"
+            className="transaction-form-textBox"
+            error={Boolean(errors?.month_total)}
+            helperText={errors?.month_total?.message}
+          />
+        )}
+        {receive && (
+          <AppTextBox
+            disabled
+            money
+            control={control}
+            name={"month_amount"}
+            label={"Amount per month"}
+            color="primary"
+            className="transaction-form-textBox"
+            error={Boolean(errors?.month_total)}
+            helperText={errors?.month_total?.message}
+          />
+        )}
+
         {checkField("account_number") && (
           <Autocomplete
             disabled={view}
@@ -796,7 +815,7 @@ const ScheduleModal = ({ create, view, update, receive }) => {
           cancelOnClick={() => {
             dispatch(resetPrompt());
           }}
-          // confirmOnClick={() => validateRoute()}
+          confirmOnClick={() => handleReceive()}
         />
       </Dialog>
 
@@ -847,7 +866,7 @@ const ScheduleModal = ({ create, view, update, receive }) => {
         />
       </Dialog>
 
-      <TransactionDrawer transactionData={transactionData} />
+      <TransactionDrawer schedule />
 
       <Dialog open={isContinue} onClose={() => dispatch(setIsContinue(false))}>
         <AppPrompt

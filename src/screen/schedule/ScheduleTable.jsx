@@ -1,6 +1,7 @@
 import React from "react";
 
 import {
+  Badge,
   Box,
   Dialog,
   IconButton,
@@ -29,14 +30,23 @@ import "../../components/styles/TagTransaction.scss";
 
 import {
   resetMenu,
+  setApproveMenu,
   setMenuData,
+  setReceiveMenu,
+  setSchedComputation,
+  setSchedView,
   setUpdateMenu,
+  setViewAccountingEntries,
   setViewMenu,
 } from "../../services/slice/menuSlice";
 
 import TransactionModal from "../../components/customs/modal/TransactionModal";
 import { useSupplierQuery } from "../../services/store/request";
 import ScheduleModal from "../../components/customs/modal/ScheduleModal";
+import ScheduleComputationModal from "../../components/customs/modal/ScheduleComputationModal";
+import TransactionModalApprover from "../../components/customs/modal/TransactionModalApprover";
+import ScheduleTransactionApproverModal from "../../components/customs/modal/ScheduleTransactionApproverModal";
+import DateChecker from "../../services/functions/DateChecker";
 
 const ScheduleTable = ({
   params,
@@ -46,12 +56,19 @@ const ScheduleTable = ({
   isFetching,
   onPageChange,
   onRowChange,
+  ap = false,
+  approver = false,
 }) => {
   const dispatch = useDispatch();
-  const menuData = useSelector((state) => state.menu.menuData);
-  const createMenu = useSelector((state) => state.menu.createMenu);
+  const receiveMenu = useSelector((state) => state.menu.receiveMenu);
   const updateMenu = useSelector((state) => state.menu.updateMenu);
   const viewMenu = useSelector((state) => state.menu.viewMenu);
+  const schedComputation = useSelector((state) => state.menu.schedComputation);
+  const approveMenu = useSelector((state) => state.menu.approveMenu);
+  const { isCoverageTodayTable } = DateChecker();
+  const viewAccountingEntries = useSelector(
+    (state) => state.menu.viewAccountingEntries
+  );
 
   const { data: supplier, isLoading: loadingSupplier } = useSupplierQuery({
     status: "active",
@@ -92,7 +109,7 @@ const ScheduleTable = ({
           </TableHead>
 
           <TableBody>
-            {loadingSupplier ? (
+            {isFetching || loadingSupplier ? (
               <TableRow>
                 <TableCell colSpan={6} align="center">
                   <Lottie
@@ -115,6 +132,8 @@ const ScheduleTable = ({
                 const supplierName = supplier?.result?.find(
                   (sup) => tag?.supplier_id === sup?.id || null
                 );
+
+                const isToday = isCoverageTodayTable(tag);
 
                 const getOrdinalSuffix = (day) => {
                   if (day > 3 && day < 21) return "th"; // covers 11th to 19th
@@ -141,17 +160,42 @@ const ScheduleTable = ({
                     onClick={() => {
                       dispatch(setMenuData(tag));
 
-                      tag?.state === "pending" && dispatch(setUpdateMenu(true));
-                      tag?.gas_status === "archived" &&
-                        dispatch(setViewMenu(true));
-                      tag?.gas_status === "returned" &&
+                      tag?.state === "pending" &&
+                        !ap &&
                         dispatch(setUpdateMenu(true));
-                      tag?.gas_status === "received" &&
+
+                      tag?.state === "pending" &&
+                        ap &&
+                        dispatch(setReceiveMenu(true));
+
+                      tag?.state === "For Computation" &&
+                        ap &&
+                        dispatch(setSchedComputation(true));
+
+                      tag?.state === "For Approval" &&
+                        ap &&
                         dispatch(setViewMenu(true));
-                      tag?.gas_status === "checked" &&
+
+                      tag?.state === "For Approval" &&
+                        !ap &&
+                        approver &&
+                        dispatch(setApproveMenu(true));
+
+                      tag?.state === "returned" &&
+                        approver &&
+                        dispatch(setViewAccountingEntries(true));
+
+                      tag?.state === "returned" &&
+                        ap &&
+                        dispatch(setSchedComputation(true));
+
+                      tag?.state != "pending" &&
+                        !ap &&
+                        !approver &&
                         dispatch(setViewMenu(true));
-                      tag?.gas_status === "approved" &&
-                        dispatch(setViewMenu(true));
+
+                      tag?.state === "approved" && dispatch(setViewMenu(true));
+                      tag?.state === "completed" && dispatch(setViewMenu(true));
                     }}
                   >
                     <TableCell>{tag?.id}</TableCell>
@@ -185,33 +229,45 @@ const ScheduleTable = ({
                           className="pending-indicator"
                         />
                       )}
-                      {tag?.gas_status === "received" && (
+                      {tag?.state === "For Computation" && (
                         <StatusIndicator
                           status="Received"
                           className="checked-indicator"
                         />
                       )}
-                      {tag?.gas_status === "archived" && (
+                      {tag?.state === "archived" && (
                         <StatusIndicator
                           status="Archived"
                           className="inActive-indicator"
                         />
                       )}
-                      {tag?.gas_status === "returned" && (
+                      {tag?.state === "returned" && (
                         <StatusIndicator
                           status="Returned"
                           className="inActive-indicator"
                         />
                       )}
-                      {tag?.gas_status === "checked" && (
+                      {tag?.state === "checked" && (
                         <StatusIndicator
                           status="Checking"
                           className="checked-indicator"
                         />
                       )}
-                      {tag?.gas_status === "approved" && (
+                      {tag?.state === "approved" && (
                         <StatusIndicator
                           status="Approved"
+                          className="checked-indicator"
+                        />
+                      )}
+                      {tag?.state === "For Approval" && (
+                        <StatusIndicator
+                          status="For Approval"
+                          className="pending-indicator"
+                        />
+                      )}
+                      {tag?.state === "completed" && (
+                        <StatusIndicator
+                          status="Completed"
                           className="received-indicator"
                         />
                       )}
@@ -220,25 +276,10 @@ const ScheduleTable = ({
                       {moment(tag?.updated_at).format("MMM DD YYYY")}
                     </TableCell>
                     <TableCell align="center">
-                      <IconButton
-                        onClick={(e) => {
-                          dispatch(setMenuData(tag));
-
-                          tag?.states === "pending" &&
-                            dispatch(setUpdateMenu(true));
-                          tag?.gas_status === "archived" &&
-                            dispatch(setViewMenu(true));
-                          tag?.gas_status === "returned" &&
-                            dispatch(setUpdateMenu(true));
-                          tag?.gas_status === "received" &&
-                            dispatch(setViewMenu(true));
-                          tag?.gas_status === "checked" &&
-                            dispatch(setViewMenu(true));
-                          tag?.gas_status === "approved" &&
-                            dispatch(setViewMenu(true));
-                        }}
-                      >
-                        <RemoveRedEyeOutlinedIcon className="tag-transaction-icon-actions" />
+                      <IconButton>
+                        <Badge variant="dot" color="error" invisible={!isToday}>
+                          <RemoveRedEyeOutlinedIcon className="tag-transaction-icon-actions" />
+                        </Badge>
                       </IconButton>
                     </TableCell>
                   </TableRow>
@@ -277,20 +318,56 @@ const ScheduleTable = ({
         </Table>
       </TableContainer>
 
-      <Dialog open={createMenu} className="transaction-modal-dialog">
-        <TransactionModal create />
-      </Dialog>
-
-      <Dialog open={viewMenu} className="transaction-modal-dialog">
-        <TransactionModal transactionData={menuData} view />
-      </Dialog>
-
       <Dialog
         open={updateMenu}
         className="transaction-modal-dialog"
         onClose={() => dispatch(resetMenu())}
       >
         <ScheduleModal update />
+      </Dialog>
+
+      <Dialog
+        open={receiveMenu}
+        className="transaction-modal-dialog"
+        onClose={() => dispatch(resetMenu())}
+      >
+        <ScheduleModal receive />
+      </Dialog>
+
+      <Dialog
+        open={schedComputation}
+        className="transaction-modal-dialog"
+        onClose={() => dispatch(resetMenu())}
+      >
+        <ScheduleComputationModal checked />
+      </Dialog>
+
+      <Dialog
+        open={viewMenu}
+        className="transaction-modal-dialog"
+        onClose={() => dispatch(resetMenu())}
+      >
+        {ap ? (
+          <ScheduleComputationModal checked view ap />
+        ) : (
+          <ScheduleComputationModal checked view />
+        )}
+      </Dialog>
+
+      <Dialog
+        open={viewAccountingEntries}
+        className="transaction-modal-dialog"
+        onClose={() => dispatch(resetMenu())}
+      >
+        <ScheduleTransactionApproverModal viewAccountingEntries />
+      </Dialog>
+
+      <Dialog
+        open={approveMenu}
+        className="transaction-modal-dialog"
+        onClose={() => dispatch(resetMenu())}
+      >
+        <ScheduleTransactionApproverModal view />
       </Dialog>
     </Box>
   );

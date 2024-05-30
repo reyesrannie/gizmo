@@ -39,11 +39,10 @@ import { objectError } from "../../../services/functions/errorResponse";
 import { totalAmount } from "../../../services/functions/compute";
 import "../../styles/RolesModal.scss";
 
-const TaxComputation = ({ create, update, taxComputation }) => {
+const TaxComputation = ({ create, update, taxComputation, schedule }) => {
   const dispatch = useDispatch();
   const transactionData = useSelector((state) => state.menu.menuData);
   const taxData = useSelector((state) => state.menu.taxData);
-  const supplyType = useSelector((state) => state.options.supplyType);
   const disableCreate = useSelector((state) => state.options.disableCreate);
   const voucher = useSelector((state) => state.options.voucher);
 
@@ -120,10 +119,18 @@ const TaxComputation = ({ create, update, taxComputation }) => {
 
       const obj = {
         transaction_id: transactionData?.id,
-        stype_id: supplierTypes?.result?.find(
-          (item) => transactionData?.transactions?.supplier_type_id === item?.id
-        ),
-        amount: parseFloat(transactionData?.amount) - sumAmount,
+        stype_id: schedule
+          ? supplierTypes?.result?.find(
+              (item) => transactionData?.supplier_type_id === item?.id
+            )
+          : supplierTypes?.result?.find(
+              (item) =>
+                transactionData?.transactions?.supplier_type_id === item?.id
+            ),
+        amount:
+          parseFloat(
+            schedule ? transactionData?.month_amount : transactionData?.amount
+          ) - sumAmount,
       };
 
       Object.entries(obj).forEach(([key, value]) => {
@@ -135,11 +142,15 @@ const TaxComputation = ({ create, update, taxComputation }) => {
       );
 
       dispatch(setSupplyType(tinType));
-      setRequiredFieldsValue(parseFloat(transactionData?.amount) - sumAmount);
+      setRequiredFieldsValue(
+        parseFloat(
+          schedule ? transactionData?.month_amount : transactionData?.amount
+        ) - sumAmount
+      );
     }
     if (successTitles && supplierTypeSuccess && supplySuccess && update) {
       const obj = {
-        transaction_id: taxData?.transaction_id,
+        transaction_id: schedule ? null : taxData?.transaction_id,
         stype_id: supplierTypes?.result?.find(
           (item) => taxData?.stype_id === item?.id
         ),
@@ -158,7 +169,7 @@ const TaxComputation = ({ create, update, taxComputation }) => {
         debit: taxData?.debit,
         credit: taxData?.credit,
         account: taxData?.account,
-        remarks: taxData?.remarks,
+        remarks: taxData?.remarks || "",
         credit_from: taxData?.credit_from,
       };
 
@@ -185,6 +196,7 @@ const TaxComputation = ({ create, update, taxComputation }) => {
     accountTitles,
     setValue,
     supplySuccess,
+    schedule,
   ]);
 
   const setRequiredFieldsValue = (amount) => {
@@ -259,7 +271,8 @@ const TaxComputation = ({ create, update, taxComputation }) => {
   const submitHandler = async (submitData) => {
     const obj = {
       ...submitData,
-      transaction_id: transactionData?.transactions?.id,
+      transaction_id: schedule ? null : transactionData?.transactions?.id,
+      schedule_id: schedule ? transactionData?.id : null,
       stype_id: submitData?.stype_id?.id,
       coa_id: submitData?.coa_id?.id,
       id: taxData?.id,

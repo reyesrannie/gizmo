@@ -8,7 +8,6 @@ import {
   AccordionSummary,
   Badge,
   Box,
-  Button,
   Dialog,
   IconButton,
   Typography,
@@ -18,11 +17,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { useSchedTransactionQuery } from "../../services/store/request";
 
 import ArrowDropDownCircleOutlinedIcon from "@mui/icons-material/ArrowDropDownCircleOutlined";
-import AddToPhotosOutlinedIcon from "@mui/icons-material/AddToPhotosOutlined";
 
 import "../../components/styles/TagTransaction.scss";
 
-import { schedTaggingHeader } from "../../services/constants/headers";
+import { schedAPHeader } from "../../services/constants/headers";
 import {
   setFilterBy,
   setHeader,
@@ -32,11 +30,11 @@ import "../../components/styles/TransactionModal.scss";
 // import CheckTable from "./CheckTable";
 import CountDistribute from "../../services/functions/CountDistribute";
 import ScheduleModal from "../../components/customs/modal/ScheduleModal";
-import { resetMenu, setCreateMenu } from "../../services/slice/menuSlice";
-import useTransactionHook from "../../services/hooks/useTransactionHook";
+import { resetMenu } from "../../services/slice/menuSlice";
 import ScheduleTable from "./ScheduleTable";
+import useApHook from "../../services/hooks/useApHook";
 
-const RequestSchedule = () => {
+const APSchedule = () => {
   const dispatch = useDispatch();
 
   const isExpanded = useSelector((state) => state.transaction.isExpanded);
@@ -51,7 +49,7 @@ const RequestSchedule = () => {
     onSortTable,
     onOrderBy,
     onStateChange,
-  } = useTransactionHook();
+  } = useApHook();
 
   const {
     data: tagTransaction,
@@ -61,15 +59,13 @@ const RequestSchedule = () => {
     status,
   } = useSchedTransactionQuery(params);
 
-  const { countHeaderAPCH, countCheck } = CountDistribute();
+  const { countGrandChildcheck, countScheduleAP } = CountDistribute();
 
-  const hasBadge = countCheck();
+  const hasBadge = countScheduleAP();
 
   useEffect(() => {
     if (header) {
-      const statusChange = schedTaggingHeader?.find(
-        (item) => item?.name === header
-      );
+      const statusChange = schedAPHeader?.find((item) => item?.name === header);
       onStateChange(statusChange?.status);
     }
   }, [header]);
@@ -89,14 +85,16 @@ const RequestSchedule = () => {
             <AccordionSummary onClick={() => dispatch(setIsExpanded(false))}>
               <Typography className="page-text-indicator-tag-transaction">
                 <Badge
-                  badgeContent={header ? countHeaderAPCH(header) : 0}
+                  badgeContent={
+                    header ? countGrandChildcheck(header, "AP Schedule") : 0
+                  }
                   color="error"
                 >
                   {header}
                 </Badge>
               </Typography>
             </AccordionSummary>
-            {schedTaggingHeader?.map(
+            {schedAPHeader?.map(
               (head, index) =>
                 header !== head?.name && (
                   <AccordionSummary
@@ -112,7 +110,9 @@ const RequestSchedule = () => {
                     <Typography className="page-text-accord-tag-transaction">
                       <Badge
                         badgeContent={
-                          head?.name ? countHeaderAPCH(head?.name) : 0
+                          head?.name
+                            ? countGrandChildcheck(head?.name, "AP Schedule")
+                            : 0
                         }
                         color="error"
                       >
@@ -135,15 +135,6 @@ const RequestSchedule = () => {
         </Box>
         <Box className="tag-transaction-button-container">
           <SearchText onSearchData={onSearchData} />
-          <Button
-            variant="contained"
-            color="secondary"
-            className="button-add-tag-transaction"
-            startIcon={<AddToPhotosOutlinedIcon />}
-            onClick={() => dispatch(setCreateMenu(true))}
-          >
-            Add
-          </Button>
         </Box>
       </Box>
       {header === "Pending" && (
@@ -158,10 +149,11 @@ const RequestSchedule = () => {
           status={status}
           tagTransaction={tagTransaction}
           onOrderBy={onOrderBy}
-          state={"received"}
+          state={"pending"}
+          ap
         />
       )}
-      {header === "Void" && (
+      {header === "Received" && (
         <ScheduleTable
           params={params}
           onSortTable={onSortTable}
@@ -173,7 +165,8 @@ const RequestSchedule = () => {
           status={status}
           tagTransaction={tagTransaction}
           onOrderBy={onOrderBy}
-          state={"voided"}
+          state={"For Computation"}
+          ap
         />
       )}
       {header === "Checked" && (
@@ -189,6 +182,7 @@ const RequestSchedule = () => {
           tagTransaction={tagTransaction}
           onOrderBy={onOrderBy}
           state="checked"
+          ap
         />
       )}
       {header === "Returned" && (
@@ -204,6 +198,7 @@ const RequestSchedule = () => {
           tagTransaction={tagTransaction}
           onOrderBy={onOrderBy}
           state="returned"
+          ap
         />
       )}
       {header === "Approved" && (
@@ -219,6 +214,7 @@ const RequestSchedule = () => {
           tagTransaction={tagTransaction}
           onOrderBy={onOrderBy}
           state={"approved"}
+          ap
         />
       )}
       {header === "History" && (
@@ -234,6 +230,7 @@ const RequestSchedule = () => {
           tagTransaction={tagTransaction}
           onOrderBy={onOrderBy}
           state={""}
+          ap
         />
       )}
       <Dialog
@@ -247,4 +244,4 @@ const RequestSchedule = () => {
   );
 };
 
-export default RequestSchedule;
+export default APSchedule;

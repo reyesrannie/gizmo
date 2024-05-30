@@ -1,6 +1,7 @@
 import React from "react";
 import {
   useCheckCountQuery,
+  useCountScheduleQuery,
   useJournalCountQuery,
   useTransactCountQuery,
 } from "../store/request";
@@ -17,6 +18,11 @@ const CountDistribute = () => {
     max: userData?.amount?.max_amount || null,
   });
   const { data: badgeJournal } = useJournalCountQuery({
+    ap: userData?.scope_tagging?.map((item) => item?.ap_code),
+    min: userData?.amount?.min_amount || null,
+    max: userData?.amount?.max_amount || null,
+  });
+  const { data: scheduleTransaction } = useCountScheduleQuery({
     ap: userData?.scope_tagging?.map((item) => item?.ap_code),
     min: userData?.amount?.min_amount || null,
     max: userData?.amount?.max_amount || null,
@@ -72,6 +78,15 @@ const CountDistribute = () => {
         badgeJournal?.result["For Approval"] +
           badgeJournal?.result["For Voiding"] || 0
       );
+    } else if (path === "AP Schedule") {
+      return (
+        scheduleTransaction?.result["For Computation"] +
+          scheduleTransaction?.result?.approved +
+          scheduleTransaction?.result?.pending +
+          scheduleTransaction?.result?.returned || 0
+      );
+    } else if (path === "Approve Schedule") {
+      return scheduleTransaction?.result["For Approval"] || 0;
     }
     return 0;
   };
@@ -216,7 +231,42 @@ const CountDistribute = () => {
       }
       return 0;
     }
+    if (child === "AP Schedule") {
+      if (path === "Pending") {
+        return scheduleTransaction?.result["pending"] || 0;
+      }
+      if (path === "Received") {
+        return scheduleTransaction?.result["For Computation"] || 0;
+      }
+      if (path === "Returned") {
+        return scheduleTransaction?.result["returned"] || 0;
+      }
+      if (path === "Approved") {
+        return scheduleTransaction?.result["approved"] || 0;
+      }
+      return 0;
+    }
+    if (child === "Approve Schedule") {
+      if (path === "For Approval") {
+        return scheduleTransaction?.result["For Approval"] || 0;
+      }
+      return 0;
+    }
     return 0;
+  };
+
+  const countScheduleAP = () => {
+    const total =
+      scheduleTransaction?.result["For Computation"] +
+        scheduleTransaction?.result?.approved +
+        scheduleTransaction?.result?.pending +
+        scheduleTransaction?.result?.returned || 0;
+    return total === 0 ? true : false;
+  };
+
+  const countScheduleApprover = () => {
+    const total = scheduleTransaction?.result["For Approval"];
+    return total === 0 ? true : false;
   };
 
   return {
@@ -232,6 +282,8 @@ const CountDistribute = () => {
     countApproveCheck,
     countApproveJournal,
     countGrandChildcheck,
+    countScheduleApprover,
+    countScheduleAP,
   };
 };
 

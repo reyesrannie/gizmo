@@ -160,3 +160,24 @@ export const convertToArray = (item) => {
   }
   return [];
 };
+
+export const schedArrayOne = (menuData, sumAmount, document) => {
+  const doc = document?.result?.find(
+    (item) => item?.id === menuData?.document_type_id
+  )?.code;
+
+  const obj = [
+    {
+      date: moment(menuData?.transactions?.date_invoice).format("MM/DD/YY"),
+      remarks: menuData?.remarks,
+      invoice: `${doc} ${menuData?.invoice_no || ""} ${
+        menuData?.reference_no || ""
+      }`,
+      amount: sumAmount,
+    },
+    undefined,
+    undefined,
+  ];
+
+  return obj;
+};

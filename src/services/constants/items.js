@@ -29,7 +29,14 @@ import LockPersonOutlinedIcon from "@mui/icons-material/LockPersonOutlined";
 import PendingActionsOutlinedIcon from "@mui/icons-material/PendingActionsOutlined";
 
 import "../../components/styles/CardNavigation.scss";
-import { apHeader, approverHeader, taggingHeader } from "./headers";
+import {
+  apHeader,
+  approverHeader,
+  approverScheduleHeader,
+  schedAPHeader,
+  schedTaggingHeader,
+  taggingHeader,
+} from "./headers";
 const user = [
   {
     path: "/account/roles",
@@ -580,18 +587,27 @@ const menu = [
         icon: <LocalOfferOutlinedIcon />,
         permission: ["sched_transact_requestor"],
         path: "/sched_transact/request",
+        child: schedTaggingHeader?.map((item) => {
+          return { desc: item?.name, icon: <MediationOutlinedIcon /> };
+        }),
       },
       {
         desc: "AP Schedule",
         icon: <CreditScoreOutlinedIcon />,
         permission: ["sched_transact_ap"],
         path: "/sched_transact/ap",
+        child: schedAPHeader?.map((item) => {
+          return { desc: item?.name, icon: <MediationOutlinedIcon /> };
+        }),
       },
       {
         desc: "Approve Schedule",
         icon: <NewspaperOutlinedIcon />,
         permission: ["sched_transact_approver"],
         path: "/sched_transact/approve",
+        child: approverScheduleHeader?.map((item) => {
+          return { desc: item?.name, icon: <MediationOutlinedIcon /> };
+        }),
       },
     ],
   },
@@ -717,7 +733,7 @@ const routes = [
         name: "AP Schedule",
       },
       {
-        path: "/sched_transact/ap",
+        path: "/sched_transact/approve",
         name: "Approve Schedule",
       },
     ],

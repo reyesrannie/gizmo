@@ -47,6 +47,7 @@ export const jsonServerAPI = createApi({
     "CountVoucher",
     "CutOFF",
     "SchedTransact",
+    "CountSchedule",
   ],
   endpoints: (builder) => ({
     //Authentication and users
@@ -93,6 +94,7 @@ export const jsonServerAPI = createApi({
         "CAccountTitles",
         "GCAccountTitles",
         "CutOFFLogs",
+        "ScheduleLogs",
       ],
     }),
     passwordChange: builder.mutation({
@@ -1102,6 +1104,16 @@ export const jsonServerAPI = createApi({
       providesTags: ["Logs"],
     }),
 
+    statusScheduleLogs: builder.query({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `schedule-log`,
+        method: "GET",
+        params: payload,
+      }),
+      providesTags: ["ScheduleLogs"],
+    }),
+
     //Tax Computation
     taxComputation: builder.query({
       transformResponse: (response) => response,
@@ -1514,7 +1526,7 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["SchedTransact"],
+      invalidatesTags: ["SchedTransact", "CountSchedule"],
     }),
     updateScheduleTransaction: builder.mutation({
       transformResponse: (response) => response,
@@ -1523,7 +1535,80 @@ export const jsonServerAPI = createApi({
         method: "PUT",
         body: payload,
       }),
-      invalidatesTags: ["SchedTransact"],
+      invalidatesTags: ["SchedTransact", "CountSchedule"],
+    }),
+    receiveScheduleTransaction: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/received/schedule/${payload.id}`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["SchedTransact", "CountSchedule"],
+    }),
+    checkedScheduleTransaction: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/checked/schedule/${payload.id}`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["SchedTransact", "CountSchedule"],
+    }),
+    approveSchedTransaction: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/approved/schedule/${payload.id}`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["SchedTransact", "CountSchedule"],
+    }),
+    returnSchedTransaction: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/returned/schedule/${payload.id}`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["SchedTransact", "CountSchedule"],
+    }),
+    resetSchedTransaction: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/reset/schedule/${payload.id}`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["SchedTransact", "CountSchedule"],
+    }),
+    generateTransaction: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/generate-transaction/schedule/${payload.id}`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: [
+        "SchedTransact",
+        "SingleCheck",
+        "CheckEntries",
+        "Logs",
+        "Transaction",
+        "CountTransaction",
+        "CountCheck",
+        "CountVoucher",
+        "CountSchedule",
+      ],
+    }),
+    countSchedule: builder.query({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/sched-count/schedule`,
+        method: "GET",
+        params: payload,
+      }),
+      providesTags: ["CountSchedule"],
     }),
   }),
 });
@@ -1655,6 +1740,7 @@ export const {
   useVpJournalNumberQuery,
 
   useStatusLogsQuery,
+  useStatusScheduleLogsQuery,
 
   useTaxComputationQuery,
   useCreateTaxComputationMutation,
@@ -1697,4 +1783,11 @@ export const {
   useSchedTransactionQuery,
   useCreateScheduleTransactionMutation,
   useUpdateScheduleTransactionMutation,
+  useReceiveScheduleTransactionMutation,
+  useCheckedScheduleTransactionMutation,
+  useApproveSchedTransactionMutation,
+  useReturnSchedTransactionMutation,
+  useResetSchedTransactionMutation,
+  useGenerateTransactionMutation,
+  useCountScheduleQuery,
 } = jsonServerAPI;

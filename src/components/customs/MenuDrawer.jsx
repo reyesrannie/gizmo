@@ -212,40 +212,46 @@ const MenuDrawer = () => {
                           })}
                         </Accordion>
                       ) : (
-                        <ListItemButton
-                          className={`selectedChildList ${
-                            location.pathname === child.path ? "selected" : ""
-                          }`}
-                          onClick={() => {
-                            dispatch(resetTransaction());
-                            dispatch(resetMenuWithoutDrawer());
-                            navigate(child.path);
-                            isTablet && dispatch(setDrawer(false));
-                          }}
-                          key={index}
-                        >
-                          <ListItemIcon
-                            className={`list-icon ${
-                              location.pathname === child.path ? "selected" : ""
-                            } `}
-                          >
-                            <Badge
-                              badgeContent={
-                                menus ? childMenuCount(child.desc) : 0
-                              }
-                              color="error"
-                              max={10}
-                            >
-                              {child.icon}
-                            </Badge>
-                          </ListItemIcon>
-                          <ListItemText
-                            className={`listText ${
+                        hasAccess(child?.permission) && (
+                          <ListItemButton
+                            className={`selectedChildList ${
                               location.pathname === child.path ? "selected" : ""
                             }`}
-                            primary={child.desc}
-                          />
-                        </ListItemButton>
+                            onClick={() => {
+                              dispatch(resetTransaction());
+                              dispatch(resetMenuWithoutDrawer());
+                              navigate(child.path);
+                              isTablet && dispatch(setDrawer(false));
+                            }}
+                            key={index}
+                          >
+                            <ListItemIcon
+                              className={`list-icon ${
+                                location.pathname === child.path
+                                  ? "selected"
+                                  : ""
+                              } `}
+                            >
+                              <Badge
+                                badgeContent={
+                                  menus ? childMenuCount(child.desc) : 0
+                                }
+                                color="error"
+                                max={10}
+                              >
+                                {child.icon}
+                              </Badge>
+                            </ListItemIcon>
+                            <ListItemText
+                              className={`listText ${
+                                location.pathname === child.path
+                                  ? "selected"
+                                  : ""
+                              }`}
+                              primary={child.desc}
+                            />
+                          </ListItemButton>
+                        )
                       );
                     })}
 
