@@ -34,17 +34,13 @@ import {
   setMenuData,
   setReceiveMenu,
   setSchedComputation,
-  setSchedView,
   setUpdateMenu,
   setViewAccountingEntries,
   setViewMenu,
 } from "../../services/slice/menuSlice";
 
-import TransactionModal from "../../components/customs/modal/TransactionModal";
-import { useSupplierQuery } from "../../services/store/request";
 import ScheduleModal from "../../components/customs/modal/ScheduleModal";
 import ScheduleComputationModal from "../../components/customs/modal/ScheduleComputationModal";
-import TransactionModalApprover from "../../components/customs/modal/TransactionModalApprover";
 import ScheduleTransactionApproverModal from "../../components/customs/modal/ScheduleTransactionApproverModal";
 import DateChecker from "../../services/functions/DateChecker";
 
@@ -69,11 +65,6 @@ const ScheduleTable = ({
   const viewAccountingEntries = useSelector(
     (state) => state.menu.viewAccountingEntries
   );
-
-  const { data: supplier, isLoading: loadingSupplier } = useSupplierQuery({
-    status: "active",
-    pagination: "none",
-  });
 
   return (
     <Box className="tag-transaction-body-container">
@@ -109,7 +100,7 @@ const ScheduleTable = ({
           </TableHead>
 
           <TableBody>
-            {isFetching || loadingSupplier ? (
+            {isFetching ? (
               <TableRow>
                 <TableCell colSpan={6} align="center">
                   <Lottie
@@ -129,10 +120,6 @@ const ScheduleTable = ({
               </TableRow>
             ) : (
               tagTransaction?.result?.data?.map((tag) => {
-                const supplierName = supplier?.result?.find(
-                  (sup) => tag?.supplier_id === sup?.id || null
-                );
-
                 const isToday = isCoverageTodayTable(tag);
 
                 const getOrdinalSuffix = (day) => {
@@ -201,17 +188,17 @@ const ScheduleTable = ({
                     <TableCell>{tag?.id}</TableCell>
                     <TableCell>
                       <Typography className="tag-transaction-company-name">
-                        {supplierName?.company_name === null ? (
+                        {tag?.supplier?.name === null ? (
                           <>&mdash;</>
                         ) : (
-                          supplierName?.company_name
+                          tag?.supplier?.name
                         )}
                       </Typography>
                       <Typography className="tag-transaction-company-tin">
-                        {supplierName === null ? (
+                        {tag?.supplier === null ? (
                           <>&mdash;</>
                         ) : (
-                          supplierName?.tin
+                          tag?.supplier?.tin
                         )}
                       </Typography>
                     </TableCell>

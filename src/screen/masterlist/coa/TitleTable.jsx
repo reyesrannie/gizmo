@@ -99,7 +99,7 @@ const TitleTable = ({
   const openWarning = useSelector((state) => state.prompt.warning);
 
   const header =
-    useSelector((state) => state.transaction.header) || "Account Titles";
+    useSelector((state) => state.headers.header) || "Account Titles";
 
   const [archiveTitle, { isLoading: archiveLoading }] =
     useArchiveAccountTitlesMutation();

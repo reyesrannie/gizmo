@@ -22,7 +22,17 @@ const DateChecker = () => {
     return adjustedCoverageFrom.format("YYYY-MM-DD") <= dateToday;
   };
 
-  return { isCoverageToday, isCoverageTodayTable };
+  const shouldDisableYear = (date) => {
+    const currentYear = moment().year();
+    const currentMonth = moment().month(); // January is 0
+
+    if (currentMonth === 0) {
+      return date.year() < currentYear - 1;
+    }
+    return date.year() < currentYear;
+  };
+
+  return { isCoverageToday, isCoverageTodayTable, shouldDisableYear };
 };
 
 export default DateChecker;

@@ -26,7 +26,6 @@ import {
 } from "../../services/constants/headers";
 import {
   setFilterBy,
-  setHeader,
   setIsExpanded,
 } from "../../services/slice/transactionSlice";
 import "../../components/styles/TransactionModal.scss";
@@ -36,13 +35,13 @@ import ScheduleModal from "../../components/customs/modal/ScheduleModal";
 import { resetMenu } from "../../services/slice/menuSlice";
 import ScheduleTable from "./ScheduleTable";
 import useApproverHook from "../../services/hooks/useApproverHook";
+import { setHeader } from "../../services/slice/headerSlice";
 
 const ApproverSchedule = () => {
   const dispatch = useDispatch();
 
   const isExpanded = useSelector((state) => state.transaction.isExpanded);
-  const header =
-    useSelector((state) => state.transaction.header) || "For Approval";
+  const header = useSelector((state) => state.headers.header) || "For Approval";
   const createMenu = useSelector((state) => state.menu.createMenu);
 
   const {

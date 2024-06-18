@@ -1,9 +1,10 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-// const baseURL = process.env.REACT_APP_API_KEY;
+const baseURL = process.env.REACT_APP_API_KEY;
 
-const baseURL = "http://10.10.13.17:8000/api";
+// const baseURL = "http://10.10.13.17:8000/api";
 // const baseURL = "http://10.10.10.16:8000/api";
+// const baseURL = "http://127.0.0.1:8000/api";
 
 export const jsonServerAPI = createApi({
   reducerPath: "jsonServerAPI",
@@ -48,6 +49,7 @@ export const jsonServerAPI = createApi({
     "CutOFF",
     "SchedTransact",
     "CountSchedule",
+    "ScheduleLogs",
   ],
   endpoints: (builder) => ({
     //Authentication and users
@@ -95,6 +97,7 @@ export const jsonServerAPI = createApi({
         "CutOFF",
         "SchedTransact",
         "CountSchedule",
+        "ScheduleLogs",
       ],
     }),
     passwordChange: builder.mutation({
@@ -1082,6 +1085,20 @@ export const jsonServerAPI = createApi({
         "CountVoucher",
       ],
     }),
+    readTransaction: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/is-read/transaction/${payload.id}`,
+        method: "PATCH",
+        body: payload,
+      }),
+      invalidatesTags: [
+        "Transaction",
+        "CountTransaction",
+        "CountCheck",
+        "CountVoucher",
+      ],
+    }),
 
     //Tag Series
     tagYearMonth: builder.query({
@@ -1273,6 +1290,15 @@ export const jsonServerAPI = createApi({
       }),
       invalidatesTags: ["CheckEntries", "Logs", "CountCheck"],
     }),
+    readTransactionCheck: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/is-read/transaction-check/${payload.id}`,
+        method: "PATCH",
+        body: payload,
+      }),
+      invalidatesTags: ["CheckEntries", "Logs", "CountCheck"],
+    }),
 
     //Journal
     journalEntries: builder.query({
@@ -1407,6 +1433,16 @@ export const jsonServerAPI = createApi({
       invalidatesTags: ["JournalEntries", "Logs", "CountVoucher"],
     }),
 
+    readTransactionJournal: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/is-read/transaction-journal/${payload.id}`,
+        method: "PATCH",
+        body: payload,
+      }),
+      invalidatesTags: ["JournalEntries", "Logs", "CountVoucher"],
+    }),
+
     //Check
     checkTransaction: builder.query({
       transformResponse: (response) => response,
@@ -1526,7 +1562,7 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["SchedTransact", "CountSchedule"],
+      invalidatesTags: ["SchedTransact", "CountSchedule", "ScheduleLogs"],
     }),
     updateScheduleTransaction: builder.mutation({
       transformResponse: (response) => response,
@@ -1535,7 +1571,7 @@ export const jsonServerAPI = createApi({
         method: "PUT",
         body: payload,
       }),
-      invalidatesTags: ["SchedTransact", "CountSchedule"],
+      invalidatesTags: ["SchedTransact", "CountSchedule", "ScheduleLogs"],
     }),
     receiveScheduleTransaction: builder.mutation({
       transformResponse: (response) => response,
@@ -1544,7 +1580,7 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["SchedTransact", "CountSchedule"],
+      invalidatesTags: ["SchedTransact", "CountSchedule", "ScheduleLogs"],
     }),
     checkedScheduleTransaction: builder.mutation({
       transformResponse: (response) => response,
@@ -1553,7 +1589,7 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["SchedTransact", "CountSchedule"],
+      invalidatesTags: ["SchedTransact", "CountSchedule", "ScheduleLogs"],
     }),
     approveSchedTransaction: builder.mutation({
       transformResponse: (response) => response,
@@ -1562,7 +1598,7 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["SchedTransact", "CountSchedule"],
+      invalidatesTags: ["SchedTransact", "CountSchedule", "ScheduleLogs"],
     }),
     returnSchedTransaction: builder.mutation({
       transformResponse: (response) => response,
@@ -1571,7 +1607,7 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["SchedTransact", "CountSchedule"],
+      invalidatesTags: ["SchedTransact", "CountSchedule", "ScheduleLogs"],
     }),
     resetSchedTransaction: builder.mutation({
       transformResponse: (response) => response,
@@ -1580,7 +1616,7 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["SchedTransact", "CountSchedule"],
+      invalidatesTags: ["SchedTransact", "CountSchedule", "ScheduleLogs"],
     }),
     generateTransaction: builder.mutation({
       transformResponse: (response) => response,
@@ -1599,6 +1635,7 @@ export const jsonServerAPI = createApi({
         "CountCheck",
         "CountVoucher",
         "CountSchedule",
+        "ScheduleLogs",
       ],
     }),
     completeSchedTransaction: builder.mutation({
@@ -1608,7 +1645,7 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["SchedTransact", "CountSchedule"],
+      invalidatesTags: ["SchedTransact", "CountSchedule", "ScheduleLogs"],
     }),
 
     countSchedule: builder.query({
@@ -1744,6 +1781,7 @@ export const {
   useReceiveTransactionMutation,
   useReturnTransactionMutation,
   useApproveTransactionMutation,
+  useReadTransactionMutation,
 
   useTagYearMonthQuery,
   useVpCheckNumberQuery,
@@ -1764,6 +1802,7 @@ export const {
   useApproveCheckEntriesMutation,
   useVoidCVoucherMutation,
   useVoidedCVoucherMutation,
+  useReadTransactionCheckMutation,
 
   useJournalEntriesQuery,
   useCreateJournalEntriesMutation,
@@ -1773,6 +1812,7 @@ export const {
   useApproveJournalEntriesMutation,
   useVoidJVoucherMutation,
   useVoidedJVoucherMutation,
+  useReadTransactionJournalMutation,
 
   useCheckTransactionQuery,
   useJournalTransactionQuery,

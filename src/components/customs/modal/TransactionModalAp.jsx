@@ -476,7 +476,7 @@ const TransactionModalAp = ({
                 disabled
                 className="transaction-form-date"
                 label="Date Invoice *"
-                format="YYYY-MM-DD"
+                format="MMMM DD, YYYY"
                 value={value}
                 onChange={(e) => {
                   onChange(e);

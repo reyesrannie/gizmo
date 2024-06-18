@@ -34,7 +34,7 @@ export const arrayFieldOne = (menuData, sumAmount, voucher, document) => {
 export const arrayFieldThree = (menuData, sumAmount) => {
   const obj = [
     {
-      tag_no: `${menuData?.transactions?.tag_year}-${menuData?.transactions?.gtag_no}`,
+      tag_no: `${menuData?.transactions?.tag_year}-${menuData?.transactions?.tag_no}`,
       time: undefined,
     },
     {
@@ -71,6 +71,12 @@ export const coaArrays = (coa, taxComputation, supTypePercent, coa_id) => {
       ? acc - parseFloat(curr.account)
       : acc + parseFloat(curr.account);
   }, 0);
+
+  const isWtaxSame = (arr) => {
+    if (arr.length === 0) return true;
+    const firstWtax = arr[0].wtax;
+    return arr.every((item) => item.wtax === firstWtax);
+  };
 
   let zeroCount = 0;
 
@@ -132,7 +138,25 @@ export const coaArrays = (coa, taxComputation, supTypePercent, coa_id) => {
     amount: sumAccount,
   };
 
-  const itemCollected = [...item, inputTax, ...wtaxCount, accountPayable];
+  const filteredItem = () => {
+    if (wtaxCount?.length > 0 && isWtaxSame(wtaxCount)) {
+      const combinedAmount = wtaxCount.reduce((acc, curr) => {
+        return acc + parseFloat(curr.amount || 0);
+      }, 0);
+
+      return {
+        id: 183,
+        name: "WITHHOLDING TAX PAYABLE",
+        mode: "Credit",
+        code: "217110",
+        amount: combinedAmount.toFixed(2),
+        wtax: wtaxCount[0].wtax,
+      };
+    }
+    return wtaxCount;
+  };
+
+  const itemCollected = [...item, inputTax, filteredItem(), accountPayable];
 
   const sortedData = itemCollected.sort((a, b) => {
     if (a.mode === "Debit" && b.mode === "Credit") {

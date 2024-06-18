@@ -110,22 +110,14 @@ const ComputationMenu = ({ details, schedule }) => {
       .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
-  const vpl = totalVat(taxComputation, "vat_local");
-  const vps = totalVat(taxComputation, "vat_service");
-  const npl = totalVat(taxComputation, "nvat_local");
-  const nps = totalVat(taxComputation, "nvat_service");
   const debit = totalVat(taxComputation, "debit");
   const credit = totalCredit(taxComputation, "credit");
-  const amount = totalAmountData(taxComputation);
   const wtax = totalVat(taxComputation, "wtax_payable_cr");
-  const totalAccounts = totalAccountData(taxComputation);
   const vatInput = totalVat(taxComputation, "vat_input_tax");
 
   const supplierDetails = schedule
-    ? supplier?.result?.find((item) => menuData?.supplier_type_id === item?.id)
-    : supplier?.result?.find(
-        (item) => menuData?.transactions?.supplier_id === item?.id
-      );
+    ? supplier?.result?.find((item) => menuData?.supplier?.id === item?.id)
+    : supplier?.result?.find((item) => menuData?.supplier?.id === item?.id);
 
   const documentDetails = schedule
     ? document?.result?.find((item) => menuData?.document_type_id === item?.id)
@@ -179,21 +171,23 @@ const ComputationMenu = ({ details, schedule }) => {
 
               <TableBody>
                 <TableRow className="table-body-tag-transaction">
-                  <TableCell>{menuData?.transactions?.tag_no}</TableCell>
+                  <TableCell>
+                    {`${menuData?.transactions?.tag_year} - ${menuData?.transactions?.tag_no}`}
+                  </TableCell>
                   <TableCell>
                     <Stack>
                       <Typography className="supplier-company-name">
-                        {supplierDetails?.company_name}
+                        {menuData?.transactions?.supplier?.name}
                       </Typography>
                       <Typography className="supplier-company-tin">
-                        {supplierDetails?.tin}
+                        {menuData?.transactions?.supplier?.tin}
                       </Typography>
                       <Typography className="supplier-company-address">
-                        {supplierDetails?.company_address}
+                        {menuData?.transactions?.supplier?.address}
                       </Typography>
                       <Typography className="supplier-company-proprietor">
-                        {supplierDetails?.proprietor !== ""
-                          ? supplierDetails?.proprietor
+                        {menuData?.transactions?.supplier?.proprietor !== null
+                          ? menuData?.transactions?.supplier?.proprietor
                           : ""}
                       </Typography>
                     </Stack>

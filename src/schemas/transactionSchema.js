@@ -12,41 +12,18 @@ const transactionSchema = Yup.object({
   atc_id: Yup.string().nullable(),
   ref_no: Yup.string().nullable(),
   company_address: Yup.string().required("Supplier address is required"),
-  g_tag_number: Yup.string().required("Tag Number address is required"),
+  g_tag_number: Yup.string().nullable(),
   delivery_invoice: Yup.string().nullable(),
-
   amount: Yup.string().required("Amount is required"),
   amount_withheld: Yup.string().nullable(),
   amount_check: Yup.string().nullable(),
-  invoice_no: Yup.string().nullable(),
+  invoice_no: Yup.string().required("Invoice No is required"),
   vat: Yup.string().nullable(),
   cost: Yup.string().nullable(),
   store: Yup.object().nullable(),
-  account_number: Yup.object().when("document_type", {
-    is: (document_type) =>
-      document_type?.required_fields?.includes("account_number"),
-    then: () =>
-      Yup.object()
-        .required("Account number is required")
-        .typeError("Account number is required"),
-    otherwise: () => Yup.object().nullable(),
-  }),
-  coverage_from: Yup.date().when("document_type", {
-    is: (document_type) => document_type?.required_fields?.includes("coverage"),
-    then: () =>
-      Yup.date()
-        .required("Coverage is required")
-        .typeError("Coverage is required"),
-    otherwise: () => Yup.date().nullable(),
-  }),
-  coverage_to: Yup.date().when("document_type", {
-    is: (document_type) => document_type?.required_fields?.includes("coverage"),
-    then: () =>
-      Yup.date()
-        .required("Coverage is required")
-        .typeError("Coverage is required"),
-    otherwise: () => Yup.date().nullable(),
-  }),
+  account_number: Yup.object().nullable(),
+  coverage_from: Yup.date().nullable(),
+  coverage_to: Yup.date().nullable(),
   date_invoice: Yup.date()
     .typeError("Date invoice is required")
     .required("Date invoice is required"),

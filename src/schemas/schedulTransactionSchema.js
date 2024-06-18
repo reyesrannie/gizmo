@@ -15,7 +15,7 @@ const schedulTransactionSchema = Yup.object({
   amount: Yup.string().required("Amount is required"),
   amount_withheld: Yup.string().nullable(),
   amount_check: Yup.string().nullable(),
-  invoice_no: Yup.string().nullable(),
+  invoice_no: Yup.string().required("Invoice No. is required"),
   vat: Yup.string().nullable(),
   cost: Yup.string().nullable(),
   store: Yup.object().nullable(),

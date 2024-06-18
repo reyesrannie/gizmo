@@ -21,7 +21,6 @@ import "../../components/styles/TagTransaction.scss";
 
 import { approverHeader } from "../../services/constants/headers";
 import {
-  setHeader,
   setFilterBy,
   setIsExpanded,
 } from "../../services/slice/transactionSlice";
@@ -34,8 +33,7 @@ const ApprovingJournal = () => {
   const dispatch = useDispatch();
 
   const isExpanded = useSelector((state) => state.transaction.isExpanded);
-  const header =
-    useSelector((state) => state.transaction.header) || "For Approval";
+  const header = useSelector((state) => state.headers.header) || "For Approval";
 
   const { countHeaderApproverJV, countApproveJournal } = CountDistribute();
 
@@ -91,7 +89,7 @@ const ApprovingJournal = () => {
                   <AccordionSummary
                     key={index}
                     onClick={() => {
-                      dispatch(setHeader(head.name));
+                      dispatch(head.name);
                       dispatch(setIsExpanded(false));
                       onOrderBy("");
                       dispatch(setFilterBy(""));

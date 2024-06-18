@@ -21,7 +21,6 @@ import "../../components/styles/TagTransaction.scss";
 
 import { approverHeader } from "../../services/constants/headers";
 import {
-  setHeader,
   setFilterBy,
   setIsExpanded,
 } from "../../services/slice/transactionSlice";
@@ -29,13 +28,13 @@ import {
 import CheckTable from "./CheckTable";
 import useApproverHook from "../../services/hooks/useApproverHook";
 import CountDistribute from "../../services/functions/CountDistribute";
+import { setHeader } from "../../services/slice/headerSlice";
 
 const ApprovingCheck = () => {
   const dispatch = useDispatch();
 
   const isExpanded = useSelector((state) => state.transaction.isExpanded);
-  const header =
-    useSelector((state) => state.transaction.header) || "For Approval";
+  const header = useSelector((state) => state.headers.header) || "For Approval";
 
   const {
     params,

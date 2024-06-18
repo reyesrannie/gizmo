@@ -30,19 +30,17 @@ import "../../../components/styles/TagTransaction.scss";
 
 import { setCreateMenu } from "../../../services/slice/menuSlice";
 
-import {
-  setHeader,
-  setIsExpanded,
-} from "../../../services/slice/transactionSlice";
+import { setIsExpanded } from "../../../services/slice/transactionSlice";
 import { coaHeader } from "../../../services/constants/headers";
 import ArrowDropDownCircleOutlinedIcon from "@mui/icons-material/ArrowDropDownCircleOutlined";
 import TitleTable from "./TitleTable";
+import { setHeader } from "../../../services/slice/headerSlice";
 
 const AccountTitles = () => {
   const dispatch = useDispatch();
 
   const header =
-    useSelector((state) => state.transaction.header) || "Account Titles";
+    useSelector((state) => state.headers.header) || "Account Titles";
 
   const {
     params,

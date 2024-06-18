@@ -31,6 +31,7 @@ const optionsSlice = createSlice({
     setVoucher: (state, action) => {
       state.voucher = action.payload;
     },
+
     resetOption: () => {
       return initialState;
     },

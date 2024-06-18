@@ -2,6 +2,7 @@ import React from "react";
 
 import {
   Autocomplete,
+  Badge,
   Box,
   Dialog,
   IconButton,
@@ -47,13 +48,14 @@ import {
 
 import {
   useDocumentTypeQuery,
-  useSupplierQuery,
+  useReadTransactionCheckMutation,
   useTagYearMonthQuery,
 } from "../../services/store/request";
 import { setFilterBy } from "../../services/slice/transactionSlice";
 import TransactionModalAp from "../../components/customs/modal/TransactionModalAp";
 import { setVoucher } from "../../services/slice/optionsSlice";
 import TransactionModalApprover from "../../components/customs/modal/TransactionModalApprover";
+import socket from "../../services/functions/serverSocket";
 
 const CheckTable = ({
   params,
@@ -79,11 +81,6 @@ const CheckTable = ({
     (state) => state.menu.viewAccountingEntries
   );
 
-  const { data: supplier, isLoading: loadingSupplier } = useSupplierQuery({
-    status: "active",
-    pagination: "none",
-  });
-
   const { data: documentType, isLoading: loadingDocument } =
     useDocumentTypeQuery({
       status: "active",
@@ -92,6 +89,18 @@ const CheckTable = ({
 
   const { data: tagYearMonth, isLoading: loadingTagYearMonth } =
     useTagYearMonthQuery({ state: state });
+
+  const [readTransaction] = useReadTransactionCheckMutation();
+
+  const handleRead = async (data) => {
+    const obj = {
+      id: data?.id,
+    };
+    try {
+      const res = await readTransaction(obj).unwrap();
+      socket.emit("transaction_read");
+    } catch (error) {}
+  };
 
   return (
     <Box className="tag-transaction-body-container">
@@ -152,7 +161,6 @@ const CheckTable = ({
           <TableBody>
             {isFetching ||
             loadingDocument ||
-            loadingSupplier ||
             isLoading ||
             loadingTagYearMonth ? (
               <TableRow>
@@ -178,9 +186,7 @@ const CheckTable = ({
                   (doc) =>
                     tag?.transactions?.document_type_id === doc?.id || null
                 );
-                const supplierName = supplier?.result?.find(
-                  (sup) => tag?.transactions?.supplier_id === sup?.id || null
-                );
+
                 return (
                   <TableRow
                     className="table-body-tag-transaction"
@@ -188,6 +194,7 @@ const CheckTable = ({
                     onClick={() => {
                       dispatch(setMenuData(tag));
                       dispatch(setVoucher("check"));
+                      tag?.is_read === 0 && handleRead(tag);
                       tag?.state === "For Computation" &&
                         dispatch(setUpdateMenu(true));
 
@@ -206,20 +213,22 @@ const CheckTable = ({
                       tag?.state === "approved" && dispatch(setViewMenu(true));
                     }}
                   >
-                    <TableCell>{tag?.transactions?.tag_no}</TableCell>
+                    <TableCell>
+                      {`${tag?.transactions?.tag_year} - ${tag?.transactions?.tag_no}`}
+                    </TableCell>
                     <TableCell>
                       <Typography className="tag-transaction-company-name">
-                        {supplierName?.company_name === null ? (
+                        {tag?.transactions?.supplier?.name === null ? (
                           <>&mdash;</>
                         ) : (
-                          supplierName?.company_name
+                          tag?.transactions?.supplier?.name
                         )}
                       </Typography>
                       <Typography className="tag-transaction-company-tin">
-                        {supplierName === null ? (
+                        {tag?.transactions?.supplier === null ? (
                           <>&mdash;</>
                         ) : (
-                          supplierName?.tin
+                          tag?.transactions?.supplier?.tin
                         )}
                       </Typography>
                     </TableCell>
@@ -237,6 +246,9 @@ const CheckTable = ({
 
                       <Typography className="tag-transaction-company-type">
                         {document === null ? <>&mdash;</> : document?.name}
+                      </Typography>
+                      <Typography className="tag-transaction-company-name">
+                        {`${tag?.invoice_no || ""}`}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
@@ -286,30 +298,14 @@ const CheckTable = ({
                       {moment(tag?.updated_at).format("MMM DD YYYY")}
                     </TableCell>
                     <TableCell align="center">
-                      <IconButton
-                        onClick={() => {
-                          dispatch(setMenuData(tag));
-                          dispatch(setVoucher("check"));
-                          tag?.state === "For Computation" &&
-                            dispatch(setUpdateMenu(true));
-
-                          tag?.state === "returned" &&
-                            dispatch(setUpdateMenu(true));
-
-                          tag?.state === "For Approval" &&
-                            dispatch(setCheckMenu(true));
-
-                          tag?.state === "For Voiding" &&
-                            dispatch(setViewAccountingEntries(true));
-
-                          tag?.state === "voided" &&
-                            dispatch(setViewAccountingEntries(true));
-
-                          tag?.state === "approved" &&
-                            dispatch(setViewMenu(true));
-                        }}
-                      >
-                        <RemoveRedEyeOutlinedIcon className="tag-transaction-icon-actions" />
+                      <IconButton>
+                        <Badge
+                          variant="dot"
+                          invisible={tag?.is_read !== 0}
+                          color="error"
+                        >
+                          <RemoveRedEyeOutlinedIcon className="tag-transaction-icon-actions" />
+                        </Badge>
                       </IconButton>
                     </TableCell>
                   </TableRow>

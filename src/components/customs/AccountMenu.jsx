@@ -31,8 +31,8 @@ const AccountMenu = ({ onClose }) => {
 
   const handleLogout = () => {
     logout();
-    localStorage.removeItem("GIZMO");
-    localStorage.removeItem("GIZMO_token");
+    sessionStorage.removeItem("GIZMO");
+    sessionStorage.removeItem("GIZMO_token");
     dispatch(resetAuth());
     dispatch(resetLogs());
     dispatch(resetOption());

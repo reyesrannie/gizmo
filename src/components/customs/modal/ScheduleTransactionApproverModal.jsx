@@ -161,7 +161,7 @@ const ScheduleTransactionApproverModal = ({
       }, 0);
 
       const supplier = tin?.result?.find(
-        (item) => menuData?.supplier_id === item?.id
+        (item) => menuData?.supplier?.id === item?.id
       );
 
       const coa = taxComputation?.result?.map((item) => {

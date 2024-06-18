@@ -20,11 +20,9 @@ import {
 } from "../../services/slice/menuSlice";
 import { menu } from "../../services/constants/items";
 import { hasAccess } from "../../services/functions/access";
-import {
-  resetTransaction,
-  setHeader,
-} from "../../services/slice/transactionSlice";
+import { resetTransaction } from "../../services/slice/transactionSlice";
 import CountDistribute from "../../services/functions/CountDistribute";
+import { resetHeader, setHeader } from "../../services/slice/headerSlice";
 
 const MenuDrawer = () => {
   const { menuCount, childMenuCount, countGrandChildcheck } = CountDistribute();
@@ -33,7 +31,7 @@ const MenuDrawer = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const isTablet = useMediaQuery("(max-width:768px)");
-  const header = useSelector((state) => state.transaction.header);
+  const header = useSelector((state) => state.headers.header);
 
   useEffect(() => {
     const handleOutsideClick = (event) => {
@@ -84,6 +82,7 @@ const MenuDrawer = () => {
                         navigate(menus.path);
                         dispatch(resetMenuWithoutDrawer());
                         dispatch(resetTransaction());
+                        dispatch(resetHeader());
                         isTablet && dispatch(setDrawer(false));
                       }}
                     >

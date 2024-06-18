@@ -8,8 +8,8 @@ const loginService = () => {
       JSON.stringify(data),
       saltkey
     ).toString();
-    localStorage.setItem("GIZMO", userData);
-    localStorage.setItem("GIZMO_token", data?.token);
+    sessionStorage.setItem("GIZMO", userData);
+    sessionStorage.setItem("GIZMO_token", data?.token);
   };
   return { loginUser };
 };

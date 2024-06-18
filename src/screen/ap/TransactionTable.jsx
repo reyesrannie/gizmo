@@ -2,6 +2,7 @@ import React from "react";
 
 import {
   Autocomplete,
+  Badge,
   Box,
   Dialog,
   IconButton,
@@ -44,11 +45,12 @@ import {
 
 import {
   useDocumentTypeQuery,
-  useSupplierQuery,
+  useReadTransactionMutation,
   useTagYearMonthQuery,
 } from "../../services/store/request";
 import { setFilterBy } from "../../services/slice/transactionSlice";
 import TransactionModal from "../../components/customs/modal/TransactionModal";
+import socket from "../../services/functions/serverSocket";
 
 const TransactionTable = ({
   params,
@@ -68,11 +70,6 @@ const TransactionTable = ({
 
   const filterBy = useSelector((state) => state.transaction.filterBy);
 
-  const { data: supplier, isLoading: loadingSupplier } = useSupplierQuery({
-    status: "active",
-    pagination: "none",
-  });
-
   const { data: documentType, isLoading: loadingDocument } =
     useDocumentTypeQuery({
       status: "active",
@@ -81,6 +78,18 @@ const TransactionTable = ({
 
   const { data: tagYearMonth, isLoading: loadingTagYearMonth } =
     useTagYearMonthQuery({ state: state });
+
+  const [readTransaction] = useReadTransactionMutation();
+
+  const handleRead = async (data) => {
+    const obj = {
+      id: data?.id,
+    };
+    try {
+      const res = await readTransaction(obj).unwrap();
+      socket.emit("transaction_read");
+    } catch (error) {}
+  };
 
   return (
     <Box className="tag-transaction-body-container">
@@ -139,10 +148,7 @@ const TransactionTable = ({
           </TableHead>
 
           <TableBody>
-            {loadingDocument ||
-            loadingSupplier ||
-            isLoading ||
-            loadingTagYearMonth ? (
+            {loadingDocument || isLoading || loadingTagYearMonth ? (
               <TableRow>
                 <TableCell colSpan={6} align="center">
                   <Lottie
@@ -165,9 +171,6 @@ const TransactionTable = ({
                 const document = documentType?.result?.find(
                   (doc) => tag?.documentType?.id === doc?.id || null
                 );
-                const supplierName = supplier?.result?.find(
-                  (sup) => tag?.supplier?.id === sup?.id || null
-                );
 
                 return (
                   <TableRow
@@ -175,24 +178,27 @@ const TransactionTable = ({
                     key={tag?.id}
                     onClick={() => {
                       dispatch(setMenuData(tag));
+                      tag?.is_read === 0 && handleRead(tag);
                       tag?.gas_status === "pending" &&
                         dispatch(setReceiveMenu(true));
                     }}
                   >
-                    <TableCell>{tag?.tag_no}</TableCell>
+                    <TableCell>
+                      {tag?.tag_year} - {tag?.tag_no}
+                    </TableCell>
                     <TableCell>
                       <Typography className="tag-transaction-company-name">
-                        {supplierName?.company_name === null ? (
+                        {tag?.supplier?.name === null ? (
                           <>&mdash;</>
                         ) : (
-                          supplierName?.company_name
+                          tag?.supplier?.name
                         )}
                       </Typography>
                       <Typography className="tag-transaction-company-tin">
-                        {supplierName === null ? (
+                        {tag?.supplier === null ? (
                           <>&mdash;</>
                         ) : (
-                          supplierName?.tin
+                          tag?.supplier?.tin
                         )}
                       </Typography>
                     </TableCell>
@@ -214,6 +220,9 @@ const TransactionTable = ({
                       <Typography className="tag-transaction-company-type">
                         {document === null ? <>&mdash;</> : document?.name}
                       </Typography>
+                      <Typography className="tag-transaction-company-name">
+                        {`${tag?.invoice_no || ""}`}
+                      </Typography>
                     </TableCell>
                     <TableCell align="center">
                       {tag?.gas_status === "pending" && (
@@ -227,14 +236,14 @@ const TransactionTable = ({
                       {moment(tag?.updated_at).format("MMM DD YYYY")}
                     </TableCell>
                     <TableCell align="center">
-                      <IconButton
-                        onClick={() => {
-                          dispatch(setMenuData(tag));
-                          tag?.gas_status === "pending" &&
-                            dispatch(setReceiveMenu(true));
-                        }}
-                      >
-                        <RemoveRedEyeOutlinedIcon className="tag-transaction-icon-actions" />
+                      <IconButton>
+                        <Badge
+                          variant="dot"
+                          invisible={tag?.is_read !== 0}
+                          color="error"
+                        >
+                          <RemoveRedEyeOutlinedIcon className="tag-transaction-icon-actions" />
+                        </Badge>
                       </IconButton>
                     </TableCell>
                   </TableRow>

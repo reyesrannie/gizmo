@@ -519,7 +519,7 @@ const ScheduleModal = ({ create, view, update, receive }) => {
                 disabled={view}
                 className="transaction-form-date"
                 label="From *"
-                format="YYYY-MM-DD"
+                format="MMMM DD, YYYY"
                 value={value}
                 maxDate={watch("coverage_to")}
                 onChange={(e) => {
@@ -544,7 +544,7 @@ const ScheduleModal = ({ create, view, update, receive }) => {
                 className="transaction-form-date"
                 label="To *"
                 minDate={watch("coverage_from")}
-                format="YYYY-MM-DD"
+                format="MMMM DD, YYYY"
                 value={value}
                 onChange={(e) => {
                   onChange(e);
@@ -655,30 +655,6 @@ const ScheduleModal = ({ create, view, update, receive }) => {
                 variant="outlined"
                 error={Boolean(errors.account_number)}
                 helperText={errors.account_number?.message}
-                className="transaction-form-textBox"
-              />
-            )}
-          />
-        )}
-        {checkField("store") && (
-          <Autocomplete
-            disabled={view}
-            control={control}
-            name={"store"}
-            options={location?.result}
-            getOptionLabel={(option) => `${option.name}`}
-            isOptionEqualToValue={(option, value) =>
-              option?.code === value?.code
-            }
-            renderInput={(params) => (
-              <MuiTextField
-                name="store"
-                {...params}
-                label="Store *"
-                size="small"
-                variant="outlined"
-                error={Boolean(errors.store)}
-                helperText={errors.store?.message}
                 className="transaction-form-textBox"
               />
             )}

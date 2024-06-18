@@ -14,7 +14,11 @@ import { LoadingButton } from "@mui/lab";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useDispatch, useSelector } from "react-redux";
-import { resetMenu, setUpdateCount } from "../../../services/slice/menuSlice";
+import {
+  resetMenu,
+  setMenuData,
+  setUpdateCount,
+} from "../../../services/slice/menuSlice";
 import {
   useAccountNumberQuery,
   useApQuery,
@@ -27,7 +31,6 @@ import {
   useLocationQuery,
   useReceiveTransactionMutation,
   useSupplierQuery,
-  useTagMonthYearQuery,
   useUpdateTransactionMutation,
 } from "../../../services/store/request";
 import { useSnackbar } from "notistack";
@@ -91,6 +94,7 @@ import {
 } from "../../../services/slice/transactionSlice";
 import { AdditionalFunction } from "../../../services/functions/AdditionalFunction";
 import { convertToArray } from "../../../services/functions/toArrayFn";
+import DateChecker from "../../../services/functions/DateChecker";
 
 const TransactionModal = ({ create, view, update, receive }) => {
   const dispatch = useDispatch();
@@ -110,19 +114,11 @@ const TransactionModal = ({ create, view, update, receive }) => {
   const defaultValue = transactionDefaultValue();
   const { enqueueSnackbar } = useSnackbar();
   const { insertDocument, deepEqual } = AdditionalFunction();
+  const { shouldDisableYear } = DateChecker();
 
   const [createTransaction, { isLoading }] = useCreateTransactionMutation();
   const [updateTransaction, { isLoading: updateLoading }] =
     useUpdateTransactionMutation();
-
-  const { params, onDateChange } = useTaggingHook();
-
-  const {
-    data: gtag,
-    isLoading: gTagIsLoading,
-    isSuccess: gTagSuccess,
-    isFetching,
-  } = useTagMonthYearQuery(params);
 
   const [archiveTransaction, { isLoading: archiveLoading }] =
     useArchiveTransactionMutation();
@@ -172,11 +168,7 @@ const TransactionModal = ({ create, view, update, receive }) => {
     pagination: "none",
   });
 
-  const {
-    data: cutOff,
-    isLoading: loadingCutOff,
-    isSuccess: cutOffSuccess,
-  } = useCutOffQuery({
+  const { data: cutOff } = useCutOffQuery({
     status: "active",
     pagination: "none",
   });
@@ -218,6 +210,7 @@ const TransactionModal = ({ create, view, update, receive }) => {
     control,
     handleSubmit,
     setValue,
+    setError,
     watch,
     clearErrors,
     formState: { errors },
@@ -242,7 +235,36 @@ const TransactionModal = ({ create, view, update, receive }) => {
     }
   };
 
+  const disabledMonths =
+    cutOff?.result
+      ?.filter((item) => item?.state === "closed")
+      ?.map((item) => {
+        const date = dayjs(item?.date, "YYYY-MM-DD").toDate();
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
+          2,
+          "0"
+        )}`;
+      }) ?? [];
+
+  const isLastMonthClosed = () => {
+    const lastMonthDate = dayjs().subtract(1, "month");
+    const lastMonthFormatted = lastMonthDate.format("YYYY-MM");
+
+    return cutOff?.result?.some(
+      (item) =>
+        item?.state === "closed" &&
+        dayjs(item?.date, "YYYY-MM-DD").format("YYYY-MM") === lastMonthFormatted
+    );
+  };
+
+  const shouldDisableMonth = (date) => {
+    const month = dayjs(date, "YYYY-MM-DD").format("YYYY-MM");
+    return disabledMonths.includes(month);
+  };
+
   const handleAutoFill = () => {
+    const lastMonthClose = isLastMonthClosed();
+    const monthAgo = dayjs(new Date()).subtract(5, "day");
     const items = {
       supplier: watch("tin")?.company_name || "",
       proprietor: watch("tin")?.proprietor || "",
@@ -258,7 +280,9 @@ const TransactionModal = ({ create, view, update, receive }) => {
       account_number: accountNumber?.result?.find(
         (item) => watch("tin")?.id === item?.supplier?.id || null
       ),
-      tag_month_year: dayjs(new Date(), { locale: AdapterDayjs.locale }),
+      tag_month_year: lastMonthClose
+        ? dayjs(new Date(), { locale: AdapterDayjs.locale })
+        : dayjs(monthAgo, { locale: AdapterDayjs.locale }),
     };
 
     Object.entries(items).forEach(([key, value]) => {
@@ -274,13 +298,7 @@ const TransactionModal = ({ create, view, update, receive }) => {
   };
 
   useEffect(() => {
-    if (gTagSuccess && create) {
-      const tagNoG = parseInt(gtag?.result, 10) + 1 || 1;
-      setValue("g_tag_number", tagNoG.toString().padStart(4, "0"));
-    }
-
     if (
-      gTagSuccess &&
       supplySuccess &&
       documentSuccess &&
       apSuccess &&
@@ -289,7 +307,6 @@ const TransactionModal = ({ create, view, update, receive }) => {
       !create
     ) {
       const tagMonthYear = dayjs(transactionData?.tag_year, "YYMM").toDate();
-
       const docs = insertDocument(transactionData);
       const mapData = mapViewTransaction(
         transactionData,
@@ -316,8 +333,6 @@ const TransactionModal = ({ create, view, update, receive }) => {
     }
   }, [
     documents,
-    gTagSuccess,
-    gtag,
     supplySuccess,
     documentSuccess,
     apSuccess,
@@ -390,6 +405,7 @@ const TransactionModal = ({ create, view, update, receive }) => {
               : `A new transaction has been created.`,
         }
       );
+
       const docs = insertDocument(res?.result);
       const resData = await mapResponse(
         res?.result,
@@ -397,15 +413,18 @@ const TransactionModal = ({ create, view, update, receive }) => {
         tin,
         document,
         accountNumber,
-        location,
         docs
       );
       setOldValues(resData);
+
       update || receive
         ? Object.entries(resData).forEach(([key, value]) => {
             setValue(key, value);
           })
         : dispatch(resetMenu());
+
+      dispatch(setMenuData(resData));
+
       dispatch(resetLogs());
       dispatch(setUpdateCount(0));
     } catch (error) {
@@ -491,22 +510,6 @@ const TransactionModal = ({ create, view, update, receive }) => {
     );
 
     return hasChanges;
-  };
-
-  const disabledMonths =
-    cutOff?.result
-      ?.filter((item) => item?.state === "closed")
-      ?.map((item) => {
-        const date = dayjs(item?.date, "YYYY-MM-DD").toDate();
-        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
-          2,
-          "0"
-        )}`;
-      }) ?? [];
-
-  const shouldDisableMonth = (date) => {
-    const month = dayjs(date, "YYYY-MM-DD").format("YYYY-MM");
-    return disabledMonths.includes(month);
   };
 
   return (
@@ -845,8 +848,8 @@ const TransactionModal = ({ create, view, update, receive }) => {
                   <DatePicker
                     disabled={view}
                     className="transaction-form-date"
-                    label="From *"
-                    format="YYYY-MM-DD"
+                    label="From (If Applicable)"
+                    format="MMMM DD, YYYY"
                     value={value}
                     maxDate={watch("coverage_to")}
                     onChange={(e) => {
@@ -869,9 +872,9 @@ const TransactionModal = ({ create, view, update, receive }) => {
                   <DatePicker
                     disabled={view}
                     className="transaction-form-date"
-                    label="To *"
+                    label="To (If Applicable)"
                     minDate={watch("coverage_from")}
-                    format="YYYY-MM-DD"
+                    format="MMMM DD, YYYY"
                     value={value}
                     onChange={(e) => {
                       onChange(e);
@@ -904,35 +907,11 @@ const TransactionModal = ({ create, view, update, receive }) => {
                   <MuiTextField
                     name="account_number"
                     {...params}
-                    label="Account Number *"
+                    label="Account Number (If Applicable)"
                     size="small"
                     variant="outlined"
                     error={Boolean(errors.account_number)}
                     helperText={errors.account_number?.message}
-                    className="transaction-form-textBox"
-                  />
-                )}
-              />
-            )}
-            {checkField("store") && (
-              <Autocomplete
-                disabled={view}
-                control={control}
-                name={"store"}
-                options={location?.result}
-                getOptionLabel={(option) => `${option.name}`}
-                isOptionEqualToValue={(option, value) =>
-                  option?.code === value?.code
-                }
-                renderInput={(params) => (
-                  <MuiTextField
-                    name="store"
-                    {...params}
-                    label="Store *"
-                    size="small"
-                    variant="outlined"
-                    error={Boolean(errors.store)}
-                    helperText={errors.store?.message}
                     className="transaction-form-textBox"
                   />
                 )}
@@ -1007,7 +986,7 @@ const TransactionModal = ({ create, view, update, receive }) => {
           render={({ field: { onChange, value, ...restField } }) => (
             <Box className="date-picker-container-transaction">
               <DatePicker
-                disabled={update || view || receive}
+                disabled={view}
                 className="transaction-form-date"
                 label="Tag year month *"
                 format="YY MM"
@@ -1016,10 +995,8 @@ const TransactionModal = ({ create, view, update, receive }) => {
                 onChange={(e) => {
                   onChange(e);
                 }}
-                onAccept={(e) =>
-                  onDateChange(moment(new Date(e)).format("YYMM"))
-                }
                 shouldDisableMonth={shouldDisableMonth}
+                shouldDisableYear={shouldDisableYear}
               />
               {errors.tag_month_year && (
                 <Typography variant="caption" color="error">
@@ -1065,7 +1042,11 @@ const TransactionModal = ({ create, view, update, receive }) => {
                 color="warning"
                 type="submit"
                 className="add-transaction-button"
-                disabled={!watch("tin")}
+                disabled={
+                  !watch("tin") ||
+                  shouldDisableYear(watch("tag_month_year")) ||
+                  shouldDisableMonth(watch("tag_month_year"))
+                }
               >
                 {create ? "Add" : "Update"}
               </LoadingButton>
@@ -1092,11 +1073,9 @@ const TransactionModal = ({ create, view, update, receive }) => {
           updateLoading ||
           loadingTIN ||
           loadingDocument ||
-          gTagIsLoading ||
           loadingAccountNumber ||
           loadingAp ||
           loadingLocation ||
-          isFetching ||
           loadingSingle ||
           loadingJournal ||
           receiveLoading

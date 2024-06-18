@@ -9,6 +9,7 @@ import syncSlice from "../slice/syncSlice";
 import transactionSlice from "../slice/transactionSlice";
 import logSlice from "../slice/logSlice";
 import optionsSlice from "../slice/optionsSlice";
+import headerSlice from "../slice/headerSlice";
 
 export const store = configureStore({
   reducer: {
@@ -19,6 +20,7 @@ export const store = configureStore({
     transaction: transactionSlice,
     log: logSlice,
     options: optionsSlice,
+    headers: headerSlice,
 
     [jsonServerAPI.reducerPath]: jsonServerAPI.reducer,
     [jsonSedarAPI.reducerPath]: jsonSedarAPI.reducer,

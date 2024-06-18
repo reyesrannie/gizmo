@@ -513,8 +513,6 @@ const TransactionDrawer = ({
                 (items) => item?.updated_by_id === items.id
               );
 
-              console.log(item);
-
               return (
                 <Step key={index}>
                   <StepLabel

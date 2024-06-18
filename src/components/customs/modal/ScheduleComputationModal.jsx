@@ -71,9 +71,9 @@ import socket from "../../../services/functions/serverSocket";
 import scheduleTransactionAPSchema from "../../../schemas/scheduleTransactionAPSchema";
 import { DatePicker } from "@mui/x-date-pickers";
 import DateChecker from "../../../services/functions/DateChecker";
-import { setHeader } from "../../../services/slice/transactionSlice";
 import { useNavigate } from "react-router-dom";
 import AppPrompt from "../AppPrompt";
+import { setHeader } from "../../../services/slice/headerSlice";
 
 const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
   const navigate = useNavigate();
@@ -453,7 +453,7 @@ const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
                   disabled={view}
                   className="transaction-form-date"
                   label="From *"
-                  format="YYYY-MM-DD"
+                  format="MMMM DD, YYYY"
                   value={value}
                   maxDate={watch("coverage_to")}
                   onChange={(e) => {
@@ -481,7 +481,7 @@ const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
                   className="transaction-form-date"
                   label="To *"
                   minDate={watch("coverage_from")}
-                  format="YYYY-MM-DD"
+                  format="MMMM DD, YYYY"
                   value={value}
                   onChange={(e) => {
                     onChange(e);
@@ -539,7 +539,7 @@ const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
           />
         )}
         <AppTextBox
-          disabled={checked || disableCheck}
+          disabled={disableCheck}
           control={control}
           name={"cip_no"}
           label={"CIP No. (Optional)"}
@@ -941,7 +941,7 @@ const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
         className="transaction-modal-dialog"
         onClose={() => dispatch(setUpdateTax(false))}
       >
-        <TaxComputation update taxComputation={taxComputation} />
+        <TaxComputation schedule update taxComputation={taxComputation} />
       </Dialog>
 
       <Dialog

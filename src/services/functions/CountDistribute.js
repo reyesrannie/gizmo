@@ -9,19 +9,22 @@ import { useSelector } from "react-redux";
 
 const CountDistribute = () => {
   const userData = useSelector((state) => state.auth.userData);
+  const isAP =
+    userData?.amount?.min_amount === "0.00" &&
+    userData?.amount?.max_amount === "0.00";
   const ap = userData?.scope_tagging?.map((item) => item?.ap_code);
   const { data: badgeTagging } = useTransactCountQuery({
     ap: userData?.scope_tagging?.map((item) => item?.ap_code),
   });
   const { data: badgeCheck } = useCheckCountQuery({
     ap: userData?.scope_tagging?.map((item) => item?.ap_code),
-    min: userData?.amount?.min_amount || null,
-    max: userData?.amount?.max_amount || null,
+    min: isAP ? "" : userData?.amount?.min_amount,
+    max: isAP ? "" : userData?.amount?.max_amount,
   });
   const { data: badgeJournal } = useJournalCountQuery({
     ap: userData?.scope_tagging?.map((item) => item?.ap_code),
-    min: userData?.amount?.min_amount || null,
-    max: userData?.amount?.max_amount || null,
+    min: isAP ? "" : userData?.amount?.min_amount,
+    max: isAP ? "" : userData?.amount?.max_amount,
   });
   const { data: scheduleTransaction } = useCountScheduleQuery({
     ap: ap,
@@ -34,11 +37,13 @@ const CountDistribute = () => {
       return (
         badgeTagging?.result?.pending +
           badgeCheck?.result["For Computation"] +
-          badgeJournal?.result["For Computation"] +
           badgeCheck?.result?.approved +
-          badgeJournal?.result?.approved +
+          badgeCheck?.result?.voided +
           badgeCheck?.result?.returned +
-          badgeCheck?.result?.voided || 0
+          badgeJournal?.result["For Computation"] +
+          badgeJournal?.result?.approved +
+          badgeJournal?.result?.voided +
+          badgeJournal?.result?.returned || 0
       );
     } else if (path === "Approver") {
       return (
@@ -87,7 +92,8 @@ const CountDistribute = () => {
       return (
         badgeJournal?.result["For Computation"] +
           badgeJournal?.result?.approved +
-          badgeJournal?.result?.returned || 0
+          badgeJournal?.result?.returned +
+          badgeJournal?.result?.voided || 0
       );
     } else if (path === "Check Approval") {
       return (
@@ -221,16 +227,16 @@ const CountDistribute = () => {
     }
     if (child === "Journal Voucher") {
       if (path === "Received") {
-        return badgeCheck?.result["For Computation"] || 0;
+        return badgeJournal?.result["For Computation"] || 0;
       }
       if (path === "Approved") {
-        return badgeCheck?.result?.approved || 0;
+        return badgeJournal?.result?.approved || 0;
       }
       if (path === "Returned") {
-        return badgeCheck?.result?.returned || 0;
+        return badgeJournal?.result?.returned || 0;
       }
       if (path === "Void") {
-        return badgeCheck?.result?.voided || 0;
+        return badgeJournal?.result?.voided || 0;
       }
       return 0;
     }

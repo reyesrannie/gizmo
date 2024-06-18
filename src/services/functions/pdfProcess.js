@@ -101,13 +101,6 @@ export const printPDF = async (data) => {
   const address = addressCount(data?.supplier?.company_address);
   const { joinedParts, remainingParts } = joinAddressParts(address, 0, 10);
 
-  firstPage.drawLine({
-    start: { x: 594, y: 69 },
-    end: { x: 594, y: 885 },
-    thickness: 5,
-    color: rgb(0, 0, 0, 0),
-  });
-
   const drawText = (text, { x, y, size = 12, color = rgb(0, 0, 0) }) => {
     firstPage.drawText(text, { x, y, size, color });
   };

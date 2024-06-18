@@ -22,18 +22,18 @@ import "../../components/styles/TagTransaction.scss";
 import { apHeader } from "../../services/constants/headers";
 import {
   setFilterBy,
-  setHeader,
   setIsExpanded,
 } from "../../services/slice/transactionSlice";
 import CheckTable from "./CheckTable";
 import useApHook from "../../services/hooks/useApHook";
 import CountDistribute from "../../services/functions/CountDistribute";
+import { setHeader } from "../../services/slice/headerSlice";
 
 const CheckVoucher = () => {
   const dispatch = useDispatch();
 
   const isExpanded = useSelector((state) => state.transaction.isExpanded);
-  const header = useSelector((state) => state.transaction.header) || "Received";
+  const header = useSelector((state) => state.headers.header) || "Received";
 
   const {
     params,

@@ -1,7 +1,6 @@
 import moment from "moment";
 import dayjs from "dayjs";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { AdditionalFunction } from "./AdditionalFunction";
 
 const mapTransaction = (submitData) => {
   const obj = {
@@ -88,14 +87,16 @@ const mapViewTransaction = (
       location?.result?.find(
         (item) => transactionData?.location?.id === item.id
       ) || null,
-    coverage_from:
-      dayjs(new Date(transactionData?.coverage_from), {
-        locale: AdapterDayjs.locale,
-      }) || null,
-    coverage_to:
-      dayjs(new Date(transactionData?.coverage_to), {
-        locale: AdapterDayjs.locale,
-      }) || null,
+    coverage_from: transactionData?.coverage_from
+      ? dayjs(new Date(transactionData.coverage_from), {
+          locale: AdapterDayjs.locale,
+        })
+      : null,
+    coverage_to: transactionData?.coverage_to
+      ? dayjs(new Date(transactionData.coverage_to), {
+          locale: AdapterDayjs.locale,
+        })
+      : null,
     ...docs,
   };
 
@@ -104,15 +105,14 @@ const mapViewTransaction = (
 
 const mapAPTransaction = (transactionData, tin, document, accountNumber) => {
   const supplierTin =
-    tin?.result?.find((item) => transactionData?.supplier_id === item.id) ||
+    tin?.result?.find((item) => transactionData?.supplier?.id === item.id) ||
     null;
   const documentType =
     document?.result?.find(
       (item) => transactionData?.document_type_id === item.id
     ) || null;
-
   const values = {
-    tag_no: transactionData?.tag_no || "",
+    tag_no: `${transactionData?.tag_year} - ${transactionData?.tag_no}` || "",
     supplier: supplierTin?.company_name || "",
     proprietor: supplierTin?.proprietor || "",
     company_address: supplierTin?.company_address || "",
@@ -141,64 +141,50 @@ const mapResponse = async (
   tin,
   document,
   accountNumber,
-  location,
   docs
 ) => {
+  const supplier =
+    tin?.result?.find((item) => transactionData?.supplier_id === item.id) ||
+    null;
   const values = {
     is_offset: transactionData?.is_offset || false,
+    id: transactionData?.id || "",
+    transaction_no: transactionData?.transaction_no || "",
     tag_no: transactionData?.tag_no || "",
-    supplier:
-      tin?.result?.find((item) => transactionData?.supplier_id === item.id)
-        ?.company_name || "",
-    proprietor:
-      tin?.result?.find((item) => transactionData?.supplier_id === item.id)
-        ?.proprietor || "",
-    company_address:
-      tin?.result?.find((item) => transactionData?.supplier_id === item.id)
-        ?.company_address || "",
-    name_in_receipt:
-      tin?.result?.find((item) => transactionData?.supplier_id === item.id)
-        ?.receipt_name || "",
-    invoice_no: transactionData?.invoice_no || "",
+    document_name: transactionData?.document_name || "",
+    document_no: transactionData?.document_no || "",
     reference_no: transactionData?.reference_no || "",
-    amount_withheld: transactionData?.amount_check || "",
-    amount_check: transactionData?.amount_withheld || "",
-    amount: transactionData?.purchase_amount || "",
-    vat: transactionData?.vat_amount || "",
-    cost: transactionData?.cost || "",
-    g_tag_number: transactionData?.gtag_no || "",
-    description: transactionData?.description || "",
+    date_invoice: transactionData?.date_invoice || null,
+    date_received: transactionData?.date_received || null,
 
-    ap:
-      ap?.result?.find((item) => transactionData?.ap_tagging_id === item.id) ||
-      null,
-    tin:
-      tin?.result?.find((item) => transactionData?.supplier_id === item.id) ||
-      null,
-    date_invoice:
-      dayjs(new Date(transactionData?.date_invoice), {
-        locale: AdapterDayjs.locale,
-      }) || null,
-    document_type:
+    documentType:
       document?.result?.find(
         (item) => transactionData?.document_type_id === item.id
       ) || null,
-    account_number:
+
+    supplier: {
+      address: supplier?.company_address,
+      id: supplier?.id,
+      name: supplier?.company_name,
+      proprietor: supplier?.proprietor,
+      receipt_name: supplier?.receipt_name,
+      tin: supplier?.tin,
+    },
+
+    invoice_no: transactionData?.invoice_no || "",
+    description: transactionData?.description || "",
+    purchase_amount: transactionData?.purchase_amount || "",
+    coverage_from: transactionData?.coverage_from || null,
+    coverage_to: transactionData?.coverage_to || null,
+    accountNumber:
       accountNumber?.result?.find(
         (item) => transactionData?.account_number_id === item.id
       ) || null,
-    store:
-      location?.result?.find(
-        (item) => transactionData?.location?.id === item.id
-      ) || null,
-    coverage_from:
-      dayjs(new Date(transactionData?.coverage_from), {
-        locale: AdapterDayjs.locale,
-      }) || null,
-    coverage_to:
-      dayjs(new Date(transactionData?.coverage_to), {
-        locale: AdapterDayjs.locale,
-      }) || null,
+    apTagging:
+      ap?.result?.find((item) => transactionData?.ap_tagging_id === item.id) ||
+      null,
+    tag_year: transactionData?.tag_year || "",
+    g_tag_number: transactionData?.gtag_no || "",
     ...docs,
   };
 
@@ -217,16 +203,16 @@ const mapScheduledTransaction = (
   const values = {
     is_offset: transactionData?.is_offset === 1 ? true : false,
     supplier:
-      tin?.result?.find((item) => transactionData?.supplier_id === item.id)
+      tin?.result?.find((item) => transactionData?.supplier?.id === item.id)
         ?.company_name || "",
     proprietor:
-      tin?.result?.find((item) => transactionData?.supplier_id === item.id)
+      tin?.result?.find((item) => transactionData?.supplier?.id === item.id)
         ?.proprietor || "",
     company_address:
-      tin?.result?.find((item) => transactionData?.supplier_id === item.id)
+      tin?.result?.find((item) => transactionData?.supplier?.id === item.id)
         ?.company_address || "",
     name_in_receipt:
-      tin?.result?.find((item) => transactionData?.supplier_id === item.id)
+      tin?.result?.find((item) => transactionData?.supplier?.id === item.id)
         ?.receipt_name || "",
     invoice_no: transactionData?.invoice_no || "",
     reference_no: transactionData?.reference_no || "",
@@ -245,7 +231,7 @@ const mapScheduledTransaction = (
       ap?.result?.find((item) => transactionData?.ap_tagging_id === item.id) ||
       null,
     tin:
-      tin?.result?.find((item) => transactionData?.supplier_id === item.id) ||
+      tin?.result?.find((item) => transactionData?.supplier?.id === item.id) ||
       null,
     document_type:
       document?.result?.find(
@@ -311,7 +297,7 @@ const mapAPScheduleTransaction = (
   accountNumber
 ) => {
   const supplierTin =
-    tin?.result?.find((item) => transactionData?.supplier_id === item.id) ||
+    tin?.result?.find((item) => transactionData?.supplier?.id === item.id) ||
     null;
   const documentType =
     document?.result?.find(

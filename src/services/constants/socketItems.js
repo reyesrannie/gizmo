@@ -17,7 +17,7 @@ export const events = [
   },
   {
     event: "supplier_updated",
-    tags: ["Supplier"],
+    tags: ["Supplier", "Transaction"],
   },
   {
     event: "vat_updated",
@@ -52,19 +52,43 @@ export const events = [
   },
   {
     event: "transaction_updated",
-    tags: ["Transaction", "CountTransaction", "CountCheck", "CountVoucher"],
+    tags: [
+      "Transaction",
+      "CountTransaction",
+      "CountCheck",
+      "CountVoucher",
+      "Logs",
+    ],
   },
   {
     event: "transaction_created",
-    tags: ["Transaction", "CountTransaction", "CountCheck", "CountVoucher"],
+    tags: [
+      "Transaction",
+      "CountTransaction",
+      "CountCheck",
+      "CountVoucher",
+      "Logs",
+    ],
   },
   {
     event: "transaction_received",
-    tags: ["Transaction", "CountTransaction", "CountCheck", "CountVoucher"],
+    tags: [
+      "Transaction",
+      "CountTransaction",
+      "CountCheck",
+      "CountVoucher",
+      "Logs",
+    ],
   },
   {
     event: "transaction_archived",
-    tags: ["Transaction", "CountTransaction", "CountCheck", "CountVoucher"],
+    tags: [
+      "Transaction",
+      "CountTransaction",
+      "CountCheck",
+      "CountVoucher",
+      "Logs",
+    ],
   },
   {
     event: "transaction_approval",
@@ -170,28 +194,28 @@ export const events = [
   },
   {
     event: "schedule_created",
-    tags: ["SchedTransact"],
+    tags: ["SchedTransact", "CountSchedule", "ScheduleLogs"],
   },
 
   {
     event: "schedule_updated",
-    tags: ["SchedTransact", "CountSchedule"],
+    tags: ["SchedTransact", "CountSchedule", "ScheduleLogs"],
   },
   {
     event: "schedule_received",
-    tags: ["SchedTransact", "CountSchedule"],
+    tags: ["SchedTransact", "CountSchedule", "ScheduleLogs"],
   },
   {
     event: "schedule_approval",
-    tags: ["SchedTransact", "CountSchedule"],
+    tags: ["SchedTransact", "CountSchedule", "ScheduleLogs"],
   },
   {
     event: "schedule_returned",
-    tags: ["SchedTransact", "CountSchedule"],
+    tags: ["SchedTransact", "CountSchedule", "ScheduleLogs"],
   },
   {
     event: "schedule_approved",
-    tags: ["SchedTransact", "CountSchedule"],
+    tags: ["SchedTransact", "CountSchedule", "ScheduleLogs"],
   },
   {
     event: "schedule_generate",
@@ -211,6 +235,11 @@ export const events = [
       "CheckEntries",
       "JournalEntries",
       "CountSchedule",
+      "ScheduleLogs",
     ],
+  },
+  {
+    event: "transaction_read",
+    tags: ["Transaction", "CountTransaction", "CountCheck", "CountVoucher"],
   },
 ];

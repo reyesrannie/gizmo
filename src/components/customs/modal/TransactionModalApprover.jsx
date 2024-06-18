@@ -230,9 +230,8 @@ const TransactionModalApprover = ({
       }, 0);
 
       const supplier = tin?.result?.find(
-        (item) => menuData?.transactions?.supplier_id === item?.id
+        (item) => menuData?.transactions?.supplier?.id === item?.id
       );
-      checkAtc(supplier);
 
       const coa = taxComputation?.result?.map((item) => {
         const checkCOa = accountTitles?.result?.find(
@@ -298,14 +297,14 @@ const TransactionModalApprover = ({
     return value?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
-  const checkAtc = (supplier) => {
+  const checkAtc = () => {
     const hasAtc = atc?.result?.find((item) => item?.id === menuData?.atc);
-    if (hasAtc?.code === "N/A") {
+
+    if (hasAtc?.code === "N/A" || hasAtc?.code === "WC") {
       dispatch(setPrintable(true));
+      return false;
     }
-    if (supplier?.tin?.length < 10 && supplier?.tin !== undefined) {
-      dispatch(setPrintable(true));
-    }
+    return true;
   };
 
   const returnHandler = async (submitData) => {
@@ -355,8 +354,6 @@ const TransactionModalApprover = ({
   };
 
   const approveHandler = async () => {
-    const vpCheck = parseInt(vpCheckNumber?.result) + 1;
-    const vpJournal = parseInt(vpJournalNumber?.result) + 1;
     const year = Math.floor(menuData?.transactions?.tag_year / 100);
     const month = menuData?.transactions?.tag_year % 100;
     const formattedDate = `20${year}-${month.toString().padStart(2, "0")}`;
@@ -433,19 +430,21 @@ const TransactionModalApprover = ({
   );
 
   const printPdf = () => {
-    const month = new Date(menuData?.transactions?.date_invoice).getMonth() + 1;
+    const month =
+      new Date(menuData?.transactions?.date_received).getMonth() + 1;
     const quarter = Math.ceil(month / 3);
     const quarterStartMonth = 3 * (quarter - 1) + 1; // Calculate the starting month of the quarter
     const monthInQuarter = month - quarterStartMonth + 1;
 
     const supplier = tin?.result?.find(
-      (item) => menuData?.transactions?.supplier_id === item?.id
+      (item) => menuData?.transactions?.supplier?.id === item?.id
     );
     const atc_name = atc?.result?.find((item) => menuData?.atc === item.id);
     const code = supplier?.company_address;
 
-    const parts = code.split(",");
-    const zipCode = parts[parts.length - 1].trim();
+    const parts = code?.split(",");
+
+    const zipCode = parts[parts?.length - 1].trim();
     const hasValidZipCodeFormat = /^\d{4}$/.test(zipCode);
 
     const obj = {
@@ -989,7 +988,7 @@ const TransactionModalApprover = ({
               content={() => componentRef.current}
             />
           )}
-          {approved && ap && !printable && !viewAccountingEntries && (
+          {checkAtc() && approved && ap && !viewAccountingEntries && (
             <Button
               variant="contained"
               color="success"
@@ -1021,7 +1020,7 @@ const TransactionModalApprover = ({
               Approve Void
             </LoadingButton>
           )}
-          {approved && ap && !printable && !viewAccountingEntries && (
+          {approved && ap && !viewAccountingEntries && (
             <Button
               variant="contained"
               color="error"

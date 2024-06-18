@@ -6,7 +6,7 @@ import { useNavigate } from "react-router";
 
 import "../styles/NotificationSchedule.scss";
 import { useDispatch } from "react-redux";
-import { setHeader } from "../../services/slice/transactionSlice";
+import { setHeader } from "../../services/slice/headerSlice";
 
 const NotificationSchedule = () => {
   const navigate = useNavigate();

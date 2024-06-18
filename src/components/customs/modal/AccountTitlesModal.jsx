@@ -48,7 +48,7 @@ import socket from "../../../services/functions/serverSocket";
 const AccountTitlesModal = ({ accountTitlesData, view, update, create }) => {
   const dispatch = useDispatch();
   const header =
-    useSelector((state) => state.transaction.header) || "Account Titles";
+    useSelector((state) => state.headers.header) || "Account Titles";
   const { enqueueSnackbar } = useSnackbar();
 
   const {

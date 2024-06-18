@@ -28,10 +28,10 @@ import TaggingTable from "./TaggingTable";
 import useTransactionHook from "../../services/hooks/useTransactionHook";
 import {
   setFilterBy,
-  setHeader,
   setIsExpanded,
 } from "../../services/slice/transactionSlice";
 import CountDistribute from "../../services/functions/CountDistribute";
+import { setHeader } from "../../services/slice/headerSlice";
 
 const TagTransaction = () => {
   const dispatch = useDispatch();
@@ -39,7 +39,7 @@ const TagTransaction = () => {
   const isExpanded = useSelector((state) => state.transaction.isExpanded);
 
   const header =
-    useSelector((state) => state.transaction.header) || "Tag Transaction";
+    useSelector((state) => state.headers.header) || "Tag Transaction";
 
   const { countHeaderTagging } = CountDistribute();
 

@@ -28,12 +28,19 @@ import socket from "../../services/functions/serverSocket";
 import { useSnackbar } from "notistack";
 import {
   jsonServerAPI,
+  useAccountNumberQuery,
+  useApQuery,
+  useCutOffQuery,
+  useDocumentTypeQuery,
+  useLocationQuery,
   useSchedTransactionQuery,
+  useSupplierQuery,
 } from "../../services/store/request";
 import { events } from "../../services/constants/socketItems";
 import NotificationSchedule from "./NotificationSchedule";
 import { setOpenNotification } from "../../services/slice/promptSlice";
 import DateChecker from "../../services/functions/DateChecker";
+import { hasAccess } from "../../services/functions/access";
 
 const AppBar = () => {
   const { enqueueSnackbar } = useSnackbar();
@@ -56,6 +63,60 @@ const AppBar = () => {
     pagination: "none",
     state: "approved",
     access: "ap",
+  });
+
+  const {
+    data: tin,
+    isLoading: loadingTIN,
+    isSuccess: supplySuccess,
+  } = useSupplierQuery({
+    status: "active",
+    pagination: "none",
+  });
+
+  const {
+    data: document,
+    isLoading: loadingDocument,
+    isSuccess: documentSuccess,
+  } = useDocumentTypeQuery({
+    status: "active",
+    pagination: "none",
+  });
+
+  const {
+    data: ap,
+    isLoading: loadingAp,
+    isSuccess: apSuccess,
+  } = useApQuery({
+    status: "active",
+    pagination: "none",
+  });
+
+  const {
+    data: accountNumber,
+    isLoading: loadingAccountNumber,
+    isSuccess: accountSuccess,
+  } = useAccountNumberQuery({
+    status: "active",
+    pagination: "none",
+  });
+
+  const {
+    data: location,
+    isLoading: loadingLocation,
+    isSuccess: locationSuccess,
+  } = useLocationQuery({
+    status: "active",
+    pagination: "none",
+  });
+
+  const {
+    data: cutOff,
+    isLoading: loadingCutOff,
+    isSuccess: cutOffSuccess,
+  } = useCutOffQuery({
+    status: "active",
+    pagination: "none",
   });
 
   useEffect(() => {
@@ -151,7 +212,7 @@ const AppBar = () => {
         >
           <Outlet />
         </Suspense>
-        {openNotification && <NotificationSchedule />}
+        {openNotification && hasAccess(["ap_tag"]) && <NotificationSchedule />}
       </Paper>
       <Menu
         anchorEl={anchorEl}

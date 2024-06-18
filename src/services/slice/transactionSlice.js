@@ -2,7 +2,6 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   fieldsRequired: [],
-  header: "",
   isExpanded: false,
   filterBy: "",
   filter: false,
@@ -19,9 +18,6 @@ const transactionSlice = createSlice({
   reducers: {
     setFieldsRequired: (state, action) => {
       state.fieldsRequired = action.payload;
-    },
-    setHeader: (state, action) => {
-      state.header = action.payload;
     },
     setIsExpanded: (state, action) => {
       state.isExpanded = action.payload;
@@ -44,11 +40,9 @@ const transactionSlice = createSlice({
     setAddDocuments: (state, action) => {
       state.addDocuments = action.payload;
     },
-
     setClearSearch: (state, action) => {
       state.clearSearch = action.payload;
     },
-
     resetTransaction: () => {
       return initialState;
     },
@@ -58,7 +52,6 @@ const transactionSlice = createSlice({
 export const {
   setFieldsRequired,
   resetTransaction,
-  setHeader,
   setIsExpanded,
   setFilterBy,
   setFilter,

@@ -46,7 +46,6 @@ import {
 import TransactionModal from "../../components/customs/modal/TransactionModal";
 import {
   useDocumentTypeQuery,
-  useSupplierQuery,
   useTagYearMonthQuery,
 } from "../../services/store/request";
 import { setFilterBy } from "../../services/slice/transactionSlice";
@@ -71,11 +70,6 @@ const TaggingTable = ({
   const viewMenu = useSelector((state) => state.menu.viewMenu);
 
   const filterBy = useSelector((state) => state.transaction.filterBy);
-
-  const { data: supplier, isLoading: loadingSupplier } = useSupplierQuery({
-    status: "active",
-    pagination: "none",
-  });
 
   const { data: documentType, isLoading: loadingDocument } =
     useDocumentTypeQuery({
@@ -143,10 +137,7 @@ const TaggingTable = ({
           </TableHead>
 
           <TableBody>
-            {loadingDocument ||
-            loadingSupplier ||
-            isLoading ||
-            loadingTagYearMonth ? (
+            {loadingDocument || isLoading || loadingTagYearMonth ? (
               <TableRow>
                 <TableCell colSpan={6} align="center">
                   <Lottie
@@ -169,9 +160,6 @@ const TaggingTable = ({
                 const document = documentType?.result?.find(
                   (doc) => tag?.documentType?.id === doc?.id || null
                 );
-                const supplierName = supplier?.result?.find(
-                  (sup) => tag?.supplier?.id === sup?.id || null
-                );
 
                 return (
                   <TableRow
@@ -183,7 +171,7 @@ const TaggingTable = ({
                       tag?.gas_status === "pending" &&
                         dispatch(setUpdateMenu(true));
                       tag?.gas_status === "archived" &&
-                        dispatch(setViewMenu(true));
+                        dispatch(setUpdateMenu(true));
                       tag?.gas_status === "returned" &&
                         dispatch(setUpdateMenu(true));
                       tag?.gas_status === "received" &&
@@ -194,20 +182,22 @@ const TaggingTable = ({
                         dispatch(setViewMenu(true));
                     }}
                   >
-                    <TableCell>{tag?.tag_no}</TableCell>
+                    <TableCell>
+                      {tag?.tag_year} - {tag?.tag_no}
+                    </TableCell>
                     <TableCell>
                       <Typography className="tag-transaction-company-name">
-                        {supplierName?.company_name === null ? (
+                        {tag?.supplier?.name === null ? (
                           <>&mdash;</>
                         ) : (
-                          supplierName?.company_name
+                          tag?.supplier?.name
                         )}
                       </Typography>
                       <Typography className="tag-transaction-company-tin">
-                        {supplierName === null ? (
+                        {tag?.supplier === null ? (
                           <>&mdash;</>
                         ) : (
-                          supplierName?.tin
+                          tag?.supplier?.tin
                         )}
                       </Typography>
                     </TableCell>
@@ -218,6 +208,9 @@ const TaggingTable = ({
                       </Typography>
                       <Typography className="tag-transaction-company-type">
                         {document === null ? <>&mdash;</> : document?.name}
+                      </Typography>
+                      <Typography className="tag-transaction-company-name">
+                        {`${tag?.invoice_no || ""}`}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">

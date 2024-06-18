@@ -25,7 +25,6 @@ import "../../components/styles/TagTransaction.scss";
 import { schedTaggingHeader } from "../../services/constants/headers";
 import {
   setFilterBy,
-  setHeader,
   setIsExpanded,
 } from "../../services/slice/transactionSlice";
 import "../../components/styles/TransactionModal.scss";
@@ -35,12 +34,13 @@ import ScheduleModal from "../../components/customs/modal/ScheduleModal";
 import { resetMenu, setCreateMenu } from "../../services/slice/menuSlice";
 import useTransactionHook from "../../services/hooks/useTransactionHook";
 import ScheduleTable from "./ScheduleTable";
+import { setHeader } from "../../services/slice/headerSlice";
 
 const RequestSchedule = () => {
   const dispatch = useDispatch();
 
   const isExpanded = useSelector((state) => state.transaction.isExpanded);
-  const header = useSelector((state) => state.transaction.header) || "Pending";
+  const header = useSelector((state) => state.headers.header) || "Pending";
   const createMenu = useSelector((state) => state.menu.createMenu);
 
   const {
