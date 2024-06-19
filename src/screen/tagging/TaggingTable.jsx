@@ -137,7 +137,10 @@ const TaggingTable = ({
           </TableHead>
 
           <TableBody>
-            {loadingDocument || isLoading || loadingTagYearMonth ? (
+            {loadingDocument ||
+            isLoading ||
+            loadingTagYearMonth ||
+            isFetching ? (
               <TableRow>
                 <TableCell colSpan={6} align="center">
                   <Lottie

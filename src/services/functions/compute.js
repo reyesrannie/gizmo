@@ -1,6 +1,6 @@
 export const totalAmount = (taxComputation) => {
   const total = (taxComputation?.result || []).reduce((acc, curr) => {
-    return curr?.credit_from !== null && curr?.credit_from === "Check Amount"
+    return curr?.credit_from !== null
       ? acc + 0
       : acc + parseFloat(curr?.amount || 0);
   }, 0);

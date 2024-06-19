@@ -62,6 +62,7 @@ const TransactionTable = ({
   onRowChange,
   onOrderBy,
   state,
+  isFetching,
 }) => {
   const [anchorE1, setAnchorE1] = useState(null);
   const dispatch = useDispatch();
@@ -148,7 +149,10 @@ const TransactionTable = ({
           </TableHead>
 
           <TableBody>
-            {loadingDocument || isLoading || loadingTagYearMonth ? (
+            {loadingDocument ||
+            isLoading ||
+            loadingTagYearMonth ||
+            isFetching ? (
               <TableRow>
                 <TableCell colSpan={6} align="center">
                   <Lottie

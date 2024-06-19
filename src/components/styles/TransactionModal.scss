@@ -310,7 +310,15 @@
 .tax-computation-button-container {
   &.MuiBox-root {
     display: flex;
-    align-items: flex-end;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+  }
+}
+
+.tax-computation-button-update {
+  &.MuiBox-root {
+    display: flex;
     justify-content: flex-end;
     gap: 10px;
     width: 100%;

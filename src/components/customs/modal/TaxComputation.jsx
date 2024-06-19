@@ -20,6 +20,7 @@ import {
 } from "../../../services/slice/menuSlice";
 import {
   useAccountTitlesQuery,
+  useArchiveTaxComputationMutation,
   useCreateTaxComputationMutation,
   useSupplierQuery,
   useSupplierTypeQuery,
@@ -77,6 +78,8 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
     useCreateTaxComputationMutation();
   const [updateTaxComputation, { isLoading: loadingUpdate }] =
     useUpdateTaxComputationMutation();
+  const [archiveTaxComputation, { isLoading: loadingArchive }] =
+    useArchiveTaxComputationMutation();
 
   const {
     control,
@@ -223,21 +226,25 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
       watch("stype_id")?.required_fields?.forEach((fieldName) => {
         const field = supplierTypeReqFields.find((f) => fieldName === f.name);
         if (field) {
-          updatedFields[field.name] = amount / field.divide;
+          let baseAmount = Math.round((amount / field.divide) * 100) / 100;
+          updatedFields[field.name] = baseAmount;
           updatedFields["vat_input_tax"] =
-            updatedFields[field.name] * field.vit;
+            Math.round(baseAmount * field.vit * 100) / 100;
           updatedFields["wtax_payable_cr"] =
-            (updatedFields[field.name] * parseFloat(watch("stype_id")?.wtax)) /
-            100;
+            Math.round(
+              ((baseAmount * parseFloat(watch("stype_id")?.wtax)) / 100) * 100
+            ) / 100;
           updatedFields["total_invoice_amount"] =
-            updatedFields["vat_input_tax"] + updatedFields[field.name];
-          updatedFields["debit"] =
-            watch("mode") === "Debit" ? updatedFields[field.name] : 0;
-          updatedFields["credit"] =
-            watch("mode") === "Credit" ? updatedFields[field.name] : 0;
+            Math.round((updatedFields["vat_input_tax"] + baseAmount) * 100) /
+            100;
+          updatedFields["debit"] = watch("mode") === "Debit" ? baseAmount : 0;
+          updatedFields["credit"] = watch("mode") === "Credit" ? baseAmount : 0;
           updatedFields["account"] =
-            updatedFields["total_invoice_amount"] -
-            updatedFields["wtax_payable_cr"];
+            Math.round(
+              (updatedFields["total_invoice_amount"] -
+                updatedFields["wtax_payable_cr"]) *
+                100
+            ) / 100;
         }
       });
 
@@ -259,6 +266,27 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
       debit: "",
       credit: "",
       account: "",
+      credit_from: null,
+    };
+
+    Object.entries(obj).forEach(([key, value]) => {
+      setValue(key, value);
+    });
+
+    setRequiredFieldsValue(watch("amount"));
+  };
+
+  const handleClearCredit = () => {
+    const obj = {
+      vat_local: "",
+      vat_service: "",
+      nvat_local: "",
+      nvat_service: "",
+      vat_input_tax: "",
+      wtax_payable_cr: "",
+      total_invoice_amount: "",
+      credit: "",
+      account: "",
     };
 
     Object.entries(obj).forEach(([key, value]) => {
@@ -277,12 +305,27 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
       coa_id: submitData?.coa_id?.id,
       id: taxData?.id,
       voucher: voucher,
+      credit_from:
+        submitData?.mode === "Credit" ? submitData?.credit_from : null,
     };
-
     try {
       const res = update
         ? await updateTaxComputation(obj).unwrap()
         : await createTaxComputation(obj).unwrap();
+      enqueueSnackbar(res?.message, { variant: "success" });
+      dispatch(setCreateTax(false));
+      dispatch(setUpdateTax(false));
+    } catch (error) {
+      objectError(error, setError, enqueueSnackbar);
+    }
+  };
+
+  const archiveHandler = async () => {
+    const obj = {
+      id: taxData?.id,
+    };
+    try {
+      const res = await archiveTaxComputation(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
       dispatch(setCreateTax(false));
       dispatch(setUpdateTax(false));
@@ -389,7 +432,7 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
             getOptionLabel={(option) => `${option}`}
             isOptionEqualToValue={(option, value) => option === value}
             onClose={() => {
-              handleClear();
+              handleClearCredit();
             }}
             renderInput={(params) => (
               <MuiTextField
@@ -551,33 +594,47 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
         </Box>
 
         <Box className="tax-computation-button-container">
-          <Button
-            variant="contained"
-            color="warning"
-            type="submit"
-            className="add-transaction-button"
-            disabled={
-              disableCreate ||
-              watch("amount") === 0 ||
-              watch("amount") === "0" ||
-              watch("amount") === "0.00"
-            }
-          >
-            {update ? "Update" : "Create"}
-          </Button>
+          <Box>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={() => {
+                archiveHandler();
+              }}
+              className="add-transaction-button"
+            >
+              Archive
+            </Button>
+          </Box>
+          <Box className="tax-computation-button-update">
+            <Button
+              variant="contained"
+              color="warning"
+              type="submit"
+              className="add-transaction-button"
+              disabled={
+                disableCreate ||
+                watch("amount") === 0 ||
+                watch("amount") === "0" ||
+                watch("amount") === "0.00"
+              }
+            >
+              {update ? "Update" : "Create"}
+            </Button>
 
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => {
-              dispatch(setCreateTax(false));
-              dispatch(setUpdateTax(false));
-              dispatch(setTaxData(null));
-            }}
-            className="add-transaction-button"
-          >
-            Cancel
-          </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => {
+                dispatch(setCreateTax(false));
+                dispatch(setUpdateTax(false));
+                dispatch(setTaxData(null));
+              }}
+              className="add-transaction-button"
+            >
+              Cancel
+            </Button>
+          </Box>
         </Box>
       </form>
 
@@ -587,7 +644,8 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
           supplierTypeLoading ||
           loadingTIN ||
           loadingTax ||
-          loadingUpdate
+          loadingUpdate ||
+          loadingArchive
         }
         className="loading-role-create"
       >

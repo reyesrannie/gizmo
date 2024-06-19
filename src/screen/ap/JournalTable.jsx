@@ -246,7 +246,7 @@ const JournalTable = ({
                         {document === null ? <>&mdash;</> : document?.name}
                       </Typography>
                       <Typography className="tag-transaction-company-name">
-                        {`${tag?.invoice_no || ""}`}
+                        {`${tag?.transactions?.invoice_no || ""}`}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">

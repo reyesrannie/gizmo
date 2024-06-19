@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import {
   Box,
@@ -210,7 +210,6 @@ const TransactionModal = ({ create, view, update, receive }) => {
     control,
     handleSubmit,
     setValue,
-    setError,
     watch,
     clearErrors,
     formState: { errors },
@@ -297,6 +296,8 @@ const TransactionModal = ({ create, view, update, receive }) => {
     );
   };
 
+  const hasRun = useRef(false);
+
   useEffect(() => {
     if (
       supplySuccess &&
@@ -304,7 +305,8 @@ const TransactionModal = ({ create, view, update, receive }) => {
       apSuccess &&
       accountSuccess &&
       locationSuccess &&
-      !create
+      !create &&
+      !hasRun?.current
     ) {
       const tagMonthYear = dayjs(transactionData?.tag_year, "YYMM").toDate();
       const docs = insertDocument(transactionData);
@@ -330,6 +332,7 @@ const TransactionModal = ({ create, view, update, receive }) => {
         setValue(key, value);
       });
       setOldValues(values);
+      hasRun.current = true;
     }
   }, [
     documents,
@@ -351,7 +354,6 @@ const TransactionModal = ({ create, view, update, receive }) => {
     setValue,
     setOldValues,
   ]);
-
   useEffect(() => {
     if (transactionData?.reference_no !== "") {
       const docs = insertDocument(transactionData);
@@ -423,7 +425,21 @@ const TransactionModal = ({ create, view, update, receive }) => {
           })
         : dispatch(resetMenu());
 
-      dispatch(setMenuData(resData));
+      dispatch(
+        setMenuData({
+          ...resData,
+          coverage_from: transactionData?.coverage_from
+            ? dayjs(new Date(transactionData.coverage_from), {
+                locale: AdapterDayjs.locale,
+              })
+            : null,
+          coverage_to: transactionData?.coverage_to
+            ? dayjs(new Date(transactionData.coverage_to), {
+                locale: AdapterDayjs.locale,
+              })
+            : null,
+        })
+      );
 
       dispatch(resetLogs());
       dispatch(setUpdateCount(0));
@@ -494,11 +510,11 @@ const TransactionModal = ({ create, view, update, receive }) => {
   };
 
   const checkChanges = () => {
-    const item = getValues();
+    const currentValues = getValues();
     const propertiesToCheck = [
       "tin",
-      "reference_no",
-      "document_type",
+      "invoice_no",
+      "documentType",
       "date_invoice",
       "amount",
       "description",
@@ -506,7 +522,7 @@ const TransactionModal = ({ create, view, update, receive }) => {
     ];
 
     const hasChanges = !propertiesToCheck.every((prop) =>
-      deepEqual(item?.[prop], oldValues?.[prop])
+      deepEqual(currentValues?.[prop], oldValues?.[prop])
     );
 
     return hasChanges;
@@ -1022,11 +1038,12 @@ const TransactionModal = ({ create, view, update, receive }) => {
               </LoadingButton>
 
               <LoadingButton
-                disabled={checkChanges()}
                 variant="contained"
                 color="success"
                 className="add-transaction-button"
+                disabled={checkChanges()}
                 onClick={() => dispatch(setReceive(!checkChanges()))}
+                // onClick={() => checkChanges()}
                 startIcon={<HandshakeOutlinedIcon />}
               >
                 Receive

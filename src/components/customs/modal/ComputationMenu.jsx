@@ -33,13 +33,7 @@ import noData from "../../../assets/lottie/NoData.json";
 
 import vat from "../../../assets/svg/vat.svg";
 import Lottie from "lottie-react";
-import {
-  totalAccount,
-  totalAccountData,
-  totalAmountData,
-  totalCredit,
-  totalVat,
-} from "../../../services/functions/compute";
+import { totalCredit, totalVat } from "../../../services/functions/compute";
 
 const ComputationMenu = ({ details, schedule }) => {
   const dispatch = useDispatch();

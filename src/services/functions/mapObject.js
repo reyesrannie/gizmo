@@ -162,25 +162,22 @@ const mapResponse = async (
         (item) => transactionData?.document_type_id === item.id
       ) || null,
 
-    supplier: {
-      address: supplier?.company_address,
-      id: supplier?.id,
-      name: supplier?.company_name,
-      proprietor: supplier?.proprietor,
-      receipt_name: supplier?.receipt_name,
-      tin: supplier?.tin,
-    },
+    supplier: supplier?.company_name || "",
+    tin: supplier,
 
     invoice_no: transactionData?.invoice_no || "",
     description: transactionData?.description || "",
     purchase_amount: transactionData?.purchase_amount || "",
-    coverage_from: transactionData?.coverage_from || null,
-    coverage_to: transactionData?.coverage_to || null,
+    amount: transactionData?.purchase_amount?.toString() || "",
+
     accountNumber:
       accountNumber?.result?.find(
         (item) => transactionData?.account_number_id === item.id
       ) || null,
     apTagging:
+      ap?.result?.find((item) => transactionData?.ap_tagging_id === item.id) ||
+      null,
+    ap:
       ap?.result?.find((item) => transactionData?.ap_tagging_id === item.id) ||
       null,
     tag_year: transactionData?.tag_year || "",

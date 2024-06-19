@@ -1159,6 +1159,15 @@ export const jsonServerAPI = createApi({
       }),
       invalidatesTags: ["TaxComputation", "VPCheckNumber", "VPJournalNumber"],
     }),
+    archiveTaxComputation: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/archive/transaction-tax/${payload.id}`,
+        method: "PATCH",
+        body: payload,
+      }),
+      invalidatesTags: ["TaxComputation", "VPCheckNumber", "VPJournalNumber"],
+    }),
 
     //Check
     checkEntries: builder.query({
@@ -1793,6 +1802,7 @@ export const {
   useTaxComputationQuery,
   useCreateTaxComputationMutation,
   useUpdateTaxComputationMutation,
+  useArchiveTaxComputationMutation,
 
   useCheckEntriesQuery,
   useCreateCheckEntriesMutation,
