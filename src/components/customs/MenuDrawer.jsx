@@ -80,9 +80,9 @@ const MenuDrawer = () => {
                       }`}
                       onClick={() => {
                         navigate(menus.path);
+                        dispatch(resetHeader());
                         dispatch(resetMenuWithoutDrawer());
                         dispatch(resetTransaction());
-                        dispatch(resetHeader());
                         isTablet && dispatch(setDrawer(false));
                       }}
                     >
@@ -137,6 +137,7 @@ const MenuDrawer = () => {
                             onClick={() => {
                               dispatch(resetTransaction());
                               dispatch(resetMenuWithoutDrawer());
+                              dispatch(resetHeader());
                               navigate(child.path);
                               isTablet && dispatch(setDrawer(false));
                             }}

@@ -1,12 +1,15 @@
 import React from "react";
 
 import {
-  Autocomplete,
   Badge,
   Box,
+  Checkbox,
   Dialog,
+  FormControlLabel,
   IconButton,
+  LinearProgress,
   Menu,
+  Stack,
   Table,
   TableBody,
   TableCell,
@@ -25,8 +28,6 @@ import Lottie from "lottie-react";
 
 import { useDispatch, useSelector } from "react-redux";
 
-import ClearIcon from "@mui/icons-material/Clear";
-
 import RemoveRedEyeOutlinedIcon from "@mui/icons-material/RemoveRedEyeOutlined";
 import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
 
@@ -34,6 +35,8 @@ import loading from "../../assets/lottie/Loading-2.json";
 import noData from "../../assets/lottie/NoData.json";
 import StatusIndicator from "../../components/customs/StatusIndicator";
 import "../../components/styles/TagTransaction.scss";
+import "../../components/styles/UserModal.scss";
+import "../../components/styles/AccountsPayable.scss";
 
 import { useState } from "react";
 
@@ -47,29 +50,33 @@ import {
 } from "../../services/slice/menuSlice";
 
 import {
+  useApQuery,
   useDocumentTypeQuery,
   useReadTransactionCheckMutation,
-  useSupplierQuery,
-  useTagYearMonthQuery,
 } from "../../services/store/request";
-import { setFilterBy } from "../../services/slice/transactionSlice";
 import TransactionModalAp from "../../components/customs/modal/TransactionModalAp";
 import { setVoucher } from "../../services/slice/optionsSlice";
 import TransactionModalApprover from "../../components/customs/modal/TransactionModalApprover";
 import socket from "../../services/functions/serverSocket";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import orderBySchema from "../../schemas/orderBySchema";
+import Autocomplete from "../../components/customs/AutoComplete";
+import ClearIcon from "@mui/icons-material/Clear";
+import { AdditionalFunction } from "../../services/functions/AdditionalFunction";
+import { hasAccess } from "../../services/functions/access";
 
 const CheckTable = ({
   params,
   onSortTable,
   isLoading,
-  status,
+  onShowAll,
   isError,
   tagTransaction,
   isFetching,
   onPageChange,
   onRowChange,
   onOrderBy,
-  state,
 }) => {
   const [anchorE1, setAnchorE1] = useState(null);
   const dispatch = useDispatch();
@@ -78,20 +85,17 @@ const CheckTable = ({
   const viewMenu = useSelector((state) => state.menu.viewMenu);
   const checkMenu = useSelector((state) => state.menu.checkMenu);
   const voidMenu = useSelector((state) => state.menu.voidMenu);
+  const { convertToPeso } = AdditionalFunction();
+
   const viewAccountingEntries = useSelector(
     (state) => state.menu.viewAccountingEntries
   );
-
-  const filterBy = useSelector((state) => state.transaction.filterBy);
 
   const { data: documentType, isLoading: loadingDocument } =
     useDocumentTypeQuery({
       status: "active",
       pagination: "none",
     });
-
-  const { data: tagYearMonth, isLoading: loadingTagYearMonth } =
-    useTagYearMonthQuery({ state: state });
 
   const [readTransaction] = useReadTransactionCheckMutation();
 
@@ -105,17 +109,51 @@ const CheckTable = ({
     } catch (error) {}
   };
 
+  const { data: ap } = useApQuery({
+    status: "active",
+    pagination: "none",
+  });
+
+  const {
+    control,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(orderBySchema),
+    defaultValues: {
+      orderBy: null,
+    },
+  });
+
   return (
     <Box className="tag-transaction-body-container">
       <TableContainer className="tag-transaction-table-container">
         <Table stickyHeader>
           <TableHead>
+            {hasAccess(["cutOff_approver"]) && (
+              <TableRow className="table-header1-ap">
+                <TableCell colSpan={7}>
+                  <Stack flexDirection={"row"} justifyContent="space-between">
+                    <FormControlLabel
+                      className="check-box-archive-ap"
+                      control={<Checkbox color="secondary" />}
+                      label="Show All"
+                      checked={params?.complete === true}
+                      onChange={() =>
+                        onShowAll(params?.complete === true ? "" : true)
+                      }
+                    />
+                  </Stack>
+                </TableCell>
+              </TableRow>
+            )}
             <TableRow className="table-header1-import-tag-transaction">
               <TableCell>Tag #.</TableCell>
               <TableCell>Supplier</TableCell>
               <TableCell>
                 <TableSortLabel
-                  active={params.tagYear !== ""}
+                  active={params.allocation !== ""}
                   onClick={(e) => setAnchorE1(e.currentTarget)}
                   direction={"desc"}
                   IconComponent={FilterAltOutlinedIcon}
@@ -123,17 +161,20 @@ const CheckTable = ({
                   Allocation
                 </TableSortLabel>
 
-                {params.tagYear !== "" && (
+                {params.allocation !== "" && (
                   <TableSortLabel
                     active={
-                      params.sorts === "gtag_no" || params.sorts === "-gtag_no"
+                      params.sorts === "updated_at" ||
+                      params.sorts === "-updated_at"
                     }
                     onClick={() =>
                       onSortTable(
-                        params.sorts === "gtag_no" ? "-gtag_no" : "gtag_no"
+                        params.sorts === "updated_at"
+                          ? "-updated_at"
+                          : "updated_at"
                       )
                     }
-                    direction={params.sorts === `-gtag_no` ? "asc" : "desc"}
+                    direction={params.sorts === "updated_at" ? "asc" : "desc"}
                   />
                 )}
               </TableCell>
@@ -162,7 +203,7 @@ const CheckTable = ({
           </TableHead>
 
           <TableBody>
-            {loadingDocument || isLoading || loadingTagYearMonth ? (
+            {loadingDocument || isLoading ? (
               <TableRow>
                 <TableCell colSpan={6} align="center">
                   <Lottie
@@ -225,6 +266,13 @@ const CheckTable = ({
                           <>&mdash;</>
                         ) : (
                           tag?.transactions?.supplier?.tin
+                        )}
+                      </Typography>
+                      <Typography className="tag-transaction-company-name">
+                        {tag?.amount === null ? (
+                          <>&mdash;</>
+                        ) : (
+                          convertToPeso(tag?.amount)
                         )}
                       </Typography>
                     </TableCell>
@@ -300,6 +348,15 @@ const CheckTable = ({
               })
             )}
           </TableBody>
+          {isFetching && (
+            <TableFooter style={{ position: "sticky", bottom: 0 }}>
+              <TableRow className="table-footer-tag-transaction">
+                <TableCell colSpan={6}>
+                  <LinearProgress color="secondary" />
+                </TableCell>
+              </TableRow>
+            </TableFooter>
+          )}
           {!isFetching && !isError && (
             <TableFooter style={{ position: "sticky", bottom: 0 }}>
               <TableRow className="table-footer-tag-transaction">
@@ -340,35 +397,38 @@ const CheckTable = ({
         className="table-sort-tag-transaction"
       >
         <Autocomplete
-          disablePortal
-          id="combo-box-demo"
-          options={tagYearMonth?.result || []}
-          onKeyDown={(e) =>
-            e?.key.toLowerCase() === "enter" && e.preventDefault()
+          control={control}
+          name={"orderBy"}
+          options={ap?.result || []}
+          getOptionLabel={(option) =>
+            `${option.company_code} - ${option.description}`
           }
-          value={filterBy || null}
-          onClose={(e) => {
-            dispatch(setFilterBy(e.target.textContent));
-            onOrderBy(e.target.textContent);
+          isOptionEqualToValue={(option, value) => option?.id === value?.id}
+          onClose={() => {
+            watch("orderBy") !== null && onOrderBy(watch("orderBy")?.id);
             setAnchorE1(null);
           }}
-          renderInput={(params, e) => (
+          renderInput={(params) => (
             <TextField
+              name="orderBy"
               {...params}
-              label="Tag Year Month"
+              label="AP "
+              size="small"
+              variant="outlined"
+              error={Boolean(errors.orderBy)}
+              helperText={errors.orderBy?.message}
               className="table-sort-select-tag-transaction"
               InputProps={{
                 ...params.InputProps,
                 endAdornment: (
                   <>
                     {params.InputProps.endAdornment}
-
-                    {filterBy !== "" && (
+                    {watch("orderBy") && (
                       <IconButton
                         onClick={() => {
+                          setValue("orderBy", null);
+
                           onOrderBy("");
-                          dispatch(setFilterBy(""));
-                          setAnchorE1(null);
                         }}
                         className="icon-clear-user"
                       >

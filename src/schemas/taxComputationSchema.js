@@ -1,9 +1,12 @@
 import * as Yup from "yup";
 
 const taxComputationSchema = Yup.object({
+  isTaxBased: Yup.boolean(),
   amount: Yup.string().required("Amount is required"),
   vat_input_tax: Yup.string().required("Vat input tax is required"),
   wtax_payable_cr: Yup.string().required("Wtax payable tax is required"),
+  account: Yup.string().required("Amount is required"),
+
   mode: Yup.string().required("Mode payable tax is required"),
   remarks: Yup.string().nullable(),
   credit_from: Yup.string().nullable(),
@@ -11,6 +14,11 @@ const taxComputationSchema = Yup.object({
     .typeError("Supplier Type  is required")
     .required("Supplier Type  is required")
     .typeError("Supplier Type  is required"),
+
+  location_id: Yup.object()
+    .typeError("Location is required")
+    .required("Location is required")
+    .typeError("Location is required"),
 
   vat_local: Yup.string().when("stype_id", {
     is: (stype_id) => stype_id?.required_fields?.includes("vat_local"),

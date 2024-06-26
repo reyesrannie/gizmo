@@ -129,15 +129,6 @@ const TransactionModalAp = ({
   });
 
   const {
-    data: location,
-    isLoading: loadingLocation,
-    isSuccess: locationSuccess,
-  } = useLocationQuery({
-    status: "active",
-    pagination: "none",
-  });
-
-  const {
     data: atc,
     isLoading: loadingAtc,
     isSuccess: atcSuccess,
@@ -231,7 +222,6 @@ const TransactionModalAp = ({
       date_invoice: null,
       document_type: null,
       store: null,
-      location_id: null,
       atc_id: null,
       remarks: "",
       voucherType: voucher,
@@ -252,7 +242,6 @@ const TransactionModalAp = ({
       supplySuccess &&
       documentSuccess &&
       accountSuccess &&
-      locationSuccess &&
       atcSuccess &&
       typeSuccess &&
       successTitles
@@ -284,9 +273,6 @@ const TransactionModalAp = ({
       if (update) {
         const updateField = {
           atc_id: atc?.result?.find((item) => transactionData?.atc === item.id),
-          location_id: location?.result?.find(
-            (item) => transactionData?.location === item?.id
-          ),
           remarks: transactionData?.remarks,
         };
 
@@ -299,7 +285,6 @@ const TransactionModalAp = ({
     supplySuccess,
     documentSuccess,
     accountSuccess,
-    locationSuccess,
     document,
     accountNumber,
     tin,
@@ -324,7 +309,6 @@ const TransactionModalAp = ({
       id: transactionData?.id,
       transaction_id: transactionData?.transactions?.id,
       atc_id: submitData?.atc_id?.id,
-      location_id: submitData?.location_id?.id,
       cip_no: submitData?.cip_no,
       remarks: submitData?.remarks,
       coa_id: submitData?.coa_id?.id,
@@ -591,31 +575,6 @@ const TransactionModalAp = ({
           />
         )}
 
-        {update && (
-          <Autocomplete
-            disabled={disableCheck}
-            control={control}
-            name={"location_id"}
-            options={location?.result || []}
-            getOptionLabel={(option) => `${option.code} - ${option.name}`}
-            isOptionEqualToValue={(option, value) =>
-              option?.code === value?.code
-            }
-            renderInput={(params) => (
-              <MuiTextField
-                name="location_id"
-                {...params}
-                label="Location *"
-                size="small"
-                variant="outlined"
-                error={Boolean(errors.location_id)}
-                helperText={errors.location_id?.message}
-                className="transaction-form-textBox"
-              />
-            )}
-          />
-        )}
-
         <AppTextBox
           disabled={true}
           money
@@ -831,8 +790,8 @@ const TransactionModalAp = ({
                   <Typography
                     className="amount-tax"
                     color={
-                      parseFloat(totalAmount(taxComputation)) ===
-                      parseFloat(watch("amount"))
+                      parseFloat(totalAmount(taxComputation)).toFixed(2) ===
+                      parseFloat(watch("amount")).toFixed(2)
                         ? "black"
                         : "error"
                     }
@@ -913,7 +872,6 @@ const TransactionModalAp = ({
           loadingTIN ||
           loadingDocument ||
           loadingAccountNumber ||
-          loadingLocation ||
           loadingAtc ||
           loadingType ||
           loadingTitles ||

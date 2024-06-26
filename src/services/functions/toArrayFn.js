@@ -1,4 +1,5 @@
 import moment from "moment";
+import { totalAccount } from "./compute";
 
 export const arrayFieldOne = (menuData, sumAmount, voucher, document) => {
   const doc = document?.result?.find(
@@ -62,15 +63,11 @@ export const mapTitleAccount = (item) => {
 };
 
 export const coaArrays = (coa, taxComputation, supTypePercent, coa_id) => {
-  const sumInputTax = (taxComputation || []).reduce((acc, curr) => {
+  const sumInputTax = (taxComputation?.result || []).reduce((acc, curr) => {
     return acc + parseFloat(curr?.vat_input_tax || 0);
   }, 0);
 
-  const sumAccount = (taxComputation || []).reduce((acc, curr) => {
-    return parseFloat(curr.credit)
-      ? acc - parseFloat(curr.account)
-      : acc + parseFloat(curr.account);
-  }, 0);
+  const sumAccount = totalAccount(taxComputation)?.toFixed(2);
 
   const isWtaxSame = (arr) => {
     if (arr.length === 0) return true;
@@ -81,7 +78,8 @@ export const coaArrays = (coa, taxComputation, supTypePercent, coa_id) => {
   let zeroCount = 0;
 
   const item = coa?.map((item) => mapTitleAccount(item));
-  const wtaxCount = taxComputation
+
+  const wtaxCount = taxComputation?.result
     ?.map((item) => {
       const wtax = supTypePercent?.find(
         (type) => item?.stype_id === type?.id
@@ -156,7 +154,38 @@ export const coaArrays = (coa, taxComputation, supTypePercent, coa_id) => {
     return wtaxCount;
   };
 
-  const itemCollected = [...item, inputTax, filteredItem(), accountPayable];
+  const theSameCoa = () => {
+    if (item?.length > 0) {
+      const result = item.reduce((acc, curr) => {
+        const existingItem = acc.find(
+          (entry) =>
+            entry.name === curr.name &&
+            entry.mode === curr.mode &&
+            entry.code === curr.code
+        );
+
+        if (existingItem) {
+          existingItem.amount = (
+            parseFloat(existingItem.amount) + parseFloat(curr.amount)
+          ).toFixed(2);
+        } else {
+          acc.push({ ...curr });
+        }
+
+        return acc;
+      }, []);
+
+      return result;
+    }
+    return item;
+  };
+
+  const itemCollected = [
+    ...theSameCoa(),
+    inputTax,
+    filteredItem(),
+    accountPayable,
+  ];
 
   const sortedData = itemCollected.sort((a, b) => {
     if (a.mode === "Debit" && b.mode === "Credit") {

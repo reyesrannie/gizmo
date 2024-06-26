@@ -48,7 +48,11 @@ const mapViewTransaction = (
 ) => {
   const values = {
     is_offset: transactionData?.is_offset === 1 ? true : false,
-    tag_no: transactionData?.tag_no || "",
+    tag_no:
+      `${
+        ap?.result?.find((item) => transactionData?.apTagging?.id === item.id)
+          ?.company_code
+      } - ${transactionData?.tag_year} - ${transactionData?.tag_no}` || "",
     supplier: transactionData?.supplier?.name || "",
     proprietor: transactionData?.supplier?.proprietor || "",
     company_address: transactionData?.supplier?.address || "",
@@ -112,7 +116,9 @@ const mapAPTransaction = (transactionData, tin, document, accountNumber) => {
       (item) => transactionData?.document_type_id === item.id
     ) || null;
   const values = {
-    tag_no: `${transactionData?.tag_year} - ${transactionData?.tag_no}` || "",
+    tag_no:
+      `${transactionData?.ap_tagging} - ${transactionData?.tag_year} - ${transactionData?.tag_no}` ||
+      "",
     supplier: supplierTin?.company_name || "",
     proprietor: supplierTin?.proprietor || "",
     company_address: supplierTin?.company_address || "",

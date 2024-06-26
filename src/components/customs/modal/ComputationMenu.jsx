@@ -33,7 +33,11 @@ import noData from "../../../assets/lottie/NoData.json";
 
 import vat from "../../../assets/svg/vat.svg";
 import Lottie from "lottie-react";
-import { totalCredit, totalVat } from "../../../services/functions/compute";
+import {
+  totalAccountPaginated,
+  totalCredit,
+  totalVat,
+} from "../../../services/functions/compute";
 
 const ComputationMenu = ({ details, schedule }) => {
   const dispatch = useDispatch();
@@ -308,8 +312,7 @@ const ComputationMenu = ({ details, schedule }) => {
                     <TableCell align="center">
                       <Typography className="tag-transaction-company-type">
                         {convertToPeso(
-                          tax?.credit_from !== null &&
-                            tax?.credit_from === "Check Amount"
+                          tax?.credit_from === "Check Amount"
                             ? 0
                             : tax?.total_invoice_amount
                         )}
@@ -395,7 +398,7 @@ const ComputationMenu = ({ details, schedule }) => {
                 </TableCell>
                 <TableCell align="right">
                   <Typography className="tag-transaction-company-type">
-                    {convertToPeso(vatInput + debit - (wtax + credit))}
+                    {convertToPeso(totalAccountPaginated(taxComputation))}
                   </Typography>
                 </TableCell>
                 <TableCell colSpan={2} />

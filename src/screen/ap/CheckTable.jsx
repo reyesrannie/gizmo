@@ -1,12 +1,11 @@
 import React from "react";
 
 import {
-  Autocomplete,
   Badge,
   Box,
   Dialog,
   IconButton,
-  Menu,
+  LinearProgress,
   Table,
   TableBody,
   TableCell,
@@ -16,7 +15,6 @@ import {
   TablePagination,
   TableRow,
   TableSortLabel,
-  TextField,
   Typography,
 } from "@mui/material";
 
@@ -25,10 +23,7 @@ import Lottie from "lottie-react";
 
 import { useDispatch, useSelector } from "react-redux";
 
-import ClearIcon from "@mui/icons-material/Clear";
-
 import RemoveRedEyeOutlinedIcon from "@mui/icons-material/RemoveRedEyeOutlined";
-import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
 
 import loading from "../../assets/lottie/Loading-2.json";
 import noData from "../../assets/lottie/NoData.json";
@@ -49,13 +44,12 @@ import {
 import {
   useDocumentTypeQuery,
   useReadTransactionCheckMutation,
-  useTagYearMonthQuery,
 } from "../../services/store/request";
-import { setFilterBy } from "../../services/slice/transactionSlice";
 import TransactionModalAp from "../../components/customs/modal/TransactionModalAp";
 import { setVoucher } from "../../services/slice/optionsSlice";
 import TransactionModalApprover from "../../components/customs/modal/TransactionModalApprover";
 import socket from "../../services/functions/serverSocket";
+import { AdditionalFunction } from "../../services/functions/AdditionalFunction";
 
 const CheckTable = ({
   params,
@@ -66,17 +60,15 @@ const CheckTable = ({
   isFetching,
   onPageChange,
   onRowChange,
-  onOrderBy,
-  state,
 }) => {
-  const [anchorE1, setAnchorE1] = useState(null);
   const dispatch = useDispatch();
   const menuData = useSelector((state) => state.menu.menuData);
   const receiveMenu = useSelector((state) => state.menu.receiveMenu);
   const updateMenu = useSelector((state) => state.menu.updateMenu);
   const viewMenu = useSelector((state) => state.menu.viewMenu);
   const checkMenu = useSelector((state) => state.menu.checkMenu);
-  const filterBy = useSelector((state) => state.transaction.filterBy);
+  const { convertToPeso } = AdditionalFunction();
+
   const viewAccountingEntries = useSelector(
     (state) => state.menu.viewAccountingEntries
   );
@@ -86,9 +78,6 @@ const CheckTable = ({
       status: "active",
       pagination: "none",
     });
-
-  const { data: tagYearMonth, isLoading: loadingTagYearMonth } =
-    useTagYearMonthQuery({ state: state });
 
   const [readTransaction] = useReadTransactionCheckMutation();
 
@@ -110,30 +99,7 @@ const CheckTable = ({
             <TableRow className="table-header1-import-tag-transaction">
               <TableCell>Tag #.</TableCell>
               <TableCell>Supplier</TableCell>
-              <TableCell>
-                <TableSortLabel
-                  active={params.tagYear !== ""}
-                  onClick={(e) => setAnchorE1(e.currentTarget)}
-                  direction={"desc"}
-                  IconComponent={FilterAltOutlinedIcon}
-                >
-                  Allocation
-                </TableSortLabel>
-
-                {params.tagYear !== "" && (
-                  <TableSortLabel
-                    active={
-                      params.sorts === "gtag_no" || params.sorts === "-gtag_no"
-                    }
-                    onClick={() =>
-                      onSortTable(
-                        params.sorts === "gtag_no" ? "-gtag_no" : "gtag_no"
-                      )
-                    }
-                    direction={params.sorts === `-gtag_no` ? "asc" : "desc"}
-                  />
-                )}
-              </TableCell>
+              <TableCell>Allocation</TableCell>
 
               <TableCell align="center"> Status</TableCell>
               <TableCell align="center">
@@ -159,10 +125,7 @@ const CheckTable = ({
           </TableHead>
 
           <TableBody>
-            {isFetching ||
-            loadingDocument ||
-            isLoading ||
-            loadingTagYearMonth ? (
+            {loadingDocument || isLoading ? (
               <TableRow>
                 <TableCell colSpan={6} align="center">
                   <Lottie
@@ -210,6 +173,9 @@ const CheckTable = ({
                       tag?.state === "For Approval" &&
                         dispatch(setCheckMenu(true));
 
+                      // tag?.state === "For Approval" &&
+                      //   dispatch(setUpdateMenu(true));
+
                       tag?.state === "approved" && dispatch(setViewMenu(true));
                     }}
                   >
@@ -229,6 +195,13 @@ const CheckTable = ({
                           <>&mdash;</>
                         ) : (
                           tag?.transactions?.supplier?.tin
+                        )}
+                      </Typography>
+                      <Typography className="tag-transaction-company-name">
+                        {tag?.amount === null ? (
+                          <>&mdash;</>
+                        ) : (
+                          convertToPeso(tag?.amount)
                         )}
                       </Typography>
                     </TableCell>
@@ -313,6 +286,15 @@ const CheckTable = ({
               })
             )}
           </TableBody>
+          {isFetching && (
+            <TableFooter style={{ position: "sticky", bottom: 0 }}>
+              <TableRow className="table-footer-tag-transaction">
+                <TableCell colSpan={6}>
+                  <LinearProgress color="secondary" />
+                </TableCell>
+              </TableRow>
+            </TableFooter>
+          )}
           {!isFetching && !isError && (
             <TableFooter style={{ position: "sticky", bottom: 0 }}>
               <TableRow className="table-footer-tag-transaction">
@@ -343,59 +325,6 @@ const CheckTable = ({
           )}
         </Table>
       </TableContainer>
-
-      <Menu
-        anchorEl={anchorE1}
-        open={Boolean(anchorE1)}
-        onClose={() => {
-          setAnchorE1(null);
-        }}
-        className="table-sort-tag-transaction"
-      >
-        <Autocomplete
-          disablePortal
-          id="combo-box-demo"
-          options={tagYearMonth?.result || []}
-          onKeyDown={(e) =>
-            e?.key.toLowerCase() === "enter" && e.preventDefault()
-          }
-          value={filterBy || null}
-          onClose={(e) => {
-            dispatch(setFilterBy(e.target.textContent));
-            onOrderBy(e.target.textContent);
-            setAnchorE1(null);
-          }}
-          renderInput={(params, e) => (
-            <TextField
-              {...params}
-              label="Tag Year Month"
-              className="table-sort-select-tag-transaction"
-              InputProps={{
-                ...params.InputProps,
-                endAdornment: (
-                  <>
-                    {params.InputProps.endAdornment}
-
-                    {filterBy !== "" && (
-                      <IconButton
-                        onClick={() => {
-                          onOrderBy("");
-                          dispatch(setFilterBy(""));
-                          setAnchorE1(null);
-                        }}
-                        className="icon-clear-user"
-                      >
-                        <ClearIcon />
-                      </IconButton>
-                    )}
-                  </>
-                ),
-              }}
-            />
-          )}
-          disableClearable
-        />
-      </Menu>
 
       <Dialog
         open={receiveMenu}

@@ -6,6 +6,11 @@ import {
   TextField as MuiTextField,
   Button,
   Dialog,
+  InputAdornment,
+  IconButton,
+  FormControlLabel,
+  Checkbox,
+  Tooltip,
 } from "@mui/material";
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -22,6 +27,7 @@ import {
   useAccountTitlesQuery,
   useArchiveTaxComputationMutation,
   useCreateTaxComputationMutation,
+  useLocationQuery,
   useSupplierQuery,
   useSupplierTypeQuery,
   useUpdateTaxComputationMutation,
@@ -38,6 +44,7 @@ import { supplierTypeReqFields } from "../../../services/constants/requiredField
 import { enqueueSnackbar } from "notistack";
 import { objectError } from "../../../services/functions/errorResponse";
 import { totalAmount } from "../../../services/functions/compute";
+
 import "../../styles/RolesModal.scss";
 
 const TaxComputation = ({ create, update, taxComputation, schedule }) => {
@@ -74,6 +81,15 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
     pagination: "none",
   });
 
+  const {
+    data: location,
+    isLoading: loadingLocation,
+    isSuccess: locationSuccess,
+  } = useLocationQuery({
+    status: "active",
+    pagination: "none",
+  });
+
   const [createTaxComputation, { isLoading: loadingTax }] =
     useCreateTaxComputationMutation();
   const [updateTaxComputation, { isLoading: loadingUpdate }] =
@@ -92,6 +108,7 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
   } = useForm({
     resolver: yupResolver(taxComputationSchema),
     defaultValues: {
+      isTaxBased: true,
       transaction_id: "",
       stype_id: null,
       coa_id: null,
@@ -109,6 +126,7 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
       account: "",
       remarks: "",
       credit_from: null,
+      location_id: null,
     },
   });
 
@@ -117,7 +135,13 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
   };
 
   useEffect(() => {
-    if (successTitles && supplierTypeSuccess && supplySuccess && create) {
+    if (
+      locationSuccess &&
+      successTitles &&
+      supplierTypeSuccess &&
+      supplySuccess &&
+      create
+    ) {
       const sumAmount = totalAmount(taxComputation);
 
       const obj = {
@@ -151,9 +175,22 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
         ) - sumAmount
       );
     }
-    if (successTitles && supplierTypeSuccess && supplySuccess && update) {
+    if (
+      locationSuccess &&
+      successTitles &&
+      supplierTypeSuccess &&
+      supplySuccess &&
+      update
+    ) {
       const obj = {
+        isTaxBased:
+          taxData?.isTaxBased === null || taxData?.isTaxBased === undefined
+            ? true
+            : taxData?.isTaxBased,
         transaction_id: schedule ? null : taxData?.transaction_id,
+        location_id:
+          location?.result?.find((item) => taxData?.location_id === item?.id) ||
+          null,
         stype_id: supplierTypes?.result?.find(
           (item) => taxData?.stype_id === item?.id
         ),
@@ -187,6 +224,7 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
       dispatch(setSupplyType(tinType));
     }
   }, [
+    locationSuccess,
     successTitles,
     supplierTypes,
     supplierTypeSuccess,
@@ -226,25 +264,25 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
       watch("stype_id")?.required_fields?.forEach((fieldName) => {
         const field = supplierTypeReqFields.find((f) => fieldName === f.name);
         if (field) {
-          let baseAmount = Math.round((amount / field.divide) * 100) / 100;
+          let baseAmount = parseFloat(amount / field.divide);
           updatedFields[field.name] = baseAmount;
-          updatedFields["vat_input_tax"] =
-            Math.round(baseAmount * field.vit * 100) / 100;
-          updatedFields["wtax_payable_cr"] =
-            Math.round(
-              ((baseAmount * parseFloat(watch("stype_id")?.wtax)) / 100) * 100
-            ) / 100;
-          updatedFields["total_invoice_amount"] =
-            Math.round((updatedFields["vat_input_tax"] + baseAmount) * 100) /
-            100;
+          updatedFields["vat_input_tax"] = parseFloat(baseAmount * field.vit);
+          updatedFields["wtax_payable_cr"] = parseFloat(
+            ((baseAmount * parseFloat(watch("stype_id")?.wtax)) / 100).toFixed(
+              2
+            )
+          );
+          updatedFields["total_invoice_amount"] = parseFloat(
+            updatedFields["vat_input_tax"] + baseAmount
+          );
           updatedFields["debit"] = watch("mode") === "Debit" ? baseAmount : 0;
           updatedFields["credit"] = watch("mode") === "Credit" ? baseAmount : 0;
-          updatedFields["account"] =
-            Math.round(
-              (updatedFields["total_invoice_amount"] -
-                updatedFields["wtax_payable_cr"]) *
-                100
-            ) / 100;
+          updatedFields["account"] = parseFloat(
+            watch("isTaxBased")
+              ? updatedFields["total_invoice_amount"] -
+                  updatedFields["wtax_payable_cr"]
+              : baseAmount - updatedFields["wtax_payable_cr"]
+          );
         }
       });
 
@@ -252,6 +290,17 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
         setValue(key, value);
       });
     }
+  };
+
+  const handleChangeAmount = () => {
+    const wtaxString = watch("wtax_payable_cr");
+    const wtaxNumber = parseFloat(wtaxString.replace(/,/g, ""));
+    setValue(
+      "account",
+      watch("isTaxBased")
+        ? parseFloat(parseFloat(watch("amount")) - parseFloat(wtaxNumber))
+        : parseFloat(parseFloat(watch("debit")) - parseFloat(wtaxNumber))
+    );
   };
 
   const handleClear = () => {
@@ -299,6 +348,7 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
   const submitHandler = async (submitData) => {
     const obj = {
       ...submitData,
+      location_id: submitData?.location_id?.id,
       transaction_id: schedule ? null : transactionData?.transactions?.id,
       schedule_id: schedule ? transactionData?.id : null,
       stype_id: submitData?.stype_id?.id,
@@ -308,6 +358,7 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
       credit_from:
         submitData?.mode === "Credit" ? submitData?.credit_from : null,
     };
+
     try {
       const res = update
         ? await updateTaxComputation(obj).unwrap()
@@ -362,6 +413,9 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
           options={accountTitles?.result || []}
           getOptionLabel={(option) => `${option.code} - ${option.name}`}
           isOptionEqualToValue={(option, value) => option?.id === value?.id}
+          onClose={() => {
+            handleClear();
+          }}
           renderInput={(params) => (
             <MuiTextField
               name="coa_id"
@@ -376,6 +430,27 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
           )}
           disableClearable
         />
+
+        <Autocomplete
+          control={control}
+          name={"location_id"}
+          options={location?.result || []}
+          getOptionLabel={(option) => `${option.code} - ${option.name}`}
+          isOptionEqualToValue={(option, value) => option?.code === value?.code}
+          renderInput={(params) => (
+            <MuiTextField
+              name="location_id"
+              {...params}
+              label="Location *"
+              size="small"
+              variant="outlined"
+              error={Boolean(errors.location_id)}
+              helperText={errors.location_id?.message}
+              className="transaction-form-textBox"
+            />
+          )}
+        />
+
         <Autocomplete
           control={control}
           name={"stype_id"}
@@ -531,6 +606,32 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
           className="transaction-tax-textBox"
           error={Boolean(errors?.wtax_payable_cr)}
           helperText={errors?.wtax_payable_cr?.message}
+          handleClear={handleChangeAmount}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <Tooltip
+                  title={
+                    <Typography className="form-title-text-note">
+                      Amount will based on Gross Amount if checked; otherwise,
+                      compute based on Tax Base.
+                    </Typography>
+                  }
+                  arrow
+                  color="secondary"
+                >
+                  <FormControlLabel
+                    control={<Checkbox color="secondary" />}
+                    checked={watch("isTaxBased")}
+                    onChange={() => {
+                      setValue("isTaxBased", !watch("isTaxBased"));
+                      handleClear();
+                    }}
+                  />
+                </Tooltip>
+              </InputAdornment>
+            ),
+          }}
         />
         <AppTextBox
           money
@@ -613,7 +714,6 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
               type="submit"
               className="add-transaction-button"
               disabled={
-                disableCreate ||
                 watch("amount") === 0 ||
                 watch("amount") === "0" ||
                 watch("amount") === "0.00"

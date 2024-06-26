@@ -18,21 +18,34 @@ const SearchText = ({ onSearchData }) => {
     }
   }, [clearSearch]);
 
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      onSearchData(e.target.value);
+    }
+    if (e.key === "Backspace" && e.target.value.length <= 1) {
+      setSearch("");
+      onSearchData("");
+    }
+  };
+
+  const handleChange = (e) => {
+    const value = e.target.value;
+    setSearch(value);
+    if (value === "") {
+      onSearchData("");
+    }
+  };
+
   return (
     <Paper className="search-container">
       <InputBase
         className="input-base"
         placeholder="Search"
         value={search}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            onSearchData(e.target.value);
-          }
-        }}
-        onChange={(e) => setSearch(e.target.value)}
+        onKeyDown={handleKeyDown}
+        onChange={handleChange}
       />
-
-      <Divider orientation="vertical" className="search-devider" />
+      <Divider orientation="vertical" className="search-divider" />
       <IconButton
         onClick={() => {
           if (search) {

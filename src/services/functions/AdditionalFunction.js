@@ -47,5 +47,9 @@ export const AdditionalFunction = () => {
     return true;
   };
 
-  return { insertDocument, deepEqual };
+  const convertToPeso = (value) => {
+    return value?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  };
+
+  return { insertDocument, deepEqual, convertToPeso };
 };

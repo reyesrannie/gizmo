@@ -8,9 +8,11 @@ const useApproverHook = () => {
     per_page: 10,
     pagination: null,
     sorts: null,
-    tagYear: "",
+    allocation: "",
     state: "For Approval",
     access: "approver",
+    allocation: "",
+    complete: "",
   });
 
   const onPageChange = (_, page) => {
@@ -60,10 +62,18 @@ const useApproverHook = () => {
     }));
   };
 
-  const onOrderBy = (tagYear) => {
+  const onOrderBy = (allocation) => {
     setParams((currentValue) => ({
       ...currentValue,
-      tagYear: tagYear,
+      allocation: allocation,
+      page: 1,
+    }));
+  };
+
+  const onShowAll = (showAll) => {
+    setParams((currentValue) => ({
+      ...currentValue,
+      complete: showAll,
       page: 1,
     }));
   };
@@ -77,6 +87,7 @@ const useApproverHook = () => {
     onSortTable,
     onStateChange,
     onOrderBy,
+    onShowAll,
   };
 };
 

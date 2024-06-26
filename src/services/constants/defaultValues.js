@@ -1,5 +1,6 @@
 export const transactionDefaultValue = () => {
   const defaultValues = {
+    tag_no: "",
     is_offset: false,
     description: "",
     supplier: "",

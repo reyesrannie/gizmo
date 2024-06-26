@@ -28,6 +28,8 @@ function AppTextBox({
   remove = false,
   handleRemove,
   enableEnter = false,
+  select = false,
+  handleClear,
   ...textField
 }) {
   const [showPassword, setShowPassword] = useState(false);
@@ -53,6 +55,12 @@ function AppTextBox({
           const formattedValue = formatValue(e.target.value);
           onChange(formattedValue);
         };
+        const handleEditAuto = (e) => {
+          onChange(e);
+          if (handleClear) {
+            handleClear();
+          }
+        };
         return (
           <>
             {money ? (
@@ -74,13 +82,17 @@ function AppTextBox({
                 name={name}
                 {...textField}
                 error={error}
-                onChange={onChange} // send value to hook form
+                onChange={handleEditAuto} // send value to hook form
                 inputRef={ref}
                 value={value}
                 size="small"
                 variant={variant}
                 label={label}
                 helperText={helperText}
+                isAllowed={(values) => {
+                  const { floatValue } = values;
+                  return floatValue >= 0;
+                }}
               />
             ) : (
               <TextField

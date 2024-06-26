@@ -2,7 +2,7 @@ import * as Yup from "yup";
 
 const transactionSchema = Yup.object({
   ap: Yup.object().required("AP number required").typeError("AP is required"),
-
+  tag_no: Yup.string().nullable(),
   tin: Yup.object().required("TIN is required"),
   name_in_receipt: Yup.string().required("Name is required"),
   proprietor: Yup.string().nullable(),

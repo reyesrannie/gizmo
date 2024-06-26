@@ -45,6 +45,7 @@ const ApprovingJournal = () => {
     onSortTable,
     onOrderBy,
     onStateChange,
+    onShowAll,
   } = useApproverHook();
 
   const {
@@ -137,6 +138,7 @@ const ApprovingJournal = () => {
           tagTransaction={tagTransaction}
           onOrderBy={onOrderBy}
           state={"For Approval"}
+          onShowAll={onShowAll}
         />
       )}
       {header === "Void" && (
@@ -152,6 +154,7 @@ const ApprovingJournal = () => {
           tagTransaction={tagTransaction}
           onOrderBy={onOrderBy}
           state={"For Voiding"}
+          onShowAll={onShowAll}
         />
       )}
       {header === "Pending Void" && (
@@ -167,6 +170,7 @@ const ApprovingJournal = () => {
           tagTransaction={tagTransaction}
           onOrderBy={onOrderBy}
           state={"voiding"}
+          onShowAll={onShowAll}
         />
       )}
       {header === "Checked" && (
@@ -182,6 +186,7 @@ const ApprovingJournal = () => {
           tagTransaction={tagTransaction}
           onOrderBy={onOrderBy}
           state="checked"
+          onShowAll={onShowAll}
         />
       )}
       {header === "Returned" && (
@@ -197,6 +202,7 @@ const ApprovingJournal = () => {
           tagTransaction={tagTransaction}
           onOrderBy={onOrderBy}
           state="returned"
+          onShowAll={onShowAll}
         />
       )}
       {header === "History" && (
@@ -212,6 +218,7 @@ const ApprovingJournal = () => {
           tagTransaction={tagTransaction}
           onOrderBy={onOrderBy}
           state={""}
+          onShowAll={onShowAll}
         />
       )}
     </Box>

@@ -95,6 +95,7 @@ import {
 import { AdditionalFunction } from "../../../services/functions/AdditionalFunction";
 import { convertToArray } from "../../../services/functions/toArrayFn";
 import DateChecker from "../../../services/functions/DateChecker";
+import { resetHeader } from "../../../services/slice/headerSlice";
 
 const TransactionModal = ({ create, view, update, receive }) => {
   const dispatch = useDispatch();
@@ -562,18 +563,16 @@ const TransactionModal = ({ create, view, update, receive }) => {
         className="form-container-transaction"
         onSubmit={handleSubmit(submitHandler)}
       >
-        {false && (
-          <AppTextBox
-            disabled={view}
-            control={control}
-            name={"tag_no"}
-            label={"Tag Number *"}
-            color="primary"
-            className="transaction-form-textBox"
-            error={Boolean(errors?.tag_no)}
-            helperText={errors?.tag_no?.message}
-          />
-        )}
+        <AppTextBox
+          disabled
+          control={control}
+          name={"tag_no"}
+          label={"Tag Number *"}
+          color="primary"
+          className="transaction-form-textBox"
+          error={Boolean(errors?.tag_no)}
+          helperText={errors?.tag_no?.message}
+        />
         <Autocomplete
           disabled={view}
           control={control}
@@ -1233,6 +1232,7 @@ const TransactionModal = ({ create, view, update, receive }) => {
             navigate(navigateTo);
             dispatch(resetPrompt());
             dispatch(resetMenu());
+            dispatch(resetHeader());
           }}
         />
       </Dialog>
