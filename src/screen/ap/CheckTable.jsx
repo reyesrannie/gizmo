@@ -46,7 +46,7 @@ import {
   useReadTransactionCheckMutation,
 } from "../../services/store/request";
 import TransactionModalAp from "../../components/customs/modal/TransactionModalAp";
-import { setVoucher } from "../../services/slice/optionsSlice";
+import { resetOption, setVoucher } from "../../services/slice/optionsSlice";
 import TransactionModalApprover from "../../components/customs/modal/TransactionModalApprover";
 import socket from "../../services/functions/serverSocket";
 import { AdditionalFunction } from "../../services/functions/AdditionalFunction";
@@ -329,7 +329,10 @@ const CheckTable = ({
       <Dialog
         open={receiveMenu}
         className="transaction-modal-dialog"
-        onClose={() => dispatch(setReceiveMenu(false))}
+        onClose={() => {
+          dispatch(setReceiveMenu(false));
+          dispatch(resetOption());
+        }}
       >
         <TransactionModalAp transactionData={menuData} receive />
       </Dialog>
@@ -337,7 +340,10 @@ const CheckTable = ({
       <Dialog
         open={viewMenu}
         className="transaction-modal-dialog"
-        onClose={() => dispatch(setViewMenu(false))}
+        onClose={() => {
+          dispatch(setViewMenu(false));
+          dispatch(resetOption());
+        }}
       >
         <TransactionModalApprover transactionData={menuData} approved ap />
       </Dialog>
@@ -345,7 +351,10 @@ const CheckTable = ({
       <Dialog
         open={updateMenu}
         className="transaction-modal-dialog"
-        onClose={() => dispatch(setUpdateMenu(false))}
+        onClose={() => {
+          dispatch(setUpdateMenu(false));
+          dispatch(resetOption());
+        }}
       >
         <TransactionModalAp transactionData={menuData} update viewVoucher />
       </Dialog>
@@ -353,7 +362,10 @@ const CheckTable = ({
       <Dialog
         open={viewAccountingEntries}
         className="transaction-modal-dialog"
-        onClose={() => dispatch(setViewAccountingEntries(false))}
+        onClose={() => {
+          dispatch(setViewAccountingEntries(false));
+          dispatch(resetOption());
+        }}
       >
         <TransactionModalApprover viewAccountingEntries />
       </Dialog>
@@ -361,7 +373,10 @@ const CheckTable = ({
       <Dialog
         open={checkMenu}
         className="transaction-modal-dialog"
-        onClose={() => dispatch(setCheckMenu(false))}
+        onClose={() => {
+          dispatch(setCheckMenu(false));
+          dispatch(resetOption());
+        }}
       >
         <TransactionModalAp transactionData={menuData} checked />
       </Dialog>

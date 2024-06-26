@@ -30,6 +30,7 @@ function AppTextBox({
   enableEnter = false,
   select = false,
   handleClear,
+  sample,
   ...textField
 }) {
   const [showPassword, setShowPassword] = useState(false);
@@ -56,10 +57,16 @@ function AppTextBox({
           onChange(formattedValue);
         };
         const handleEditAuto = (e) => {
-          onChange(e);
+          const rawValue = e.target.value.replace(/,/g, "");
+          onChange(rawValue);
           if (handleClear) {
             handleClear();
           }
+        };
+
+        const formatDisplayValue = (value) => {
+          const num = Number(value);
+          return num % 1 === 0 ? num : num.toFixed(2);
         };
         return (
           <>
@@ -71,7 +78,6 @@ function AppTextBox({
                   }
                 }}
                 customInput={TextField}
-                decimalScale={2}
                 thousandSeparator={","}
                 autoFocus={false}
                 autoComplete="off"
@@ -84,7 +90,7 @@ function AppTextBox({
                 error={error}
                 onChange={handleEditAuto} // send value to hook form
                 inputRef={ref}
-                value={value}
+                value={formatDisplayValue(value)}
                 size="small"
                 variant={variant}
                 label={label}

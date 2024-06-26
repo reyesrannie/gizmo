@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 
 import {
   Box,
@@ -100,6 +100,8 @@ const TransactionModalAp = ({
   const isReturn = useSelector((state) => state.prompt.return);
 
   const { enqueueSnackbar } = useSnackbar();
+
+  const hasRun = useRef(false);
 
   const {
     data: tin,
@@ -231,10 +233,7 @@ const TransactionModalAp = ({
 
   const validateAmount = (amount) => {
     const total = totalAmount(taxComputation);
-
-    dispatch(
-      setDisableCheck(total?.toFixed(2) !== parseFloat(amount)?.toFixed(2))
-    );
+    return total?.toFixed(2) !== parseFloat(amount)?.toFixed(2);
   };
 
   useEffect(() => {
@@ -244,7 +243,8 @@ const TransactionModalAp = ({
       accountSuccess &&
       atcSuccess &&
       typeSuccess &&
-      successTitles
+      successTitles &&
+      !hasRun?.current
     ) {
       const tagMonthYear = dayjs(transactionData?.tag_year, "YYMM").toDate();
       const mapData = mapAPTransaction(
@@ -280,6 +280,7 @@ const TransactionModalAp = ({
           setValue(key, value);
         });
       }
+      hasRun.current = true;
     }
   }, [
     supplySuccess,
@@ -553,7 +554,6 @@ const TransactionModalAp = ({
         {update && (
           <Autocomplete
             control={control}
-            disabled={disableCheck}
             name={"atc_id"}
             options={atc?.result || []}
             getOptionLabel={(option) => `${option.code} - ${option.name}`}
@@ -656,7 +656,6 @@ const TransactionModalAp = ({
                 const formattedDate = `20${year}-${month
                   .toString()
                   .padStart(2, "0")}`;
-
                 return (
                   <Paper
                     elevation={3}
@@ -672,7 +671,7 @@ const TransactionModalAp = ({
                       <Box className="tax-box-value">
                         <Typography className="amount-tax">
                           Amount: <span>&#8369;</span>{" "}
-                          {convertToPeso(tax.amount)}
+                          {convertToPeso(parseFloat(tax.amount).toFixed(2))}
                         </Typography>
                         <Typography className="amount-tax">
                           Code: {type?.code}
@@ -684,42 +683,56 @@ const TransactionModalAp = ({
                       <Box className="tax-box-value">
                         <Typography className="amount-tax">
                           Input Tax: <span>&#8369;</span>{" "}
-                          {convertToPeso(tax.vat_input_tax)}
+                          {convertToPeso(
+                            parseFloat(tax.vat_input_tax).toFixed(2)
+                          )}
                         </Typography>
-                        {tax?.nvat_local !== "0.00" && (
+                        {tax?.nvat_local !== 0 && (
                           <Typography className="amount-tax">
                             Tax Based: <span>&#8369;</span>{" "}
-                            {convertToPeso(tax.nvat_local)}
+                            {convertToPeso(
+                              parseFloat(tax.nvat_local).toFixed(2)
+                            )}
                           </Typography>
                         )}
-                        {tax?.nvat_service !== "0.00" && (
+                        {tax?.nvat_service !== 0 && (
                           <Typography className="amount-tax">
                             Tax Based: <span>&#8369;</span>{" "}
-                            {convertToPeso(tax.nvat_service)}
+                            {convertToPeso(
+                              parseFloat(tax.nvat_service).toFixed(2)
+                            )}
                           </Typography>
                         )}
-                        {tax?.vat_local !== "0.00" && (
+                        {tax?.vat_local !== 0 && (
                           <Typography className="amount-tax">
                             Tax Based: <span>&#8369;</span>{" "}
-                            {convertToPeso(tax.vat_local)}
+                            {convertToPeso(
+                              parseFloat(tax.vat_local).toFixed(2)
+                            )}
                           </Typography>
                         )}
-                        {tax?.vat_service !== "0.00" && (
+                        {tax?.vat_service !== 0 && (
                           <Typography className="amount-tax">
                             Tax Based: <span>&#8369;</span>{" "}
-                            {convertToPeso(tax.vat_service)}
+                            {convertToPeso(
+                              parseFloat(tax.vat_service).toFixed(2)
+                            )}
                           </Typography>
                         )}
 
                         <Typography className="amount-tax">
                           Wtax Payable Expanded: <span>&#8369;</span>{" "}
-                          {convertToPeso(tax.wtax_payable_cr)}
+                          {convertToPeso(
+                            parseFloat(tax.wtax_payable_cr).toFixed(2)
+                          )}
                         </Typography>
                       </Box>
                       <Box className="tax-box-value">
                         <Typography className="amount-tax">
                           Total invoice amount: <span>&#8369;</span>{" "}
-                          {convertToPeso(tax.total_invoice_amount)}
+                          {convertToPeso(
+                            parseFloat(tax.total_invoice_amount).toFixed(2)
+                          )}
                         </Typography>
                       </Box>
                     </Box>
@@ -759,22 +772,19 @@ const TransactionModalAp = ({
                         )}
                       </Box>
                       <Box className="tax-box-value">
-                        {tax.credit_from !== null && (
-                          <Typography className="amount-tax">
-                            Credit From : {tax.credit_from}
-                          </Typography>
-                        )}
                         <Typography className="amount-tax">
                           {tax?.mode} : <span>&#8369;</span>{" "}
                           {tax?.mode === "Debit"
-                            ? convertToPeso(tax.debit)
-                            : convertToPeso(tax.credit)}
+                            ? convertToPeso(parseFloat(tax.debit).toFixed(2))
+                            : convertToPeso(parseFloat(tax.credit).toFixed(2))}
                         </Typography>
                         <Typography className="amount-tax">
                           Total amount: <span>&#8369;</span>{" "}
                           {tax?.mode === "Debit"
-                            ? convertToPeso(tax.account)
-                            : `-${convertToPeso(tax.credit)}`}
+                            ? convertToPeso(parseFloat(tax.account).toFixed(2))
+                            : `-${convertToPeso(
+                                parseFloat(tax.credit).toFixed(2)
+                              )}`}
                         </Typography>
                       </Box>
                     </Box>
@@ -847,7 +857,9 @@ const TransactionModalAp = ({
                 color="warning"
                 type="submit"
                 className="add-transaction-button"
-                disabled={disableCheck}
+                disabled={
+                  errorTaxComputation || validateAmount(watch("amount"))
+                }
               >
                 Checked
               </LoadingButton>

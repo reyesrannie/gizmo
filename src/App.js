@@ -11,9 +11,12 @@ import CloseIcon from "@mui/icons-material/Close";
 import { SnackbarProvider, closeSnackbar } from "notistack";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import CacheBuster from "react-cache-buster";
+import pkg from "../package.json";
 
 function App() {
   const screenHS = useMediaQuery("(max-height:681px)");
+  const { version } = pkg;
   const theme = createTheme({
     components: {
       MuiDrawer: {
@@ -79,19 +82,21 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
-      <SnackbarProvider
-        maxSnack={3}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-        action={(key) => (
-          <IconButton onClick={() => closeSnackbar(key)}>
-            <CloseIcon className="icon-properties" />
-          </IconButton>
-        )}
-      >
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <Routing />
-        </LocalizationProvider>
-      </SnackbarProvider>
+      <CacheBuster currentVersion={version} isEnabled={true}>
+        <SnackbarProvider
+          maxSnack={3}
+          anchorOrigin={{ vertical: "top", horizontal: "right" }}
+          action={(key) => (
+            <IconButton onClick={() => closeSnackbar(key)}>
+              <CloseIcon className="icon-properties" />
+            </IconButton>
+          )}
+        >
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <Routing />
+          </LocalizationProvider>
+        </SnackbarProvider>
+      </CacheBuster>
     </ThemeProvider>
   );
 }

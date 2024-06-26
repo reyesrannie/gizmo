@@ -12,7 +12,7 @@ import {
   Checkbox,
   Tooltip,
 } from "@mui/material";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import vat from "../../../assets/svg/vat.svg";
 import { useForm } from "react-hook-form";
@@ -125,7 +125,6 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
       credit: "",
       account: "",
       remarks: "",
-      credit_from: null,
       location_id: null,
     },
   });
@@ -133,6 +132,8 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
   const checkField = (field) => {
     return watch("stype_id")?.required_fields?.includes(field);
   };
+
+  const hasRun = useRef(false);
 
   useEffect(() => {
     if (
@@ -143,7 +144,6 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
       create
     ) {
       const sumAmount = totalAmount(taxComputation);
-
       const obj = {
         transaction_id: transactionData?.id,
         stype_id: schedule
@@ -180,7 +180,8 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
       successTitles &&
       supplierTypeSuccess &&
       supplySuccess &&
-      update
+      update &&
+      !hasRun?.current
     ) {
       const obj = {
         isTaxBased:
@@ -198,7 +199,7 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
           (item) => taxData?.coa_id === item?.id
         ),
         mode: taxData?.mode,
-        amount: parseFloat(taxData?.amount).toFixed(2),
+        amount: parseFloat(taxData?.amount),
         vat_local: taxData?.vat_local,
         vat_service: taxData?.vat_service,
         nvat_local: taxData?.nvat_local,
@@ -210,7 +211,6 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
         credit: taxData?.credit,
         account: taxData?.account,
         remarks: taxData?.remarks || "",
-        credit_from: taxData?.credit_from,
       };
 
       Object.entries(obj).forEach(([key, value]) => {
@@ -222,6 +222,7 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
       );
 
       dispatch(setSupplyType(tinType));
+      hasRun.current = true;
     }
   }, [
     locationSuccess,
@@ -268,9 +269,7 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
           updatedFields[field.name] = baseAmount;
           updatedFields["vat_input_tax"] = parseFloat(baseAmount * field.vit);
           updatedFields["wtax_payable_cr"] = parseFloat(
-            ((baseAmount * parseFloat(watch("stype_id")?.wtax)) / 100).toFixed(
-              2
-            )
+            (baseAmount * parseFloat(watch("stype_id")?.wtax)) / 100
           );
           updatedFields["total_invoice_amount"] = parseFloat(
             updatedFields["vat_input_tax"] + baseAmount
@@ -315,27 +314,6 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
       debit: "",
       credit: "",
       account: "",
-      credit_from: null,
-    };
-
-    Object.entries(obj).forEach(([key, value]) => {
-      setValue(key, value);
-    });
-
-    setRequiredFieldsValue(watch("amount"));
-  };
-
-  const handleClearCredit = () => {
-    const obj = {
-      vat_local: "",
-      vat_service: "",
-      nvat_local: "",
-      nvat_service: "",
-      vat_input_tax: "",
-      wtax_payable_cr: "",
-      total_invoice_amount: "",
-      credit: "",
-      account: "",
     };
 
     Object.entries(obj).forEach(([key, value]) => {
@@ -355,8 +333,6 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
       coa_id: submitData?.coa_id?.id,
       id: taxData?.id,
       voucher: voucher,
-      credit_from:
-        submitData?.mode === "Credit" ? submitData?.credit_from : null,
     };
 
     try {
@@ -498,32 +474,6 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
           )}
           disableClearable
         />
-
-        {watch("mode") === "Credit" && (
-          <Autocomplete
-            control={control}
-            name={"credit_from"}
-            options={["Gross Amount", "Check Amount"]}
-            getOptionLabel={(option) => `${option}`}
-            isOptionEqualToValue={(option, value) => option === value}
-            onClose={() => {
-              handleClearCredit();
-            }}
-            renderInput={(params) => (
-              <MuiTextField
-                name="credit_from"
-                {...params}
-                label="Credit To *"
-                size="small"
-                variant="outlined"
-                error={Boolean(errors.credit_from)}
-                helperText={errors.credit_from?.message}
-                className="transaction-form-textBox"
-              />
-            )}
-            disableClearable
-          />
-        )}
 
         <AppTextBox
           money

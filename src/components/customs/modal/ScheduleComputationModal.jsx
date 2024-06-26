@@ -696,25 +696,25 @@ const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
                           Input Tax: <span>&#8369;</span>{" "}
                           {convertToPeso(tax.vat_input_tax)}
                         </Typography>
-                        {tax?.nvat_local !== "0.00" && (
+                        {tax?.nvat_local !== 0 && (
                           <Typography className="amount-tax">
                             Tax Based: <span>&#8369;</span>{" "}
                             {convertToPeso(tax.nvat_local)}
                           </Typography>
                         )}
-                        {tax?.nvat_service !== "0.00" && (
+                        {tax?.nvat_service !== 0 && (
                           <Typography className="amount-tax">
                             Tax Based: <span>&#8369;</span>{" "}
                             {convertToPeso(tax.nvat_service)}
                           </Typography>
                         )}
-                        {tax?.vat_local !== "0.00" && (
+                        {tax?.vat_local !== 0 && (
                           <Typography className="amount-tax">
                             Tax Based: <span>&#8369;</span>{" "}
                             {convertToPeso(tax.vat_local)}
                           </Typography>
                         )}
-                        {tax?.vat_service !== "0.00" && (
+                        {tax?.vat_service !== 0 && (
                           <Typography className="amount-tax">
                             Tax Based: <span>&#8369;</span>{" "}
                             {convertToPeso(tax.vat_service)}

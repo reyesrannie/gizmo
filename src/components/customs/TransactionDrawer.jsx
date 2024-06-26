@@ -67,6 +67,12 @@ const CustomIndicator = ({ props, item }) => {
       {completed && item?.status === "approved" && (
         <RecommendOutlinedIcon color="success" />
       )}
+      {completed && item?.status === "For Voiding" && (
+        <CheckCircleOutlinedIcon color="secondary" />
+      )}
+      {completed && item?.status === "voided" && (
+        <CheckCircleOutlinedIcon color="error" />
+      )}
       {completed && item?.state === "approved" && (
         <RecommendOutlinedIcon color="success" />
       )}
@@ -287,6 +293,22 @@ const TransactionDrawer = ({
                             {item?.status?.toUpperCase()}
                           </Typography>
                         )}
+                        {item?.status === "For Voiding" && (
+                          <Typography
+                            color="secondary"
+                            className="logs-indicator-transaction"
+                          >
+                            {item?.status?.toUpperCase()}
+                          </Typography>
+                        )}
+                        {item?.status === "voided" && (
+                          <Typography
+                            color="error"
+                            className="logs-indicator-transaction"
+                          >
+                            {item?.status?.toUpperCase()}
+                          </Typography>
+                        )}
                       </Box>
                       {item?.voucher_type !== null && (
                         <Box className={"logs-details-transaction"}>
@@ -360,6 +382,17 @@ const TransactionDrawer = ({
                         </Box>
                       )}
                       {item?.status === "returned" && (
+                        <Box className={"logs-details-transaction"}>
+                          <Typography className="logs-indicator-transaction">
+                            Reason:
+                          </Typography>
+                          <Typography className="logs-details-text-transaction">
+                            {item?.reason}
+                          </Typography>
+                        </Box>
+                      )}
+
+                      {item?.status === "For Voiding" && (
                         <Box className={"logs-details-transaction"}>
                           <Typography className="logs-indicator-transaction">
                             Reason:

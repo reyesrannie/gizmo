@@ -142,6 +142,10 @@ const TaggingTable = ({
                         dispatch(setViewMenu(true));
                       tag?.gas_status === "approved" &&
                         dispatch(setViewMenu(true));
+                      tag?.gas_status === "For Voiding" &&
+                        dispatch(setViewMenu(true));
+                      tag?.gas_status === "voided" &&
+                        dispatch(setViewMenu(true));
                     }}
                   >
                     <TableCell>
@@ -219,29 +223,24 @@ const TaggingTable = ({
                           className="received-indicator"
                         />
                       )}
+                      {tag?.gas_status === "For Voiding" && (
+                        <StatusIndicator
+                          status="For Voiding"
+                          className="pending-indicator"
+                        />
+                      )}
+                      {tag?.gas_status === "voided" && (
+                        <StatusIndicator
+                          status="Voided"
+                          className="inActive-indicator"
+                        />
+                      )}
                     </TableCell>
                     <TableCell align="center">
                       {moment(tag?.updated_at).format("MMM DD YYYY")}
                     </TableCell>
                     <TableCell align="center">
-                      <IconButton
-                        onClick={(e) => {
-                          dispatch(setMenuData(tag));
-
-                          tag?.gas_status === "pending" &&
-                            dispatch(setUpdateMenu(true));
-                          tag?.gas_status === "archived" &&
-                            dispatch(setViewMenu(true));
-                          tag?.gas_status === "returned" &&
-                            dispatch(setUpdateMenu(true));
-                          tag?.gas_status === "received" &&
-                            dispatch(setViewMenu(true));
-                          tag?.gas_status === "checked" &&
-                            dispatch(setViewMenu(true));
-                          tag?.gas_status === "approved" &&
-                            dispatch(setViewMenu(true));
-                        }}
-                      >
+                      <IconButton>
                         <RemoveRedEyeOutlinedIcon className="tag-transaction-icon-actions" />
                       </IconButton>
                     </TableCell>

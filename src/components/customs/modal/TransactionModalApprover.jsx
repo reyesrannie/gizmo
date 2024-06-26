@@ -75,6 +75,7 @@ import { singleError } from "../../../services/functions/errorResponse";
 import ComputationMenu from "./ComputationMenu";
 import { printPDF } from "../../../services/functions/pdfProcess";
 import socket from "../../../services/functions/serverSocket";
+import { totalAccount } from "../../../services/functions/compute";
 
 const TransactionModalApprover = ({
   view,
@@ -223,11 +224,7 @@ const TransactionModalApprover = ({
       successUser &&
       documentSuccess
     ) {
-      const sumAmount = taxComputation?.result?.reduce((acc, curr) => {
-        return parseFloat(curr.credit)
-          ? acc - parseFloat(0)
-          : acc + parseFloat(curr.account);
-      }, 0);
+      const sumAmount = totalAccount(taxComputation);
 
       const supplier = tin?.result?.find(
         (item) => menuData?.transactions?.supplier?.id === item?.id
@@ -294,11 +291,11 @@ const TransactionModalApprover = ({
 
   const checkAtc = () => {
     const hasAtc = atc?.result?.find((item) => item?.id === menuData?.atc);
-
     if (hasAtc?.code === "N/A" || hasAtc?.code === "WC") {
       dispatch(setPrintable(true));
       return false;
     }
+
     return true;
   };
 

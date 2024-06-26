@@ -227,9 +227,6 @@ const ComputationMenu = ({ details, schedule }) => {
                       <Typography className="supplier-company-tin">
                         {apDetails?.description}
                       </Typography>
-                      <Typography className="supplier-company-address">
-                        {locationDetails?.code} - {locationDetails?.name}
-                      </Typography>
                     </Stack>
                   </TableCell>
                 </TableRow>
@@ -245,6 +242,7 @@ const ComputationMenu = ({ details, schedule }) => {
           <TableHead>
             <TableRow className="table-header1-import-tag-transaction">
               <TableCell>Line</TableCell>
+              <TableCell>Location</TableCell>
               <TableCell>Account Title</TableCell>
               <TableCell>Remarks</TableCell>
               <TableCell>Supplier Type</TableCell>
@@ -287,11 +285,21 @@ const ComputationMenu = ({ details, schedule }) => {
               </TableRow>
             ) : (
               taxComputation?.result?.data?.map((tax, index) => {
+                const loc =
+                  location?.result?.find(
+                    (item) => tax?.location_id === item?.id
+                  ) || null;
+
                 return (
                   <TableRow className="table-body-tag-transaction" key={index}>
                     <TableCell>
                       <Typography className="tag-transaction-company-type">
                         {index + 1}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography className="tag-transaction-company-type">
+                        {loc !== null && `${loc?.code} - ${loc?.name}`}
                       </Typography>
                     </TableCell>
                     <TableCell>
@@ -311,11 +319,7 @@ const ComputationMenu = ({ details, schedule }) => {
                     </TableCell>
                     <TableCell align="center">
                       <Typography className="tag-transaction-company-type">
-                        {convertToPeso(
-                          tax?.credit_from === "Check Amount"
-                            ? 0
-                            : tax?.total_invoice_amount
-                        )}
+                        {convertToPeso(tax?.total_invoice_amount)}
                       </Typography>
                     </TableCell>
 
@@ -343,8 +347,7 @@ const ComputationMenu = ({ details, schedule }) => {
 
                     <TableCell align="center">
                       <Typography className="tag-transaction-company-type">
-                        {tax?.credit_from !== null &&
-                        tax?.credit_from === "Check Amount"
+                        {tax?.credit !== 0
                           ? `-${convertToPeso(tax?.account)}`
                           : convertToPeso(tax?.account)}
                       </Typography>
@@ -356,7 +359,7 @@ const ComputationMenu = ({ details, schedule }) => {
 
             {!isError && !loadingTax && (
               <TableRow className="table-body-tag-transaction">
-                <TableCell align="center" colSpan={6} />
+                <TableCell align="center" colSpan={7} />
                 <TableCell align="center">
                   <Typography className="tag-transaction-company-type">
                     Total Debit
@@ -373,7 +376,7 @@ const ComputationMenu = ({ details, schedule }) => {
 
             {!isError && !loadingTax && (
               <TableRow className="table-body-tag-transaction">
-                <TableCell align="center" colSpan={6} />
+                <TableCell align="center" colSpan={7} />
                 <TableCell align="center">
                   <Typography className="tag-transaction-company-type">
                     Total Credit
@@ -390,7 +393,7 @@ const ComputationMenu = ({ details, schedule }) => {
 
             {!isError && !loadingTax && (
               <TableRow className="table-body-tag-transaction">
-                <TableCell align="center" colSpan={6} />
+                <TableCell align="center" colSpan={7} />
                 <TableCell align="right">
                   <Typography className="tag-transaction-company-type">
                     Total

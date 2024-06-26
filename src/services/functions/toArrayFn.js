@@ -54,9 +54,9 @@ export const mapTitleAccount = (item) => {
   const obj = {
     id: item?.id,
     name: item?.coa?.name,
-    mode: item?.credit !== "0.00" ? "Credit" : "Debit",
+    mode: item?.credit !== 0 ? "Credit" : "Debit",
     code: item?.coa?.code,
-    amount: item?.credit !== "0.00" ? item?.credit : item?.debit,
+    amount: item?.credit !== 0 ? item?.credit : item?.debit,
   };
 
   return obj;
