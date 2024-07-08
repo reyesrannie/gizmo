@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 
 import {
   Box,
@@ -184,6 +184,8 @@ const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
   const [completeTransaction, { isLoading: loadingComplete }] =
     useCompleteSchedTransactionMutation();
 
+  const hasRun = useRef(false);
+
   const {
     control,
     handleSubmit,
@@ -204,7 +206,6 @@ const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
       date_invoice: null,
       document_type: null,
       store: null,
-      location_id: null,
       atc_id: null,
       remarks: "",
       coa_id: null,
@@ -231,7 +232,8 @@ const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
       locationSuccess &&
       atcSuccess &&
       typeSuccess &&
-      successTitles
+      successTitles &&
+      !hasRun?.current
     ) {
       const mapData = mapAPScheduleTransaction(
         transactionData,
@@ -248,16 +250,13 @@ const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
         atc_id:
           atc?.result?.find((item) => transactionData?.atc_id === item.id) ||
           null,
-        location_id:
-          location?.result?.find(
-            (item) => transactionData?.location_id === item?.id
-          ) || null,
         remarks: transactionData?.remarks || "",
       };
 
       Object.entries(values).forEach(([key, value]) => {
         setValue(key, value);
       });
+      hasRun.current = true;
     }
   }, [
     supplySuccess,
@@ -281,16 +280,15 @@ const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
     view,
     checked,
     accountTitles,
+    hasRun,
   ]);
 
   const submitHandler = async (submitData) => {
     const obj = {
       id: transactionData?.id,
-      location_id: submitData?.location_id?.id,
       atc_id: submitData?.atc_id?.id,
       cip_no: submitData?.cip_no,
     };
-
     try {
       const res = await checkScheduleTransaction(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
@@ -565,27 +563,6 @@ const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
               variant="outlined"
               error={Boolean(errors.atc_id)}
               helperText={errors.atc_id?.message}
-              className="transaction-form-textBox"
-            />
-          )}
-        />
-
-        <Autocomplete
-          disabled={disableCheck || view}
-          control={control}
-          name={"location_id"}
-          options={location?.result || []}
-          getOptionLabel={(option) => `${option.code} - ${option.name}`}
-          isOptionEqualToValue={(option, value) => option?.code === value?.code}
-          renderInput={(params) => (
-            <MuiTextField
-              name="location_id"
-              {...params}
-              label="Location *"
-              size="small"
-              variant="outlined"
-              error={Boolean(errors.location_id)}
-              helperText={errors.location_id?.message}
               className="transaction-form-textBox"
             />
           )}

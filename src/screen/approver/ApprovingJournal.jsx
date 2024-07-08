@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 
 import Breadcrums from "../../components/customs/Breadcrums";
 import SearchText from "../../components/customs/SearchText";
@@ -28,6 +28,7 @@ import {
 import JournalTable from "./JournalTable";
 import useApproverHook from "../../services/hooks/useApproverHook";
 import CountDistribute from "../../services/functions/CountDistribute";
+import { setHeader } from "../../services/slice/headerSlice";
 
 const ApprovingJournal = () => {
   const dispatch = useDispatch();
@@ -67,6 +68,24 @@ const ApprovingJournal = () => {
     }
   }, [header]);
 
+  const accordionRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        accordionRef.current &&
+        !accordionRef.current.contains(event.target)
+      ) {
+        dispatch(setIsExpanded(false));
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [accordionRef, dispatch]);
+
   return (
     <Box>
       <Box>
@@ -75,6 +94,7 @@ const ApprovingJournal = () => {
       <Box className="tag-transaction-head-container">
         <Box className="tag-transaction-navigation-container">
           <Accordion
+            ref={accordionRef}
             expanded={isExpanded}
             elevation={0}
             className="tag-transaction-accordion"
@@ -90,7 +110,7 @@ const ApprovingJournal = () => {
                   <AccordionSummary
                     key={index}
                     onClick={() => {
-                      dispatch(head.name);
+                      dispatch(setHeader(head.name));
                       dispatch(setIsExpanded(false));
                       onOrderBy("");
                       dispatch(setFilterBy(""));

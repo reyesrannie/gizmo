@@ -96,6 +96,7 @@ import { AdditionalFunction } from "../../../services/functions/AdditionalFuncti
 import { convertToArray } from "../../../services/functions/toArrayFn";
 import DateChecker from "../../../services/functions/DateChecker";
 import { resetHeader } from "../../../services/slice/headerSlice";
+import { isAp } from "../../../services/functions/access";
 
 const TransactionModal = ({ create, view, update, receive }) => {
   const dispatch = useDispatch();
@@ -111,6 +112,7 @@ const TransactionModal = ({ create, view, update, receive }) => {
   const transactionData = useSelector((state) => state.menu.menuData);
   const documents = useSelector((state) => state.transaction.documents);
   const addDocuments = useSelector((state) => state.transaction.addDocuments);
+  const userData = useSelector((state) => state.auth.userData);
 
   const defaultValue = transactionDefaultValue();
   const { enqueueSnackbar } = useSnackbar();
@@ -367,6 +369,13 @@ const TransactionModal = ({ create, view, update, receive }) => {
       dispatch(setDocuments(addToDocs));
     }
   }, [transactionData, insertDocument, document, dispatch, setAddDocuments]);
+
+  useEffect(() => {
+    if (isAp(transactionData?.apTagging?.company_code)) {
+      dispatch(resetTransaction());
+      dispatch(resetMenu());
+    }
+  }, [transactionData, dispatch]);
 
   const checkField = (field) => {
     return watch("document_type")?.required_fields?.includes(field);

@@ -343,6 +343,7 @@ const JournalTable = ({
                           variant="dot"
                           invisible={tag?.is_read !== 0}
                           color="error"
+                          className="tag-transaction-badge"
                         >
                           <RemoveRedEyeOutlinedIcon className="tag-transaction-icon-actions" />
                         </Badge>

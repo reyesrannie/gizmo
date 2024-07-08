@@ -141,6 +141,7 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
       successTitles &&
       supplierTypeSuccess &&
       supplySuccess &&
+      !hasRun?.current &&
       create
     ) {
       const sumAmount = totalAmount(taxComputation);
@@ -174,6 +175,8 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
           schedule ? transactionData?.month_amount : transactionData?.amount
         ) - sumAmount
       );
+
+      hasRun.current = true;
     }
     if (
       locationSuccess &&
@@ -185,9 +188,11 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
     ) {
       const obj = {
         isTaxBased:
-          taxData?.isTaxBased === null || taxData?.isTaxBased === undefined
+          taxData?.isTaxBased === null ||
+          taxData?.isTaxBased === undefined ||
+          taxData?.isTaxBased === 1
             ? true
-            : taxData?.isTaxBased,
+            : false,
         transaction_id: schedule ? null : taxData?.transaction_id,
         location_id:
           location?.result?.find((item) => taxData?.location_id === item?.id) ||
@@ -239,6 +244,7 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
     setValue,
     supplySuccess,
     schedule,
+    hasRun,
   ]);
 
   const setRequiredFieldsValue = (amount) => {
@@ -262,6 +268,7 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
 
       clearErrors();
       const updatedFields = {};
+      const code = watch("stype_id");
       watch("stype_id")?.required_fields?.forEach((fieldName) => {
         const field = supplierTypeReqFields.find((f) => fieldName === f.name);
         if (field) {
@@ -285,9 +292,33 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
         }
       });
 
-      Object.entries(updatedFields).forEach(([key, value]) => {
-        setValue(key, value);
-      });
+      if (code?.code?.substring(0, 2) === "PT") {
+        const field = supplierTypeReqFields.find(
+          (f) => code?.required_fields[0] === f.name
+        );
+        const obj = {
+          ...updatedFields,
+          vat_input_tax: 0,
+          [field?.name]:
+            updatedFields?.[field?.name] + updatedFields?.vat_input_tax,
+          debit:
+            watch("mode") === "Debit"
+              ? updatedFields?.[field?.name] + updatedFields?.vat_input_tax
+              : 0,
+          credit:
+            watch("mode") === "Credit"
+              ? updatedFields?.[field?.name] + updatedFields?.vat_input_tax
+              : 0,
+        };
+        Object.entries(obj).forEach(([key, value]) => {
+          setValue(key, value);
+        });
+      } else {
+        Object.entries(updatedFields).forEach(([key, value]) => {
+          setValue(key, value);
+        });
+        console.log(updatedFields);
+      }
     }
   };
 
@@ -431,7 +462,7 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
           control={control}
           name={"stype_id"}
           options={supplierTypes?.result || []}
-          getOptionLabel={(option) => `${option.code} - ${option.wtax}`}
+          getOptionLabel={(option) => `${option.code}`}
           isOptionEqualToValue={(option, value) => option?.id === value?.id}
           onClose={() => {
             handleClear();

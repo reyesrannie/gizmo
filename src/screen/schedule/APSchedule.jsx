@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 
 import Breadcrums from "../../components/customs/Breadcrums";
 import SearchText from "../../components/customs/SearchText";
@@ -70,6 +70,24 @@ const APSchedule = () => {
     }
   }, [header]);
 
+  const accordionRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        accordionRef.current &&
+        !accordionRef.current.contains(event.target)
+      ) {
+        dispatch(setIsExpanded(false));
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [accordionRef, dispatch]);
+
   return (
     <Box>
       <Box>
@@ -78,6 +96,7 @@ const APSchedule = () => {
       <Box className="tag-transaction-head-container">
         <Box className="tag-transaction-navigation-container">
           <Accordion
+            ref={accordionRef}
             expanded={isExpanded}
             elevation={0}
             className="tag-transaction-accordion"

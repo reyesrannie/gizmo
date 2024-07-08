@@ -10,6 +10,7 @@ const useApHook = () => {
     sorts: null,
     tagYear: "",
     state: "For Computation",
+    allocation: "",
     access: "ap",
   });
 
@@ -60,10 +61,10 @@ const useApHook = () => {
     }));
   };
 
-  const onOrderBy = (tagYear) => {
+  const onOrderBy = (allocation) => {
     setParams((currentValue) => ({
       ...currentValue,
-      tagYear: tagYear,
+      allocation: allocation,
       page: 1,
     }));
   };

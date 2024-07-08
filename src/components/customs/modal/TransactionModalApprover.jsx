@@ -75,7 +75,10 @@ import { singleError } from "../../../services/functions/errorResponse";
 import ComputationMenu from "./ComputationMenu";
 import { printPDF } from "../../../services/functions/pdfProcess";
 import socket from "../../../services/functions/serverSocket";
-import { totalAccount } from "../../../services/functions/compute";
+import {
+  totalAccount,
+  totalVatNonPaginate,
+} from "../../../services/functions/compute";
 
 const TransactionModalApprover = ({
   view,
@@ -252,10 +255,13 @@ const TransactionModalApprover = ({
         (stat) => stat?.status === "For Approval"
       );
 
-      const rowThree = arrayFieldThree(menuData);
+      const receivedBy = logs?.result
+        ?.filter((stat) => stat?.status === "received")
+        ?.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
+
+      const rowThree = arrayFieldThree(menuData, receivedBy);
       const row = arrayFieldOne(menuData, sumAmount, voucher, document);
       const arrayCoa = coaArrays(coa, taxComputation, supTypePercent, coa_id);
-
       const obj = {
         supplier_name: supplier?.company_name,
         first_row: row,
@@ -265,8 +271,8 @@ const TransactionModalApprover = ({
           (users) => preparedBy?.updated_by_id === users?.id
         ),
         account: sumAmount,
+        dateCreated: receivedBy,
       };
-
       dispatch(setVoucherData(obj));
     }
   }, [
@@ -291,8 +297,12 @@ const TransactionModalApprover = ({
 
   const checkAtc = () => {
     const hasAtc = atc?.result?.find((item) => item?.id === menuData?.atc);
+    const wtax = totalVatNonPaginate(taxComputation, "wtax_payable_cr");
     if (hasAtc?.code === "N/A" || hasAtc?.code === "WC") {
       dispatch(setPrintable(true));
+      return false;
+    }
+    if (wtax === 0) {
       return false;
     }
 
@@ -847,7 +857,11 @@ const TransactionModalApprover = ({
                 <Typography>Date</Typography>
               </TableCell>
               <TableCell align="center" className="voucher-payment-footer">
-                <Typography>{moment(new Date()).format("MM/DD/YY")}</Typography>
+                <Typography>
+                  {moment(voucherData?.dateCreated?.created_at).format(
+                    "MM/DD/YY"
+                  )}
+                </Typography>
               </TableCell>
 
               <TableCell

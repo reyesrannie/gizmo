@@ -11,7 +11,6 @@ const useApproverHook = () => {
     allocation: "",
     state: "For Approval",
     access: "approver",
-    allocation: "",
     complete: "",
   });
 

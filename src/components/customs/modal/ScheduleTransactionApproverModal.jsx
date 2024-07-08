@@ -188,12 +188,7 @@ const ScheduleTransactionApproverModal = ({
 
       const rowThree = arrayFieldThree(menuData);
       const row = schedArrayOne(menuData, sumAmount, document);
-      const arrayCoa = coaArrays(
-        coa,
-        taxComputation?.result,
-        supTypePercent,
-        coa_id
-      );
+      const arrayCoa = coaArrays(coa, taxComputation, supTypePercent, coa_id);
 
       const obj = {
         supplier_name: supplier?.company_name,

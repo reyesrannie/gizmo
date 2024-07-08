@@ -30,6 +30,16 @@ export const totalVat = (taxComputation, property) => {
   return total;
 };
 
+export const totalVatNonPaginate = (taxComputation, property) => {
+  const total = taxComputation?.result?.reduce((acc, curr) => {
+    return curr?.credit_from !== null && curr?.credit_from === "Check Amount"
+      ? acc + 0
+      : acc + parseFloat(curr[property] || 0);
+  }, 0);
+
+  return total;
+};
+
 export const totalCredit = (taxComputation, property) => {
   const total = taxComputation?.result?.data?.reduce((acc, curr) => {
     return acc + parseFloat(curr[property] || 0);

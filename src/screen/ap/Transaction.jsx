@@ -22,7 +22,6 @@ const Transaction = () => {
     onSearchData,
     onSortTable,
     onOrderBy,
-    resetParams,
   } = useTransactionHook();
 
   const {

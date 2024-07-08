@@ -65,6 +65,18 @@ export const printPDF = async (data) => {
     return acc + parseFloat(curr.vat_local);
   }, 0);
 
+  const npl = data?.tax?.reduce((acc, curr) => {
+    return acc + parseFloat(curr.nvat_local);
+  }, 0);
+
+  const vps = data?.tax?.reduce((acc, curr) => {
+    return acc + parseFloat(curr.vat_service);
+  }, 0);
+
+  const nps = data?.tax?.reduce((acc, curr) => {
+    return acc + parseFloat(curr.nvat_service);
+  }, 0);
+
   const wTaxL = data?.tax?.reduce((acc, curr) => {
     return parseFloat(curr.vat_local) === 0
       ? acc - 0
@@ -77,8 +89,16 @@ export const printPDF = async (data) => {
       : acc + parseFloat(curr.wtax_payable_cr);
   }, 0);
 
-  const vps = data?.tax?.reduce((acc, curr) => {
-    return acc + parseFloat(curr.vat_service);
+  const wNTaxL = data?.tax?.reduce((acc, curr) => {
+    return parseFloat(curr.nvat_local) === 0
+      ? acc - 0
+      : acc + parseFloat(curr.wtax_payable_cr);
+  }, 0);
+
+  const wNTaxS = data?.tax?.reduce((acc, curr) => {
+    return parseFloat(curr.nvat_service) === 0
+      ? acc - 0
+      : acc + parseFloat(curr.wtax_payable_cr);
   }, 0);
 
   const dateToday = new Date();
@@ -108,8 +128,8 @@ export const printPDF = async (data) => {
   const isSG =
     data?.atc.substring(2, 5) === "158" || data?.atc.substring(2, 5) === "160";
 
-  const hasAmountL = vpl !== 0;
-  const hasAmountS = vps !== 0;
+  const hasAmountL = vpl !== 0 || npl !== 0;
+  const hasAmountS = vps !== 0 || nps !== 0;
 
   const isAG = data?.atc.substring(2, 5) === "120";
   const isRental = data?.atc.substring(2, 5) === "100";
@@ -148,22 +168,37 @@ export const printPDF = async (data) => {
     vps !== 0 &&
     drawText("Goods and Services", { x: 40, y: 520, size: 9 });
 
-  drawText(hasAmountL ? convertToPeso(vpl) : convertToPeso(vps), {
-    x: getMonth(data?.month),
-    y: 560,
-    size: 9,
-  });
-  drawText(hasAmountL ? convertToPeso(vpl) : convertToPeso(vps), {
-    x: 448,
-    y: 560,
-    size: 9,
-  });
+  drawText(
+    hasAmountL
+      ? convertToPeso(vpl !== 0 ? vpl : npl)
+      : convertToPeso(vps !== 0 ? vps : nps),
+    {
+      x: getMonth(data?.month),
+      y: 560,
+      size: 9,
+    }
+  );
+  drawText(
+    hasAmountL
+      ? convertToPeso(vpl !== 0 ? vpl : npl)
+      : convertToPeso(vps !== 0 ? vps : nps),
+    {
+      x: 448,
+      y: 560,
+      size: 9,
+    }
+  );
 
-  drawText(hasAmountL ? convertToPeso(wTaxL) : convertToPeso(wTaxS), {
-    x: 520,
-    y: 560,
-    size: 9,
-  });
+  drawText(
+    hasAmountL
+      ? convertToPeso(wTaxL !== 0 ? wTaxL : wNTaxL)
+      : convertToPeso(wTaxS !== 0 ? wTaxS : wNTaxS),
+    {
+      x: 520,
+      y: 560,
+      size: 9,
+    }
+  );
 
   isSG &&
     drawText(
@@ -175,7 +210,7 @@ export const printPDF = async (data) => {
 
   hasAmountS &&
     hasAmountL &&
-    drawText(convertToPeso(vps), {
+    drawText(convertToPeso(vps !== 0 ? vps : nps), {
       x: getMonth(data?.month),
       y: 546,
       size: 9,
@@ -183,7 +218,7 @@ export const printPDF = async (data) => {
 
   hasAmountS &&
     hasAmountL &&
-    drawText(convertToPeso(vps), {
+    drawText(convertToPeso(vps !== 0 ? vps : nps), {
       x: 448,
       y: 546,
       size: 9,
@@ -191,7 +226,7 @@ export const printPDF = async (data) => {
 
   hasAmountS &&
     hasAmountL &&
-    drawText(convertToPeso(wTaxS), {
+    drawText(convertToPeso(wTaxS !== 0 ? wTaxS : wNTaxS), {
       x: 520,
       y: 546,
       size: 9,
@@ -202,23 +237,26 @@ export const printPDF = async (data) => {
     hasAmountL &&
     drawText(`${data?.atc?.substring(0, 2)}160`, { x: 182, y: 546, size: 10 });
 
-  drawText(convertToPeso(vps + vpl), {
+  drawText(convertToPeso(vps !== 0 && vpl !== 0 ? vps + vpl : nps + npl), {
     x: getMonth(data?.month),
     y: 424,
     size: 10,
   });
 
-  drawText(convertToPeso(vps + vpl), {
+  drawText(convertToPeso(vps !== 0 && vpl !== 0 ? vps + vpl : nps + npl), {
     x: 448,
     y: 424,
     size: 10,
   });
 
-  drawText(convertToPeso(wTaxL + wTaxS), {
-    x: 520,
-    y: 424,
-    size: 10,
-  });
+  drawText(
+    convertToPeso(wTaxL !== 0 && wTaxS !== 0 ? wTaxL + wTaxS : wNTaxL + wNTaxS),
+    {
+      x: 520,
+      y: 424,
+      size: 10,
+    }
+  );
 
   isAG && drawText("Prime Contractors/ Sub", { x: 40, y: 560, size: 9 });
   isAG && drawText("Contractors", { x: 40, y: 547, size: 9 });

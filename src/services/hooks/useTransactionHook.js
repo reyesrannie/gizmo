@@ -9,6 +9,7 @@ const useTransactionHook = () => {
     sorts: null,
     tagYear: "",
     state: "pending",
+    allocation: "",
   });
 
   const onPageChange = (_, page) => {
@@ -58,10 +59,10 @@ const useTransactionHook = () => {
     }));
   };
 
-  const onOrderBy = (tagYear) => {
+  const onOrderBy = (allocation) => {
     setParams((currentValue) => ({
       ...currentValue,
-      tagYear: tagYear,
+      allocation: allocation,
       page: 1,
     }));
   };

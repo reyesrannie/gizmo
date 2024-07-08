@@ -108,7 +108,7 @@
 
 .tag-transaction-table-container {
   &.MuiTableContainer-root {
-    max-height: 735px;
+    max-height: 635px;
     &::-webkit-scrollbar {
       width: 14px;
       border: 3px solid #fff;
@@ -266,6 +266,12 @@
 .tag-transaction-icon-actions {
   &.MuiSvgIcon-root {
     font-size: 20px;
+  }
+}
+
+.tag-transaction-badge {
+  &.MuiBadge-root {
+    z-index: 0;
   }
 }
 

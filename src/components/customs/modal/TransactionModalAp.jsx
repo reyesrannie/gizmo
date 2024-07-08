@@ -657,138 +657,144 @@ const TransactionModalAp = ({
                   .toString()
                   .padStart(2, "0")}`;
                 return (
-                  <Paper
-                    elevation={3}
-                    key={index}
-                    className="tax-details-value"
-                    onClick={() => {
-                      update && dispatch(setUpdateTax(true));
-                      update && dispatch(setTaxData(tax));
-                    }}
-                  >
-                    <LocalOfferOutlinedIcon />
-                    <Box className="tax-box-value-container">
-                      <Box className="tax-box-value">
-                        <Typography className="amount-tax">
-                          Amount: <span>&#8369;</span>{" "}
-                          {convertToPeso(parseFloat(tax.amount).toFixed(2))}
-                        </Typography>
-                        <Typography className="amount-tax">
-                          Code: {type?.code}
-                        </Typography>
-                        <Typography className="amount-tax">
-                          Wtax: {type?.wtax}
-                        </Typography>
-                      </Box>
-                      <Box className="tax-box-value">
-                        <Typography className="amount-tax">
-                          Input Tax: <span>&#8369;</span>{" "}
-                          {convertToPeso(
-                            parseFloat(tax.vat_input_tax).toFixed(2)
+                  !errorTaxComputation && (
+                    <Paper
+                      elevation={3}
+                      key={index}
+                      className="tax-details-value"
+                      onClick={() => {
+                        update && dispatch(setUpdateTax(true));
+                        update && dispatch(setTaxData(tax));
+                      }}
+                    >
+                      <LocalOfferOutlinedIcon />
+                      <Box className="tax-box-value-container">
+                        <Box className="tax-box-value">
+                          <Typography className="amount-tax">
+                            Amount: <span>&#8369;</span>{" "}
+                            {convertToPeso(parseFloat(tax.amount).toFixed(2))}
+                          </Typography>
+                          <Typography className="amount-tax">
+                            Code: {type?.code}
+                          </Typography>
+                          <Typography className="amount-tax">
+                            Wtax: {type?.wtax}
+                          </Typography>
+                        </Box>
+                        <Box className="tax-box-value">
+                          <Typography className="amount-tax">
+                            Input Tax: <span>&#8369;</span>{" "}
+                            {convertToPeso(
+                              parseFloat(tax.vat_input_tax).toFixed(2)
+                            )}
+                          </Typography>
+                          {tax?.nvat_local !== 0 && (
+                            <Typography className="amount-tax">
+                              Tax Based: <span>&#8369;</span>{" "}
+                              {convertToPeso(
+                                parseFloat(tax.nvat_local).toFixed(2)
+                              )}
+                            </Typography>
                           )}
-                        </Typography>
-                        {tax?.nvat_local !== 0 && (
-                          <Typography className="amount-tax">
-                            Tax Based: <span>&#8369;</span>{" "}
-                            {convertToPeso(
-                              parseFloat(tax.nvat_local).toFixed(2)
-                            )}
-                          </Typography>
-                        )}
-                        {tax?.nvat_service !== 0 && (
-                          <Typography className="amount-tax">
-                            Tax Based: <span>&#8369;</span>{" "}
-                            {convertToPeso(
-                              parseFloat(tax.nvat_service).toFixed(2)
-                            )}
-                          </Typography>
-                        )}
-                        {tax?.vat_local !== 0 && (
-                          <Typography className="amount-tax">
-                            Tax Based: <span>&#8369;</span>{" "}
-                            {convertToPeso(
-                              parseFloat(tax.vat_local).toFixed(2)
-                            )}
-                          </Typography>
-                        )}
-                        {tax?.vat_service !== 0 && (
-                          <Typography className="amount-tax">
-                            Tax Based: <span>&#8369;</span>{" "}
-                            {convertToPeso(
-                              parseFloat(tax.vat_service).toFixed(2)
-                            )}
-                          </Typography>
-                        )}
+                          {tax?.nvat_service !== 0 && (
+                            <Typography className="amount-tax">
+                              Tax Based: <span>&#8369;</span>{" "}
+                              {convertToPeso(
+                                parseFloat(tax.nvat_service).toFixed(2)
+                              )}
+                            </Typography>
+                          )}
+                          {tax?.vat_local !== 0 && (
+                            <Typography className="amount-tax">
+                              Tax Based: <span>&#8369;</span>{" "}
+                              {convertToPeso(
+                                parseFloat(tax.vat_local).toFixed(2)
+                              )}
+                            </Typography>
+                          )}
+                          {tax?.vat_service !== 0 && (
+                            <Typography className="amount-tax">
+                              Tax Based: <span>&#8369;</span>{" "}
+                              {convertToPeso(
+                                parseFloat(tax.vat_service).toFixed(2)
+                              )}
+                            </Typography>
+                          )}
 
-                        <Typography className="amount-tax">
-                          Wtax Payable Expanded: <span>&#8369;</span>{" "}
-                          {convertToPeso(
-                            parseFloat(tax.wtax_payable_cr).toFixed(2)
+                          <Typography className="amount-tax">
+                            Wtax Payable Expanded: <span>&#8369;</span>{" "}
+                            {convertToPeso(
+                              parseFloat(tax.wtax_payable_cr).toFixed(2)
+                            )}
+                          </Typography>
+                        </Box>
+                        <Box className="tax-box-value">
+                          <Typography className="amount-tax">
+                            Total invoice amount: <span>&#8369;</span>{" "}
+                            {convertToPeso(
+                              parseFloat(tax.total_invoice_amount).toFixed(2)
+                            )}
+                          </Typography>
+                        </Box>
+                      </Box>
+                      <Divider
+                        orientation="horizontal"
+                        className="transaction-devider"
+                      />
+                      <Box className="tax-box-value-container">
+                        <Box className="tax-box-value">
+                          <Typography className="amount-tax">
+                            Account Code: {title?.code}
+                          </Typography>
+                          <Typography className="amount-tax">
+                            Account Title: {title?.name}
+                          </Typography>
+                        </Box>
+                        <Box className="tax-box-value">
+                          {transactionData?.voucher_number === null && (
+                            <Typography className="amount-tax">
+                              VP#: {voucher === "check" ? "CV" : "JV"}
+                              {transactionData?.apTagging?.vp}
+                              {formattedDate}-
+                              {voucher === "check"
+                                ? vpCheck.toString().padStart(4, "0")
+                                : vpJournal.toString().padStart(4, "0")}
+                            </Typography>
                           )}
-                        </Typography>
-                      </Box>
-                      <Box className="tax-box-value">
-                        <Typography className="amount-tax">
-                          Total invoice amount: <span>&#8369;</span>{" "}
-                          {convertToPeso(
-                            parseFloat(tax.total_invoice_amount).toFixed(2)
+                          {transactionData?.voucher_number !== null && (
+                            <Typography className="amount-tax">
+                              VP#: {transactionData?.voucher_number}
+                            </Typography>
                           )}
-                        </Typography>
-                      </Box>
-                    </Box>
-                    <Divider
-                      orientation="horizontal"
-                      className="transaction-devider"
-                    />
-                    <Box className="tax-box-value-container">
-                      <Box className="tax-box-value">
-                        <Typography className="amount-tax">
-                          Account Code: {title?.code}
-                        </Typography>
-                        <Typography className="amount-tax">
-                          Account Title: {title?.name}
-                        </Typography>
-                      </Box>
-                      <Box className="tax-box-value">
-                        {transactionData?.voucher_number === null && (
+                          {tax?.remarks !== null && (
+                            <Typography className="amount-tax">
+                              Remarks: {tax?.remarks}
+                            </Typography>
+                          )}
+                        </Box>
+                        <Box className="tax-box-value">
                           <Typography className="amount-tax">
-                            VP#: {voucher === "check" ? "CV" : "JV"}
-                            {transactionData?.apTagging?.vp}
-                            {formattedDate}-
-                            {voucher === "check"
-                              ? vpCheck.toString().padStart(4, "0")
-                              : vpJournal.toString().padStart(4, "0")}
+                            {tax?.mode} : <span>&#8369;</span>{" "}
+                            {tax?.mode === "Debit"
+                              ? convertToPeso(parseFloat(tax.debit).toFixed(2))
+                              : convertToPeso(
+                                  parseFloat(tax.credit).toFixed(2)
+                                )}
                           </Typography>
-                        )}
-                        {transactionData?.voucher_number !== null && (
                           <Typography className="amount-tax">
-                            VP#: {transactionData?.voucher_number}
+                            Total amount: <span>&#8369;</span>{" "}
+                            {tax?.mode === "Debit"
+                              ? convertToPeso(
+                                  parseFloat(tax.account).toFixed(2)
+                                )
+                              : `-${convertToPeso(
+                                  parseFloat(tax.credit).toFixed(2)
+                                )}`}
                           </Typography>
-                        )}
-                        {tax?.remarks !== null && (
-                          <Typography className="amount-tax">
-                            Remarks: {tax?.remarks}
-                          </Typography>
-                        )}
+                        </Box>
                       </Box>
-                      <Box className="tax-box-value">
-                        <Typography className="amount-tax">
-                          {tax?.mode} : <span>&#8369;</span>{" "}
-                          {tax?.mode === "Debit"
-                            ? convertToPeso(parseFloat(tax.debit).toFixed(2))
-                            : convertToPeso(parseFloat(tax.credit).toFixed(2))}
-                        </Typography>
-                        <Typography className="amount-tax">
-                          Total amount: <span>&#8369;</span>{" "}
-                          {tax?.mode === "Debit"
-                            ? convertToPeso(parseFloat(tax.account).toFixed(2))
-                            : `-${convertToPeso(
-                                parseFloat(tax.credit).toFixed(2)
-                              )}`}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </Paper>
+                    </Paper>
+                  )
                 );
               })}
               <Paper
@@ -800,19 +806,24 @@ const TransactionModalAp = ({
                   <Typography
                     className="amount-tax"
                     color={
+                      !errorTaxComputation &&
                       parseFloat(totalAmount(taxComputation)).toFixed(2) ===
-                      parseFloat(watch("amount")).toFixed(2)
+                        parseFloat(watch("amount")).toFixed(2)
                         ? "black"
                         : "error"
                     }
                   >
                     Total invoice amount : <span>&#8369;</span>{" "}
-                    {convertToPeso(totalAmount(taxComputation)?.toFixed(2))}
+                    {errorTaxComputation
+                      ? convertToPeso((0).toFixed(2))
+                      : convertToPeso(totalAmount(taxComputation)?.toFixed(2))}
                   </Typography>
                   <Typography className="amount-tax">
                     {voucher === "check" ? "Check amount" : "Total amount"}:{" "}
                     <span>&#8369;</span>{" "}
-                    {convertToPeso(totalAccount(taxComputation)?.toFixed(2))}
+                    {errorTaxComputation
+                      ? convertToPeso((0).toFixed(2))
+                      : convertToPeso(totalAccount(taxComputation)?.toFixed(2))}
                   </Typography>
                 </Box>
               </Paper>
@@ -926,7 +937,10 @@ const TransactionModalAp = ({
         className="transaction-modal-dialog"
         onClose={() => dispatch(setCreateTax(false))}
       >
-        <TaxComputation create taxComputation={taxComputation} />
+        <TaxComputation
+          create
+          taxComputation={errorTaxComputation ? [] : taxComputation}
+        />
       </Dialog>
 
       <Dialog

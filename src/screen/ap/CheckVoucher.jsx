@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 
 import Breadcrums from "../../components/customs/Breadcrums";
 import SearchText from "../../components/customs/SearchText";
@@ -64,6 +64,24 @@ const CheckVoucher = () => {
     }
   }, [header]);
 
+  const accordionRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        accordionRef.current &&
+        !accordionRef.current.contains(event.target)
+      ) {
+        dispatch(setIsExpanded(false));
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [accordionRef, dispatch]);
+
   return (
     <Box>
       <Box>
@@ -75,6 +93,7 @@ const CheckVoucher = () => {
             expanded={isExpanded}
             elevation={0}
             className="tag-transaction-accordion"
+            ref={accordionRef}
           >
             <AccordionSummary onClick={() => dispatch(setIsExpanded(false))}>
               <Typography className="page-text-indicator-tag-transaction">

@@ -1,7 +1,6 @@
 import React from "react";
 
 import {
-  Autocomplete,
   Badge,
   Box,
   Dialog,
@@ -59,6 +58,10 @@ import { setVoucher } from "../../services/slice/optionsSlice";
 import TransactionModalApprover from "../../components/customs/modal/TransactionModalApprover";
 import socket from "../../services/functions/serverSocket";
 import { AdditionalFunction } from "../../services/functions/AdditionalFunction";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import orderBySchema from "../../schemas/orderBySchema";
+import Autocomplete from "../../components/customs/AutoComplete";
 
 const JournalTable = ({
   params,
@@ -69,13 +72,17 @@ const JournalTable = ({
   isFetching,
   onPageChange,
   onRowChange,
+  onOrderBy,
 }) => {
+  const [anchorE1, setAnchorE1] = useState(null);
   const dispatch = useDispatch();
   const menuData = useSelector((state) => state.menu.menuData);
   const receiveMenu = useSelector((state) => state.menu.receiveMenu);
   const updateMenu = useSelector((state) => state.menu.updateMenu);
   const viewMenu = useSelector((state) => state.menu.viewMenu);
   const checkMenu = useSelector((state) => state.menu.checkMenu);
+  const userData = useSelector((state) => state.auth.userData);
+
   const { convertToPeso } = AdditionalFunction();
 
   const viewAccountingEntries = useSelector(
@@ -100,6 +107,18 @@ const JournalTable = ({
     } catch (error) {}
   };
 
+  const {
+    control,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(orderBySchema),
+    defaultValues: {
+      orderBy: null,
+    },
+  });
+
   return (
     <Box className="tag-transaction-body-container">
       <TableContainer className="tag-transaction-table-container">
@@ -108,7 +127,32 @@ const JournalTable = ({
             <TableRow className="table-header1-import-tag-transaction">
               <TableCell>Tag #.</TableCell>
               <TableCell>Supplier</TableCell>
-              <TableCell>Allocation</TableCell>
+              <TableCell>
+                <TableSortLabel
+                  active={params.allocation !== ""}
+                  onClick={(e) => setAnchorE1(e.currentTarget)}
+                  direction={"desc"}
+                  IconComponent={FilterAltOutlinedIcon}
+                >
+                  Allocation
+                </TableSortLabel>
+                {params.allocation !== "" && (
+                  <TableSortLabel
+                    active={
+                      params.sorts === "updated_at" ||
+                      params.sorts === "-updated_at"
+                    }
+                    onClick={() =>
+                      onSortTable(
+                        params.sorts === "updated_at"
+                          ? "-updated_at"
+                          : "updated_at"
+                      )
+                    }
+                    direction={params.sorts === "updated_at" ? "asc" : "desc"}
+                  />
+                )}
+              </TableCell>
               <TableCell align="center"> Status</TableCell>
               <TableCell align="center">
                 <TableSortLabel
@@ -277,6 +321,7 @@ const JournalTable = ({
                           variant="dot"
                           invisible={tag?.is_read !== 0}
                           color="error"
+                          className="tag-transaction-badge"
                         >
                           <RemoveRedEyeOutlinedIcon className="tag-transaction-icon-actions" />
                         </Badge>
@@ -326,6 +371,62 @@ const JournalTable = ({
           )}
         </Table>
       </TableContainer>
+
+      <Menu
+        anchorEl={anchorE1}
+        open={Boolean(anchorE1)}
+        onClose={() => {
+          setAnchorE1(null);
+        }}
+        className="table-sort-tag-transaction"
+      >
+        <Autocomplete
+          control={control}
+          name={"orderBy"}
+          options={userData?.scope_tagging || []}
+          getOptionLabel={(option) => `${option?.ap_code}`}
+          isOptionEqualToValue={(option, value) =>
+            option?.ap_id === value?.ap_id
+          }
+          onClose={() => {
+            watch("orderBy") !== null && onOrderBy(watch("orderBy")?.ap_id);
+            setAnchorE1(null);
+          }}
+          renderInput={(params) => (
+            <TextField
+              name="orderBy"
+              {...params}
+              label="AP "
+              size="small"
+              variant="outlined"
+              error={Boolean(errors.orderBy)}
+              helperText={errors.orderBy?.message}
+              className="table-sort-select-tag-transaction"
+              InputProps={{
+                ...params.InputProps,
+                endAdornment: (
+                  <>
+                    {params.InputProps.endAdornment}
+                    {watch("orderBy") && (
+                      <IconButton
+                        onClick={() => {
+                          setValue("orderBy", null);
+
+                          onOrderBy("");
+                        }}
+                        className="icon-clear-user"
+                      >
+                        <ClearIcon />
+                      </IconButton>
+                    )}
+                  </>
+                ),
+              }}
+            />
+          )}
+          disableClearable
+        />
+      </Menu>
 
       <Dialog
         open={receiveMenu}

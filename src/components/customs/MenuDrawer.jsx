@@ -1,13 +1,16 @@
 import {
   Accordion,
   Badge,
+  Box,
   Divider,
   Drawer,
   List,
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  Stack,
   Toolbar,
+  Typography,
   useMediaQuery,
 } from "@mui/material";
 import React, { useEffect } from "react";
@@ -23,6 +26,7 @@ import { hasAccess } from "../../services/functions/access";
 import { resetTransaction } from "../../services/slice/transactionSlice";
 import CountDistribute from "../../services/functions/CountDistribute";
 import { resetHeader, setHeader } from "../../services/slice/headerSlice";
+import logo from "../../assets/misLogo.png";
 
 const MenuDrawer = () => {
   const { menuCount, childMenuCount, countGrandChildcheck } = CountDistribute();
@@ -270,6 +274,7 @@ const MenuDrawer = () => {
                       navigate(menus.path);
                       dispatch(resetMenuWithoutDrawer());
                       dispatch(resetTransaction());
+                      dispatch(resetHeader());
                       isTablet && dispatch(setDrawer(false));
                     }}
                   >
@@ -303,6 +308,17 @@ const MenuDrawer = () => {
           </React.Fragment>
         ))}
       </List>
+      <Box className="end-of-drawer">
+        <img src={logo} alt="logo" className="misLogo" draggable="false" />
+        <Typography className={`misRights ${!openDrawer ? `close` : ""}`}>
+          Powered By MIS All rights reserved
+        </Typography>
+        {openDrawer && (
+          <Typography className={`misRights ${!openDrawer ? `close` : ""}`}>
+            Copyrights &copy; 2024
+          </Typography>
+        )}
+      </Box>
     </Drawer>
   );
 };

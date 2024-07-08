@@ -23,7 +23,9 @@ export const arrayFieldOne = (menuData, sumAmount, voucher, document) => {
     {
       date: moment(menuData?.transactions?.date_invoice).format("MM/DD/YY"),
       remarks: menuData?.remarks,
-      invoice: menuData?.transactions?.invoice_no,
+      invoice: `${doc} ${menuData?.transactions?.invoice_no || ""} ${
+        menuData?.transactions?.reference_no || ""
+      }`,
       amount: sumAmount,
     },
     undefined,
@@ -32,7 +34,7 @@ export const arrayFieldOne = (menuData, sumAmount, voucher, document) => {
   return voucher === "check" ? obj : objJV;
 };
 
-export const arrayFieldThree = (menuData, sumAmount) => {
+export const arrayFieldThree = (menuData, receiveBy) => {
   const obj = [
     {
       tag_no: `${menuData?.transactions?.tag_year}-${menuData?.transactions?.tag_no}`,
@@ -40,7 +42,7 @@ export const arrayFieldThree = (menuData, sumAmount) => {
     },
     {
       tag_no: undefined,
-      time: moment(new Date()).format("hh:mm a"),
+      time: moment(receiveBy?.created_at).format("hh:mm a"),
     },
     undefined,
     undefined,
