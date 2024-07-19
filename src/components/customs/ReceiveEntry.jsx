@@ -215,7 +215,7 @@ const ReceiveEntry = () => {
               variant="outlined"
               error={Boolean(errors.voucher)}
               helperText={errors.voucher?.message}
-              className="transaction-form-textBox"
+              className="transaction-form-textBox receive"
             />
           )}
         />
@@ -225,7 +225,7 @@ const ReceiveEntry = () => {
           name={"amount"}
           label={"Amount"}
           color="primary"
-          className="transaction-form-textBox"
+          className="transaction-form-textBox receive"
           error={Boolean(errors?.amount)}
           helperText={errors?.amount?.message}
           onKeyUp={(e) => validateRemaining(e.target.value.replace(/,/g, ""))}

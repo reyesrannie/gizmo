@@ -191,8 +191,8 @@
 .transaction-form-textBox {
   &.MuiFormControl-root {
     border-radius: 10px;
-    min-width: 230px;
-    max-width: 230px;
+    min-width: 240px;
+    max-width: 240px;
     min-height: 63px;
 
     .MuiInputBase-root {
@@ -208,6 +208,23 @@
       font-family: Roboto-Light;
       letter-spacing: 1px;
     }
+  }
+}
+
+.transaction-form-textBox.receive {
+  &.MuiFormControl-root {
+    min-width: 230px;
+    max-width: 230px;
+  }
+}
+
+.receive-modal {
+  .MuiPaper-root {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 490px;
+    overflow: hidden;
   }
 }
 
@@ -289,6 +306,17 @@
     justify-content: space-between;
     gap: 10px;
     min-width: 950px;
+  }
+}
+
+.add-transaction-button-container-report {
+  &.MuiBox-root {
+    margin-top: 10px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 10px;
+    min-width: 300px;
   }
 }
 

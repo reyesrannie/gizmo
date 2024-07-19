@@ -58,6 +58,7 @@ export const events = [
       "CountCheck",
       "CountVoucher",
       "Logs",
+      "TagYear",
     ],
   },
   {
@@ -68,6 +69,7 @@ export const events = [
       "CountCheck",
       "CountVoucher",
       "Logs",
+      "TagYear",
     ],
   },
   {
@@ -78,6 +80,7 @@ export const events = [
       "CountCheck",
       "CountVoucher",
       "Logs",
+      "TagYear",
     ],
   },
   {
@@ -88,6 +91,7 @@ export const events = [
       "CountCheck",
       "CountVoucher",
       "Logs",
+      "TagYear",
     ],
   },
   {
@@ -106,6 +110,7 @@ export const events = [
       "SingleJournal",
       "CheckEntries",
       "JournalEntries",
+      "TagYear",
     ],
   },
   {
@@ -124,6 +129,7 @@ export const events = [
       "SingleJournal",
       "CheckEntries",
       "JournalEntries",
+      "TagYear",
     ],
   },
   {
@@ -142,6 +148,7 @@ export const events = [
       "SingleJournal",
       "CheckEntries",
       "JournalEntries",
+      "TagYear",
     ],
   },
   {
@@ -160,6 +167,7 @@ export const events = [
       "SingleJournal",
       "CheckEntries",
       "JournalEntries",
+      "TagYear",
     ],
   },
   {
@@ -178,6 +186,7 @@ export const events = [
       "SingleJournal",
       "CheckEntries",
       "JournalEntries",
+      "TagYear",
     ],
   },
   {

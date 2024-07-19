@@ -7,6 +7,27 @@
   }
 }
 
+.report-tiles {
+  &.MuiBox-root {
+    .MuiSvgIcon-root {
+      font-size: 50px;
+      margin-bottom: 0px;
+    }
+    &:hover {
+      cursor: pointer;
+    }
+  }
+}
+
+.report-management-body {
+  &.MuiBox-root {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 300px;
+  }
+}
+
 .user-management-body {
   &.MuiBox-root {
     display: flex;

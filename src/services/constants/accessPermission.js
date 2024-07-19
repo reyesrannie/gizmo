@@ -103,6 +103,16 @@ const accessPermission = [
       },
     ],
   },
+  {
+    id: 9,
+    access: "Report",
+    children: [
+      {
+        access_permission: "report",
+        label: "Report",
+      },
+    ],
+  },
 ];
 
 export default accessPermission;

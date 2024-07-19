@@ -133,15 +133,6 @@ const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
   });
 
   const {
-    data: atc,
-    isLoading: loadingAtc,
-    isSuccess: atcSuccess,
-  } = useAtcQuery({
-    status: "active",
-    pagination: "none",
-  });
-
-  const {
     data: taxComputation,
     isLoading: loadingTax,
     isError: errorTaxComputation,
@@ -206,7 +197,6 @@ const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
       date_invoice: null,
       document_type: null,
       store: null,
-      atc_id: null,
       remarks: "",
       coa_id: null,
       month_paid: "0",
@@ -230,7 +220,6 @@ const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
       documentSuccess &&
       accountSuccess &&
       locationSuccess &&
-      atcSuccess &&
       typeSuccess &&
       successTitles &&
       !hasRun?.current
@@ -247,9 +236,7 @@ const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
         coa_id: accountTitles?.result?.find(
           (item) => transactionData?.coa_id === item?.id
         ),
-        atc_id:
-          atc?.result?.find((item) => transactionData?.atc_id === item.id) ||
-          null,
+
         remarks: transactionData?.remarks || "",
       };
 
@@ -266,8 +253,6 @@ const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
     document,
     accountNumber,
     tin,
-    atc,
-    atcSuccess,
     typeSuccess,
     successTitles,
     transactionData,
@@ -286,7 +271,6 @@ const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
   const submitHandler = async (submitData) => {
     const obj = {
       id: transactionData?.id,
-      atc_id: submitData?.atc_id?.id,
       cip_no: submitData?.cip_no,
     };
     try {
@@ -545,27 +529,6 @@ const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
           className="transaction-form-textBox"
           error={Boolean(errors?.cip_no)}
           helperText={errors?.cip_no?.message}
-        />
-
-        <Autocomplete
-          control={control}
-          disabled={disableCheck || view}
-          name={"atc_id"}
-          options={atc?.result || []}
-          getOptionLabel={(option) => `${option.code} - ${option.name}`}
-          isOptionEqualToValue={(option, value) => option?.code === value?.code}
-          renderInput={(params) => (
-            <MuiTextField
-              name="atc_id"
-              {...params}
-              label="ATC *"
-              size="small"
-              variant="outlined"
-              error={Boolean(errors.atc_id)}
-              helperText={errors.atc_id?.message}
-              className="transaction-form-textBox"
-            />
-          )}
         />
 
         <AppTextBox
@@ -831,7 +794,11 @@ const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
                 color="warning"
                 type="submit"
                 className="add-transaction-button"
-                disabled={disableCheck}
+                disabled={
+                  errorTaxComputation ||
+                  parseFloat(totalAmount(taxComputation)) !==
+                    parseFloat(watch("amount"))
+                }
               >
                 Checked
               </LoadingButton>
@@ -873,7 +840,6 @@ const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
           loadingDocument ||
           loadingAccountNumber ||
           loadingLocation ||
-          loadingAtc ||
           loadingType ||
           loadingTitles ||
           loadingTax ||

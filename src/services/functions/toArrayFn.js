@@ -66,16 +66,12 @@ export const mapTitleAccount = (item) => {
 
 export const coaArrays = (coa, taxComputation, supTypePercent, coa_id) => {
   const sumInputTax = (taxComputation?.result || []).reduce((acc, curr) => {
-    return acc + parseFloat(curr?.vat_input_tax || 0);
+    return curr?.credit !== 0
+      ? acc - parseFloat(curr?.vat_input_tax || 0)
+      : acc + parseFloat(curr?.vat_input_tax || 0);
   }, 0);
 
-  const sumAccount = totalAccount(taxComputation)?.toFixed(2);
-
-  const isWtaxSame = (arr) => {
-    if (arr.length === 0) return true;
-    const firstWtax = arr[0].wtax;
-    return arr.every((item) => item.wtax === firstWtax);
-  };
+  const sumAccount = totalAccount(taxComputation);
 
   let zeroCount = 0;
 
@@ -95,7 +91,7 @@ export const coaArrays = (coa, taxComputation, supTypePercent, coa_id) => {
         return {
           id: 183,
           name: "WITHHOLDING TAX PAYABLE",
-          mode: "Credit",
+          mode: item?.mode,
           code: "217110",
           amount: item?.wtax_payable_cr,
           wtax: wtax,
@@ -139,53 +135,86 @@ export const coaArrays = (coa, taxComputation, supTypePercent, coa_id) => {
   };
 
   const filteredItem = () => {
-    if (wtaxCount?.length > 0 && isWtaxSame(wtaxCount)) {
-      const combinedAmount = wtaxCount.reduce((acc, curr) => {
-        return acc + parseFloat(curr.amount || 0);
-      }, 0);
+    if (wtaxCount?.length > 0) {
+      const wtaxMap = new Map();
 
-      return {
-        id: 183,
-        name: "WITHHOLDING TAX PAYABLE",
-        mode: "Credit",
-        code: "217110",
-        amount: combinedAmount.toFixed(2),
-        wtax: wtaxCount[0].wtax,
-      };
+      wtaxCount.forEach((item) => {
+        const wtax = item.wtax;
+        const amount = item.amount || 0;
+
+        if (wtaxMap.has(wtax)) {
+          const existingItem = wtaxMap.get(wtax);
+          item.mode === "Credit"
+            ? (existingItem.amount -= amount)
+            : (existingItem.amount += amount);
+        } else {
+          wtaxMap.set(wtax, {
+            id: item.id,
+            name: item.name,
+            mode: "Credit",
+            code: item.code,
+            amount: amount,
+            wtax: wtax,
+          });
+        }
+      });
+
+      const combinedItems = Array.from(wtaxMap.values()).map((item) => ({
+        ...item,
+        amount: item.amount,
+      }));
+
+      return combinedItems;
     }
+
     return wtaxCount;
   };
 
   const theSameCoa = () => {
+    const coa = new Map();
+
     if (item?.length > 0) {
-      const result = item.reduce((acc, curr) => {
-        const existingItem = acc.find(
-          (entry) =>
-            entry.name === curr.name &&
-            entry.mode === curr.mode &&
-            entry.code === curr.code
-        );
+      item?.forEach((data) => {
+        const coaId = data?.id;
+        const amount = data?.amount;
+        const mode = data?.mode;
+        const name = data?.name;
+        const code = data?.code;
 
-        if (existingItem) {
-          existingItem.amount = (
-            parseFloat(existingItem.amount) + parseFloat(curr.amount)
-          ).toFixed(2);
+        if (coa.has(code)) {
+          const existingCoa = coa?.get(code);
+
+          existingCoa.mode !== mode
+            ? (existingCoa.amount -= amount)
+            : (existingCoa.amount += amount);
+
+          const isDebit = existingCoa.amount > amount ? existingCoa.mode : mode;
+          existingCoa.mode = isDebit;
         } else {
-          acc.push({ ...curr });
+          coa.set(code, {
+            id: coaId,
+            amount: amount,
+            mode: mode,
+            name: name,
+            code: code,
+          });
         }
-
-        return acc;
-      }, []);
-
-      return result;
+      });
     }
-    return item;
+    const combinedItems = Array.from(coa.values()).map((item) => ({
+      ...item,
+      amount: item.amount,
+    }));
+
+    return combinedItems;
   };
+
+  console.log(...theSameCoa());
 
   const itemCollected = [
     ...theSameCoa(),
     inputTax,
-    filteredItem(),
+    ...filteredItem(),
     accountPayable,
   ];
 
@@ -200,12 +229,11 @@ export const coaArrays = (coa, taxComputation, supTypePercent, coa_id) => {
   });
 
   const defaultValues = [
-    ...new Array(4 - coa.length).fill(undefined),
+    ...new Array(coa?.length < 4 ? 4 - coa.length : 1).fill(undefined),
     ...sortedData,
     undefined,
     undefined,
   ];
-
   return defaultValues;
 };
 
@@ -235,4 +263,103 @@ export const schedArrayOne = (menuData, sumAmount, document) => {
   ];
 
   return obj;
+};
+
+export const getAllATC = (report) => {
+  const atc = new Map();
+
+  report?.result?.forEach((item) => {
+    const atcCode = item?.atc?.code;
+    const percent = item?.supplierType?.wtax;
+
+    const vatValue = {
+      nvat_local: item?.nvat_local,
+      nvat_service: item?.nvat_service,
+      vat_local: item?.vat_local,
+      vat_service: item?.vat_service,
+    };
+
+    const taxBased = Object.keys(vatValue).find((key) => vatValue[key] !== 0);
+
+    const amount = vatValue[taxBased] || 0;
+    const wtax = item?.wtax_payable_cr || 0;
+
+    if (atc.has(atcCode)) {
+      const existingAtc = atc.get(atcCode);
+      item.mode === "Credit"
+        ? (existingAtc.amount -= amount)
+        : (existingAtc.amount += amount);
+      item.mode === "Credit"
+        ? (existingAtc.wtax -= wtax)
+        : (existingAtc.wtax += wtax);
+    } else {
+      atc.set(atcCode, {
+        code: atcCode,
+        amount: amount,
+        wtax: wtax,
+        percent: percent,
+      });
+    }
+  });
+
+  const combinedItems = Array.from(atc.values()).map((item) => ({
+    ...item,
+    amount: item.amount,
+  }));
+
+  return combinedItems;
+};
+
+export const getAllSupplier = (report) => {
+  const supplier = new Map();
+
+  report?.result?.forEach((item) => {
+    const supplierId = item?.transactions?.supplier?.id;
+    const vatValue = {
+      nvat_local: item?.nvat_local,
+      nvat_service: item?.nvat_service,
+      vat_local: item?.vat_local,
+      vat_service: item?.vat_service,
+    };
+    const taxBased = Object.keys(vatValue).find((key) => vatValue[key] !== 0);
+    const tax = vatValue[taxBased] || 0;
+    const wtax = item?.wtax_payable_cr || 0;
+    if (supplier.has(supplierId)) {
+      const existingSup = supplier.get(supplierId);
+      if (item.mode === "Credit") {
+        existingSup.amount -= item?.amount;
+        existingSup.wtax -= wtax;
+        existingSup.taxBased -= tax;
+      } else {
+        existingSup.amount += item?.amount;
+        existingSup.wtax += wtax;
+        existingSup.taxBased += tax;
+      }
+    } else {
+      supplier.set(supplierId, {
+        code: item?.transactions?.supplier,
+        amount: item?.amount,
+        source: item?.transactions?.apTagging,
+        coa: item?.coa,
+        description: item?.transactions?.description,
+        inv: `${item?.transactions?.documentType?.code} ${item?.transactions?.invoice_no}`,
+        date_invoice: item?.transactions?.date_invoice,
+        location: item?.location,
+        tag_no: `${item?.transactions?.tag_year}-${item?.transactions?.tag_no}`,
+        voucher_number:
+          item?.voucher === "check"
+            ? item?.transactions?.transactionChecks?.voucher_number
+            : item?.transactions?.transactionJournals?.voucher_number,
+        atc: item?.atc?.code,
+        taxBased: tax,
+        wtax: wtax,
+        rate: item?.supplierType?.wtax,
+      });
+    }
+  });
+  const combinedItems = Array.from(supplier.values()).map((item) => ({
+    ...item,
+    amount: item.amount,
+  }));
+  return combinedItems;
 };

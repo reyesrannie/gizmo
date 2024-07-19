@@ -26,6 +26,7 @@ import {
 import {
   useAccountTitlesQuery,
   useArchiveTaxComputationMutation,
+  useAtcQuery,
   useCreateTaxComputationMutation,
   useLocationQuery,
   useSupplierQuery,
@@ -68,6 +69,15 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
     isLoading: loadingTitles,
     isSuccess: successTitles,
   } = useAccountTitlesQuery({
+    status: "active",
+    pagination: "none",
+  });
+
+  const {
+    data: atc,
+    isLoading: loadingAtc,
+    isSuccess: atcSuccess,
+  } = useAtcQuery({
     status: "active",
     pagination: "none",
   });
@@ -126,6 +136,7 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
       account: "",
       remarks: "",
       location_id: null,
+      atc_id: null,
     },
   });
 
@@ -141,6 +152,7 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
       successTitles &&
       supplierTypeSuccess &&
       supplySuccess &&
+      atcSuccess &&
       !hasRun?.current &&
       create
     ) {
@@ -183,6 +195,7 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
       successTitles &&
       supplierTypeSuccess &&
       supplySuccess &&
+      atcSuccess &&
       update &&
       !hasRun?.current
     ) {
@@ -197,6 +210,8 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
         location_id:
           location?.result?.find((item) => taxData?.location_id === item?.id) ||
           null,
+        atc_id:
+          atc?.result?.find((item) => taxData?.atc_id === item?.id) || null,
         stype_id: supplierTypes?.result?.find(
           (item) => taxData?.stype_id === item?.id
         ),
@@ -245,6 +260,7 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
     supplySuccess,
     schedule,
     hasRun,
+    atcSuccess,
   ]);
 
   const setRequiredFieldsValue = (amount) => {
@@ -317,7 +333,6 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
         Object.entries(updatedFields).forEach(([key, value]) => {
           setValue(key, value);
         });
-        console.log(updatedFields);
       }
     }
   };
@@ -362,6 +377,7 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
       schedule_id: schedule ? transactionData?.id : null,
       stype_id: submitData?.stype_id?.id,
       coa_id: submitData?.coa_id?.id,
+      atc_id: submitData?.atc_id?.id,
       id: taxData?.id,
       voucher: voucher,
     };
@@ -453,6 +469,26 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
               variant="outlined"
               error={Boolean(errors.location_id)}
               helperText={errors.location_id?.message}
+              className="transaction-form-textBox"
+            />
+          )}
+        />
+
+        <Autocomplete
+          control={control}
+          name={"atc_id"}
+          options={atc?.result || []}
+          getOptionLabel={(option) => `${option.code} - ${option.name}`}
+          isOptionEqualToValue={(option, value) => option?.code === value?.code}
+          renderInput={(params) => (
+            <MuiTextField
+              name="atc_id"
+              {...params}
+              label="ATC *"
+              size="small"
+              variant="outlined"
+              error={Boolean(errors.atc_id)}
+              helperText={errors.atc_id?.message}
               className="transaction-form-textBox"
             />
           )}
@@ -726,7 +762,8 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
           loadingTIN ||
           loadingTax ||
           loadingUpdate ||
-          loadingArchive
+          loadingArchive ||
+          loadingAtc
         }
         className="loading-role-create"
       >

@@ -110,6 +110,21 @@
   }
 }
 
+.table-body-available {
+  &.MuiTableRow-root {
+    .MuiTableCell-root {
+      border-bottom: 4px solid #f2f2f2;
+      padding: 8px;
+      font-family: Roboto-Light;
+      letter-spacing: 1px;
+    }
+    &:hover {
+      background-color: #f2f2f2;
+      cursor: pointer;
+    }
+  }
+}
+
 .table-footer-ap {
   &.MuiTableRow-root {
     .MuiTableCell-root {

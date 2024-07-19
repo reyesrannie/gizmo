@@ -131,15 +131,6 @@ const TransactionModalAp = ({
   });
 
   const {
-    data: atc,
-    isLoading: loadingAtc,
-    isSuccess: atcSuccess,
-  } = useAtcQuery({
-    status: "active",
-    pagination: "none",
-  });
-
-  const {
     data: taxComputation,
     isLoading: loadingTax,
     isError: errorTaxComputation,
@@ -224,7 +215,6 @@ const TransactionModalAp = ({
       date_invoice: null,
       document_type: null,
       store: null,
-      atc_id: null,
       remarks: "",
       voucherType: voucher,
       coa_id: null,
@@ -241,7 +231,6 @@ const TransactionModalAp = ({
       supplySuccess &&
       documentSuccess &&
       accountSuccess &&
-      atcSuccess &&
       typeSuccess &&
       successTitles &&
       !hasRun?.current
@@ -272,7 +261,6 @@ const TransactionModalAp = ({
 
       if (update) {
         const updateField = {
-          atc_id: atc?.result?.find((item) => transactionData?.atc === item.id),
           remarks: transactionData?.remarks,
         };
 
@@ -289,8 +277,6 @@ const TransactionModalAp = ({
     document,
     accountNumber,
     tin,
-    atc,
-    atcSuccess,
     typeSuccess,
     successTitles,
     transactionData,
@@ -309,7 +295,6 @@ const TransactionModalAp = ({
     const obj = {
       id: transactionData?.id,
       transaction_id: transactionData?.transactions?.id,
-      atc_id: submitData?.atc_id?.id,
       cip_no: submitData?.cip_no,
       remarks: submitData?.remarks,
       coa_id: submitData?.coa_id?.id,
@@ -546,29 +531,6 @@ const TransactionModalAp = ({
                 variant="outlined"
                 error={Boolean(errors.coa_id)}
                 helperText={errors.coa_id?.message}
-                className="transaction-form-textBox"
-              />
-            )}
-          />
-        )}
-        {update && (
-          <Autocomplete
-            control={control}
-            name={"atc_id"}
-            options={atc?.result || []}
-            getOptionLabel={(option) => `${option.code} - ${option.name}`}
-            isOptionEqualToValue={(option, value) =>
-              option?.code === value?.code
-            }
-            renderInput={(params) => (
-              <MuiTextField
-                name="atc_id"
-                {...params}
-                label="ATC *"
-                size="small"
-                variant="outlined"
-                error={Boolean(errors.atc_id)}
-                helperText={errors.atc_id?.message}
                 className="transaction-form-textBox"
               />
             )}
@@ -895,7 +857,6 @@ const TransactionModalAp = ({
           loadingTIN ||
           loadingDocument ||
           loadingAccountNumber ||
-          loadingAtc ||
           loadingType ||
           loadingTitles ||
           loadingTax ||

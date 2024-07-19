@@ -71,6 +71,9 @@ const ApproverSchedule = lazy(() =>
 );
 
 const CutOff = lazy(() => import("../../screen/cutoff/Cutoff"));
+const TransactionReport = lazy(() =>
+  import("../../screen/report/TransactionReport")
+);
 
 const Routing = () => {
   const user = decodeUser();
@@ -363,6 +366,20 @@ const Routing = () => {
           path: "approve",
           element: hasAccess(["sched_transact_approver"]) ? (
             <ApproverSchedule />
+          ) : (
+            <Navigate to={"/"} />
+          ),
+        },
+      ],
+    },
+    {
+      path: "/report",
+      element: user ? <AppBar /> : <Navigate to={"/login"} />,
+      children: [
+        {
+          path: "",
+          element: hasAccess(["report"]) ? (
+            <TransactionReport />
           ) : (
             <Navigate to={"/"} />
           ),

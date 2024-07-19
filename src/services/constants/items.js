@@ -27,6 +27,9 @@ import TaskOutlinedIcon from "@mui/icons-material/TaskOutlined";
 import MediationOutlinedIcon from "@mui/icons-material/MediationOutlined";
 import LockPersonOutlinedIcon from "@mui/icons-material/LockPersonOutlined";
 import PendingActionsOutlinedIcon from "@mui/icons-material/PendingActionsOutlined";
+import AssessmentOutlinedIcon from "@mui/icons-material/AssessmentOutlined";
+import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
+import DeviceHubOutlinedIcon from "@mui/icons-material/DeviceHubOutlined";
 
 import "../../components/styles/CardNavigation.scss";
 import {
@@ -353,6 +356,51 @@ const schedule = [
   },
 ];
 
+const report = [
+  {
+    path: "/report/transaction",
+    desc: "Reports that is sorted by per transaction",
+    name: "Transaction",
+    permission: ["report"],
+    firstIcon: (
+      <ReceiptLongOutlinedIcon
+        color="secondary"
+        className="icon-card-details"
+      />
+    ),
+    lastIcon: (
+      <NavigationOutlinedIcon className="icon-last" color="secondary" />
+    ),
+  },
+  {
+    path: "/report/atc",
+    desc: "Reports that is sorted by per ATC",
+    name: "ATC",
+    permission: ["report"],
+    firstIcon: (
+      <DeviceHubOutlinedIcon color="secondary" className="icon-card-details" />
+    ),
+    lastIcon: (
+      <NavigationOutlinedIcon className="icon-last" color="secondary" />
+    ),
+  },
+  {
+    path: "/report/supplier",
+    desc: "Reports that is sorted by per supplier",
+    name: "Supplier",
+    permission: ["report"],
+    firstIcon: (
+      <PrecisionManufacturingOutlinedIcon
+        color="secondary"
+        className="icon-card-details"
+      />
+    ),
+    lastIcon: (
+      <NavigationOutlinedIcon className="icon-last" color="secondary" />
+    ),
+  },
+];
+
 const menu = [
   {
     desc: "Dashboard",
@@ -611,6 +659,12 @@ const menu = [
       },
     ],
   },
+  {
+    desc: "Report",
+    icon: <AssessmentOutlinedIcon />,
+    path: "/report",
+    permission: ["report"],
+  },
 ];
 
 const routes = [
@@ -738,6 +792,24 @@ const routes = [
       },
     ],
   },
+  {
+    path: "/report",
+    name: "Report",
+    children: [
+      {
+        path: "/report/transaction",
+        name: "Transaction",
+      },
+      {
+        path: "/report/atc",
+        name: "ATC",
+      },
+      {
+        path: "/report/supplier",
+        name: "Supplier",
+      },
+    ],
+  },
 ];
 
 export {
@@ -749,4 +821,5 @@ export {
   menu,
   routes,
   schedule,
+  report,
 };

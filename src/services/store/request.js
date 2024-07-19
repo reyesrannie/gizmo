@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 // const baseURL = process.env.REACT_APP_API_KEY;
 
-const baseURL = "http://10.10.13.17:8000/api";
+const baseURL = "http://10.10.12.10:8000/api";
 // const baseURL = "http://10.10.10.16:8000/api";
 // const baseURL = "http://127.0.0.1:8000/api";
 
@@ -50,6 +50,7 @@ export const jsonServerAPI = createApi({
     "SchedTransact",
     "CountSchedule",
     "ScheduleLogs",
+    "TagYear",
   ],
   endpoints: (builder) => ({
     //Authentication and users
@@ -1108,6 +1109,7 @@ export const jsonServerAPI = createApi({
         method: "GET",
         params: payload,
       }),
+      providesTags: ["TagYear"],
     }),
 
     //Status Logs
@@ -1542,7 +1544,7 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["CutOFF", "CutOFFLogs"],
+      invalidatesTags: ["CutOFF", "CutOFFLogs", "TagYear"],
     }),
     cutOffLogs: builder.query({
       transformResponse: (response) => response,
@@ -1558,7 +1560,7 @@ export const jsonServerAPI = createApi({
     schedTransaction: builder.query({
       transformResponse: (response) => response,
       query: (payload) => ({
-        url: `/sched-transaction`,
+        url: `/schedule`,
         method: "GET",
         params: payload,
       }),
@@ -1567,7 +1569,7 @@ export const jsonServerAPI = createApi({
     createScheduleTransaction: builder.mutation({
       transformResponse: (response) => response,
       query: (payload) => ({
-        url: `/sched-transaction`,
+        url: `/schedule`,
         method: "POST",
         body: payload,
       }),
@@ -1576,7 +1578,7 @@ export const jsonServerAPI = createApi({
     updateScheduleTransaction: builder.mutation({
       transformResponse: (response) => response,
       query: (payload) => ({
-        url: `/sched-transaction/${payload.id}`,
+        url: `/schedule/${payload.id}`,
         method: "PUT",
         body: payload,
       }),
@@ -1665,6 +1667,16 @@ export const jsonServerAPI = createApi({
         params: payload,
       }),
       providesTags: ["CountSchedule"],
+    }),
+
+    // report
+    report: builder.query({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/transaction-report/transaction/`,
+        method: "GET",
+        params: payload,
+      }),
     }),
   }),
 });
@@ -1851,4 +1863,6 @@ export const {
   useCompleteSchedTransactionMutation,
   useGenerateTransactionMutation,
   useCountScheduleQuery,
+
+  useReportQuery,
 } = jsonServerAPI;

@@ -39,6 +39,8 @@ const taxComputationSchema = Yup.object({
   coa_id: Yup.object()
     .typeError("Account Title is required")
     .required("Account Title is required"),
+
+  atc_id: Yup.object().typeError("ATC is required").required("ATC is required"),
 });
 
 export default taxComputationSchema;

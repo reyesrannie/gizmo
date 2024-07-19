@@ -110,7 +110,7 @@ const ComputationMenu = ({ details, schedule }) => {
 
   const debit = totalVat(taxComputation, "debit");
   const credit = totalCredit(taxComputation, "credit");
-  const wtax = totalVat(taxComputation, "wtax_payable_cr");
+  const wtax = totalCredit(taxComputation, "wtax_payable_cr");
   const vatInput = totalVat(taxComputation, "vat_input_tax");
 
   const supplierDetails = schedule
@@ -175,13 +175,19 @@ const ComputationMenu = ({ details, schedule }) => {
                   <TableCell>
                     <Stack>
                       <Typography className="supplier-company-name">
-                        {menuData?.transactions?.supplier?.name}
+                        {schedule
+                          ? menuData?.supplier?.name
+                          : menuData?.transactions?.supplier?.name}
                       </Typography>
                       <Typography className="supplier-company-tin">
-                        {menuData?.transactions?.supplier?.tin}
+                        {schedule
+                          ? menuData?.supplier?.tin
+                          : menuData?.transactions?.supplier?.tin}
                       </Typography>
                       <Typography className="supplier-company-address">
-                        {menuData?.transactions?.supplier?.address}
+                        {schedule
+                          ? menuData?.supplier?.address
+                          : menuData?.transactions?.supplier?.address}
                       </Typography>
                       <Typography className="supplier-company-proprietor">
                         {menuData?.transactions?.supplier?.proprietor !== null
@@ -244,6 +250,7 @@ const ComputationMenu = ({ details, schedule }) => {
               <TableCell>Line</TableCell>
               <TableCell>Location</TableCell>
               <TableCell>Account Title</TableCell>
+              <TableCell>ATC</TableCell>
               <TableCell>Remarks</TableCell>
               <TableCell>Supplier Type</TableCell>
               <TableCell align="center">Amount</TableCell>
@@ -267,7 +274,7 @@ const ComputationMenu = ({ details, schedule }) => {
             loadingAtc ||
             status === "pending" ? (
               <TableRow>
-                <TableCell colSpan={15} align="center">
+                <TableCell colSpan={16} align="center">
                   <Lottie
                     animationData={loading}
                     className="loading-tag-transaction"
@@ -276,7 +283,7 @@ const ComputationMenu = ({ details, schedule }) => {
               </TableRow>
             ) : isError ? (
               <TableRow>
-                <TableCell colSpan={15} align="center">
+                <TableCell colSpan={16} align="center">
                   <Lottie
                     animationData={noData}
                     className="no-data-tag-transaction"
@@ -305,6 +312,11 @@ const ComputationMenu = ({ details, schedule }) => {
                     <TableCell>
                       <Typography className="tag-transaction-company-type">
                         {tax?.coa?.name}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography className="tag-transaction-company-type">
+                        {tax?.atc?.code}
                       </Typography>
                     </TableCell>
                     <TableCell>
@@ -359,7 +371,7 @@ const ComputationMenu = ({ details, schedule }) => {
 
             {!isError && !loadingTax && (
               <TableRow className="table-body-tag-transaction">
-                <TableCell align="center" colSpan={7} />
+                <TableCell align="center" colSpan={8} />
                 <TableCell align="center">
                   <Typography className="tag-transaction-company-type">
                     Total Debit
@@ -376,7 +388,7 @@ const ComputationMenu = ({ details, schedule }) => {
 
             {!isError && !loadingTax && (
               <TableRow className="table-body-tag-transaction">
-                <TableCell align="center" colSpan={7} />
+                <TableCell align="center" colSpan={8} />
                 <TableCell align="center">
                   <Typography className="tag-transaction-company-type">
                     Total Credit
@@ -393,7 +405,7 @@ const ComputationMenu = ({ details, schedule }) => {
 
             {!isError && !loadingTax && (
               <TableRow className="table-body-tag-transaction">
-                <TableCell align="center" colSpan={7} />
+                <TableCell align="center" colSpan={8} />
                 <TableCell align="right">
                   <Typography className="tag-transaction-company-type">
                     Total

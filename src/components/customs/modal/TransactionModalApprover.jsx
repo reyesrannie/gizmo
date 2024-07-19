@@ -262,6 +262,7 @@ const TransactionModalApprover = ({
       const rowThree = arrayFieldThree(menuData, receivedBy);
       const row = arrayFieldOne(menuData, sumAmount, voucher, document);
       const arrayCoa = coaArrays(coa, taxComputation, supTypePercent, coa_id);
+
       const obj = {
         supplier_name: supplier?.company_name,
         first_row: row,
@@ -441,7 +442,9 @@ const TransactionModalApprover = ({
     const supplier = tin?.result?.find(
       (item) => menuData?.transactions?.supplier?.id === item?.id
     );
-    const atc_name = atc?.result?.find((item) => menuData?.atc === item.id);
+
+    const atc_tax = taxComputation?.result?.find((item) => item?.credit === 0);
+    const atc_name = atc?.result?.find((item) => atc_tax?.atc_id === item.id);
     const code = supplier?.company_address;
 
     const parts = code?.split(",");
@@ -508,7 +511,15 @@ const TransactionModalApprover = ({
                 <Typography className="payee-typo">
                   {voucher === "check" ? "PAYEE" : "SUPPLIERS"}
                 </Typography>
-                <Typography className="name-supplier-typo" align="center">
+                <Typography
+                  className="name-supplier-typo"
+                  align="center"
+                  sx={{
+                    fontSize: `${
+                      voucherData?.supplier_name?.length <= 40 ? 12 : 8
+                    }px`,
+                  }}
+                >
                   {voucherData?.supplier_name}
                 </Typography>
               </TableCell>

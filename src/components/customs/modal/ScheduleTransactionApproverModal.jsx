@@ -295,7 +295,15 @@ const ScheduleTransactionApproverModal = ({
                 className="voucher-payee-header"
               >
                 <Typography className="payee-typo">PAYEE</Typography>
-                <Typography className="name-supplier-typo" align="center">
+                <Typography
+                  className="name-supplier-typo"
+                  align="center"
+                  sx={{
+                    fontSize: `${
+                      voucherData?.supplier_name?.length <= 40 ? 12 : 8
+                    }px`,
+                  }}
+                >
                   {voucherData?.supplier_name}
                 </Typography>
               </TableCell>

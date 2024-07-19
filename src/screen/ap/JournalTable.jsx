@@ -50,7 +50,6 @@ import {
   useDocumentTypeQuery,
   useReadTransactionJournalMutation,
   useSupplierQuery,
-  useTagYearMonthQuery,
 } from "../../services/store/request";
 import { setFilterBy } from "../../services/slice/transactionSlice";
 import TransactionModalAp from "../../components/customs/modal/TransactionModalAp";

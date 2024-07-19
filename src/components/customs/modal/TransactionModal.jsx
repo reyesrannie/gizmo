@@ -587,9 +587,7 @@ const TransactionModal = ({ create, view, update, receive }) => {
           control={control}
           name={"tin"}
           options={tin?.result || []}
-          getOptionLabel={(option) =>
-            `${option.tin} -> ${option?.company_name}`
-          }
+          getOptionLabel={(option) => `${option.tin} - ${option?.company_name}`}
           isOptionEqualToValue={(option, value) => option?.id === value?.id}
           onClose={() => {
             handleClear(false);

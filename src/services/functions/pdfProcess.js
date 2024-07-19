@@ -61,45 +61,75 @@ const joinAddressParts = (addressParts, startIndex, endIndex) => {
 // Start PDF
 
 export const printPDF = async (data) => {
+  console.log(data);
   const vpl = data?.tax?.reduce((acc, curr) => {
-    return acc + parseFloat(curr.vat_local);
+    return curr?.credit != 0
+      ? acc - parseFloat(curr.vat_local)
+      : acc + parseFloat(curr.vat_local);
   }, 0);
 
   const npl = data?.tax?.reduce((acc, curr) => {
-    return acc + parseFloat(curr.nvat_local);
+    return curr?.credit != 0
+      ? acc - parseFloat(curr.nvat_local)
+      : acc + parseFloat(curr.nvat_local);
   }, 0);
 
   const vps = data?.tax?.reduce((acc, curr) => {
-    return acc + parseFloat(curr.vat_service);
+    return curr?.credit != 0
+      ? acc - parseFloat(curr.vat_service)
+      : acc + parseFloat(curr.vat_service);
   }, 0);
 
   const nps = data?.tax?.reduce((acc, curr) => {
-    return acc + parseFloat(curr.nvat_service);
+    return curr?.credit != 0
+      ? acc - parseFloat(curr.nvat_service)
+      : acc + parseFloat(curr.nvat_service);
   }, 0);
 
-  const wTaxL = data?.tax?.reduce((acc, curr) => {
-    return parseFloat(curr.vat_local) === 0
-      ? acc - 0
-      : acc + parseFloat(curr.wtax_payable_cr);
-  }, 0);
+  const wTaxL = data?.tax?.reduce(
+    (acc, curr) =>
+      parseFloat(curr.vat_local) !== 0
+        ? parseFloat(curr.credit) === 0
+          ? acc + parseFloat(curr.wtax_payable_cr)
+          : acc - parseFloat(curr.wtax_payable_cr)
+        : acc,
+    0
+  );
 
-  const wTaxS = data?.tax?.reduce((acc, curr) => {
-    return parseFloat(curr.vat_service) === 0
-      ? acc - 0
-      : acc + parseFloat(curr.wtax_payable_cr);
-  }, 0);
+  const wTaxS = data?.tax?.reduce(
+    (acc, curr) =>
+      parseFloat(curr.vat_service) !== 0
+        ? parseFloat(curr.credit) === 0
+          ? acc + parseFloat(curr.wtax_payable_cr)
+          : acc - parseFloat(curr.wtax_payable_cr)
+        : acc,
+    0
+  );
 
-  const wNTaxL = data?.tax?.reduce((acc, curr) => {
-    return parseFloat(curr.nvat_local) === 0
-      ? acc - 0
-      : acc + parseFloat(curr.wtax_payable_cr);
-  }, 0);
+  const wNTaxL = data?.tax?.reduce(
+    (acc, curr) =>
+      parseFloat(curr.nvat_local) !== 0
+        ? parseFloat(curr.credit) === 0
+          ? acc + parseFloat(curr.wtax_payable_cr)
+          : acc - parseFloat(curr.wtax_payable_cr)
+        : acc,
+    0
+  );
 
-  const wNTaxS = data?.tax?.reduce((acc, curr) => {
-    return parseFloat(curr.nvat_service) === 0
-      ? acc - 0
-      : acc + parseFloat(curr.wtax_payable_cr);
-  }, 0);
+  const wNTaxS = data?.tax?.reduce(
+    (acc, curr) =>
+      parseFloat(curr.nvat_service) !== 0
+        ? parseFloat(curr.credit) === 0
+          ? acc + parseFloat(curr.wtax_payable_cr)
+          : acc - parseFloat(curr.wtax_payable_cr)
+        : acc,
+    0
+  );
+
+  console.log(wTaxL);
+  console.log(wTaxS);
+  console.log(wNTaxL);
+  console.log(wNTaxS);
 
   const dateToday = new Date();
   const response = await fetch(pdfFileAsset);
@@ -237,20 +267,20 @@ export const printPDF = async (data) => {
     hasAmountL &&
     drawText(`${data?.atc?.substring(0, 2)}160`, { x: 182, y: 546, size: 10 });
 
-  drawText(convertToPeso(vps !== 0 && vpl !== 0 ? vps + vpl : nps + npl), {
+  drawText(convertToPeso(vps !== 0 || vpl !== 0 ? vps + vpl : nps + npl), {
     x: getMonth(data?.month),
     y: 424,
     size: 10,
   });
 
-  drawText(convertToPeso(vps !== 0 && vpl !== 0 ? vps + vpl : nps + npl), {
+  drawText(convertToPeso(vps !== 0 || vpl !== 0 ? vps + vpl : nps + npl), {
     x: 448,
     y: 424,
     size: 10,
   });
 
   drawText(
-    convertToPeso(wTaxL !== 0 && wTaxS !== 0 ? wTaxL + wTaxS : wNTaxL + wNTaxS),
+    convertToPeso(wTaxL !== 0 || wTaxS !== 0 ? wTaxL + wTaxS : wNTaxL + wNTaxS),
     {
       x: 520,
       y: 424,

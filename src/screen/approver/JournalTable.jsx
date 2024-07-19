@@ -53,10 +53,7 @@ import {
   useApQuery,
   useDocumentTypeQuery,
   useReadTransactionJournalMutation,
-  useSupplierQuery,
-  useTagYearMonthQuery,
 } from "../../services/store/request";
-import { setFilterBy } from "../../services/slice/transactionSlice";
 import TransactionModalAp from "../../components/customs/modal/TransactionModalAp";
 import { setVoucher } from "../../services/slice/optionsSlice";
 import TransactionModalApprover from "../../components/customs/modal/TransactionModalApprover";
