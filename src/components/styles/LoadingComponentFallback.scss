@@ -8,3 +8,19 @@
     overflow: hidden;
   }
 }
+
+.loading-Generate {
+  &.MuiDialog-root {
+    .MuiPaper-root {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: transparent;
+      box-shadow: none;
+      .MuiTypography-root {
+        font-family: "Roboto-Black";
+        color: #1a1d24;
+      }
+    }
+  }
+}

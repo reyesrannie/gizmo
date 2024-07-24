@@ -101,6 +101,10 @@ const accessPermission = [
         access_permission: "sched_transact_approver",
         label: "Approver Schedule",
       },
+      {
+        access_permission: "sched_transact_generate",
+        label: "Generate Schedule",
+      },
     ],
   },
   {

@@ -172,6 +172,10 @@
   gap: 10px;
 }
 
+.form-container-transaction.width {
+  max-width: 100px;
+}
+
 .transaction-devider {
   &.MuiDivider-root {
     width: 100%;

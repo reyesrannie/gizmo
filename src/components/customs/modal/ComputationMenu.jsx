@@ -260,7 +260,7 @@ const ComputationMenu = ({ details, schedule }) => {
               <TableCell align="center">Credit</TableCell>
 
               <TableCell align="center">
-                {voucher === "check" ? "Check Amount" : "Total Amount"}
+                {voucher === "check" ? "Voucher Amount" : "Total Amount"}
               </TableCell>
             </TableRow>
           </TableHead>
@@ -371,13 +371,13 @@ const ComputationMenu = ({ details, schedule }) => {
 
             {!isError && !loadingTax && (
               <TableRow className="table-body-tag-transaction">
-                <TableCell align="center" colSpan={8} />
-                <TableCell align="center">
+                <TableCell align="center" colSpan={7} />
+                <TableCell align="left" colSpan={2}>
                   <Typography className="tag-transaction-company-type">
                     Total Debit
                   </Typography>
                 </TableCell>
-                <TableCell align="right">
+                <TableCell align="left">
                   <Typography className="tag-transaction-company-type">
                     {convertToPeso(vatInput + debit)}
                   </Typography>
@@ -388,13 +388,13 @@ const ComputationMenu = ({ details, schedule }) => {
 
             {!isError && !loadingTax && (
               <TableRow className="table-body-tag-transaction">
-                <TableCell align="center" colSpan={8} />
-                <TableCell align="center">
+                <TableCell align="center" colSpan={7} />
+                <TableCell align="left" colSpan={2}>
                   <Typography className="tag-transaction-company-type">
                     Total Credit
                   </Typography>
                 </TableCell>
-                <TableCell align="right">
+                <TableCell align="left">
                   <Typography className="tag-transaction-company-type">
                     {convertToPeso(wtax + credit)}
                   </Typography>
@@ -405,13 +405,13 @@ const ComputationMenu = ({ details, schedule }) => {
 
             {!isError && !loadingTax && (
               <TableRow className="table-body-tag-transaction">
-                <TableCell align="center" colSpan={8} />
-                <TableCell align="right">
+                <TableCell align="center" colSpan={7} />
+                <TableCell align="left" colSpan={2}>
                   <Typography className="tag-transaction-company-type">
                     Total
                   </Typography>
                 </TableCell>
-                <TableCell align="right">
+                <TableCell align="left">
                   <Typography className="tag-transaction-company-type">
                     {convertToPeso(totalAccountPaginated(taxComputation))}
                   </Typography>

@@ -175,7 +175,7 @@ const CheckVoucher = () => {
           state={"voided"}
         />
       )}
-      {header === "Checked" && (
+      {header === "For Approval" && (
         <CheckTable
           params={params}
           onSortTable={onSortTable}

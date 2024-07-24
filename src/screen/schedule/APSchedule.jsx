@@ -188,7 +188,7 @@ const APSchedule = () => {
           ap
         />
       )}
-      {header === "Checked" && (
+      {header === "For Approval" && (
         <ScheduleTable
           params={params}
           onSortTable={onSortTable}

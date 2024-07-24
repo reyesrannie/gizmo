@@ -119,7 +119,7 @@ const ScheduleTable = ({
                 </TableCell>
               </TableRow>
             ) : (
-              tagTransaction?.result?.data?.map((tag) => {
+              tagTransaction?.result?.data?.map((tag, index) => {
                 const isToday = isCoverageTodayTable(tag);
 
                 const getOrdinalSuffix = (day) => {
@@ -143,7 +143,7 @@ const ScheduleTable = ({
                 return (
                   <TableRow
                     className="table-body-tag-transaction"
-                    key={tag?.id}
+                    key={index}
                     onClick={() => {
                       dispatch(setMenuData(tag));
 

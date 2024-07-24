@@ -53,7 +53,8 @@ const AppBar = () => {
   );
   const userData = decodeUser();
   const [anchorEl, setAnchorEl] = useState(null);
-  const { isCoverageToday } = DateChecker();
+
+  const { isCoverageToday, autoGenerateVoucher } = DateChecker();
 
   const {
     data: scheduledTransaction,
@@ -165,6 +166,7 @@ const AppBar = () => {
   useEffect(() => {
     if (successSched) {
       const isToday = isCoverageToday(scheduledTransaction?.result);
+      autoGenerateVoucher(scheduledTransaction?.result);
       dispatch(setOpenNotification(isToday));
     }
     if (errorSched) {
@@ -231,6 +233,14 @@ const AppBar = () => {
       </Menu>
       <Dialog open={changePass}>
         <ChangePassword logged />
+      </Dialog>
+
+      <Dialog
+        open={openNotification && hasAccess("sched_transact_generate")}
+        className="loading-Generate"
+      >
+        <Lottie animationData={loading} loop />
+        <Typography>Generating scheduled transaction......</Typography>
       </Dialog>
     </Box>
   );

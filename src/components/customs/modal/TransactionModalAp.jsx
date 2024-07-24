@@ -834,7 +834,7 @@ const TransactionModalAp = ({
                   errorTaxComputation || validateAmount(watch("amount"))
                 }
               >
-                Checked
+                Submit
               </LoadingButton>
             )}
             <Button

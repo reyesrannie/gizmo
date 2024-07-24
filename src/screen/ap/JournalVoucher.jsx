@@ -236,7 +236,7 @@ const JournalVoucher = () => {
           state={""}
         />
       )}
-      {header === "Checked" && (
+      {header === "For Approval" && (
         <JournalTable
           params={params}
           onSortTable={onSortTable}

@@ -176,7 +176,7 @@ const RequestSchedule = () => {
           state={"voided"}
         />
       )}
-      {header === "Checked" && (
+      {header === "For Approval" && (
         <ScheduleTable
           params={params}
           onSortTable={onSortTable}

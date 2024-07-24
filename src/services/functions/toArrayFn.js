@@ -174,7 +174,7 @@ export const coaArrays = (coa, taxComputation, supTypePercent, coa_id) => {
     const coa = new Map();
 
     if (item?.length > 0) {
-      item?.forEach((data) => {
+      item?.forEach((data, index) => {
         const coaId = data?.id;
         const amount = data?.amount;
         const mode = data?.mode;
@@ -183,12 +183,13 @@ export const coaArrays = (coa, taxComputation, supTypePercent, coa_id) => {
 
         if (coa.has(code)) {
           const existingCoa = coa?.get(code);
-
+          const isDebit = existingCoa.amount > amount ? existingCoa.mode : mode;
           existingCoa.mode !== mode
             ? (existingCoa.amount -= amount)
             : (existingCoa.amount += amount);
 
-          const isDebit = existingCoa.amount > amount ? existingCoa.mode : mode;
+          existingCoa.amount = Math.abs(existingCoa.amount);
+
           existingCoa.mode = isDebit;
         } else {
           coa.set(code, {
@@ -197,6 +198,7 @@ export const coaArrays = (coa, taxComputation, supTypePercent, coa_id) => {
             mode: mode,
             name: name,
             code: code,
+            index: index,
           });
         }
       });
@@ -208,8 +210,6 @@ export const coaArrays = (coa, taxComputation, supTypePercent, coa_id) => {
 
     return combinedItems;
   };
-
-  console.log(...theSameCoa());
 
   const itemCollected = [
     ...theSameCoa(),

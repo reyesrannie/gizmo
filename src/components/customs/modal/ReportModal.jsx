@@ -1,132 +1,133 @@
-import React, { useEffect, useRef, useState } from "react";
-import "../../styles/TransactionModal.scss";
-import "../../styles/TagTransaction.scss";
-import "../../styles/Supplier.scss";
-import "../../styles/UserManagement.scss";
-
 import {
-  Paper,
-  Typography,
   Box,
   Button,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TableCell,
-  Table,
-  TableBody,
-  Stack,
-  TableFooter,
-  IconButton,
+  Paper,
+  Typography,
+  TextField as MuiTextField,
   Dialog,
 } from "@mui/material";
+import React from "react";
+import "../../styles/AppPrompt.scss";
+import "../../styles/TransactionModal.scss";
+import "../../styles/RolesModal.scss";
 
+import { LoadingButton } from "@mui/lab";
+import receiveImg from "../../../assets/svg/receive.svg";
 import { useDispatch, useSelector } from "react-redux";
 
-import { setViewMenu } from "../../../services/slice/menuSlice";
-import { useReportQuery } from "../../../services/store/request";
-import loading from "../../../assets/lottie/Loading-2.json";
-import noData from "../../../assets/lottie/NoData.json";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import loadingLight from "../../../assets/lottie/Loading.json";
 
 import Lottie from "lottie-react";
-import moment from "moment";
-import { AdditionalFunction } from "../../../services/functions/AdditionalFunction";
-import {
-  totalAmount,
-  totalInputTax,
-  totalWTax,
-} from "../../../services/functions/compute";
 
-import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
-import {
-  generateExcelReport,
-  generateExcelReportPerATC,
-  generateExcelReportPerSup,
-} from "../../../services/functions/exportFile";
-import { hasAccess } from "../../../services/functions/access";
-import CardNavigation from "../CardNavigation";
-import { report } from "../../../services/constants/items";
+import reportSchema from "../../../schemas/reportSchema";
+import { reportOptions } from "../../../services/constants/reports";
+import Autocomplete from "../AutoComplete";
+import { useReportQuery } from "../../../services/store/request";
+import useReportHook from "../../../services/hooks/useReportHook";
+import { setMenuData, setViewMenu } from "../../../services/slice/menuSlice";
 
-const ReportModal = ({ transaction, title }) => {
-  const { convertToPeso } = AdditionalFunction();
-  const [selectedReport, setSelectedReport] = useState("");
+const ReportModal = () => {
   const dispatch = useDispatch();
   const menuData = useSelector((state) => state.menu.menuData);
-  const voucher = useSelector((state) => state.options.voucher);
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    watch,
+  } = useForm({
+    resolver: yupResolver(reportSchema),
+    defaultValues: {
+      report: null,
+    },
+  });
+
+  const { params } = useReportHook();
 
   const {
     data: reportData,
-    isLoading,
     isError,
-    isSuccess,
+    isLoading,
   } = useReportQuery(
-    { ...menuData, state: "approved" },
-    { skip: menuData === null || selectedReport === "" }
+    { ...params, tag_year: menuData?.tag_year },
+    {
+      skip: watch("report") === null || menuData?.tag_year === undefined,
+    }
   );
 
-  const hasRun = useRef(false);
-
-  useEffect(() => {
-    if (isSuccess) {
-      generateReport(selectedReport);
-      hasRun.current = true;
-    }
-  }, [isSuccess]);
-
-  const generateReport = async (type) => {
-    if (type === "Transaction") {
-      setSelectedReport("");
-      generateExcelReport(reportData, menuData, type);
-    } else if (type === "ATC") {
-      setSelectedReport("");
-      generateExcelReportPerATC(reportData, menuData, type);
-    } else if (type === "Supplier") {
-      setSelectedReport("");
-      generateExcelReportPerSup(reportData, menuData, type);
+  const submitHandler = async (submitData) => {
+    const generate = submitData?.report?.function;
+    try {
+      await generate(reportData, menuData, submitData?.report?.name);
+    } catch (error) {
+      console.log(error);
     }
   };
 
   return (
-    <Paper className="transaction-modal-container">
-      <Typography className="transaction-text">{title}</Typography>
+    <Paper className="app-prompt-container">
+      <img
+        src={receiveImg}
+        alt="Password"
+        className="app-prompt-image"
+        draggable="false"
+      />
+      <Typography className="app-prompt-title">Select Report</Typography>
+      <Typography className="app-prompt-text" sx={{ marginBottom: 2 }}>
+        To continue please select report to extract
+      </Typography>
 
-      <Box className="report-management-body">
-        {report?.map(
-          (card, index) =>
-            hasAccess(card?.permission) && (
-              <Box
-                className="report-tiles"
-                key={index}
-                onClick={() => {
-                  setSelectedReport(card?.name);
-                }}
-              >
-                <Stack display={"flex"} alignItems={"center"}>
-                  <Typography className="supplier-company-name">
-                    {card?.name}
-                  </Typography>
-                  {card?.firstIcon}
-                </Stack>
-              </Box>
-            )
-        )}
-      </Box>
-      <Box className="add-transaction-button-container-report">
-        .
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => {
-            dispatch(setViewMenu(false));
-          }}
-          className="add-transaction-button"
-        >
-          Close
-        </Button>
-      </Box>
+      <form
+        className="form-container-transaction width"
+        onSubmit={handleSubmit(submitHandler)}
+      >
+        <Autocomplete
+          control={control}
+          name={"report"}
+          options={reportOptions || []}
+          getOptionLabel={(option) => `${option?.name}`}
+          isOptionEqualToValue={(option, value) => option?.name === value?.name}
+          renderInput={(params) => (
+            <MuiTextField
+              name="document_type"
+              {...params}
+              label="Report *"
+              size="small"
+              variant="outlined"
+              error={Boolean(errors?.report)}
+              helperText={errors?.report?.message}
+              className="transaction-form-textBox receive"
+            />
+          )}
+        />
+        <Box className="app-prompt-button-container">
+          <LoadingButton
+            disabled={reportData === undefined || isError}
+            variant="contained"
+            color="warning"
+            className="change-password-button"
+            type="submit"
+          >
+            Proceed
+          </LoadingButton>
+          <Button
+            variant="contained"
+            color="primary"
+            className="change-password-button"
+            onClick={() => {
+              dispatch(setMenuData(null));
+              dispatch(setViewMenu(false));
+            }}
+          >
+            cancel
+          </Button>
+        </Box>
+      </form>
 
-      <Dialog open={isLoading} className="loading-transaction-create">
-        <Lottie animationData={loading} loop={true} />
+      <Dialog open={isLoading} className="loading-role-create">
+        <Lottie animationData={loadingLight} loop />
       </Dialog>
     </Paper>
   );

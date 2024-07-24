@@ -193,22 +193,7 @@ const ApprovingJournal = () => {
           onShowAll={onShowAll}
         />
       )}
-      {header === "Checked" && (
-        <JournalTable
-          params={params}
-          onSortTable={onSortTable}
-          isError={isError}
-          isFetching={isFetching}
-          isLoading={isLoading}
-          onPageChange={onPageChange}
-          onRowChange={onRowChange}
-          status={status}
-          tagTransaction={tagTransaction}
-          onOrderBy={onOrderBy}
-          state="checked"
-          onShowAll={onShowAll}
-        />
-      )}
+
       {header === "Returned" && (
         <JournalTable
           params={params}

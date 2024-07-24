@@ -7,7 +7,7 @@ const taggingHeader = [
 
 const apHeader = [
   { name: "Received", status: "For Computation" },
-  { name: "Checked", status: "For Approval" },
+  { name: "For Approval", status: "For Approval" },
   { name: "Returned", status: "returned" },
   { name: "Approved", status: "approved" },
   { name: "Void", status: "voided" },
@@ -39,7 +39,7 @@ const schedTaggingHeader = [
 const schedAPHeader = [
   { name: "Pending", status: "pending" },
   { name: "Received", status: "For Computation" },
-  { name: "Checked", status: "For Approval" },
+  { name: "For Approval", status: "For Approval" },
   { name: "Returned", status: "returned" },
   { name: "Approved", status: "approved" },
   { name: "History", status: "" },

@@ -194,13 +194,8 @@ const TransactionReport = () => {
         onClose={() => dispatch(setViewMenu(false))}
         className="transaction-modal-dialog-tax"
       >
-        <ReportModal transaction title={"Select Report"} />
+        <ReportModal />
       </Dialog>
-
-      {/* 
-      <Dialog open={archiveLoading} className="loading-role-create">
-        <Lottie animationData={loadingLight} loop={archiveLoading} />
-      </Dialog> */}
     </Box>
   );
 };

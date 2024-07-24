@@ -161,22 +161,7 @@ const ApprovingCheck = () => {
           onShowAll={onShowAll}
         />
       )}
-      {header === "Checked" && (
-        <CheckTable
-          params={params}
-          onSortTable={onSortTable}
-          isError={isError}
-          isFetching={isFetching}
-          isLoading={isLoading}
-          onPageChange={onPageChange}
-          onRowChange={onRowChange}
-          status={status}
-          tagTransaction={tagTransaction}
-          onOrderBy={onOrderBy}
-          state="checked"
-          onShowAll={onShowAll}
-        />
-      )}
+
       {header === "Returned" && (
         <CheckTable
           params={params}
