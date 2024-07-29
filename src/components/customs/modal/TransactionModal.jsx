@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import {
   Box,
@@ -112,12 +112,11 @@ const TransactionModal = ({ create, view, update, receive }) => {
   const transactionData = useSelector((state) => state.menu.menuData);
   const documents = useSelector((state) => state.transaction.documents);
   const addDocuments = useSelector((state) => state.transaction.addDocuments);
-  const userData = useSelector((state) => state.auth.userData);
 
   const defaultValue = transactionDefaultValue();
   const { enqueueSnackbar } = useSnackbar();
   const { insertDocument, deepEqual } = AdditionalFunction();
-  const { shouldDisableYear } = DateChecker();
+  const { shouldDisableYear, minDate } = DateChecker();
 
   const [createTransaction, { isLoading }] = useCreateTransactionMutation();
   const [updateTransaction, { isLoading: updateLoading }] =
@@ -1014,6 +1013,7 @@ const TransactionModal = ({ create, view, update, receive }) => {
                 format="YY MM"
                 value={value}
                 views={["month", "year"]}
+                minDate={minDate}
                 onChange={(e) => {
                   onChange(e);
                 }}

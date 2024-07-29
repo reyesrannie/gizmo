@@ -39,7 +39,6 @@ import {
   useAccountTitlesQuery,
   useApproveCheckEntriesMutation,
   useApproveJournalEntriesMutation,
-  useApproveTransactionMutation,
   useAtcQuery,
   useDocumentTypeQuery,
   useReturnCheckEntriesMutation,
@@ -201,9 +200,6 @@ const TransactionModalApprover = ({
 
   const [approveJournalEntry, { isLoading: loadingApproveJournal }] =
     useApproveJournalEntriesMutation();
-
-  const [approveTransaction, { isLoading: loadingApproveTransaction }] =
-    useApproveTransactionMutation();
 
   const [voidCVoucher, { isLoading: loadingVoidCV }] =
     useVoidCVoucherMutation();
@@ -376,8 +372,8 @@ const TransactionModalApprover = ({
         voucher === "check"
           ? await approveCheckEntry(obj).unwrap()
           : await approveJournalEntry(obj).unwrap();
-      menuData?.transactions?.gas_status !== "approved" &&
-        (await approveTransaction(transactId).unwrap());
+      // menuData?.transactions?.gas_status !== "approved" &&
+      //   (await approveTransaction(transactId).unwrap());
       enqueueSnackbar(res?.message, { variant: "success" });
       socket.emit("transaction_approved", {
         ...obj,
@@ -1079,7 +1075,6 @@ const TransactionModalApprover = ({
           loadingApproveJournal ||
           loadingVp ||
           loadingJournalVP ||
-          loadingApproveTransaction ||
           loadingVoidCV ||
           loadingVoidJV ||
           loadingVoidedCV ||

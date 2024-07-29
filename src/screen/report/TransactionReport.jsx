@@ -126,11 +126,13 @@ const TransactionReport = () => {
                     color="secondary"
                   >
                     <TableRow
-                      onClick={() =>
-                        checkIfAvailable(tag?.tag_year)
-                          ? displayReport(tag)
-                          : null
-                      }
+                      onClick={() => {
+                        // checkIfAvailable(tag?.tag_year)
+                        //   ? displayReport(tag)
+                        //   : null;
+
+                        displayReport(tag);
+                      }}
                       className={
                         checkIfAvailable(tag?.tag_year)
                           ? "table-body-available"

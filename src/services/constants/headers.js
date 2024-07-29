@@ -22,6 +22,12 @@ const approverHeader = [
   { name: "History", status: "" },
 ];
 
+const treasuryHeader = [
+  { name: "Preparation", status: "For Approval" },
+  { name: "Releasing", status: "returned" },
+  { name: "Clearing", status: "voided" },
+];
+
 const coaHeader = [
   { name: "Account Titles" },
   { name: "Great Grandparent" },
@@ -202,4 +208,5 @@ export {
   footer,
   titleHeaderATC,
   footerAtc,
+  treasuryHeader,
 };

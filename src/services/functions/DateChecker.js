@@ -5,6 +5,8 @@ import { useSelector } from "react-redux";
 import socket from "./serverSocket";
 import { hasAccess } from "./access";
 import { singleError } from "./errorResponse";
+import { useMemo } from "react";
+import dayjs from "dayjs";
 
 const DateChecker = () => {
   const { enqueueSnackbar } = useSnackbar();
@@ -77,11 +79,21 @@ const DateChecker = () => {
     return date.year() < currentYear;
   };
 
+  const today = dayjs();
+  const minDate = useMemo(() => {
+    if (today.date() <= 10) {
+      return today.subtract(1, "month").startOf("month");
+    } else {
+      return today.startOf("month");
+    }
+  }, [today]);
+
   return {
     isCoverageToday,
     isCoverageTodayTable,
     shouldDisableYear,
     autoGenerateVoucher,
+    minDate,
   };
 };
 

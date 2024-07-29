@@ -30,6 +30,10 @@ import PendingActionsOutlinedIcon from "@mui/icons-material/PendingActionsOutlin
 import AssessmentOutlinedIcon from "@mui/icons-material/AssessmentOutlined";
 import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
 import DeviceHubOutlinedIcon from "@mui/icons-material/DeviceHubOutlined";
+import AccountBalanceRoundedIcon from "@mui/icons-material/AccountBalanceRounded";
+import CreditScoreRoundedIcon from "@mui/icons-material/CreditScoreRounded";
+import ClearAllRoundedIcon from "@mui/icons-material/ClearAllRounded";
+import DriveFileMoveRoundedIcon from "@mui/icons-material/DriveFileMoveRounded";
 
 import "../../components/styles/CardNavigation.scss";
 import {
@@ -39,6 +43,7 @@ import {
   schedAPHeader,
   schedTaggingHeader,
   taggingHeader,
+  treasuryHeader,
 } from "./headers";
 const user = [
   {
@@ -605,7 +610,7 @@ const menu = [
       {
         desc: "Journal Approval",
         icon: <TaskOutlinedIcon />,
-        path: "/approver/approvejournal",
+        path: "/approvejournal",
         permission: ["approver"],
         child: approverHeader?.map((item) => {
           return { desc: item?.name, icon: <MediationOutlinedIcon /> };
@@ -614,12 +619,32 @@ const menu = [
     ],
   },
   {
-    desc: "Cutoff",
-    icon: <LockPersonOutlinedIcon />,
-    path: "/cutoff",
-    permission: ["cutOff_requestor", "cutOff_approver"],
-    children: [],
+    desc: "Treasury",
+    icon: <AccountBalanceRoundedIcon />,
+    path: "/treasury",
+    permission: ["preparation", "releasing", "clearing", "filing"],
+    children: [
+      {
+        desc: "Check Voucher",
+        icon: <PlaylistAddCheckOutlinedIcon />,
+        path: "/treasury/check",
+        permission: ["preparation", "releasing", "clearing"],
+        child: treasuryHeader?.map((item) => {
+          return { desc: item?.name, icon: <MediationOutlinedIcon /> };
+        }),
+      },
+      {
+        desc: "Journal Voucher",
+        icon: <TaskOutlinedIcon />,
+        path: "/treasury/journal",
+        permission: ["preparation", "releasing", "clearing"],
+        child: treasuryHeader?.map((item) => {
+          return { desc: item?.name, icon: <MediationOutlinedIcon /> };
+        }),
+      },
+    ],
   },
+
   {
     desc: "Scheduled",
     icon: <PendingActionsOutlinedIcon />,
@@ -658,6 +683,13 @@ const menu = [
         }),
       },
     ],
+  },
+  {
+    desc: "Cutoff",
+    icon: <LockPersonOutlinedIcon />,
+    path: "/cutoff",
+    permission: ["cutOff_requestor", "cutOff_approver"],
+    children: [],
   },
   {
     desc: "Report",

@@ -63,6 +63,28 @@ const accessPermission = [
   },
   {
     id: 6,
+    access: "Treasury",
+    children: [
+      {
+        access_permission: "preparation",
+        label: "Preparation",
+      },
+      {
+        access_permission: "releasing",
+        label: "Releasing",
+      },
+      {
+        access_permission: "clearing",
+        label: "Clearing",
+      },
+      {
+        access_permission: "filing",
+        label: "Filing",
+      },
+    ],
+  },
+  {
+    id: 7,
     access: "Cut OFF",
     children: [
       {
@@ -76,7 +98,7 @@ const accessPermission = [
     ],
   },
   {
-    id: 7,
+    id: 8,
     access: "Allocation",
     children: [
       {
@@ -86,7 +108,7 @@ const accessPermission = [
     ],
   },
   {
-    id: 8,
+    id: 9,
     access: "Scheduled",
     children: [
       {
@@ -108,7 +130,7 @@ const accessPermission = [
     ],
   },
   {
-    id: 9,
+    id: 10,
     access: "Report",
     children: [
       {
