@@ -11,6 +11,7 @@ const apHeader = [
   { name: "Returned", status: "returned" },
   { name: "Approved", status: "approved" },
   { name: "Void", status: "voided" },
+  { name: "Filing", status: "For Filing" },
   { name: "History", status: "" },
 ];
 
@@ -23,9 +24,9 @@ const approverHeader = [
 ];
 
 const treasuryHeader = [
-  { name: "Preparation", status: "For Approval" },
-  { name: "Releasing", status: "returned" },
-  { name: "Clearing", status: "voided" },
+  { name: "Preparation", status: "For Preparation" },
+  { name: "Releasing", status: "For Releasing" },
+  { name: "Clearing", status: "For Clearing" },
 ];
 
 const coaHeader = [

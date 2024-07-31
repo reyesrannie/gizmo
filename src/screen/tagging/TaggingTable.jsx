@@ -196,7 +196,7 @@ const TaggingTable = ({
                       {tag?.gas_status === "received" && (
                         <StatusIndicator
                           status="Received"
-                          className="checked-indicator"
+                          className="received-indicator"
                         />
                       )}
                       {tag?.gas_status === "archived" && (
@@ -208,31 +208,31 @@ const TaggingTable = ({
                       {tag?.gas_status === "returned" && (
                         <StatusIndicator
                           status="Returned"
-                          className="inActive-indicator"
+                          className="return-indicator"
                         />
                       )}
                       {tag?.gas_status === "checked" && (
                         <StatusIndicator
                           status="Checking"
-                          className="checked-indicator"
+                          className="computation-indicator"
                         />
                       )}
                       {tag?.gas_status === "approved" && (
                         <StatusIndicator
                           status="Approved"
-                          className="received-indicator"
+                          className="approved-indicator"
                         />
                       )}
                       {tag?.gas_status === "For Voiding" && (
                         <StatusIndicator
                           status="For Voiding"
-                          className="pending-indicator"
+                          className="voiding-indicator"
                         />
                       )}
                       {tag?.gas_status === "voided" && (
                         <StatusIndicator
                           status="Voided"
-                          className="inActive-indicator"
+                          className="void-indicator"
                         />
                       )}
                     </TableCell>

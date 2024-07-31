@@ -251,4 +251,23 @@ export const events = [
     event: "transaction_read",
     tags: ["Transaction", "CountTransaction", "CountCheck", "CountVoucher"],
   },
+  {
+    event: "transaction_preparation",
+    tags: [
+      "Transaction",
+      "CountTransaction",
+      "CountCheck",
+      "CountVoucher",
+      "Logs",
+      "AccountTitles",
+      "GTAG",
+      "VPCheckNumber",
+      "VPJournalNumber",
+      "SingleCheck",
+      "SingleJournal",
+      "CheckEntries",
+      "JournalEntries",
+      "TagYear",
+    ],
+  },
 ];

@@ -29,6 +29,7 @@ function AppTextBox({
   handleRemove,
   enableEnter = false,
   select = false,
+  showDecimal = false,
   handleClear,
   sample,
   ...textField
@@ -58,6 +59,7 @@ function AppTextBox({
         };
         const handleEditAuto = (e) => {
           const rawValue = e.target.value.replace(/,/g, "");
+          console.log(e.target.value);
           onChange(rawValue);
           if (handleClear) {
             handleClear();
@@ -66,7 +68,7 @@ function AppTextBox({
 
         const formatDisplayValue = (value) => {
           const num = Number(value);
-          return num % 1 === 0 ? num : num.toFixed(2);
+          return num % 1 === 0 ? "" : num.toFixed(2);
         };
         return (
           <>
@@ -90,7 +92,7 @@ function AppTextBox({
                 error={error}
                 onChange={handleEditAuto} // send value to hook form
                 inputRef={ref}
-                value={formatDisplayValue(value)}
+                value={showDecimal ? formatDisplayValue(value) : value}
                 size="small"
                 variant={variant}
                 label={label}

@@ -275,38 +275,83 @@ const JournalTable = ({
                       {tag?.state === "For Computation" && (
                         <StatusIndicator
                           status="For Computation"
-                          className="pending-indicator"
-                        />
-                      )}
-                      {tag?.state === "For Approval" && (
-                        <StatusIndicator
-                          status="For Approval"
-                          className="checked-indicator"
+                          className="computation-indicator"
                         />
                       )}
 
-                      {tag?.state === "returned" && (
+                      {tag?.state === "For Approval" && (
                         <StatusIndicator
-                          status="Returned"
-                          className="inActive-indicator"
+                          status="For Approval"
+                          className="approval-indicator"
                         />
                       )}
 
                       {tag?.state === "approved" && (
                         <StatusIndicator
                           status="Approved"
-                          className="received-indicator"
+                          className="approved-indicator"
                         />
                       )}
+
+                      {tag?.state === "returned" && (
+                        <StatusIndicator
+                          status="Returned"
+                          className="return-indicator"
+                        />
+                      )}
+
                       {tag?.state === "For Voiding" && (
                         <StatusIndicator
                           status="For Voiding"
-                          className="pending-indicator"
+                          className="voiding-indicator"
                         />
                       )}
+
                       {tag?.state === "voided" && (
                         <StatusIndicator
                           status="Void"
+                          className="void-indicator"
+                        />
+                      )}
+
+                      {tag?.state === "For Preparation" && (
+                        <StatusIndicator
+                          status="Awaiting Prep"
+                          className="preparation-indicator"
+                        />
+                      )}
+
+                      {tag?.state === "For Releasing" && (
+                        <StatusIndicator
+                          status="Awaiting Release"
+                          className="release-indicator"
+                        />
+                      )}
+
+                      {tag?.state === "For Filing" && (
+                        <StatusIndicator
+                          status="Awaiting File"
+                          className="filing-indicator"
+                        />
+                      )}
+
+                      {tag?.state === "For Clearing" && (
+                        <StatusIndicator
+                          status="For Clearing"
+                          className="clearing-indicator"
+                        />
+                      )}
+
+                      {tag?.state === "Filed" && (
+                        <StatusIndicator
+                          status="Filed"
+                          className="filed-indicator"
+                        />
+                      )}
+
+                      {tag?.state === "Cancelled" && (
+                        <StatusIndicator
+                          status="Cancelled"
                           className="inActive-indicator"
                         />
                       )}

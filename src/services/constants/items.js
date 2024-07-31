@@ -319,6 +319,36 @@ const approver = [
   },
 ];
 
+const treasury = [
+  {
+    path: "/treasury/check",
+    desc: "Preparation of Check to clearing of check process",
+    name: "Check Voucher",
+    permission: ["preparation", "releasing", "clearing"],
+    firstIcon: (
+      <PlaylistAddCheckOutlinedIcon
+        color="secondary"
+        className="icon-card-details"
+      />
+    ),
+    lastIcon: (
+      <NavigationOutlinedIcon className="icon-last" color="secondary" />
+    ),
+  },
+  {
+    path: "/treasury/journal",
+    desc: "Payment or adjustmnet module for processing",
+    name: "Journal Voucher",
+    permission: ["preparation", "releasing", "clearing"],
+    firstIcon: (
+      <TaskOutlinedIcon color="secondary" className="icon-card-details" />
+    ),
+    lastIcon: (
+      <NavigationOutlinedIcon className="icon-last" color="secondary" />
+    ),
+  },
+];
+
 const schedule = [
   {
     path: "/sched_transact/request",
@@ -610,7 +640,7 @@ const menu = [
       {
         desc: "Journal Approval",
         icon: <TaskOutlinedIcon />,
-        path: "/approvejournal",
+        path: "/approver/approvejournal",
         permission: ["approver"],
         child: approverHeader?.map((item) => {
           return { desc: item?.name, icon: <MediationOutlinedIcon /> };
@@ -622,7 +652,7 @@ const menu = [
     desc: "Treasury",
     icon: <AccountBalanceRoundedIcon />,
     path: "/treasury",
-    permission: ["preparation", "releasing", "clearing", "filing"],
+    permission: ["preparation", "releasing", "clearing"],
     children: [
       {
         desc: "Check Voucher",
@@ -854,4 +884,5 @@ export {
   routes,
   schedule,
   report,
+  treasury,
 };

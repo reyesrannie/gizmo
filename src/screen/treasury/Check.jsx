@@ -19,21 +19,22 @@ import ArrowDropDownCircleOutlinedIcon from "@mui/icons-material/ArrowDropDownCi
 
 import "../../components/styles/TagTransaction.scss";
 
-import { apHeader } from "../../services/constants/headers";
+import { treasuryHeader } from "../../services/constants/headers";
 import {
   setFilterBy,
   setIsExpanded,
 } from "../../services/slice/transactionSlice";
+
 import CheckTable from "./CheckTable";
-import useApHook from "../../services/hooks/useApHook";
 import CountDistribute from "../../services/functions/CountDistribute";
 import { setHeader } from "../../services/slice/headerSlice";
+import useTreasuryHook from "../../services/hooks/useTreasuryHook";
 
-const CheckVoucher = () => {
+const Check = () => {
   const dispatch = useDispatch();
 
   const isExpanded = useSelector((state) => state.transaction.isExpanded);
-  const header = useSelector((state) => state.headers.header) || "Received";
+  const header = useSelector((state) => state.headers.header) || "Preparation";
 
   const {
     params,
@@ -43,7 +44,8 @@ const CheckVoucher = () => {
     onSortTable,
     onOrderBy,
     onStateChange,
-  } = useApHook();
+    onShowAll,
+  } = useTreasuryHook();
 
   const {
     data: tagTransaction,
@@ -53,13 +55,15 @@ const CheckVoucher = () => {
     status,
   } = useCheckEntriesQuery(params);
 
-  const { countHeaderAPCH, countCheck } = CountDistribute();
+  const { countHeaderApproverCH, countApproveCheck } = CountDistribute();
 
-  const hasBadge = countCheck();
+  const hasBadge = countApproveCheck();
 
   useEffect(() => {
     if (header) {
-      const statusChange = apHeader?.find((item) => item?.name === header);
+      const statusChange = treasuryHeader?.find(
+        (item) => item?.name === header
+      );
       onStateChange(statusChange?.status);
     }
   }, [header]);
@@ -90,22 +94,17 @@ const CheckVoucher = () => {
       <Box className="tag-transaction-head-container">
         <Box className="tag-transaction-navigation-container">
           <Accordion
+            ref={accordionRef}
             expanded={isExpanded}
             elevation={0}
             className="tag-transaction-accordion"
-            ref={accordionRef}
           >
             <AccordionSummary onClick={() => dispatch(setIsExpanded(false))}>
               <Typography className="page-text-indicator-tag-transaction">
-                <Badge
-                  badgeContent={header ? countHeaderAPCH(header) : 0}
-                  color="error"
-                >
-                  {header}
-                </Badge>
+                {header}
               </Typography>
             </AccordionSummary>
-            {apHeader?.map(
+            {treasuryHeader?.map(
               (head, index) =>
                 header !== head?.name && (
                   <AccordionSummary
@@ -115,12 +114,13 @@ const CheckVoucher = () => {
                       dispatch(setIsExpanded(false));
                       onOrderBy("");
                       dispatch(setFilterBy(""));
+                      onStateChange(head?.status);
                     }}
                   >
                     <Typography className="page-text-accord-tag-transaction">
                       <Badge
                         badgeContent={
-                          head?.name ? countHeaderAPCH(head?.name) : 0
+                          head?.name ? countHeaderApproverCH(head?.name) : 0
                         }
                         color="error"
                       >
@@ -145,7 +145,7 @@ const CheckVoucher = () => {
           <SearchText onSearchData={onSearchData} />
         </Box>
       </Box>
-      {header === "Received" && (
+      {header === "Preparation" && (
         <CheckTable
           params={params}
           onSortTable={onSortTable}
@@ -157,40 +157,12 @@ const CheckVoucher = () => {
           status={status}
           tagTransaction={tagTransaction}
           onOrderBy={onOrderBy}
-          state={"received"}
+          state={"Preparation"}
+          onShowAll={onShowAll}
         />
       )}
-      {header === "Void" && (
-        <CheckTable
-          params={params}
-          onSortTable={onSortTable}
-          isError={isError}
-          isFetching={isFetching}
-          isLoading={isLoading}
-          onPageChange={onPageChange}
-          onRowChange={onRowChange}
-          status={status}
-          tagTransaction={tagTransaction}
-          onOrderBy={onOrderBy}
-          state={"voided"}
-        />
-      )}
-      {header === "For Approval" && (
-        <CheckTable
-          params={params}
-          onSortTable={onSortTable}
-          isError={isError}
-          isFetching={isFetching}
-          isLoading={isLoading}
-          onPageChange={onPageChange}
-          onRowChange={onRowChange}
-          status={status}
-          tagTransaction={tagTransaction}
-          onOrderBy={onOrderBy}
-          state="checked"
-        />
-      )}
-      {header === "Returned" && (
+
+      {header === "Releasing" && (
         <CheckTable
           params={params}
           onSortTable={onSortTable}
@@ -203,9 +175,10 @@ const CheckVoucher = () => {
           tagTransaction={tagTransaction}
           onOrderBy={onOrderBy}
           state="returned"
+          onShowAll={onShowAll}
         />
       )}
-      {header === "Approved" && (
+      {header === "Clearing" && (
         <CheckTable
           params={params}
           onSortTable={onSortTable}
@@ -217,41 +190,12 @@ const CheckVoucher = () => {
           status={status}
           tagTransaction={tagTransaction}
           onOrderBy={onOrderBy}
-          state={"approved"}
-        />
-      )}
-      {header === "Filing" && (
-        <CheckTable
-          params={params}
-          onSortTable={onSortTable}
-          isError={isError}
-          isFetching={isFetching}
-          isLoading={isLoading}
-          onPageChange={onPageChange}
-          onRowChange={onRowChange}
-          status={status}
-          tagTransaction={tagTransaction}
-          onOrderBy={onOrderBy}
-          state={""}
-        />
-      )}
-      {header === "History" && (
-        <CheckTable
-          params={params}
-          onSortTable={onSortTable}
-          isError={isError}
-          isFetching={isFetching}
-          isLoading={isLoading}
-          onPageChange={onPageChange}
-          onRowChange={onRowChange}
-          status={status}
-          tagTransaction={tagTransaction}
-          onOrderBy={onOrderBy}
-          state={""}
+          state={"For Voiding"}
+          onShowAll={onShowAll}
         />
       )}
     </Box>
   );
 };
 
-export default CheckVoucher;
+export default Check;

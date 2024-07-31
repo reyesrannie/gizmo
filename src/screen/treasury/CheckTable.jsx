@@ -28,8 +28,6 @@ import Lottie from "lottie-react";
 
 import { useDispatch, useSelector } from "react-redux";
 
-import ClearIcon from "@mui/icons-material/Clear";
-
 import RemoveRedEyeOutlinedIcon from "@mui/icons-material/RemoveRedEyeOutlined";
 import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
 
@@ -37,6 +35,8 @@ import loading from "../../assets/lottie/Loading-2.json";
 import noData from "../../assets/lottie/NoData.json";
 import StatusIndicator from "../../components/customs/StatusIndicator";
 import "../../components/styles/TagTransaction.scss";
+import "../../components/styles/UserModal.scss";
+import "../../components/styles/AccountsPayable.scss";
 
 import { useState } from "react";
 
@@ -44,6 +44,7 @@ import {
   resetMenu,
   setCheckMenu,
   setMenuData,
+  setUpdateMenu,
   setViewAccountingEntries,
   setViewMenu,
   setVoidMenu,
@@ -52,7 +53,7 @@ import {
 import {
   useApQuery,
   useDocumentTypeQuery,
-  useReadTransactionJournalMutation,
+  useReadTransactionCheckMutation,
 } from "../../services/store/request";
 import TransactionModalAp from "../../components/customs/modal/TransactionModalAp";
 import { setVoucher } from "../../services/slice/optionsSlice";
@@ -62,22 +63,21 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import orderBySchema from "../../schemas/orderBySchema";
 import Autocomplete from "../../components/customs/AutoComplete";
+import ClearIcon from "@mui/icons-material/Clear";
 import { AdditionalFunction } from "../../services/functions/AdditionalFunction";
 import { hasAccess } from "../../services/functions/access";
 
-const JournalTable = ({
+const CheckTable = ({
   params,
   onSortTable,
   isLoading,
-  status,
+  onShowAll,
   isError,
   tagTransaction,
   isFetching,
   onPageChange,
   onRowChange,
   onOrderBy,
-  state,
-  onShowAll,
 }) => {
   const [anchorE1, setAnchorE1] = useState(null);
   const dispatch = useDispatch();
@@ -85,7 +85,6 @@ const JournalTable = ({
   const updateMenu = useSelector((state) => state.menu.updateMenu);
   const viewMenu = useSelector((state) => state.menu.viewMenu);
   const checkMenu = useSelector((state) => state.menu.checkMenu);
-  const filterBy = useSelector((state) => state.transaction.filterBy);
   const voidMenu = useSelector((state) => state.menu.voidMenu);
   const { convertToPeso } = AdditionalFunction();
 
@@ -99,7 +98,7 @@ const JournalTable = ({
       pagination: "none",
     });
 
-  const [readTransaction] = useReadTransactionJournalMutation();
+  const [readTransaction] = useReadTransactionCheckMutation();
 
   const handleRead = async (data) => {
     const obj = {
@@ -236,20 +235,14 @@ const JournalTable = ({
                     key={tag?.id}
                     onClick={() => {
                       dispatch(setMenuData(tag));
-                      dispatch(setVoucher("journal"));
+                      dispatch(setVoucher("check"));
                       tag?.is_read === 0 && handleRead(tag);
-                      tag?.state === "approved" && dispatch(setViewMenu(true));
 
-                      tag?.state === "For Approval" &&
-                        dispatch(setCheckMenu(true));
+                      tag?.state === "For Preparation" &&
+                        dispatch(setViewMenu(true));
 
-                      tag?.state === "returned" && dispatch(setViewMenu(true));
-
-                      tag?.state === "For Voiding" &&
-                        dispatch(setVoidMenu(true));
-
-                      tag?.state === "voided" &&
-                        dispatch(setViewAccountingEntries(true));
+                      tag?.state === "For Releasing" &&
+                        dispatch(setUpdateMenu(true));
                     }}
                   >
                     <TableCell>
@@ -481,6 +474,7 @@ const JournalTable = ({
                       <IconButton
                         onClick={() => {
                           setValue("orderBy", null);
+
                           onOrderBy("");
                         }}
                         className="icon-clear-user"
@@ -502,42 +496,18 @@ const JournalTable = ({
         className="transaction-modal-dialog"
         onClose={() => dispatch(resetMenu())}
       >
-        <TransactionModalApprover approved />
+        <TransactionModalApprover preparation />
       </Dialog>
 
       <Dialog
         open={updateMenu}
         className="transaction-modal-dialog"
-        onClose={() => dispatch(resetMenu(false))}
-      >
-        <TransactionModalAp transactionData={menuData} update />
-      </Dialog>
-
-      <Dialog
-        open={voidMenu}
-        className="transaction-modal-dialog"
         onClose={() => dispatch(resetMenu())}
       >
-        <TransactionModalApprover transactionData={menuData} voiding />
-      </Dialog>
-
-      <Dialog
-        open={viewAccountingEntries}
-        className="transaction-modal-dialog"
-        onClose={() => dispatch(setViewAccountingEntries(false))}
-      >
-        <TransactionModalApprover viewAccountingEntries voiding />
-      </Dialog>
-
-      <Dialog
-        open={checkMenu}
-        className="transaction-modal-dialog"
-        onClose={() => dispatch(resetMenu())}
-      >
-        <TransactionModalApprover transactionData={menuData} checked />
+        <TransactionModalApprover approved />
       </Dialog>
     </Box>
   );
 };
 
-export default JournalTable;
+export default CheckTable;

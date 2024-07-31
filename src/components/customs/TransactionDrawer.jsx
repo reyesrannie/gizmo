@@ -104,7 +104,6 @@ const TransactionDrawer = ({
   const { data: logs } = useStatusLogsQuery(
     {
       transaction_id: transactionData?.id,
-      sorts: "created_at",
       pagination: "none",
     },
     { skip: transactionData === null || transactionData === undefined }

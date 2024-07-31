@@ -3,6 +3,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 // const baseURL = process.env.REACT_APP_API_KEY;
 
 const baseURL = "http://10.10.12.10:8000/api";
+
 // const baseURL = "http://10.10.10.16:8000/api";
 // const baseURL = "http://127.0.0.1:8000/api";
 
@@ -1301,6 +1302,25 @@ export const jsonServerAPI = createApi({
       }),
       invalidatesTags: ["CheckEntries", "Logs", "CountCheck"],
     }),
+
+    prepareCVoucher: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/preparation/transaction-check/${payload.id}`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["CheckEntries", "Logs", "CountCheck"],
+    }),
+    releaseCVoucher: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/releasing/transaction-check/${payload.id}`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["CheckEntries", "Logs", "CountCheck"],
+    }),
     readTransactionCheck: builder.mutation({
       transformResponse: (response) => response,
       query: (payload) => ({
@@ -1824,6 +1844,8 @@ export const {
   useApproveCheckEntriesMutation,
   useVoidCVoucherMutation,
   useVoidedCVoucherMutation,
+  usePrepareCVoucherMutation,
+  useReleaseCVoucherMutation,
   useReadTransactionCheckMutation,
 
   useJournalEntriesQuery,

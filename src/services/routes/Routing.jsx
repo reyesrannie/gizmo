@@ -75,6 +75,10 @@ const TransactionReport = lazy(() =>
   import("../../screen/report/TransactionReport")
 );
 
+const Treasury = lazy(() => import("../../screen/treasury/Treasury"));
+
+const Check = lazy(() => import("../../screen/treasury/Check"));
+
 const Routing = () => {
   const user = decodeUser();
   const routes = useRoutes([
@@ -322,6 +326,36 @@ const Routing = () => {
         {
           path: "approvejournal",
           element: hasAccess(["approver"]) ? (
+            <ApprovingJournal />
+          ) : (
+            <Navigate to={"/"} />
+          ),
+        },
+      ],
+    },
+    {
+      path: "/treasury",
+      element: user ? <AppBar /> : <Navigate to={"/login"} />,
+      children: [
+        {
+          path: "",
+          element: hasAccess(["preparation", "releasing", "clearing"]) ? (
+            <Treasury />
+          ) : (
+            <Navigate to={"/"} />
+          ),
+        },
+        {
+          path: "check",
+          element: hasAccess(["preparation", "releasing", "clearing"]) ? (
+            <Check />
+          ) : (
+            <Navigate to={"/"} />
+          ),
+        },
+        {
+          path: "journal",
+          element: hasAccess(["preparation", "releasing", "clearing"]) ? (
             <ApprovingJournal />
           ) : (
             <Navigate to={"/"} />

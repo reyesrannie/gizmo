@@ -41,6 +41,8 @@ import {
   useApproveJournalEntriesMutation,
   useAtcQuery,
   useDocumentTypeQuery,
+  usePrepareCVoucherMutation,
+  useReleaseCVoucherMutation,
   useReturnCheckEntriesMutation,
   useReturnJournalEntriesMutation,
   useStatusLogsQuery,
@@ -78,6 +80,11 @@ import {
   totalAccount,
   totalVatNonPaginate,
 } from "../../../services/functions/compute";
+import AppTextBox from "../AppTextBox";
+import { Controller, useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import preparationSchema from "../../../schemas/preparationSchema";
+import { DatePicker } from "@mui/x-date-pickers";
 
 const TransactionModalApprover = ({
   view,
@@ -86,11 +93,11 @@ const TransactionModalApprover = ({
   ap,
   viewAccountingEntries,
   voiding,
+  preparation,
 }) => {
   const dispatch = useDispatch();
   const isReturn = useSelector((state) => state.prompt.return);
   const menuData = useSelector((state) => state.menu.menuData);
-  const printable = useSelector((state) => state.menu.printable);
   const computationMenu = useSelector((state) => state.menu.computationMenu);
 
   const voucher = useSelector((state) => state.options.voucher);
@@ -212,6 +219,26 @@ const TransactionModalApprover = ({
 
   const [voidedJVoucher, { isLoading: loadingVoidedJV }] =
     useVoidedJVoucherMutation();
+
+  const [prepareCheck, { isLoading: loadingPrep }] =
+    usePrepareCVoucherMutation();
+
+  const [releaseCheck, { isLoading: loadingRelease }] =
+    useReleaseCVoucherMutation();
+
+  const {
+    control,
+    watch,
+    formState: { errors },
+    getValues,
+  } = useForm({
+    resolver: yupResolver(preparationSchema),
+    defaultValues: {
+      bank: "",
+      check_no: "",
+      check_date: null,
+    },
+  });
 
   useEffect(() => {
     if (
@@ -372,8 +399,6 @@ const TransactionModalApprover = ({
         voucher === "check"
           ? await approveCheckEntry(obj).unwrap()
           : await approveJournalEntry(obj).unwrap();
-      // menuData?.transactions?.gas_status !== "approved" &&
-      //   (await approveTransaction(transactId).unwrap());
       enqueueSnackbar(res?.message, { variant: "success" });
       socket.emit("transaction_approved", {
         ...obj,
@@ -458,6 +483,50 @@ const TransactionModalApprover = ({
     };
 
     printPDF(obj);
+  };
+
+  const handlePrepareCheck = async () => {
+    const obj = {
+      id: menuData?.id,
+    };
+    try {
+      const res =
+        voucher === "check"
+          ? await prepareCheck(obj).unwrap()
+          : await voidedJVoucher(obj).unwrap();
+      enqueueSnackbar(res?.message, { variant: "success" });
+      socket.emit("transaction_preparation", {
+        ...obj,
+      });
+      dispatch(resetMenu());
+      dispatch(resetPrompt());
+    } catch (error) {
+      singleError(error, enqueueSnackbar);
+    }
+  };
+
+  const releaseHandler = async () => {
+    const items = getValues();
+    const obj = {
+      ...items,
+      id: menuData?.id,
+      check_date: moment(items?.check_date).format("YYYY/MM/DD"),
+    };
+
+    try {
+      const res =
+        voucher === "check"
+          ? await releaseCheck(obj).unwrap()
+          : await voidedJVoucher(obj).unwrap();
+      enqueueSnackbar(res?.message, { variant: "success" });
+      socket.emit("transaction_release", {
+        ...obj,
+      });
+      dispatch(resetMenu());
+      dispatch(resetPrompt());
+    } catch (error) {
+      singleError(error, enqueueSnackbar);
+    }
   };
 
   return (
@@ -849,10 +918,27 @@ const TransactionModalApprover = ({
             <TableRow>
               <TableCell
                 colSpan={3}
-                align="left"
-                className="voucher-payment-footer"
+                align={preparation ? "center" : "left"}
+                className={`voucher-payment-footer ${
+                  preparation ? "preparation" : ""
+                } `}
               >
-                <Typography>Bank</Typography>
+                {preparation ? (
+                  <AppTextBox
+                    control={control}
+                    name={"bank"}
+                    label={"Bank"}
+                    color="primary"
+                    variant={"filled"}
+                    className="transaction-form-textBox preparation"
+                    error={Boolean(errors?.bank)}
+                    helperText={errors?.bank?.message}
+                  />
+                ) : (
+                  <Typography>
+                    Bank: {menuData?.bank === null ? "" : menuData?.bank}
+                  </Typography>
+                )}
               </TableCell>
               <TableCell align="left" className="voucher-payment-footer">
                 <Typography>Prepared by:</Typography>
@@ -884,10 +970,29 @@ const TransactionModalApprover = ({
             <TableRow>
               <TableCell
                 colSpan={3}
-                align="left"
-                className="voucher-payment-footer"
+                align={preparation ? "center" : "left"}
+                className={`voucher-payment-footer ${
+                  preparation ? "preparation" : ""
+                } `}
               >
-                <Typography>Check No:</Typography>
+                {preparation ? (
+                  <AppTextBox
+                    control={control}
+                    name={"check_no"}
+                    label={"Check No: "}
+                    color="primary"
+                    variant={"filled"}
+                    className="transaction-form-textBox preparation"
+                    error={Boolean(errors?.check_no)}
+                    helperText={errors?.check_no?.message}
+                  />
+                ) : (
+                  <Typography>
+                    {`Check No: ${
+                      menuData?.check_no === null ? "" : menuData?.check_no
+                    }`}
+                  </Typography>
+                )}
               </TableCell>
 
               <TableCell
@@ -934,11 +1039,41 @@ const TransactionModalApprover = ({
             <TableRow>
               <TableCell
                 colSpan={3}
-                align="left"
-                className="voucher-payment-footer"
+                align={preparation ? "center" : "left"}
+                className={`voucher-payment-footer ${
+                  preparation ? "preparation" : ""
+                } `}
               >
-                <Typography>Date</Typography>
+                {preparation ? (
+                  <Controller
+                    name="check_date"
+                    control={control}
+                    render={({ field: { onChange, value, ...restField } }) => (
+                      <Box className="date-picker-container-transaction preparation">
+                        <DatePicker
+                          className="transaction-form-date preparation"
+                          label="Date"
+                          format="MM/DD/YYYY"
+                          value={value}
+                          onChange={(e) => {
+                            onChange(e);
+                          }}
+                        />
+                        {errors.check_date && (
+                          <Typography variant="caption" color="error">
+                            {errors.check_date.message}
+                          </Typography>
+                        )}
+                      </Box>
+                    )}
+                  />
+                ) : (
+                  <Typography>{`Date: ${moment(
+                    new Date(menuData?.check_date)
+                  ).format("MM/DD/YYYY")}`}</Typography>
+                )}
               </TableCell>
+
               <TableCell align="left" className="voucher-payment-footer">
                 <Typography>Amount</Typography>
               </TableCell>
@@ -962,7 +1097,7 @@ const TransactionModalApprover = ({
       )}
       <Box className="add-transaction-button-container">
         <Box className="return-receive-container">
-          {!approved && !viewAccountingEntries && (
+          {!preparation && !approved && !viewAccountingEntries && (
             <Button
               variant="contained"
               color="error"
@@ -974,7 +1109,7 @@ const TransactionModalApprover = ({
             </Button>
           )}
 
-          {!viewAccountingEntries && (
+          {!preparation && !ap && !viewAccountingEntries && (
             <Button
               variant="contained"
               color="success"
@@ -986,7 +1121,19 @@ const TransactionModalApprover = ({
             </Button>
           )}
 
-          {approved && ap && !viewAccountingEntries && (
+          {ap && !viewAccountingEntries && (
+            <Button
+              variant="contained"
+              color="success"
+              className="add-transaction-button"
+              // startIcon={<DeleteForeverOutlinedIcon />}
+              onClick={() => handlePrepareCheck()}
+            >
+              {voucher === "check" ? "Prepare Check" : "Prepare"}
+            </Button>
+          )}
+
+          {approved && !viewAccountingEntries && (
             <ReactToPrint
               trigger={() => (
                 <Button
@@ -1013,7 +1160,7 @@ const TransactionModalApprover = ({
           )}
         </Box>
         <Box className="archive-transaction-button-container">
-          {!approved && !viewAccountingEntries && !voiding && (
+          {!preparation && !approved && !viewAccountingEntries && !voiding && (
             <LoadingButton
               variant="contained"
               color="warning"
@@ -1023,6 +1170,21 @@ const TransactionModalApprover = ({
               Approve
             </LoadingButton>
           )}
+
+          {preparation && !viewAccountingEntries && !voiding && (
+            <LoadingButton
+              disabled={
+                !watch("bank") || !watch("check_no") || !watch("check_date")
+              }
+              variant="contained"
+              color="warning"
+              onClick={releaseHandler}
+              className="add-transaction-button"
+            >
+              Submit
+            </LoadingButton>
+          )}
+
           {!approved && !viewAccountingEntries && voiding && (
             <LoadingButton
               variant="contained"
@@ -1078,7 +1240,9 @@ const TransactionModalApprover = ({
           loadingVoidCV ||
           loadingVoidJV ||
           loadingVoidedCV ||
-          loadingVoidedJV
+          loadingVoidedJV ||
+          loadingPrep ||
+          loadingRelease
         }
         className="loading-transaction-create"
       >

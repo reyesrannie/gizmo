@@ -222,6 +222,23 @@
   }
 }
 
+.transaction-form-textBox.preparation {
+  &.MuiFormControl-root {
+    min-width: 150px;
+    margin: 5px;
+    max-width: 0px;
+    min-height: 0px;
+    max-height: 50px;
+    .MuiInputBase-root {
+      overflow: hidden;
+      font-size: 0.75rem;
+    }
+    .MuiFormLabel-root {
+      font-size: 0.75rem;
+    }
+  }
+}
+
 .receive-modal {
   .MuiPaper-root {
     display: flex;
@@ -283,6 +300,37 @@
     .MuiSvgIcon-root {
       font-size: 20px;
     }
+  }
+}
+
+.transaction-form-date.preparation {
+  &.MuiFormControl-root {
+    min-width: 150px;
+    margin: 0px;
+    max-width: 0px;
+    min-height: 0px;
+    max-height: 50px;
+    background-color: #f0f0f0;
+    margin: 5px;
+    .MuiInputBase-root {
+      border-radius: 10px;
+      font-family: Roboto-Medium;
+      letter-spacing: 1px;
+      font-size: 0.75rem;
+      max-height: 40px;
+    }
+    .MuiFormLabel-root {
+      background-color: #ffffff;
+      line-height: 0.5rem;
+      letter-spacing: 1px;
+      font-size: 0.75rem;
+    }
+  }
+}
+
+.date-picker-container-transaction.preparation {
+  &.MuiBox-root {
+    align-items: center;
   }
 }
 

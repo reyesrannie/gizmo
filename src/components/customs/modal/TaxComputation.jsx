@@ -558,6 +558,7 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
 
         {checkField("vat_local") && (
           <AppTextBox
+            showDecimal
             money
             control={control}
             name={"vat_local"}
@@ -570,6 +571,7 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
         )}
         {checkField("vat_service") && (
           <AppTextBox
+            showDecimal
             money
             control={control}
             name={"vat_service"}
@@ -582,6 +584,7 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
         )}
         {checkField("nvat_local") && (
           <AppTextBox
+            showDecimal
             money
             control={control}
             name={"nvat_local"}
@@ -594,6 +597,7 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
         )}
         {checkField("nvat_service") && (
           <AppTextBox
+            showDecimal
             money
             control={control}
             name={"nvat_service"}
@@ -605,6 +609,7 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
           />
         )}
         <AppTextBox
+          showDecimal
           money
           control={control}
           name={"vat_input_tax"}
@@ -615,6 +620,7 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
           helperText={errors?.vat_input_tax?.message}
         />
         <AppTextBox
+          showDecimal
           money
           control={control}
           name={"wtax_payable_cr"}
@@ -651,6 +657,7 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
           }}
         />
         <AppTextBox
+          showDecimal
           money
           control={control}
           name={"total_invoice_amount"}
@@ -662,6 +669,7 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
         />
         {watch("mode") === "Debit" && (
           <AppTextBox
+            showDecimal
             money
             control={control}
             name={"debit"}
@@ -674,6 +682,7 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
         )}
         {watch("mode") === "Credit" && (
           <AppTextBox
+            showDecimal
             money
             control={control}
             name={"credit"}
@@ -686,6 +695,7 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
         )}
 
         <AppTextBox
+          showDecimal
           money
           control={control}
           name={"account"}

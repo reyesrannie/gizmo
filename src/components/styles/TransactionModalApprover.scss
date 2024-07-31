@@ -246,6 +246,18 @@
   }
 }
 
+.voucher-payment-footer.preparation {
+  &.MuiTableCell-root {
+    border: 2px solid black;
+    border-bottom: 1px solid black;
+    padding: none;
+    .MuiTypography-root {
+      font-family: Roboto-Medium;
+      font-size: 11px;
+    }
+  }
+}
+
 .voucher-payment-footer-sign {
   &.MuiTableCell-root {
     border: 2px solid black;
