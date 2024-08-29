@@ -6,7 +6,6 @@ import SearchText from "../../components/customs/SearchText";
 import {
   Accordion,
   AccordionSummary,
-  Badge,
   Box,
   IconButton,
   Typography,
@@ -26,15 +25,19 @@ import {
 } from "../../services/slice/transactionSlice";
 
 import CheckTable from "./CheckTable";
-import CountDistribute from "../../services/functions/CountDistribute";
 import { setHeader } from "../../services/slice/headerSlice";
 import useTreasuryHook from "../../services/hooks/useTreasuryHook";
+import { hasAccess } from "../../services/functions/access";
 
 const Check = () => {
   const dispatch = useDispatch();
 
   const isExpanded = useSelector((state) => state.transaction.isExpanded);
-  const header = useSelector((state) => state.headers.header) || "Preparation";
+  const header =
+    useSelector((state) => state.headers.header) ||
+    (hasAccess("check_approval") && !hasAccess("preparation")
+      ? "For Approval"
+      : "Preparation");
 
   const {
     params,
@@ -54,10 +57,6 @@ const Check = () => {
     isFetching,
     status,
   } = useCheckEntriesQuery(params);
-
-  const { countHeaderApproverCH, countApproveCheck } = CountDistribute();
-
-  const hasBadge = countApproveCheck();
 
   useEffect(() => {
     if (header) {
@@ -118,28 +117,23 @@ const Check = () => {
                     }}
                   >
                     <Typography className="page-text-accord-tag-transaction">
-                      <Badge
-                        badgeContent={
-                          head?.name ? countHeaderApproverCH(head?.name) : 0
-                        }
-                        color="error"
-                      >
-                        {head?.name}
-                      </Badge>
+                      {head?.name}
                     </Typography>
                   </AccordionSummary>
                 )
             )}
           </Accordion>
-          <IconButton
-            onClick={() => {
-              dispatch(setIsExpanded(!isExpanded));
-            }}
-          >
-            <Badge variant="dot" color="error" invisible={hasBadge}>
+          {hasAccess("check_approval") && !hasAccess("preparation") ? (
+            <></>
+          ) : (
+            <IconButton
+              onClick={() => {
+                dispatch(setIsExpanded(!isExpanded));
+              }}
+            >
               <ArrowDropDownCircleOutlinedIcon />
-            </Badge>
-          </IconButton>
+            </IconButton>
+          )}
         </Box>
         <Box className="tag-transaction-button-container">
           <SearchText onSearchData={onSearchData} />
@@ -162,7 +156,7 @@ const Check = () => {
         />
       )}
 
-      {header === "Releasing" && (
+      {header === "For Releasing" && (
         <CheckTable
           params={params}
           onSortTable={onSortTable}
@@ -178,7 +172,7 @@ const Check = () => {
           onShowAll={onShowAll}
         />
       )}
-      {header === "Clearing" && (
+      {header === "Released" && (
         <CheckTable
           params={params}
           onSortTable={onSortTable}
@@ -190,7 +184,23 @@ const Check = () => {
           status={status}
           tagTransaction={tagTransaction}
           onOrderBy={onOrderBy}
-          state={"For Voiding"}
+          state="Released"
+          onShowAll={onShowAll}
+        />
+      )}
+      {header === "For Approval" && (
+        <CheckTable
+          params={params}
+          onSortTable={onSortTable}
+          isError={isError}
+          isFetching={isFetching}
+          isLoading={isLoading}
+          onPageChange={onPageChange}
+          onRowChange={onRowChange}
+          status={status}
+          tagTransaction={tagTransaction}
+          onOrderBy={onOrderBy}
+          state="Check Approval"
           onShowAll={onShowAll}
         />
       )}

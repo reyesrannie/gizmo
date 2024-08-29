@@ -59,6 +59,7 @@ export const events = [
       "CountVoucher",
       "Logs",
       "TagYear",
+      "CountTreasury",
     ],
   },
   {
@@ -70,6 +71,7 @@ export const events = [
       "CountVoucher",
       "Logs",
       "TagYear",
+      "CountTreasury",
     ],
   },
   {
@@ -81,6 +83,7 @@ export const events = [
       "CountVoucher",
       "Logs",
       "TagYear",
+      "CountTreasury",
     ],
   },
   {
@@ -92,6 +95,7 @@ export const events = [
       "CountVoucher",
       "Logs",
       "TagYear",
+      "CountTreasury",
     ],
   },
   {
@@ -111,6 +115,7 @@ export const events = [
       "CheckEntries",
       "JournalEntries",
       "TagYear",
+      "CountTreasury",
     ],
   },
   {
@@ -130,6 +135,7 @@ export const events = [
       "CheckEntries",
       "JournalEntries",
       "TagYear",
+      "CountTreasury",
     ],
   },
   {
@@ -149,6 +155,7 @@ export const events = [
       "CheckEntries",
       "JournalEntries",
       "TagYear",
+      "CountTreasury",
     ],
   },
   {
@@ -168,6 +175,7 @@ export const events = [
       "CheckEntries",
       "JournalEntries",
       "TagYear",
+      "CountTreasury",
     ],
   },
   {
@@ -187,6 +195,7 @@ export const events = [
       "CheckEntries",
       "JournalEntries",
       "TagYear",
+      "CountTreasury",
     ],
   },
   {
@@ -245,6 +254,7 @@ export const events = [
       "JournalEntries",
       "CountSchedule",
       "ScheduleLogs",
+      "CountTreasury",
     ],
   },
   {
@@ -268,6 +278,7 @@ export const events = [
       "CheckEntries",
       "JournalEntries",
       "TagYear",
+      "CountTreasury",
     ],
   },
 ];

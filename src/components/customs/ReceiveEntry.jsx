@@ -41,7 +41,7 @@ import { enqueueSnackbar } from "notistack";
 import { singleError } from "../../services/functions/errorResponse";
 import socket from "../../services/functions/serverSocket";
 
-const ReceiveEntry = () => {
+const ReceiveEntry = ({ check = false }) => {
   const dispatch = useDispatch();
   const transactionData = useSelector((state) => state.menu.menuData);
   const disableProceed = useSelector((state) => state.prompt.disableProceed);
@@ -80,7 +80,7 @@ const ReceiveEntry = () => {
   } = useForm({
     resolver: yupResolver(entriesSchema),
     defaultValues: {
-      voucher: null,
+      voucher: check ? "Check Voucher" : "Journal Voucher",
       amount:
         parseFloat(transactionData?.purchase_amount).toFixed(2) -
         parseFloat(checkTransaction?.result?.amount || 0).toFixed(2) -
@@ -133,27 +133,23 @@ const ReceiveEntry = () => {
         singleError(error, enqueueSnackbar);
       }
     } else {
+      console.log(transactionData);
       const obj = {
         tag_year: transactionData?.tag_year,
-        transaction_id: transactionData?.id,
+        transaction_id: transactionData?.transactions?.id,
         ap_tagging_id: transactionData?.apTagging?.id || null,
         amount:
           parseFloat(journalTransaction?.result?.amount || 0) +
           parseFloat(submitData?.amount?.replace(/,/g, "") || "0"),
         id: !journalSuccess ? null : journalTransaction?.result?.id,
       };
-      const isZero =
-        parseFloat(transactionData?.purchase_amount) ===
-        parseFloat(obj.amount) +
-          parseFloat(checkTransaction?.result?.amount || 0);
 
       try {
         const res = journalSuccess
           ? await updateJournalEntry(obj).unwrap()
           : await createJournalEntry(obj).unwrap();
         enqueueSnackbar(res?.message, { variant: "success" });
-        isZero && (await receiveTransactionHandler("/ap/journal"));
-        !isZero && dispatch(resetPrompt());
+        dispatch(resetPrompt());
       } catch (error) {
         singleError(error, enqueueSnackbar);
       }
@@ -193,7 +189,7 @@ const ReceiveEntry = () => {
       />
       <Typography className="app-prompt-title">Select Entry</Typography>
       <Typography className="app-prompt-text" sx={{ marginBottom: 2 }}>
-        To continue please select entry and amount
+        To continue please enter amount
       </Typography>
 
       <form
@@ -201,6 +197,7 @@ const ReceiveEntry = () => {
         onSubmit={handleSubmit(submitHandler)}
       >
         <Autocomplete
+          disabled
           control={control}
           name={"voucher"}
           options={voucherOptions || []}
@@ -228,7 +225,9 @@ const ReceiveEntry = () => {
           className="transaction-form-textBox receive"
           error={Boolean(errors?.amount)}
           helperText={errors?.amount?.message}
-          onKeyUp={(e) => validateRemaining(e.target.value.replace(/,/g, ""))}
+          onKeyUp={(e) =>
+            check && validateRemaining(e.target.value.replace(/,/g, ""))
+          }
         />
         <Box className="app-prompt-button-container">
           <LoadingButton

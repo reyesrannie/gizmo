@@ -113,7 +113,7 @@ const mapAPTransaction = (transactionData, tin, document, accountNumber) => {
     null;
   const documentType =
     document?.result?.find(
-      (item) => transactionData?.document_type_id === item.id
+      (item) => transactionData?.documentType?.id === item.id
     ) || null;
   const values = {
     tag_no:

@@ -78,8 +78,8 @@ const accessPermission = [
         label: "Clearing",
       },
       {
-        access_permission: "filing",
-        label: "Filing",
+        access_permission: "check_approval",
+        label: "Check Approval",
       },
     ],
   },
@@ -104,6 +104,10 @@ const accessPermission = [
       {
         access_permission: "ap_tag",
         label: "AP",
+      },
+      {
+        access_permission: "filing",
+        label: "Filing",
       },
     ],
   },

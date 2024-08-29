@@ -102,7 +102,7 @@ const MenuDrawer = () => {
                         <Badge
                           badgeContent={menus ? menuCount(menus.desc) : 0}
                           color="error"
-                          max={10}
+                          max={100}
                         >
                           {menus.icon}
                         </Badge>
@@ -158,7 +158,7 @@ const MenuDrawer = () => {
                                   menus ? childMenuCount(child.desc) : 0
                                 }
                                 color="error"
-                                max={10}
+                                max={100}
                               >
                                 {child.icon}
                               </Badge>
@@ -174,44 +174,50 @@ const MenuDrawer = () => {
                           </ListItemButton>
                           {child?.child?.map((grandChild, index) => {
                             return (
-                              <ListItemButton
-                                className={`selectedChildList ${
-                                  header === grandChild.desc ? "selected" : ""
-                                }`}
-                                onClick={() => {
-                                  dispatch(setHeader(grandChild?.desc));
-                                  dispatch(resetMenuWithoutDrawer());
-                                  isTablet && dispatch(setDrawer(false));
-                                }}
-                                key={index}
-                              >
-                                <ListItemIcon
-                                  className={`list-icon ${
-                                    header === grandChild.desc ? "selected" : ""
-                                  } `}
-                                >
-                                  <Badge
-                                    badgeContent={
-                                      menus
-                                        ? countGrandChildcheck(
-                                            grandChild?.desc,
-                                            child?.desc
-                                          )
-                                        : 0
-                                    }
-                                    color="error"
-                                    max={10}
-                                  >
-                                    {grandChild.icon}
-                                  </Badge>
-                                </ListItemIcon>
-                                <ListItemText
-                                  className={`listText ${
+                              hasAccess(grandChild?.permission) && (
+                                <ListItemButton
+                                  className={`selectedChildList ${
                                     header === grandChild.desc ? "selected" : ""
                                   }`}
-                                  primary={grandChild.desc}
-                                />
-                              </ListItemButton>
+                                  onClick={() => {
+                                    dispatch(setHeader(grandChild?.desc));
+                                    dispatch(resetMenuWithoutDrawer());
+                                    isTablet && dispatch(setDrawer(false));
+                                  }}
+                                  key={index}
+                                >
+                                  <ListItemIcon
+                                    className={`list-icon ${
+                                      header === grandChild.desc
+                                        ? "selected"
+                                        : ""
+                                    } `}
+                                  >
+                                    <Badge
+                                      badgeContent={
+                                        menus
+                                          ? countGrandChildcheck(
+                                              grandChild?.desc,
+                                              child?.desc
+                                            )
+                                          : 0
+                                      }
+                                      color="error"
+                                      max={100}
+                                    >
+                                      {grandChild.icon}
+                                    </Badge>
+                                  </ListItemIcon>
+                                  <ListItemText
+                                    className={`listText ${
+                                      header === grandChild.desc
+                                        ? "selected"
+                                        : ""
+                                    }`}
+                                    primary={grandChild.desc}
+                                  />
+                                </ListItemButton>
+                              )
                             );
                           })}
                         </Accordion>
@@ -241,7 +247,7 @@ const MenuDrawer = () => {
                                   menus ? childMenuCount(child.desc) : 0
                                 }
                                 color="error"
-                                max={10}
+                                max={100}
                               >
                                 {child.icon}
                               </Badge>
@@ -290,7 +296,7 @@ const MenuDrawer = () => {
                       <Badge
                         badgeContent={menus ? menuCount(menus.desc) : 0}
                         color="error"
-                        max={10}
+                        max={100}
                       >
                         {menus.icon}
                       </Badge>

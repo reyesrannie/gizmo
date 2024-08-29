@@ -8,13 +8,14 @@ import {
   Dialog,
   FormControlLabel,
   Checkbox,
+  Stack,
 } from "@mui/material";
 import React from "react";
 import supplier from "../../../assets/svg/supplier.svg";
 
 import "../../styles/SupplierModal.scss";
 import AppTextBox from "../AppTextBox";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import Autocomplete from "../AutoComplete";
 import { useDispatch } from "react-redux";
@@ -104,6 +105,7 @@ const SupplierModal = ({ supplierData, view, update }) => {
     resolver: yupResolver(supplierSchema),
     defaultValues: {
       noTin: false,
+      isSpecial: false,
       is_company: false,
       tin: "",
       company_name: "",
@@ -248,13 +250,32 @@ const SupplierModal = ({ supplierData, view, update }) => {
         <Typography className="form-title-text-supplier">
           Company Details
         </Typography>
-        <FormControlLabel
-          className="check-box-no-tin-supplier"
-          control={<Checkbox color="secondary" />}
-          label="Supplier has no TIN"
-          checked={watch("noTin")}
-          onChange={() => setValue("noTin", !watch("noTin"))}
-        />
+        <Stack flexDirection={"row"}>
+          <FormControlLabel
+            className="check-box-no-tin-supplier"
+            control={<Checkbox color="secondary" />}
+            label="Supplier has no TIN"
+            checked={watch("noTin")}
+            onChange={() => setValue("noTin", !watch("noTin"))}
+          />
+          <FormControlLabel
+            className="check-box-no-tin-supplier"
+            label="Special Process"
+            control={
+              <Controller
+                name="isSpecial"
+                control={control}
+                render={({ field }) => (
+                  <Checkbox
+                    {...field}
+                    color="secondary"
+                    checked={field.value}
+                  />
+                )}
+              />
+            }
+          />
+        </Stack>
       </Box>
       <form
         className="form-container-supplier"

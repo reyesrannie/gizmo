@@ -1,32 +1,44 @@
 const taggingHeader = [
-  { name: "Tag Transaction", status: "pending" },
-  { name: "Returned", status: "returned" },
-  { name: "Archived", status: "archived" },
-  { name: "History", status: "" },
+  { name: "Pending", status: "pending", permission: "tagging" },
+  { name: "Returned", status: "returned", permission: "tagging" },
+  { name: "Archived", status: "archived", permission: "tagging" },
+  { name: "History", status: "", permission: "tagging" },
 ];
 
 const apHeader = [
-  { name: "Received", status: "For Computation" },
-  { name: "For Approval", status: "For Approval" },
-  { name: "Returned", status: "returned" },
-  { name: "Approved", status: "approved" },
-  { name: "Void", status: "voided" },
-  { name: "Filing", status: "For Filing" },
-  { name: "History", status: "" },
+  { name: "Received", status: "For Computation", permission: "ap_tag" },
+  { name: "For Approval", status: "For Approval", permission: "ap_tag" },
+  { name: "Returned", status: "returned", permission: "ap_tag" },
+  { name: "Approved", status: "approved", permission: "ap_tag" },
+  { name: "Void", status: "voided", permission: "ap_tag" },
+  { name: "Filing", status: "For Filing", permission: "filing" },
+  { name: "History", status: "", permission: "ap_tag" },
 ];
 
 const approverHeader = [
-  { name: "For Approval", status: "For Approval" },
-  { name: "Returned", status: "returned" },
-  { name: "Void", status: "voided" },
-  { name: "Pending Void", status: "For Voiding" },
-  { name: "History", status: "" },
+  { name: "Approval", status: "For Approval", permission: "approver" },
+  { name: "Returned", status: "returned", permission: "approver" },
+  { name: "Void", status: "voided", permission: "approver" },
+  { name: "Pending Void", status: "For Voiding", permission: "approver" },
+  { name: "History", status: "", permission: "approver" },
 ];
 
 const treasuryHeader = [
-  { name: "Preparation", status: "For Preparation" },
-  { name: "Releasing", status: "For Releasing" },
-  { name: "Clearing", status: "For Clearing" },
+  { name: "Preparation", status: "For Preparation", permission: "preparation" },
+  {
+    name: "For Approval",
+    status: "Check Approval",
+    permission: ["releasing", "check_approval"],
+  },
+  { name: "For Releasing", status: "For Releasing", permission: "releasing" },
+  { name: "Released", status: "Released", permission: "clearing" },
+];
+
+const checkHeader = [
+  { name: "Available", status: "Available" },
+  { name: "Released", status: "Released" },
+  { name: "Cleared", status: "Cleared" },
+  { name: "Cancelled", status: "Cancelled" },
 ];
 
 const coaHeader = [
@@ -210,4 +222,5 @@ export {
   titleHeaderATC,
   footerAtc,
   treasuryHeader,
+  checkHeader,
 };

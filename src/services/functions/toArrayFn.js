@@ -3,7 +3,7 @@ import { totalAccount } from "./compute";
 
 export const arrayFieldOne = (menuData, sumAmount, voucher, document) => {
   const doc = document?.result?.find(
-    (item) => item?.id === menuData?.transactions?.document_type_id
+    (item) => item?.id === menuData?.transactions?.documentType?.id
   )?.code;
 
   const obj = [
@@ -315,6 +315,9 @@ export const getAllSupplier = (report) => {
 
   report?.result?.forEach((item) => {
     const supplierId = item?.transactions?.supplier?.id;
+    const atcId = item?.atc?.id;
+    const supplierKey = `${supplierId}-${atcId}`;
+
     const vatValue = {
       nvat_local: item?.nvat_local,
       nvat_service: item?.nvat_service,
@@ -324,8 +327,9 @@ export const getAllSupplier = (report) => {
     const taxBased = Object.keys(vatValue).find((key) => vatValue[key] !== 0);
     const tax = vatValue[taxBased] || 0;
     const wtax = item?.wtax_payable_cr || 0;
-    if (supplier.has(supplierId)) {
-      const existingSup = supplier.get(supplierId);
+
+    if (supplier.has(supplierKey)) {
+      const existingSup = supplier.get(supplierKey);
       if (item.mode === "Credit") {
         existingSup.amount -= item?.amount;
         existingSup.wtax -= wtax;
@@ -336,7 +340,7 @@ export const getAllSupplier = (report) => {
         existingSup.taxBased += tax;
       }
     } else {
-      supplier.set(supplierId, {
+      supplier.set(supplierKey, {
         code: item?.transactions?.supplier,
         amount: item?.amount,
         source: item?.transactions?.apTagging,
@@ -357,9 +361,11 @@ export const getAllSupplier = (report) => {
       });
     }
   });
+
   const combinedItems = Array.from(supplier.values()).map((item) => ({
     ...item,
     amount: item.amount,
   }));
+
   return combinedItems;
 };

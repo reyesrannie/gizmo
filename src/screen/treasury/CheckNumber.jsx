@@ -6,43 +6,36 @@ import SearchText from "../../components/customs/SearchText";
 import {
   Accordion,
   AccordionSummary,
-  Badge,
   Box,
-  Dialog,
   IconButton,
   Typography,
 } from "@mui/material";
 
 import { useDispatch, useSelector } from "react-redux";
-import { useSchedTransactionQuery } from "../../services/store/request";
+import {
+  useCheckEntriesQuery,
+  useCheckNumberQuery,
+} from "../../services/store/request";
 
 import ArrowDropDownCircleOutlinedIcon from "@mui/icons-material/ArrowDropDownCircleOutlined";
 
 import "../../components/styles/TagTransaction.scss";
 
-import {
-  approverScheduleHeader,
-  schedAPHeader,
-} from "../../services/constants/headers";
+import { checkHeader } from "../../services/constants/headers";
 import {
   setFilterBy,
   setIsExpanded,
 } from "../../services/slice/transactionSlice";
-import "../../components/styles/TransactionModal.scss";
-// import CheckTable from "./CheckTable";
-import CountDistribute from "../../services/functions/CountDistribute";
-import ScheduleModal from "../../components/customs/modal/ScheduleModal";
-import { resetMenu } from "../../services/slice/menuSlice";
-import ScheduleTable from "./ScheduleTable";
-import useApproverHook from "../../services/hooks/useApproverHook";
-import { setHeader } from "../../services/slice/headerSlice";
 
-const ApproverSchedule = () => {
+import CheckNumberTable from "./CheckNumberTable";
+import { setHeader } from "../../services/slice/headerSlice";
+import useTreasuryCheckHook from "../../services/hooks/useTreasuryCheckHook";
+
+const CheckNumber = () => {
   const dispatch = useDispatch();
 
   const isExpanded = useSelector((state) => state.transaction.isExpanded);
-  const header = useSelector((state) => state.headers.header) || "For Approval";
-  const createMenu = useSelector((state) => state.menu.createMenu);
+  const header = useSelector((state) => state.headers.header) || "Available";
 
   const {
     params,
@@ -52,7 +45,8 @@ const ApproverSchedule = () => {
     onSortTable,
     onOrderBy,
     onStateChange,
-  } = useApproverHook();
+    onShowAll,
+  } = useTreasuryCheckHook();
 
   const {
     data: tagTransaction,
@@ -60,15 +54,11 @@ const ApproverSchedule = () => {
     isError,
     isFetching,
     status,
-  } = useSchedTransactionQuery(params);
-
-  const { countGrandChildcheck } = CountDistribute();
+  } = useCheckNumberQuery(params);
 
   useEffect(() => {
     if (header) {
-      const statusChange = approverScheduleHeader?.find(
-        (item) => item?.name === header
-      );
+      const statusChange = checkHeader?.find((item) => item?.name === header);
       onStateChange(statusChange?.status);
     }
   }, [header]);
@@ -109,7 +99,7 @@ const ApproverSchedule = () => {
                 {header}
               </Typography>
             </AccordionSummary>
-            {approverScheduleHeader?.map(
+            {checkHeader?.map(
               (head, index) =>
                 header !== head?.name && (
                   <AccordionSummary
@@ -141,8 +131,8 @@ const ApproverSchedule = () => {
           <SearchText onSearchData={onSearchData} />
         </Box>
       </Box>
-      {header === "For Approval" && (
-        <ScheduleTable
+      {header === "Available" && (
+        <CheckNumberTable
           params={params}
           onSortTable={onSortTable}
           isError={isError}
@@ -153,13 +143,13 @@ const ApproverSchedule = () => {
           status={status}
           tagTransaction={tagTransaction}
           onOrderBy={onOrderBy}
-          state={"For Approval"}
-          approver
+          state={"Available"}
+          onShowAll={onShowAll}
         />
       )}
 
-      {header === "Returned" && (
-        <ScheduleTable
+      {header === "Releasing" && (
+        <CheckNumberTable
           params={params}
           onSortTable={onSortTable}
           isError={isError}
@@ -171,12 +161,11 @@ const ApproverSchedule = () => {
           tagTransaction={tagTransaction}
           onOrderBy={onOrderBy}
           state="returned"
-          approver
+          onShowAll={onShowAll}
         />
       )}
-
-      {header === "History" && (
-        <ScheduleTable
+      {header === "Clearing" && (
+        <CheckNumberTable
           params={params}
           onSortTable={onSortTable}
           isError={isError}
@@ -187,19 +176,12 @@ const ApproverSchedule = () => {
           status={status}
           tagTransaction={tagTransaction}
           onOrderBy={onOrderBy}
-          state={""}
-          approver
+          state={"For Voiding"}
+          onShowAll={onShowAll}
         />
       )}
-      <Dialog
-        open={createMenu}
-        className="transaction-modal-dialog"
-        onClose={() => resetMenu(false)}
-      >
-        <ScheduleModal create />
-      </Dialog>
     </Box>
   );
 };
 
-export default ApproverSchedule;
+export default CheckNumber;

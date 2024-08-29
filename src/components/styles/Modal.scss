@@ -1,0 +1,352 @@
+.modal-container {
+  &.MuiPaper-root {
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+.table-container-for-print {
+  @media print {
+    &.MuiTableContainer-root {
+      width: 96%;
+      margin: 2%;
+      overflow: hidden;
+    }
+  }
+}
+
+.transaction-form-textBox {
+  &.MuiFormControl-root {
+    border-radius: 10px;
+    min-width: 240px;
+    max-width: 240px;
+    min-height: 63px;
+
+    .MuiInputBase-root {
+      border-radius: 10px;
+      font-family: Roboto-Medium;
+      letter-spacing: 1px;
+    }
+    .MuiFormLabel-root {
+      font-family: Roboto-Medium;
+      letter-spacing: 1px;
+    }
+    .MuiFormHelperText-root {
+      font-family: Roboto-Light;
+      letter-spacing: 1px;
+    }
+  }
+}
+
+.transaction-tax-textBox {
+  &.MuiFormControl-root {
+    border-radius: 10px;
+    min-width: 210px;
+    max-width: 210px;
+    min-height: 63px;
+    .MuiInputBase-root {
+      border-radius: 10px;
+      font-family: Roboto-Medium;
+      letter-spacing: 1px;
+    }
+    .MuiFormLabel-root {
+      font-family: Roboto-Medium;
+      letter-spacing: 1px;
+    }
+    .MuiFormHelperText-root {
+      font-family: Roboto-Light;
+      letter-spacing: 1px;
+    }
+    .MuiInputAdornment-root {
+      max-width: 15px;
+    }
+  }
+}
+
+.date-picker-container {
+  &.MuiBox-root {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    .MuiTypography-root {
+      position: absolute;
+      font-family: Roboto-light;
+      font-size: 12px;
+      letter-spacing: 1px;
+      margin-left: 15px;
+      bottom: 0;
+    }
+  }
+}
+
+.transaction-form-date {
+  &.MuiFormControl-root {
+    border-radius: 10px;
+    min-width: 230px;
+    max-width: 230px;
+    min-height: 63px;
+
+    .MuiInputBase-root {
+      border-radius: 10px;
+      font-family: Roboto-Medium;
+      letter-spacing: 1px;
+      font-size: 14px;
+      max-height: 40px;
+    }
+    .MuiFormLabel-root {
+      overflow: visible !important;
+      line-height: 9px;
+      font-family: Roboto-Medium;
+      letter-spacing: 1px;
+    }
+    .MuiFormHelperText-root {
+      font-family: Roboto-Light;
+      letter-spacing: 1px;
+    }
+    .MuiSvgIcon-root {
+      font-size: 20px;
+    }
+  }
+}
+
+.transaction-form-textBox.treasury {
+  &.MuiFormControl-root {
+    min-height: unset;
+    min-width: unset;
+    max-width: unset;
+
+    .MuiInputBase-root {
+      font-size: 10px;
+      overflow: hidden;
+    }
+    .MuiFormLabel-root {
+      font-size: 12px;
+    }
+    .MuiFormHelperText-root {
+      font-size: 10px;
+    }
+  }
+}
+
+.transaction-tax-textBox.treasury {
+  &.MuiFormControl-root {
+    min-height: unset;
+    min-width: unset;
+    max-width: unset;
+    .MuiInputBase-root {
+      font-size: 12px;
+      overflow: hidden;
+    }
+    .MuiFormLabel-root {
+      font-size: 12px;
+    }
+    .MuiFormHelperText-root {
+      font-size: 10px;
+    }
+    .MuiInputAdornment-root {
+    }
+  }
+}
+
+.date-picker-container.treasury {
+  &.MuiBox-root {
+    .MuiTypography-root {
+      font-size: 10px;
+    }
+  }
+}
+
+.transaction-form-date.treasury {
+  &.MuiFormControl-root {
+    min-height: unset;
+    min-width: unset;
+    max-width: unset;
+
+    .MuiInputBase-root {
+      font-size: 10px;
+      overflow: hidden;
+    }
+    .MuiFormLabel-root {
+      font-size: 12px;
+    }
+    .MuiFormHelperText-root {
+      font-size: 10px;
+    }
+    .MuiSvgIcon-root {
+      font-size: 15px;
+    }
+  }
+}
+
+.voucher-treasury {
+  &.MuiTableCell-root {
+    border: 2px solid black;
+    padding: 4px;
+    .MuiTypography-root {
+      font-family: Roboto-Black;
+      font-size: 12px;
+    }
+  }
+}
+
+.voucher-treasury.header {
+  &.MuiTableCell-root {
+    .MuiTypography-root {
+      font-family: Roboto-Black;
+      font-size: 16px;
+    }
+  }
+}
+
+.voucher-treasury.name {
+  &.MuiTableCell-root {
+    width: unset;
+  }
+}
+
+.voucher-treasury-payee {
+  &.MuiTableCell-root {
+    border: 2px solid black;
+    padding: 4px;
+    width: 25%;
+  }
+}
+
+.voucher-treasury.body {
+  &.MuiTableCell-root {
+    background-color: rgb(185, 183, 183);
+    .MuiTypography-root {
+      font-family: Roboto-Light;
+      font-size: 12px;
+    }
+  }
+}
+
+.voucher-treasury.content {
+  &.MuiTableCell-root {
+    .MuiTypography-root {
+      font-family: Roboto-Light;
+      font-size: 12px;
+    }
+  }
+}
+
+.voucher-treasury.left {
+  &.MuiTableCell-root {
+    border-right: none;
+    .MuiTypography-root {
+      font-family: Roboto-Light;
+    }
+  }
+}
+
+.voucher-treasury.center {
+  &.MuiTableCell-root {
+    border-right: none;
+    border-left: none;
+    .MuiTypography-root {
+      font-family: Roboto-Light;
+    }
+  }
+}
+
+.voucher-treasury.right {
+  &.MuiTableCell-root {
+    border-left: none;
+    .MuiTypography-root {
+      font-family: Roboto-Light;
+    }
+  }
+}
+
+.voucher-treasury.details {
+  &.MuiTableCell-root {
+    border-right: none;
+    border-left: none;
+    .MuiTypography-root {
+      font-family: Roboto-Light;
+    }
+  }
+}
+
+.voucher-treasury.footer {
+  &.MuiTableCell-root {
+    background-color: rgb(185, 183, 183);
+    .MuiTypography-root {
+      font-family: Roboto-Black;
+      font-size: 8px;
+    }
+  }
+}
+
+.voucher-treasury.highlight {
+  &.MuiTableCell-root {
+    background-color: rgb(185, 183, 183);
+    .MuiTypography-root {
+      font-family: Roboto-Black;
+    }
+  }
+}
+
+.voucher-treasury.empty {
+  &.MuiTableCell-root {
+    border: none;
+    background-color: rgb(185, 183, 183);
+    padding: 10px;
+    width: 150px;
+    .MuiTypography-root {
+      font-family: Roboto-Black;
+      font-size: 12px;
+    }
+  }
+}
+
+.voucher-treasury.empty-left {
+  &.MuiTableCell-root {
+    border-right: none;
+    background-color: rgb(185, 183, 183);
+    padding: 10px;
+    width: 150px;
+  }
+}
+
+.voucher-treasury.empty-right {
+  &.MuiTableCell-root {
+    border-left: none;
+    background-color: rgb(185, 183, 183);
+    padding: 10px;
+    width: 150px;
+  }
+}
+
+.name-supplier-typo-treasury.supplier {
+  &.MuiTypography-root {
+    font-family: Roboto-Light;
+    font-size: 8px;
+  }
+}
+.name-supplier-typo-treasury.name {
+  &.MuiTypography-root {
+    font-family: Roboto-Black;
+  }
+}
+
+.form-control-radio.treasury {
+  &.MuiFormControl-root {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    align-items: center;
+    .MuiFormLabel-root {
+      font-family: Roboto-Light;
+      font-size: 12px;
+    }
+    .MuiFormGroup-root {
+      display: flex;
+      flex-direction: row;
+    }
+  }
+}

@@ -6,7 +6,6 @@ import SearchText from "../../components/customs/SearchText";
 import {
   Accordion,
   AccordionSummary,
-  Badge,
   Box,
   Button,
   IconButton,
@@ -21,8 +20,6 @@ import ArrowDropDownCircleOutlinedIcon from "@mui/icons-material/ArrowDropDownCi
 
 import "../../components/styles/TagTransaction.scss";
 
-import { setCreateMenu } from "../../services/slice/menuSlice";
-
 import { taggingHeader } from "../../services/constants/headers";
 import TaggingTable from "./TaggingTable";
 import useTransactionHook from "../../services/hooks/useTransactionHook";
@@ -30,18 +27,15 @@ import {
   setFilterBy,
   setIsExpanded,
 } from "../../services/slice/transactionSlice";
-import CountDistribute from "../../services/functions/CountDistribute";
 import { setHeader } from "../../services/slice/headerSlice";
+import { setViewMenu } from "../../services/slice/menuSlice";
 
 const TagTransaction = () => {
   const dispatch = useDispatch();
 
   const isExpanded = useSelector((state) => state.transaction.isExpanded);
 
-  const header =
-    useSelector((state) => state.headers.header) || "Tag Transaction";
-
-  const { countHeaderTagging } = CountDistribute();
+  const header = useSelector((state) => state.headers.header) || "Pending";
 
   const {
     params,
@@ -81,12 +75,7 @@ const TagTransaction = () => {
           >
             <AccordionSummary onClick={() => dispatch(setIsExpanded(false))}>
               <Typography className="page-text-indicator-tag-transaction">
-                <Badge
-                  badgeContent={header ? countHeaderTagging(header) : 0}
-                  color="error"
-                >
-                  {header}
-                </Badge>
+                {header}
               </Typography>
             </AccordionSummary>
             {taggingHeader?.map(
@@ -103,14 +92,7 @@ const TagTransaction = () => {
                     }}
                   >
                     <Typography className="page-text-accord-tag-transaction">
-                      <Badge
-                        badgeContent={
-                          head?.name ? countHeaderTagging(head?.name) : 0
-                        }
-                        color="error"
-                      >
-                        {head?.name}
-                      </Badge>
+                      {head?.name}
                     </Typography>
                   </AccordionSummary>
                 )
@@ -126,28 +108,18 @@ const TagTransaction = () => {
         </Box>
         <Box className="tag-transaction-button-container">
           <SearchText onSearchData={onSearchData} />
-          {/* <Button
-            variant="contained"
-            color="secondary"
-            className="button-add-tag-transaction"
-            startIcon={<SyncOutlinedIcon />}
-            onClick={() => dispatch(setDate(true))}
-          >
-            Sync
-          </Button> */}
-
           <Button
             variant="contained"
             color="secondary"
             className="button-add-tag-transaction"
             startIcon={<AddToPhotosOutlinedIcon />}
-            onClick={() => dispatch(setCreateMenu(true))}
+            onClick={() => dispatch(setViewMenu(true))}
           >
             Add
           </Button>
         </Box>
       </Box>
-      {header === "Tag Transaction" && (
+      {header === "Pending" && (
         <TaggingTable
           params={params}
           onSortTable={onSortTable}

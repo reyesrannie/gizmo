@@ -7,7 +7,6 @@ import {
   Button,
   Dialog,
   InputAdornment,
-  IconButton,
   FormControlLabel,
   Checkbox,
   Tooltip,
@@ -52,7 +51,6 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
   const dispatch = useDispatch();
   const transactionData = useSelector((state) => state.menu.menuData);
   const taxData = useSelector((state) => state.menu.taxData);
-  const disableCreate = useSelector((state) => state.options.disableCreate);
   const voucher = useSelector((state) => state.options.voucher);
 
   const {
@@ -408,6 +406,8 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
     }
   };
 
+  console.log(transactionData);
+
   return (
     <Paper className="transaction-modal-container">
       <img
@@ -477,7 +477,11 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
         <Autocomplete
           control={control}
           name={"atc_id"}
-          options={atc?.result || []}
+          options={atc?.result?.filter((item) =>
+            transactionData?.transactions?.supplier?.supplier_atcs?.some(
+              (data) => item?.id.toString() === data?.atc_id?.toString()
+            )
+          )}
           getOptionLabel={(option) => `${option.code} - ${option.name}`}
           isOptionEqualToValue={(option, value) => option?.code === value?.code}
           renderInput={(params) => (

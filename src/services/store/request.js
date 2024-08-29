@@ -1,11 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 // const baseURL = process.env.REACT_APP_API_KEY;
-
-const baseURL = "http://10.10.12.10:8000/api";
-
-// const baseURL = "http://10.10.10.16:8000/api";
-// const baseURL = "http://127.0.0.1:8000/api";
+const baseURL = "http://10.10.12.10:8000/api/";
 
 export const jsonServerAPI = createApi({
   reducerPath: "jsonServerAPI",
@@ -52,6 +48,7 @@ export const jsonServerAPI = createApi({
     "CountSchedule",
     "ScheduleLogs",
     "TagYear",
+    "CountTreasury",
   ],
   endpoints: (builder) => ({
     //Authentication and users
@@ -100,6 +97,7 @@ export const jsonServerAPI = createApi({
         "SchedTransact",
         "CountSchedule",
         "ScheduleLogs",
+        "CountTreasury",
       ],
     }),
     passwordChange: builder.mutation({
@@ -1306,20 +1304,56 @@ export const jsonServerAPI = createApi({
     prepareCVoucher: builder.mutation({
       transformResponse: (response) => response,
       query: (payload) => ({
-        url: `/preparation/transaction-check/${payload.id}`,
+        url: `/preparation/transaction-check/`,
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["CheckEntries", "Logs", "CountCheck"],
+      invalidatesTags: ["CheckEntries", "Logs", "CountCheck", "CountTreasury"],
+    }),
+    forApprovalCVoucher: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/check-approval/transaction-check/`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["CheckEntries", "Logs", "CountCheck", "CountTreasury"],
     }),
     releaseCVoucher: builder.mutation({
       transformResponse: (response) => response,
       query: (payload) => ({
-        url: `/releasing/transaction-check/${payload.id}`,
+        url: `/releasing/transaction-check/`,
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["CheckEntries", "Logs", "CountCheck"],
+      invalidatesTags: ["CheckEntries", "Logs", "CountCheck", "CountTreasury"],
+    }),
+    releasedCVoucher: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/released/transaction-check/`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["CheckEntries", "Logs", "CountCheck", "CountTreasury"],
+    }),
+    clearCVoucher: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/clearing/transaction-check/${payload.id}`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["CheckEntries", "Logs", "CountCheck", "CountTreasury"],
+    }),
+    fileCVoucher: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/filing/transaction-check/`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["CheckEntries", "Logs", "CountCheck", "CountTreasury"],
     }),
     readTransactionCheck: builder.mutation({
       transformResponse: (response) => response,
@@ -1328,7 +1362,7 @@ export const jsonServerAPI = createApi({
         method: "PATCH",
         body: payload,
       }),
-      invalidatesTags: ["CheckEntries", "Logs", "CountCheck"],
+      invalidatesTags: ["CheckEntries", "Logs", "CountCheck", "CountTreasury"],
     }),
 
     //Journal
@@ -1529,6 +1563,17 @@ export const jsonServerAPI = createApi({
       providesTags: ["CountVoucher"],
     }),
 
+    //Treasury Count
+    treasuryCount: builder.query({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/treasury-count/transaction`,
+        method: "GET",
+        params: payload,
+      }),
+      providesTags: ["CountTreasury"],
+    }),
+
     //cutoff
     cutOff: builder.query({
       transformResponse: (response) => response,
@@ -1698,6 +1743,42 @@ export const jsonServerAPI = createApi({
         params: payload,
       }),
     }),
+    checkNumber: builder.query({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/check`,
+        method: "GET",
+        params: payload,
+      }),
+      providesTags: ["CheckNumber"],
+    }),
+    createCheckNumber: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/check`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["CheckNumber"],
+    }),
+    updateCheckNumber: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/check/${payload.id}`,
+        method: "PUT",
+        body: payload,
+      }),
+      invalidatesTags: ["CheckNumber"],
+    }),
+    archiveCheckNumber: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/archived/check/${payload.id}`,
+        method: "PATCH",
+        body: payload,
+      }),
+      invalidatesTags: ["CheckNumber"],
+    }),
   }),
 });
 
@@ -1845,7 +1926,11 @@ export const {
   useVoidCVoucherMutation,
   useVoidedCVoucherMutation,
   usePrepareCVoucherMutation,
+  useForApprovalCVoucherMutation,
   useReleaseCVoucherMutation,
+  useReleasedCVoucherMutation,
+  useClearCVoucherMutation,
+  useFileCVoucherMutation,
   useReadTransactionCheckMutation,
 
   useJournalEntriesQuery,
@@ -1867,6 +1952,7 @@ export const {
   useCheckCountQuery,
   useJournalCountQuery,
   useTransactCountQuery,
+  useTreasuryCountQuery,
 
   useCutOffQuery,
   useCreateCutOffMutation,
@@ -1887,4 +1973,9 @@ export const {
   useCountScheduleQuery,
 
   useReportQuery,
+
+  useCheckNumberQuery,
+  useCreateCheckNumberMutation,
+  useArchiveCheckNumberMutation,
+  useUpdateCheckNumberMutation,
 } = jsonServerAPI;

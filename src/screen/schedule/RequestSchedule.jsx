@@ -61,10 +61,6 @@ const RequestSchedule = () => {
     status,
   } = useSchedTransactionQuery(params);
 
-  const { countHeaderAPCH, countCheck } = CountDistribute();
-
-  const hasBadge = countCheck();
-
   useEffect(() => {
     if (header) {
       const statusChange = schedTaggingHeader?.find(
@@ -88,12 +84,7 @@ const RequestSchedule = () => {
           >
             <AccordionSummary onClick={() => dispatch(setIsExpanded(false))}>
               <Typography className="page-text-indicator-tag-transaction">
-                <Badge
-                  badgeContent={header ? countHeaderAPCH(header) : 0}
-                  color="error"
-                >
-                  {header}
-                </Badge>
+                {header}
               </Typography>
             </AccordionSummary>
             {schedTaggingHeader?.map(
@@ -110,14 +101,7 @@ const RequestSchedule = () => {
                     }}
                   >
                     <Typography className="page-text-accord-tag-transaction">
-                      <Badge
-                        badgeContent={
-                          head?.name ? countHeaderAPCH(head?.name) : 0
-                        }
-                        color="error"
-                      >
-                        {head?.name}
-                      </Badge>
+                      {head?.name}
                     </Typography>
                   </AccordionSummary>
                 )
@@ -128,9 +112,7 @@ const RequestSchedule = () => {
               dispatch(setIsExpanded(!isExpanded));
             }}
           >
-            <Badge variant="dot" color="error" invisible={hasBadge}>
-              <ArrowDropDownCircleOutlinedIcon />
-            </Badge>
+            <ArrowDropDownCircleOutlinedIcon />
           </IconButton>
         </Box>
         <Box className="tag-transaction-button-container">

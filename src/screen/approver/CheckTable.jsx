@@ -235,7 +235,10 @@ const CheckTable = ({
                     onClick={() => {
                       dispatch(setMenuData(tag));
                       dispatch(setVoucher("check"));
-                      tag?.is_read === 0 && handleRead(tag);
+                      tag?.is_read === 0 &&
+                        tag?.state !== "returned" &&
+                        tag?.state !== "voided" &&
+                        handleRead(tag);
                       tag?.state === "approved" && dispatch(setViewMenu(true));
 
                       tag?.state === "For Voiding" &&

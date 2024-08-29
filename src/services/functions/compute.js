@@ -59,3 +59,14 @@ export const totalCredit = (taxComputation, property) => {
 
   return total;
 };
+
+export const totalAccountMapping = (taxComputation, items) => {
+  const getAllSameID = taxComputation?.result?.filter(
+    (item) => items?.transactions?.id === item?.transaction_id
+  );
+
+  return (getAllSameID || []).reduce((acc, curr) => {
+    const value = parseFloat(curr?.account ?? 0);
+    return curr?.credit !== 0 ? acc - value : acc + value;
+  }, 0);
+};

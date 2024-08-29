@@ -172,6 +172,13 @@
   gap: 10px;
 }
 
+.form-container-transaction.clearing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
 .form-container-transaction.width {
   max-width: 100px;
 }
@@ -441,6 +448,12 @@
   &.MuiButtonBase-root {
     font-family: Roboto-Medium;
     text-transform: none;
+  }
+}
+
+.add-transaction-button.treasury {
+  &.MuiButtonBase-root {
+    width: 70%;
   }
 }
 

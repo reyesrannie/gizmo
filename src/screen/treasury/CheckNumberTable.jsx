@@ -1,10 +1,15 @@
 import React from "react";
 
 import {
+  Badge,
   Box,
+  Checkbox,
   Dialog,
+  FormControlLabel,
   IconButton,
   LinearProgress,
+  Menu,
+  Stack,
   Table,
   TableBody,
   TableCell,
@@ -14,6 +19,7 @@ import {
   TablePagination,
   TableRow,
   TableSortLabel,
+  TextField,
   Typography,
 } from "@mui/material";
 
@@ -23,33 +29,61 @@ import Lottie from "lottie-react";
 import { useDispatch, useSelector } from "react-redux";
 
 import RemoveRedEyeOutlinedIcon from "@mui/icons-material/RemoveRedEyeOutlined";
+import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
 
 import loading from "../../assets/lottie/Loading-2.json";
 import noData from "../../assets/lottie/NoData.json";
 import StatusIndicator from "../../components/customs/StatusIndicator";
 import "../../components/styles/TagTransaction.scss";
+import "../../components/styles/UserModal.scss";
+import "../../components/styles/AccountsPayable.scss";
+
+import { useState } from "react";
 
 import {
   resetMenu,
+  setCheckMenu,
   setMenuData,
+  setUpdateMenu,
+  setViewAccountingEntries,
   setViewMenu,
+  setVoidMenu,
 } from "../../services/slice/menuSlice";
 
-import TransactionModal from "../../components/customs/modal/TransactionModal";
-import { useDocumentTypeQuery } from "../../services/store/request";
+import {
+  useApQuery,
+  useDocumentTypeQuery,
+  useReadTransactionCheckMutation,
+} from "../../services/store/request";
+import TransactionModalAp from "../../components/customs/modal/TransactionModalAp";
+import { setVoucher } from "../../services/slice/optionsSlice";
+import TransactionModalApprover from "../../components/customs/modal/TransactionModalApprover";
+import socket from "../../services/functions/serverSocket";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import orderBySchema from "../../schemas/orderBySchema";
+import Autocomplete from "../../components/customs/AutoComplete";
+import ClearIcon from "@mui/icons-material/Clear";
 import { AdditionalFunction } from "../../services/functions/AdditionalFunction";
+import { hasAccess } from "../../services/functions/access";
+import TreasuryModal from "../../components/customs/modal/TreasuryModal";
 
-const TaggingTable = ({
+const CheckNumberTable = ({
   params,
   onSortTable,
   isLoading,
+  onShowAll,
   isError,
   tagTransaction,
   isFetching,
   onPageChange,
   onRowChange,
+  onOrderBy,
 }) => {
+  const [anchorE1, setAnchorE1] = useState(null);
   const dispatch = useDispatch();
+  const menuData = useSelector((state) => state.menu.menuData);
+  const updateMenu = useSelector((state) => state.menu.updateMenu);
   const viewMenu = useSelector((state) => state.menu.viewMenu);
 
   const { convertToPeso } = AdditionalFunction();
@@ -60,35 +94,46 @@ const TaggingTable = ({
       pagination: "none",
     });
 
+  const [readTransaction] = useReadTransactionCheckMutation();
+
+  const handleRead = async (data) => {
+    const obj = {
+      id: data?.id,
+    };
+    try {
+      const res = await readTransaction(obj).unwrap();
+      socket.emit("transaction_read");
+    } catch (error) {}
+  };
+
+  const { data: ap } = useApQuery({
+    status: "active",
+    pagination: "none",
+  });
+
+  const {
+    control,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(orderBySchema),
+    defaultValues: {
+      orderBy: null,
+    },
+  });
+
   return (
     <Box className="tag-transaction-body-container">
       <TableContainer className="tag-transaction-table-container">
         <Table stickyHeader>
           <TableHead>
             <TableRow className="table-header1-import-tag-transaction">
-              <TableCell>Tag #.</TableCell>
+              <TableCell>Check No.</TableCell>
               <TableCell>Supplier</TableCell>
-              <TableCell>Allocation</TableCell>
-
-              <TableCell align="center"> Status</TableCell>
-              <TableCell align="center">
-                <TableSortLabel
-                  active={
-                    params.sorts === "updated_at" ||
-                    params.sorts === "-updated_at"
-                  }
-                  onClick={() =>
-                    onSortTable(
-                      params.sorts === "updated_at"
-                        ? "-updated_at"
-                        : "updated_at"
-                    )
-                  }
-                  direction={params.sorts === "updated_at" ? "asc" : "desc"}
-                >
-                  Date Modified
-                </TableSortLabel>
-              </TableCell>
+              <TableCell>Amount</TableCell>
+              <TableCell align="center">Status</TableCell>
+              <TableCell align="center">Check Date</TableCell>
               <TableCell align="center">View</TableCell>
             </TableRow>
           </TableHead>
@@ -114,10 +159,6 @@ const TaggingTable = ({
               </TableRow>
             ) : (
               tagTransaction?.result?.data?.map((tag) => {
-                const document = documentType?.result?.find(
-                  (doc) => tag?.documentType?.id === doc?.id || null
-                );
-
                 return (
                   <TableRow
                     className="table-body-tag-transaction"
@@ -127,96 +168,34 @@ const TaggingTable = ({
                       dispatch(setViewMenu(true));
                     }}
                   >
-                    <TableCell>
-                      {tag?.tag_year} - {tag?.tag_no}
-                    </TableCell>
+                    <TableCell>{tag?.check_no}</TableCell>
                     <TableCell>
                       <Typography className="tag-transaction-company-name">
-                        {tag?.supplier?.name === null ? (
+                        {tag?.supplier?.company_name === null ? (
                           <>&mdash;</>
                         ) : (
-                          tag?.supplier?.name
-                        )}
-                      </Typography>
-                      <Typography className="tag-transaction-company-tin">
-                        {tag?.supplier === null ? (
-                          <>&mdash;</>
-                        ) : (
-                          tag?.supplier?.tin
-                        )}
-                      </Typography>
-                      <Typography className="tag-transaction-company-name">
-                        {tag?.purchase_amount === null ? (
-                          <>&mdash;</>
-                        ) : (
-                          convertToPeso(tag?.purchase_amount)
+                          tag?.supplier?.company_name
                         )}
                       </Typography>
                     </TableCell>
 
                     <TableCell>
                       <Typography className="tag-transaction-company-name">
-                        {`${tag?.apTagging?.company_code} - ${tag?.tag_year} - ${tag?.gtag_no} `}
-                      </Typography>
-                      <Typography className="tag-transaction-company-type">
-                        {document === null ? <>&mdash;</> : document?.name}
-                      </Typography>
-                      <Typography className="tag-transaction-company-name">
-                        {`${tag?.invoice_no || ""}`}
+                        {tag?.amount === null ? (
+                          <>&mdash;</>
+                        ) : (
+                          convertToPeso(tag?.amount)
+                        )}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
-                      {tag?.gas_status === "pending" && (
-                        <StatusIndicator
-                          status="Pending"
-                          className="pending-indicator"
-                        />
-                      )}
-                      {tag?.gas_status === "received" && (
-                        <StatusIndicator
-                          status="Received"
-                          className="received-indicator"
-                        />
-                      )}
-                      {tag?.gas_status === "archived" && (
-                        <StatusIndicator
-                          status="Archived"
-                          className="inActive-indicator"
-                        />
-                      )}
-                      {tag?.gas_status === "returned" && (
-                        <StatusIndicator
-                          status="Returned"
-                          className="return-indicator"
-                        />
-                      )}
-                      {tag?.gas_status === "checked" && (
-                        <StatusIndicator
-                          status="Checking"
-                          className="computation-indicator"
-                        />
-                      )}
-                      {tag?.gas_status === "approved" && (
-                        <StatusIndicator
-                          status="Approved"
-                          className="approved-indicator"
-                        />
-                      )}
-                      {tag?.gas_status === "For Voiding" && (
-                        <StatusIndicator
-                          status="For Voiding"
-                          className="voiding-indicator"
-                        />
-                      )}
-                      {tag?.gas_status === "voided" && (
-                        <StatusIndicator
-                          status="Voided"
-                          className="void-indicator"
-                        />
-                      )}
+                      <StatusIndicator
+                        status={tag?.state}
+                        className="computation-indicator"
+                      />
                     </TableCell>
                     <TableCell align="center">
-                      {moment(tag?.updated_at).format("MMM DD YYYY")}
+                      {moment(tag?.check_date).format("MMM DD YYYY")}
                     </TableCell>
                     <TableCell align="center">
                       <IconButton>
@@ -228,7 +207,6 @@ const TaggingTable = ({
               })
             )}
           </TableBody>
-
           {isFetching && (
             <TableFooter style={{ position: "sticky", bottom: 0 }}>
               <TableRow className="table-footer-tag-transaction">
@@ -238,7 +216,6 @@ const TaggingTable = ({
               </TableRow>
             </TableFooter>
           )}
-
           {!isFetching && !isError && (
             <TableFooter style={{ position: "sticky", bottom: 0 }}>
               <TableRow className="table-footer-tag-transaction">
@@ -270,15 +247,79 @@ const TaggingTable = ({
         </Table>
       </TableContainer>
 
+      <Menu
+        anchorEl={anchorE1}
+        open={Boolean(anchorE1)}
+        onClose={() => {
+          setAnchorE1(null);
+        }}
+        className="table-sort-tag-transaction"
+      >
+        <Autocomplete
+          control={control}
+          name={"orderBy"}
+          options={ap?.result || []}
+          getOptionLabel={(option) =>
+            `${option.company_code} - ${option.description}`
+          }
+          isOptionEqualToValue={(option, value) => option?.id === value?.id}
+          onClose={() => {
+            watch("orderBy") !== null && onOrderBy(watch("orderBy")?.id);
+            setAnchorE1(null);
+          }}
+          renderInput={(params) => (
+            <TextField
+              name="orderBy"
+              {...params}
+              label="AP "
+              size="small"
+              variant="outlined"
+              error={Boolean(errors.orderBy)}
+              helperText={errors.orderBy?.message}
+              className="table-sort-select-tag-transaction"
+              InputProps={{
+                ...params.InputProps,
+                endAdornment: (
+                  <>
+                    {params.InputProps.endAdornment}
+                    {watch("orderBy") && (
+                      <IconButton
+                        onClick={() => {
+                          setValue("orderBy", null);
+
+                          onOrderBy("");
+                        }}
+                        className="icon-clear-user"
+                      >
+                        <ClearIcon />
+                      </IconButton>
+                    )}
+                  </>
+                ),
+              }}
+            />
+          )}
+          disableClearable
+        />
+      </Menu>
+
       <Dialog
         open={viewMenu}
         className="transaction-modal-dialog"
         onClose={() => dispatch(resetMenu())}
       >
-        <TransactionModal />
+        <TreasuryModal preparation />
+      </Dialog>
+
+      <Dialog
+        open={updateMenu}
+        className="transaction-modal-dialog"
+        onClose={() => dispatch(resetMenu())}
+      >
+        <TreasuryModal releasing />
       </Dialog>
     </Box>
   );
 };
 
-export default TaggingTable;
+export default CheckNumberTable;

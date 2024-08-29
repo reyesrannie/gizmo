@@ -7,6 +7,7 @@ import { routes } from "../../services/constants/items";
 import { useDispatch } from "react-redux";
 import { resetMenu } from "../../services/slice/menuSlice";
 import { resetTransaction } from "../../services/slice/transactionSlice";
+import { resetHeader } from "../../services/slice/headerSlice";
 
 const Breadcrums = () => {
   const dispatch = useDispatch();
@@ -22,6 +23,8 @@ const Breadcrums = () => {
           e.preventDefault();
           dispatch(resetMenu());
           dispatch(resetTransaction());
+          dispatch(resetHeader());
+
           navigate(route.path);
         }}
         underline="hover"

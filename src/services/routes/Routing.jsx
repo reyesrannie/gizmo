@@ -19,7 +19,6 @@ const Transaction = lazy(() => import("../../screen/ap/Transaction"));
 const CheckVoucher = lazy(() => import("../../screen/ap/CheckVoucher"));
 const JournalVoucher = lazy(() => import("../../screen/ap/JournalVoucher"));
 const Approver = lazy(() => import("../../screen/approver/Approver"));
-
 const ApprovingJournal = lazy(() =>
   import("../../screen/approver/ApprovingJournal")
 );
@@ -59,25 +58,21 @@ const RoleManagement = lazy(() =>
 const UserAccounts = lazy(() =>
   import("../../screen/user/accounts/UserAccounts")
 );
-
 const Schedule = lazy(() => import("../../screen/schedule/Schedule"));
 const RequestSchedule = lazy(() =>
   import("../../screen/schedule/RequestSchedule")
 );
-
 const APSchedule = lazy(() => import("../../screen/schedule/APSchedule"));
 const ApproverSchedule = lazy(() =>
   import("../../screen/schedule/ApproverSchedule")
 );
-
 const CutOff = lazy(() => import("../../screen/cutoff/Cutoff"));
 const TransactionReport = lazy(() =>
   import("../../screen/report/TransactionReport")
 );
-
 const Treasury = lazy(() => import("../../screen/treasury/Treasury"));
-
 const Check = lazy(() => import("../../screen/treasury/Check"));
+const CheckNumber = lazy(() => import("../../screen/treasury/CheckNumber"));
 
 const Routing = () => {
   const user = decodeUser();
@@ -339,7 +334,12 @@ const Routing = () => {
       children: [
         {
           path: "",
-          element: hasAccess(["preparation", "releasing", "clearing"]) ? (
+          element: hasAccess([
+            "preparation",
+            "releasing",
+            "clearing",
+            "check_approval",
+          ]) ? (
             <Treasury />
           ) : (
             <Navigate to={"/"} />
@@ -347,7 +347,12 @@ const Routing = () => {
         },
         {
           path: "check",
-          element: hasAccess(["preparation", "releasing", "clearing"]) ? (
+          element: hasAccess([
+            "preparation",
+            "releasing",
+            "clearing",
+            "check_approval",
+          ]) ? (
             <Check />
           ) : (
             <Navigate to={"/"} />
@@ -357,6 +362,14 @@ const Routing = () => {
           path: "journal",
           element: hasAccess(["preparation", "releasing", "clearing"]) ? (
             <ApprovingJournal />
+          ) : (
+            <Navigate to={"/"} />
+          ),
+        },
+        {
+          path: "checknumber",
+          element: hasAccess(["preparation", "releasing", "clearing"]) ? (
+            <CheckNumber />
           ) : (
             <Navigate to={"/"} />
           ),

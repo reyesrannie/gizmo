@@ -59,7 +59,6 @@ function AppTextBox({
         };
         const handleEditAuto = (e) => {
           const rawValue = e.target.value.replace(/,/g, "");
-          console.log(e.target.value);
           onChange(rawValue);
           if (handleClear) {
             handleClear();

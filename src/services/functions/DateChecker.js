@@ -88,11 +88,18 @@ const DateChecker = () => {
     }
   }, [today]);
 
+  const isDateNotCutOff = (date) => {
+    const dateTagged = moment(date).format("MM-DD-YYYY");
+    const availableDate = moment(new Date(minDate)).format("MM-DD-YYYY");
+    return moment(dateTagged).diff(availableDate, "days") >= 0;
+  };
+
   return {
     isCoverageToday,
     isCoverageTodayTable,
     shouldDisableYear,
     autoGenerateVoucher,
+    isDateNotCutOff,
     minDate,
   };
 };

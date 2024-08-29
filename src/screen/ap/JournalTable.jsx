@@ -208,7 +208,9 @@ const JournalTable = ({
                     onClick={() => {
                       dispatch(setVoucher("journal"));
                       dispatch(setMenuData(tag));
-                      tag?.is_read === 0 && handleRead(tag);
+                      tag?.is_read === 0 &&
+                        tag?.state !== "For Approval" &&
+                        handleRead(tag);
                       tag?.state === "For Computation" &&
                         dispatch(setUpdateMenu(true));
 
@@ -363,7 +365,9 @@ const JournalTable = ({
                       <IconButton>
                         <Badge
                           variant="dot"
-                          invisible={tag?.is_read !== 0}
+                          invisible={
+                            tag?.is_read !== 0 || tag?.state === "For Approval"
+                          }
                           color="error"
                           className="tag-transaction-badge"
                         >

@@ -27,16 +27,13 @@ import {
 
 import JournalTable from "./JournalTable";
 import useApproverHook from "../../services/hooks/useApproverHook";
-import CountDistribute from "../../services/functions/CountDistribute";
 import { setHeader } from "../../services/slice/headerSlice";
 
 const ApprovingJournal = () => {
   const dispatch = useDispatch();
 
   const isExpanded = useSelector((state) => state.transaction.isExpanded);
-  const header = useSelector((state) => state.headers.header) || "For Approval";
-
-  const { countHeaderApproverJV, countApproveJournal } = CountDistribute();
+  const header = useSelector((state) => state.headers.header) || "Approval";
 
   const {
     params,
@@ -56,8 +53,6 @@ const ApprovingJournal = () => {
     isFetching,
     status,
   } = useJournalEntriesQuery(params);
-
-  const hasBadge = countApproveJournal();
 
   useEffect(() => {
     if (header) {
@@ -118,14 +113,7 @@ const ApprovingJournal = () => {
                     }}
                   >
                     <Typography className="page-text-accord-tag-transaction">
-                      <Badge
-                        badgeContent={
-                          head?.name ? countHeaderApproverJV(head?.name) : 0
-                        }
-                        color="error"
-                      >
-                        {head?.name}
-                      </Badge>
+                      {head?.name}
                     </Typography>
                   </AccordionSummary>
                 )
@@ -136,16 +124,14 @@ const ApprovingJournal = () => {
               dispatch(setIsExpanded(!isExpanded));
             }}
           >
-            <Badge variant="dot" color="error" invisible={hasBadge}>
-              <ArrowDropDownCircleOutlinedIcon />
-            </Badge>
+            <ArrowDropDownCircleOutlinedIcon />
           </IconButton>
         </Box>
         <Box className="tag-transaction-button-container">
           <SearchText onSearchData={onSearchData} />
         </Box>
       </Box>
-      {header === "For Approval" && (
+      {header === "Approval" && (
         <JournalTable
           params={params}
           onSortTable={onSortTable}

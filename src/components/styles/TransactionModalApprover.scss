@@ -8,6 +8,16 @@
   }
 }
 
+.table-container-for-print-treasury {
+  @media print {
+    &.MuiTableContainer-root {
+      width: 94%;
+      margin: 3%;
+      overflow: hidden;
+    }
+  }
+}
+
 .disclaimer-voucher-signature {
   display: none;
   font-style: italic;
@@ -243,6 +253,12 @@
       font-family: Roboto-Medium;
       font-size: 11px;
     }
+  }
+}
+
+.voucher-payment-footer.prepared {
+  &.MuiTableCell-root {
+    width: 100px;
   }
 }
 
