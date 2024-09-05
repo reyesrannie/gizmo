@@ -131,11 +131,48 @@
   }
 }
 
+.transaction-form-textBox.treasury-array {
+  &.MuiFormControl-root {
+    min-width: 200px;
+    max-width: 200px;
+    min-height: unset;
+    .MuiInputBase-root {
+      font-size: 12px;
+      overflow: hidden;
+    }
+    .MuiFormLabel-root {
+      font-size: 12px;
+    }
+    .MuiFormHelperText-root {
+    }
+  }
+}
+
 .transaction-tax-textBox.treasury {
   &.MuiFormControl-root {
     min-height: unset;
     min-width: unset;
     max-width: unset;
+    .MuiInputBase-root {
+      font-size: 12px;
+      overflow: hidden;
+    }
+    .MuiFormLabel-root {
+      font-size: 12px;
+    }
+    .MuiFormHelperText-root {
+      font-size: 10px;
+    }
+    .MuiInputAdornment-root {
+    }
+  }
+}
+
+.transaction-tax-textBox.treasury-array {
+  &.MuiFormControl-root {
+    min-height: unset;
+    min-width: 200px;
+    max-width: 200px;
     .MuiInputBase-root {
       font-size: 12px;
       overflow: hidden;
@@ -164,6 +201,28 @@
     min-height: unset;
     min-width: unset;
     max-width: unset;
+
+    .MuiInputBase-root {
+      font-size: 10px;
+      overflow: hidden;
+    }
+    .MuiFormLabel-root {
+      font-size: 12px;
+    }
+    .MuiFormHelperText-root {
+      font-size: 10px;
+    }
+    .MuiSvgIcon-root {
+      font-size: 15px;
+    }
+  }
+}
+
+.transaction-form-date.treasury-array {
+  &.MuiFormControl-root {
+    min-height: unset;
+    min-width: 200px;
+    max-width: 200px;
 
     .MuiInputBase-root {
       font-size: 10px;

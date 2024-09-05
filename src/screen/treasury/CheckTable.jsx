@@ -43,25 +43,20 @@ import { useState } from "react";
 
 import {
   resetMenu,
-  setCheckMenu,
   setMenuData,
+  setMenuDataMultiple,
   setUpdateMenu,
-  setViewAccountingEntries,
   setViewMenu,
-  setVoidMenu,
 } from "../../services/slice/menuSlice";
 
 import {
   useApQuery,
   useDocumentTypeQuery,
-  useForApprovalCVoucherMutation,
   useReadTransactionCheckMutation,
   useReleaseCVoucherMutation,
   useReleasedCVoucherMutation,
 } from "../../services/store/request";
-import TransactionModalAp from "../../components/customs/modal/TransactionModalAp";
 import { setVoucher } from "../../services/slice/optionsSlice";
-import TransactionModalApprover from "../../components/customs/modal/TransactionModalApprover";
 import socket from "../../services/functions/serverSocket";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -74,6 +69,7 @@ import TreasuryModal from "../../components/customs/modal/TreasuryModal";
 import { enqueueSnackbar } from "notistack";
 import { resetPrompt } from "../../services/slice/promptSlice";
 import { singleError } from "../../services/functions/errorResponse";
+import TreasuryMultiple from "../../components/customs/modal/TreasuryMultiple";
 
 const CheckTable = ({
   params,
@@ -88,9 +84,9 @@ const CheckTable = ({
 }) => {
   const [anchorE1, setAnchorE1] = useState(null);
   const dispatch = useDispatch();
-  const userData = useSelector((state) => state.auth.userData);
 
   const viewMenu = useSelector((state) => state.menu.viewMenu);
+  const updateMenu = useSelector((state) => state.menu.updateMenu);
 
   const { convertToPeso } = AdditionalFunction();
 
@@ -311,7 +307,7 @@ const CheckTable = ({
 
                   const isPreparedBy =
                     tag?.state === "Check Approval" &&
-                    tag?.preparedBy?.id === userData?.account?.id_no;
+                    hasAccess("check_approval");
 
                   return (
                     <TableRow
@@ -319,14 +315,22 @@ const CheckTable = ({
                       key={tag?.id}
                       onClick={() => {
                         dispatch(setMenuData(tag));
+
                         dispatch(setVoucher("check"));
-                        watch("check_ids")?.length === 0 &&
+                        params?.state !== "Check Approval" &&
+                          watch("check_ids")?.length === 0 &&
                           tag?.is_read === 0 &&
-                          !isPreparedBy &&
                           handleRead(tag);
 
-                        watch("check_ids")?.length === 0 &&
+                        isPreparedBy && handleRead(tag);
+
+                        params?.state === "For Preparation" &&
+                          watch("check_ids")?.length === 0 &&
                           dispatch(setViewMenu(true));
+
+                        params?.state !== "For Preparation" &&
+                          watch("check_ids")?.length === 0 &&
+                          dispatch(setUpdateMenu(true));
                       }}
                     >
                       {(hasAccess("check_approval") ||
@@ -579,7 +583,7 @@ const CheckTable = ({
                           color="success"
                           className="add-transaction-button treasury"
                           onClick={() => {
-                            dispatch(setMenuData(watch("check_ids")));
+                            dispatch(setMenuDataMultiple(watch("check_ids")));
                             dispatch(setVoucher("check"));
                             dispatch(setViewMenu(true));
                           }}
@@ -712,12 +716,16 @@ const CheckTable = ({
         />
       </Menu>
 
+      <Dialog open={viewMenu} className="transaction-modal-dialog">
+        <TreasuryModal />
+      </Dialog>
+
       <Dialog
-        open={viewMenu}
+        open={updateMenu}
         className="transaction-modal-dialog"
         onClose={() => dispatch(resetMenu())}
       >
-        <TreasuryModal />
+        <TreasuryMultiple />
       </Dialog>
     </Box>
   );

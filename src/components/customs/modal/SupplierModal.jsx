@@ -105,7 +105,7 @@ const SupplierModal = ({ supplierData, view, update }) => {
     resolver: yupResolver(supplierSchema),
     defaultValues: {
       noTin: false,
-      isSpecial: false,
+      is_special_case: false,
       is_company: false,
       tin: "",
       company_name: "",
@@ -122,6 +122,10 @@ const SupplierModal = ({ supplierData, view, update }) => {
   useEffect(() => {
     if (successType && successAtc && successVat && successDocumentTypes) {
       const valuesItem = {
+        is_special_case:
+          supplierData?.is_special_case === null
+            ? 0
+            : supplierData?.is_special_case,
         noTin:
           supplierData?.tin?.length !== 15 && supplierData?.tin !== undefined,
         tin: supplierData?.tin || "",
@@ -263,7 +267,7 @@ const SupplierModal = ({ supplierData, view, update }) => {
             label="Special Process"
             control={
               <Controller
-                name="isSpecial"
+                name="is_special_case"
                 control={control}
                 render={({ field }) => (
                   <Checkbox

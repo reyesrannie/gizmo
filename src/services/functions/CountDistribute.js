@@ -7,6 +7,7 @@ import {
   useTreasuryCountQuery,
 } from "../store/request";
 import { useSelector } from "react-redux";
+import { hasAccess } from "./access";
 
 const CountDistribute = () => {
   const userData = useSelector((state) => state.auth.userData);
@@ -50,7 +51,7 @@ const CountDistribute = () => {
     Filing: "For Filing",
     Approval: "For Approval",
     Preparation: "For Preparation",
-    Releasing: "For Releasing",
+    "For Releasing": "For Releasing",
     Clearing: "For Clearing",
   };
 
@@ -98,11 +99,19 @@ const CountDistribute = () => {
           "approved",
         ]);
       case "Treasury":
-        return sumResult(treasuryCount?.result, [
-          "For Preparation",
-          "For Releasing",
-          "For Clearing",
-        ]);
+        return sumResult(
+          treasuryCount?.result,
+          hasAccess("check_approval") && hasAccess("preparation")
+            ? [
+                "For Preparation",
+                "For Releasing",
+                "For Clearing",
+                "Check Approval",
+              ]
+            : !hasAccess("check_approval") && hasAccess("preparation")
+            ? ["For Preparation", "For Releasing", "For Clearing"]
+            : ["Check Approval"]
+        );
       default:
         return 0;
     }
@@ -143,11 +152,19 @@ const CountDistribute = () => {
           "voided",
         ]);
       case "Check Voucher":
-        return sumResult(treasuryCount?.result, [
-          "For Preparation",
-          "For Releasing",
-          "For Clearing",
-        ]);
+        return sumResult(
+          treasuryCount?.result,
+          hasAccess("check_approval") && hasAccess("preparation")
+            ? [
+                "For Preparation",
+                "For Releasing",
+                "For Clearing",
+                "Check Approval",
+              ]
+            : !hasAccess("check_approval") && hasAccess("preparation")
+            ? ["For Preparation", "For Releasing", "For Clearing"]
+            : ["Check Approval"]
+        );
       default:
         return 0;
     }

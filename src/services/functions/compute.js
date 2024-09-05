@@ -70,3 +70,11 @@ export const totalAccountMapping = (taxComputation, items) => {
     return curr?.credit !== 0 ? acc - value : acc + value;
   }, 0);
 };
+
+export const totalAmountCheck = (item) => {
+  const totalAmount = item?.reduce((acc, curr) => {
+    return acc + parseFloat(curr.amount || 0);
+  }, 0);
+
+  return totalAmount;
+};

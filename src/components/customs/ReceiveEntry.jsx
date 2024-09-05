@@ -133,7 +133,6 @@ const ReceiveEntry = ({ check = false }) => {
         singleError(error, enqueueSnackbar);
       }
     } else {
-      console.log(transactionData);
       const obj = {
         tag_year: transactionData?.tag_year,
         transaction_id: transactionData?.transactions?.id,

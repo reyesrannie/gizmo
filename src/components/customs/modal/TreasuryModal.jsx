@@ -22,6 +22,7 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
+  IconButton,
 } from "@mui/material";
 
 import "../../styles/Modal.scss";
@@ -34,16 +35,18 @@ import {
   useReleasedCVoucherMutation,
   useTaxComputationQuery,
 } from "../../../services/store/request";
+import DoNotDisturbOnOutlinedIcon from "@mui/icons-material/DoNotDisturbOnOutlined";
 import Lottie from "lottie-react";
 import loading from "../../../assets/lottie/Loading-2.json";
 import {
   totalAccount,
   totalAccountMapping,
+  totalAmountCheck,
 } from "../../../services/functions/compute";
 import { setVoucherData } from "../../../services/slice/transactionSlice";
 import { AdditionalFunction } from "../../../services/functions/AdditionalFunction";
 import Autocomplete from "../AutoComplete";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import treasurySchema from "../../../schemas/treasurySchema";
 import moment from "moment";
@@ -52,6 +55,7 @@ import { DatePicker } from "@mui/x-date-pickers";
 import ReactToPrint from "react-to-print";
 import {
   resetMenu,
+  setCreateMenu,
   setReceiveMenu,
   setUpdateCount,
   setViewAccountingEntries,
@@ -69,14 +73,14 @@ import { hasAccess } from "../../../services/functions/access";
 
 const TreasuryModal = () => {
   const componentRef = useRef();
-  const printRef = useRef();
   const dispatch = useDispatch();
   const menuData = useSelector((state) => state.menu.menuData);
+  const menuDataMultiple = useSelector((state) => state.menu.menuDataMultiple);
   const voucherData = useSelector((state) => state.transaction.voucherData);
   const receiveMenu = useSelector((state) => state.menu.receiveMenu);
   const taxData = useSelector((state) => state.menu.taxData);
   const updateCount = useSelector((state) => state.menu.updateCount);
-  const userData = useSelector((state) => state.auth.userData);
+  const createMenu = useSelector((state) => state.menu.createMenu);
 
   const { convertToPeso } = AdditionalFunction();
 
@@ -97,38 +101,59 @@ const TreasuryModal = () => {
     {
       status: "active",
       transaction_id:
-        menuData?.transactions?.id === undefined
-          ? menuData?.map((tags) => tags?.transactions?.id)
-          : [menuData?.transactions?.id],
+        menuDataMultiple?.length !== 0
+          ? menuDataMultiple?.map((tags) => tags?.transactions?.id)
+          : menuData?.transactions?.id,
       voucher: "check",
       pagination: "none",
     },
-    { skip: menuData === null }
+    { skip: menuData === null && menuDataMultiple?.length === 0 }
   );
 
   const {
     control,
     handleSubmit,
     setValue,
+    setError,
     watch,
+    clearErrors,
+    reset,
+    getValues,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(treasurySchema),
     defaultValues: {
+      multiple: false,
       debit_coa_id: null,
       credit_coa_id: null,
       bank: null,
       check_no: "",
       check_date: null,
-      type: "",
+      type: "CHECK VOUCHER",
+      check: [
+        {
+          id: Date.now(),
+          bank: null,
+          check_no: "",
+          amount: 0,
+          check_date: null,
+        },
+      ],
     },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "check",
   });
 
   const [releaseVoucher, { isLoading: releaseLoading }] =
     useReleaseCVoucherMutation();
 
-  const [forApprovalVoucher, { isLoading: forApprovalLoading }] =
-    useForApprovalCVoucherMutation();
+  const [
+    forApprovalVoucher,
+    { isLoading: forApprovalLoading, error: forApprovalError },
+  ] = useForApprovalCVoucherMutation();
 
   const [releasedVoucher, { isLoading: releasedLoading }] =
     useReleasedCVoucherMutation();
@@ -150,13 +175,14 @@ const TreasuryModal = () => {
     }
     if (taxData !== null) {
       const items = {
-        check_no: menuData?.treasuryChecks[0]?.check_no,
+        check_no: menuDataMultiple?.treasuryChecks[0]?.check_no,
         check_date:
-          dayjs(new Date(menuData?.treasuryChecks[0]?.check_date), {
+          dayjs(new Date(menuDataMultiple?.treasuryChecks[0]?.check_date), {
             locale: AdapterDayjs.locale,
           }) || null,
         bank: accountTitles?.result?.find(
-          (item) => menuData?.treasuryChecks[0]?.coa?.code === item?.code
+          (item) =>
+            menuDataMultiple?.treasuryChecks[0]?.coa?.code === item?.code
         ),
         type: menuData?.state === "Released" ? "Clearing" : "none",
       };
@@ -169,19 +195,30 @@ const TreasuryModal = () => {
   const submitHandler = async (submitData) => {
     const obj = {
       check_ids:
-        menuData?.length === undefined
+        menuDataMultiple?.length === 0
           ? [menuData?.id]
-          : menuData?.map((items) => items.id),
+          : menuDataMultiple?.map((items) => items.id),
       debit_coa_id: submitData?.debit_coa_id?.id,
       credit_coa_id: submitData?.credit_coa_id?.id,
-      treasury_checks: [
-        {
-          coa_id: submitData?.bank?.id,
-          check_no: submitData?.check_no,
-          amount: voucherData?.amount,
-          check_date: moment(submitData?.check_date).format("YYYY-MM-DD"),
-        },
-      ],
+      treasury_checks: watch("multiple")
+        ? submitData?.check?.map((items) => {
+            return {
+              check_no: items.check_no,
+              coa_id: items?.bank?.id,
+              amount: items.amount,
+              check_date: items?.check_date
+                ? moment(items?.check_date).format("YYYY-MM-DD")
+                : null,
+            };
+          })
+        : [
+            {
+              coa_id: submitData?.bank?.id,
+              check_no: submitData?.check_no,
+              amount: voucherData?.amount,
+              check_date: moment(submitData?.check_date).format("YYYY-MM-DD"),
+            },
+          ],
     };
 
     try {
@@ -193,9 +230,9 @@ const TreasuryModal = () => {
         const forClearing = {
           ...taxData,
           id:
-            menuData?.length === undefined
+            menuDataMultiple?.length === 0
               ? menuData?.id
-              : menuData?.map((items) => items.id),
+              : menuDataMultiple?.map((items) => items.id),
           clearing_debit_id: obj?.debit_coa_id,
           clearing_credit_id: obj?.credit_coa_id,
         };
@@ -246,11 +283,25 @@ const TreasuryModal = () => {
     }
   };
 
+  const handleCheckAmount = (e, index) => {
+    const totalAmount = parseFloat(totalAmountCheck(watch("check"))).toFixed(2);
+    const maxAmount = parseFloat(voucherData?.amount).toFixed(2);
+
+    if (parseFloat(totalAmount) > parseFloat(maxAmount)) {
+      setError(`check.${index}.amount`, {
+        type: "validate",
+        message: "Exceeded Maximum Amount",
+      });
+    } else {
+      clearErrors(`check.${index}.amount`);
+    }
+  };
+
   return (
     <Paper className="transaction-modal-container">
       <form onSubmit={handleSubmit(submitHandler)}>
-        {menuData?.length !== undefined ? (
-          menuData?.map((items, index) => {
+        {menuDataMultiple?.length !== 0 ? (
+          menuDataMultiple?.map((items, index) => {
             const voucherAmount = totalAccountMapping(taxComputation, items);
             return (
               <Accordion
@@ -611,7 +662,15 @@ const TreasuryModal = () => {
                             align="left"
                             className="voucher-treasury content"
                           >
-                            <Typography>{`Prepared By: ${menuData?.preparedBy?.first_name} ${menuData?.preparedBy?.last_name}`}</Typography>
+                            <Typography>{`Prepared By: ${
+                              menuData?.preparedBy?.first_name
+                                ? menuData?.preparedBy?.first_name
+                                : ""
+                            } ${
+                              menuData?.preparedBy?.last_name
+                                ? menuData?.preparedBy?.last_name
+                                : ""
+                            }`}</Typography>
                           </TableCell>
                           <TableCell
                             align="center"
@@ -1097,7 +1156,7 @@ const TreasuryModal = () => {
                     align="left"
                     className="voucher-treasury content"
                   >
-                    {menuData?.state !== "For Preparation" ? (
+                    {createMenu || menuData?.state !== "For Preparation" ? (
                       <Typography>
                         {`Bank: ${
                           menuData?.treasuryChecks[0]?.coa?.name
@@ -1135,7 +1194,15 @@ const TreasuryModal = () => {
                     align="left"
                     className="voucher-treasury content"
                   >
-                    <Typography>{`Prepared By: ${menuData?.preparedBy?.first_name} ${menuData?.preparedBy?.last_name}`}</Typography>
+                    <Typography>{`Prepared By: ${
+                      menuData?.preparedBy?.first_name
+                        ? menuData?.preparedBy?.first_name
+                        : ""
+                    } ${
+                      menuData?.preparedBy?.last_name
+                        ? menuData?.preparedBy?.last_name
+                        : ""
+                    }`}</Typography>
                   </TableCell>
                   <TableCell
                     align="center"
@@ -1165,7 +1232,7 @@ const TreasuryModal = () => {
                     align="left"
                     className="voucher-treasury content"
                   >
-                    {menuData?.state !== "For Preparation" ? (
+                    {createMenu || menuData?.state !== "For Preparation" ? (
                       <Typography>{`Check No. : ${
                         menuData?.treasuryChecks[0]?.check_no
                           ? menuData?.treasuryChecks[0]?.check_no
@@ -1208,7 +1275,7 @@ const TreasuryModal = () => {
                     align="left"
                     className="voucher-treasury content"
                   >
-                    {menuData?.state !== "For Preparation" ? (
+                    {createMenu || menuData?.state !== "For Preparation" ? (
                       <Typography>{`Check Date.: ${
                         menuData?.treasuryChecks[0]?.check_date
                           ? moment(
@@ -1339,9 +1406,213 @@ const TreasuryModal = () => {
                     </TableCell>
                   </TableRow>
                 )}
+
+                {menuData?.state === "For Preparation" && (
+                  <TableRow>
+                    <TableCell
+                      colSpan={8}
+                      align="left"
+                      className="voucher-treasury content"
+                    >
+                      {!watch("multiple") ? (
+                        <Button
+                          variant="contained"
+                          color="warning"
+                          className="add-transaction-button"
+                          onClick={() => {
+                            setValue("bank", null);
+                            setValue("bank", null);
+                            setValue("check_date", null);
+                            setValue("check_no", "");
+                            setValue("multiple", true);
+                            dispatch(setCreateMenu(true));
+                          }}
+                        >
+                          Add Check
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="contained"
+                          color="error"
+                          className="add-transaction-button"
+                          onClick={() => {
+                            remove(fields?.map((_, index) => index));
+                            setValue("multiple", false);
+                            dispatch(setCreateMenu(false));
+                          }}
+                        >
+                          Clear Checks
+                        </Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
           </TableContainer>
+        )}
+        {createMenu && (
+          <Accordion elevation={1}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Stack display={"flex"} flexDirection={"row"} gap={76}>
+                <Typography
+                  className="name-supplier-typo-treasury name"
+                  align="center"
+                >
+                  Check Details
+                </Typography>
+
+                <Typography
+                  className="name-supplier-typo-treasury name"
+                  align="center"
+                  color={
+                    parseFloat(totalAmountCheck(watch("check"))).toFixed(2) !==
+                    parseFloat(voucherData?.amount).toFixed(2)
+                      ? "error"
+                      : ""
+                  }
+                >
+                  {`Total Amount: ₱ ${convertToPeso(
+                    parseFloat(totalAmountCheck(watch("check"))).toFixed(2)
+                  )}`}
+                </Typography>
+              </Stack>
+            </AccordionSummary>
+
+            {fields?.map((item, index) => {
+              return (
+                <AccordionDetails key={item.id}>
+                  <Stack
+                    flexDirection={"row"}
+                    gap={2}
+                    alignItems={"center"}
+                    justifyContent={"center"}
+                  >
+                    <AppTextBox
+                      type={watch("type") === "DEBIT MEMO" ? "" : "number"}
+                      control={control}
+                      name={`check.${index}.check_no`}
+                      label={
+                        watch("type") === "CHECK VOUCHER"
+                          ? "Check No. *"
+                          : "Remarks"
+                      }
+                      color="primary"
+                      className="transaction-tax-textBox treasury-array"
+                      error={Boolean(
+                        errors?.check?.[index]?.check_no ||
+                          forApprovalError?.data?.errors?.[
+                            `treasury_checks.${index}.check_no`
+                          ]
+                      )}
+                      helperText={
+                        errors?.check?.[index]?.check_no?.message ||
+                        forApprovalError?.data?.errors?.[
+                          `treasury_checks.${index}.check_no`
+                        ]?.[0]
+                      }
+                      variant="filled"
+                    />
+                    <AppTextBox
+                      showDecimal
+                      money
+                      control={control}
+                      name={`check.${index}.amount`}
+                      label={"Amount"}
+                      color="primary"
+                      className="transaction-tax-textBox treasury-array"
+                      error={Boolean(errors?.check?.[index]?.amount)}
+                      helperText={errors?.check?.[index]?.amount?.message}
+                      variant="filled"
+                      onKeyUp={(e) => handleCheckAmount(e, index)}
+                    />
+                    <Autocomplete
+                      control={control}
+                      name={`check.${index}.bank`}
+                      options={accountTitles?.result || []}
+                      getOptionLabel={(option) => `${option.name}`}
+                      isOptionEqualToValue={(option, value) =>
+                        option?.id === value?.id
+                      }
+                      renderInput={(params) => (
+                        <MuiTextField
+                          name="bank"
+                          {...params}
+                          label="Bank*"
+                          size="small"
+                          variant="filled"
+                          error={Boolean(errors?.check?.[index]?.bank)}
+                          helperText={errors?.check?.[index]?.bank?.message}
+                          className="transaction-form-textBox treasury-array"
+                        />
+                      )}
+                      disableClearable
+                    />
+                    <Controller
+                      name={`check.${index}.check_date`}
+                      control={control}
+                      render={({
+                        field: { onChange, value, ...restField },
+                      }) => (
+                        <Box className="date-picker-container treasury">
+                          <DatePicker
+                            className="transaction-form-date treasury-array"
+                            label="Check Date *"
+                            format="MM/DD/YYYY"
+                            value={value}
+                            onChange={(e) => {
+                              onChange(e);
+                            }}
+                            slotProps={{
+                              textField: {
+                                variant: "filled",
+                                error: Boolean(
+                                  errors?.check?.[index]?.check_date
+                                ),
+                                helperText:
+                                  errors?.check?.[index]?.check_date?.message,
+                              },
+                            }}
+                          />
+                        </Box>
+                      )}
+                    />
+                    <IconButton
+                      onClick={() => {
+                        remove(index);
+                        setTimeout(() => {
+                          if (fields?.length === 1) {
+                            dispatch(setCreateMenu(false));
+                            setValue("multiple", false);
+                          }
+                        }, 0);
+                      }}
+                    >
+                      <DoNotDisturbOnOutlinedIcon color="error" />
+                    </IconButton>
+                  </Stack>
+                </AccordionDetails>
+              );
+            })}
+            <AccordionDetails className="accordion-check-details">
+              <Button
+                variant="contained"
+                color="success"
+                className="add-transaction-button"
+                onClick={() =>
+                  append({
+                    id: Date.now(),
+                    bank: null,
+                    check_no: "",
+                    amount: 0,
+                    check_date: null,
+                  })
+                }
+              >
+                Add
+              </Button>
+            </AccordionDetails>
+          </Accordion>
         )}
 
         <Box className="add-transaction-button-container">
@@ -1401,9 +1672,15 @@ const TreasuryModal = () => {
           </Box>
           <Box className="archive-transaction-button-container">
             {(taxData !== null ||
+              menuDataMultiple?.length !== 0 ||
               menuData?.state === "For Preparation" ||
               menuData?.state === "For Clearing") && (
               <Button
+                disabled={
+                  watch("multiple") === true &&
+                  parseFloat(totalAmountCheck(watch("check"))).toFixed(2) !==
+                    parseFloat(voucherData?.amount).toFixed(2)
+                }
                 variant="contained"
                 color="success"
                 type="submit"

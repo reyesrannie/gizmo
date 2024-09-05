@@ -9,12 +9,40 @@
 }
 
 .table-container-for-print-treasury {
+  &.MuiTableContainer-root {
+    margin-bottom: 10px;
+  }
   @media print {
     &.MuiTableContainer-root {
       width: 94%;
       margin: 3%;
       overflow: hidden;
+      page-break-after: always;
     }
+    &.MuiTableContainer-root:not(:first-of-type)::before {
+      content: "";
+      display: block;
+      height: 6mm; /* Adjust as needed */
+    }
+  }
+}
+
+.check-item-typography {
+  &.MuiTypography-root {
+    font-family: Roboto-Light;
+    font-size: 14px;
+    padding-right: 10px;
+  }
+}
+
+.treasury-check-details {
+  &.MuiPaper-root {
+    padding: 10px;
+  }
+}
+.treasury-check-details-summary {
+  &.MuiAccordionDetails-root {
+    padding-bottom: 5px;
   }
 }
 
@@ -28,6 +56,14 @@
       font-size: 12px;
       justify-content: center;
     }
+  }
+}
+
+.accordion-check-details {
+  &.MuiAccordionDetails-root {
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
 }
 

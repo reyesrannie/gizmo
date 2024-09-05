@@ -19,6 +19,7 @@ const initialState = {
   importError: null,
   viewMenu: false,
   menuData: null,
+  menuDataMultiple: [],
   createTax: false,
   updateTax: false,
   taxData: null,
@@ -50,6 +51,7 @@ const initialStateWithoutDrawer = {
   importError: null,
   viewMenu: false,
   menuData: null,
+  menuDataMultiple: [],
   createTax: false,
   updateTax: false,
   taxData: null,
@@ -110,6 +112,9 @@ const menutSlice = createSlice({
     },
     setMenuData: (state, action) => {
       state.menuData = action.payload;
+    },
+    setMenuDataMultiple: (state, action) => {
+      state.menuDataMultiple = action.payload;
     },
     setReceiveMenu: (state, action) => {
       state.receiveMenu = action.payload;
@@ -192,6 +197,7 @@ export const {
   setPreparation,
   resetMenuWithoutDrawer,
   setApproveMenu,
+  setMenuDataMultiple,
 } = menutSlice.actions;
 
 export default menutSlice.reducer;

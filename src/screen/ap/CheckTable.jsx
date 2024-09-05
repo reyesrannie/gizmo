@@ -297,12 +297,16 @@ const CheckTable = ({
                         tag?.is_read === 0 &&
                           tag?.state !== "For Approval" &&
                           tag?.state !== "For Preparation" &&
+                          tag?.state !== "Check Approval" &&
+                          tag?.state !== "Released" &&
                           handleRead(tag);
 
                         (tag?.state === "Filed" ||
                           tag?.state === "approved" ||
                           tag?.state === "voided" ||
-                          tag?.state === "For Voiding") &&
+                          tag?.state === "For Voiding" ||
+                          tag?.state === "Check Approval" ||
+                          tag?.state === "Released") &&
                           dispatch(setViewMenu(true));
                         //approved
 
@@ -455,7 +459,7 @@ const CheckTable = ({
 
                         {tag?.state === "For Filing" && (
                           <StatusIndicator
-                            status="Awaiting File"
+                            status="For Filing"
                             className="filing-indicator"
                           />
                         )}
@@ -478,6 +482,19 @@ const CheckTable = ({
                           <StatusIndicator
                             status="Cancelled"
                             className="inActive-indicator"
+                          />
+                        )}
+
+                        {tag?.state === "Check Approval" && (
+                          <StatusIndicator
+                            status="For Approval"
+                            className="approval-indicator"
+                          />
+                        )}
+                        {tag?.state === "Released" && (
+                          <StatusIndicator
+                            status="Released"
+                            className="approved-indicator"
                           />
                         )}
                       </TableCell>

@@ -32,6 +32,7 @@ function AppTextBox({
   showDecimal = false,
   handleClear,
   sample,
+  autoChange,
   ...textField
 }) {
   const [showPassword, setShowPassword] = useState(false);
@@ -67,7 +68,8 @@ function AppTextBox({
 
         const formatDisplayValue = (value) => {
           const num = Number(value);
-          return num % 1 === 0 ? "" : num.toFixed(2);
+
+          return num % 1 === 0 ? num : num.toFixed(2);
         };
         return (
           <>

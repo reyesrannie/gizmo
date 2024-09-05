@@ -227,17 +227,17 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
         total_invoice_amount: taxData?.total_invoice_amount,
         debit: taxData?.debit,
         credit: taxData?.credit,
-        account: taxData?.account,
+        account: parseFloat(taxData?.account),
         remarks: taxData?.remarks || "",
       };
-
-      Object.entries(obj).forEach(([key, value]) => {
-        setValue(key, value);
-      });
 
       const tinType = tin?.result?.find(
         (item) => item?.id === transactionData?.transactions?.supplier_id
       );
+
+      Object.entries(obj).forEach(([key, value]) => {
+        setValue(key, value);
+      });
 
       dispatch(setSupplyType(tinType));
       hasRun.current = true;
@@ -335,17 +335,6 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
     }
   };
 
-  const handleChangeAmount = () => {
-    const wtaxString = watch("wtax_payable_cr");
-    const wtaxNumber = parseFloat(wtaxString.replace(/,/g, ""));
-    setValue(
-      "account",
-      watch("isTaxBased")
-        ? parseFloat(parseFloat(watch("amount")) - parseFloat(wtaxNumber))
-        : parseFloat(parseFloat(watch("debit")) - parseFloat(wtaxNumber))
-    );
-  };
-
   const handleClear = () => {
     const obj = {
       vat_local: "",
@@ -406,7 +395,26 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
     }
   };
 
-  console.log(transactionData);
+  const handleChangeAmount = () => {
+    const wtaxString = watch("wtax_payable_cr");
+    const wtaxNumber = parseFloat(wtaxString);
+    setValue(
+      "account",
+      watch("isTaxBased")
+        ? parseFloat(parseFloat(watch("amount")) - parseFloat(wtaxNumber))
+        : parseFloat(parseFloat(watch("debit")) - parseFloat(wtaxNumber))
+    );
+  };
+
+  const autoChangeWtax = (e) => {
+    const baseAmount = parseFloat(e.target.value.replace(/,/g, ""));
+    setValue(
+      "wtax_payable_cr",
+      (baseAmount * parseFloat(watch("stype_id")?.wtax)) / 100
+    );
+
+    handleChangeAmount();
+  };
 
   return (
     <Paper className="transaction-modal-container">
@@ -477,11 +485,13 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
         <Autocomplete
           control={control}
           name={"atc_id"}
-          options={atc?.result?.filter((item) =>
-            transactionData?.transactions?.supplier?.supplier_atcs?.some(
-              (data) => item?.id.toString() === data?.atc_id?.toString()
-            )
-          )}
+          options={
+            atc?.result?.filter((item) =>
+              transactionData?.transactions?.supplier?.supplier_atcs?.some(
+                (data) => item?.id.toString() === data?.atc_id?.toString()
+              )
+            ) || []
+          }
           getOptionLabel={(option) => `${option.code} - ${option.name}`}
           isOptionEqualToValue={(option, value) => option?.code === value?.code}
           renderInput={(params) => (
@@ -562,6 +572,7 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
 
         {checkField("vat_local") && (
           <AppTextBox
+            onKeyUp={autoChangeWtax}
             showDecimal
             money
             control={control}
@@ -575,6 +586,7 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
         )}
         {checkField("vat_service") && (
           <AppTextBox
+            onKeyUp={autoChangeWtax}
             showDecimal
             money
             control={control}
@@ -588,6 +600,7 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
         )}
         {checkField("nvat_local") && (
           <AppTextBox
+            onKeyUp={autoChangeWtax}
             showDecimal
             money
             control={control}
@@ -601,6 +614,7 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
         )}
         {checkField("nvat_service") && (
           <AppTextBox
+            onKeyUp={autoChangeWtax}
             showDecimal
             money
             control={control}
