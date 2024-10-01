@@ -57,7 +57,6 @@ import {
   useReleasedCVoucherMutation,
 } from "../../services/store/request";
 import { setVoucher } from "../../services/slice/optionsSlice";
-import socket from "../../services/functions/serverSocket";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import orderBySchema from "../../schemas/orderBySchema";
@@ -110,7 +109,6 @@ const CheckTable = ({
     };
     try {
       const res = await readTransaction(obj).unwrap();
-      socket.emit("transaction_read");
     } catch (error) {}
   };
 
@@ -137,9 +135,6 @@ const CheckTable = ({
     try {
       const res = await releasedVoucher(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      socket.emit("transaction_preparation", {
-        ...obj,
-      });
       dispatch(resetMenu());
       dispatch(resetPrompt());
       setValue("check_ids", []);
@@ -153,9 +148,6 @@ const CheckTable = ({
     try {
       const res = await forApprovalVoucher(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      socket.emit("transaction_preparation", {
-        ...obj,
-      });
       dispatch(resetMenu());
       dispatch(resetPrompt());
       setValue("check_ids", []);
@@ -399,7 +391,7 @@ const CheckTable = ({
                       )}
 
                       <TableCell>
-                        {`${tag?.transactions?.tag_year} - ${tag?.transactions?.tag_no}`}
+                        {`${tag?.transactions?.tag_no} - ${tag?.transactions?.tag_year}`}
                       </TableCell>
                       <TableCell>
                         <Typography className="tag-transaction-company-name">
@@ -432,7 +424,7 @@ const CheckTable = ({
                           </Typography>
                         ) : (
                           <Typography className="tag-transaction-company-name">
-                            {`${tag?.transactions?.ap_tagging} - ${tag?.transactions?.tag_year} - ${tag?.transactions?.gtag_no} `}
+                            {`${tag?.transactions?.ap_tagging} - ${tag?.transactions?.gtag_no} - ${tag?.transactions?.tag_year} `}
                           </Typography>
                         )}
 

@@ -335,6 +335,29 @@
   }
 }
 
+.transaction-form-date.history {
+  &.MuiFormControl-root {
+    margin: 0px;
+    min-height: 0px;
+    max-height: 50px;
+    background-color: #f0f0f0;
+    margin: 5px;
+    .MuiInputBase-root {
+      border-radius: 10px;
+      font-family: Roboto-Medium;
+      letter-spacing: 1px;
+      font-size: 0.75rem;
+      min-height: 39px;
+    }
+    .MuiFormLabel-root {
+      background-color: #ffffff;
+      line-height: 0.5rem;
+      letter-spacing: 1px;
+      font-size: 0.75rem;
+    }
+  }
+}
+
 .date-picker-container-transaction.preparation {
   &.MuiBox-root {
     align-items: center;
@@ -354,6 +377,35 @@
       margin-left: 15px;
       bottom: 0;
     }
+  }
+}
+
+.history-box-container {
+  &.MuiBox-root {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+}
+
+.history-box-container.history-noData {
+  &.MuiBox-root {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+  }
+}
+
+.history-box-container.history {
+  &.MuiBox-root {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    width: 100%;
   }
 }
 

@@ -172,7 +172,7 @@ const Check = () => {
           onShowAll={onShowAll}
         />
       )}
-      {header === "Released" && (
+      {header === "Clearing" && (
         <CheckTable
           params={params}
           onSortTable={onSortTable}
@@ -184,7 +184,7 @@ const Check = () => {
           status={status}
           tagTransaction={tagTransaction}
           onOrderBy={onOrderBy}
-          state="Released"
+          state="Releasing"
           onShowAll={onShowAll}
         />
       )}

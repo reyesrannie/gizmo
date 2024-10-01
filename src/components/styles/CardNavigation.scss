@@ -7,10 +7,29 @@
   }
 }
 
+.card-navigation-container.history {
+  &.MuiCard-root {
+    min-width: 180px;
+    max-width: 180px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin: 10px;
+  }
+}
+
 .card-content {
   &.MuiCardContent-root {
     min-height: 170px;
     max-height: 170px;
+  }
+}
+
+.card-content.history {
+  &.MuiCardContent-root {
+    min-height: 30px;
+    max-height: 120px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
   }
 }
 
@@ -23,7 +42,24 @@
   }
 }
 
+.icon-card-details.history {
+  &.MuiSvgIcon-root {
+    background-color: #1a1d24;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 0px;
+  }
+}
+
 .card-title {
+  &.MuiTypography-root {
+    font-family: Roboto-Black;
+    font-size: 16px;
+    margin-bottom: 5px;
+  }
+}
+
+.card-title.history {
   &.MuiTypography-root {
     font-family: Roboto-Black;
     font-size: 16px;

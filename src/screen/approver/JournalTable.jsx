@@ -57,7 +57,6 @@ import {
 import TransactionModalAp from "../../components/customs/modal/TransactionModalAp";
 import { setVoucher } from "../../services/slice/optionsSlice";
 import TransactionModalApprover from "../../components/customs/modal/TransactionModalApprover";
-import socket from "../../services/functions/serverSocket";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import orderBySchema from "../../schemas/orderBySchema";
@@ -107,7 +106,6 @@ const JournalTable = ({
     };
     try {
       const res = await readTransaction(obj).unwrap();
-      socket.emit("transaction_read");
     } catch (error) {}
   };
 

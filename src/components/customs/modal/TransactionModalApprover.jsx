@@ -39,19 +39,16 @@ import {
 import {
   useAccountTitlesQuery,
   useApproveCheckEntriesMutation,
-  useApproveJournalEntriesMutation,
   useAtcQuery,
   useDocumentTypeQuery,
   usePrepareCVoucherMutation,
   useReturnCheckEntriesMutation,
-  useReturnJournalEntriesMutation,
   useStatusLogsQuery,
   useSupplierQuery,
   useSupplierTypeQuery,
   useTaxComputationQuery,
   useUsersQuery,
   useVoidCVoucherMutation,
-  useVoidJVoucherMutation,
   useVoidedCVoucherMutation,
   useVoidedJVoucherMutation,
   useVpCheckNumberQuery,
@@ -72,7 +69,7 @@ import { enqueueSnackbar } from "notistack";
 import { singleError } from "../../../services/functions/errorResponse";
 import ComputationMenu from "./ComputationMenu";
 import { printPDF } from "../../../services/functions/pdfProcess";
-import socket from "../../../services/functions/serverSocket";
+
 import {
   totalAccount,
   totalVatNonPaginate,
@@ -80,6 +77,11 @@ import {
 import DateChecker from "../../../services/functions/DateChecker";
 import { hasAccess } from "../../../services/functions/access";
 import ReceiveEntry from "../ReceiveEntry";
+import {
+  useApproveGJMutation,
+  useReturnGJMutation,
+  useVoidGJMutation,
+} from "../../../services/store/seconAPIRequest";
 
 const TransactionModalApprover = () => {
   const dispatch = useDispatch();
@@ -189,20 +191,17 @@ const TransactionModalApprover = () => {
   const [returnCheckEntry, { isLoading: loadingReturn }] =
     useReturnCheckEntriesMutation();
 
-  const [returnJournalkEntry, { isLoading: loadingReturnJournal }] =
-    useReturnJournalEntriesMutation();
+  const [returnGJ, { isLoading: loadingReturnGJ }] = useReturnGJMutation();
 
   const [approveCheckEntry, { isLoading: loadingApprove }] =
     useApproveCheckEntriesMutation();
 
-  const [approveJournalEntry, { isLoading: loadingApproveJournal }] =
-    useApproveJournalEntriesMutation();
+  const [approveGJ, { isLoading: loadingGJApprove }] = useApproveGJMutation();
 
   const [voidCVoucher, { isLoading: loadingVoidCV }] =
     useVoidCVoucherMutation();
 
-  const [voidJVoucher, { isLoading: loadingVoidJV }] =
-    useVoidJVoucherMutation();
+  const [voidGJ, { isLoading: loadingVoidGJ }] = useVoidGJMutation();
 
   const [voidedCVoucher, { isLoading: loadingVoidedCV }] =
     useVoidedCVoucherMutation();
@@ -316,12 +315,8 @@ const TransactionModalApprover = () => {
       const res =
         voucher === "check"
           ? await returnCheckEntry(obj).unwrap()
-          : await returnJournalkEntry(obj).unwrap();
+          : await returnGJ(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      socket.emit("transaction_returned", {
-        ...obj,
-        message: `The transaction ${menuData?.transactions?.tag_no} is returned`,
-      });
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
@@ -339,12 +334,8 @@ const TransactionModalApprover = () => {
       const res =
         voucher === "check"
           ? await voidCVoucher(obj).unwrap()
-          : await voidJVoucher(obj).unwrap();
+          : await voidGJ(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      socket.emit("transaction_for_void", {
-        ...obj,
-        message: `The transaction ${menuData?.transactions?.tag_no} is for void`,
-      });
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
@@ -360,7 +351,7 @@ const TransactionModalApprover = () => {
     const obj = {
       id: menuData?.id,
       voucher_number:
-        voucher === "check" ? `CVRL${formattedDate}` : `JVRL${formattedDate}`,
+        voucher === "check" ? `CVRL${formattedDate}` : `GJRL${formattedDate}`,
       ap_tagging_id: menuData?.apTagging?.id,
     };
 
@@ -371,12 +362,8 @@ const TransactionModalApprover = () => {
       const res =
         voucher === "check"
           ? await approveCheckEntry(obj).unwrap()
-          : await approveJournalEntry(obj).unwrap();
+          : await approveGJ(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      socket.emit("transaction_approved", {
-        ...obj,
-        message: `The transaction ${menuData?.transactions?.tag_no} is approved`,
-      });
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
@@ -395,10 +382,6 @@ const TransactionModalApprover = () => {
           ? await voidedCVoucher(obj).unwrap()
           : await voidedJVoucher(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      socket.emit("transaction_voided", {
-        ...obj,
-        message: `The transaction ${menuData?.transactions?.tag_no} is void`,
-      });
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
@@ -468,9 +451,6 @@ const TransactionModalApprover = () => {
           ? await prepareCheck(obj).unwrap()
           : await voidedJVoucher(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      socket.emit("transaction_preparation", {
-        ...obj,
-      });
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
@@ -491,7 +471,7 @@ const TransactionModalApprover = () => {
               >
                 <Typography>
                   {menuData?.voucher_number === null &&
-                    (voucher === "check" ? "CVRL" : "JVRL") +
+                    (voucher === "check" ? "CVRL" : "GJRL") +
                       formattedDate +
                       "-" +
                       (voucher === "check"
@@ -518,7 +498,7 @@ const TransactionModalApprover = () => {
                 <Typography>
                   {voucher === "check"
                     ? "VOUCHER'S PAYABLE"
-                    : "JOURNAL VOUCHER"}
+                    : "GENERAL JOURNAL"}
                 </Typography>
               </TableCell>
               <TableCell
@@ -934,12 +914,12 @@ const TransactionModalApprover = () => {
                 </Stack>
               </TableCell>
               <TableCell align="left" className="voucher-payment-footer">
-                <Typography>{voucher === "check" ? "CV" : "JV"} NO.</Typography>
+                <Typography>{voucher === "check" ? "CV" : "GJ"} NO.</Typography>
               </TableCell>
               <TableCell align="center" className="voucher-payment-footer">
                 <Typography>
                   {menuData?.voucher_number === null &&
-                    (voucher === "check" ? "CVRL" : "JVRL") +
+                    (voucher === "check" ? "CVRL" : "GJRL") +
                       formattedDate +
                       "-" +
                       (voucher === "check"
@@ -1079,7 +1059,7 @@ const TransactionModalApprover = () => {
             </LoadingButton>
           )}
           {menuData?.state === "approved" &&
-            isDateNotCutOff(formattedDate) &&
+            (isDateNotCutOff(formattedDate) || voucher !== "check") &&
             hasAccess("ap_tag") && (
               <Button
                 variant="contained"
@@ -1112,12 +1092,12 @@ const TransactionModalApprover = () => {
           loadingReturn ||
           loadingApprove ||
           loadingType ||
-          loadingReturnJournal ||
-          loadingApproveJournal ||
+          loadingReturnGJ ||
+          loadingGJApprove ||
           loadingVp ||
           loadingJournalVP ||
           loadingVoidCV ||
-          loadingVoidJV ||
+          loadingVoidGJ ||
           loadingVoidedCV ||
           loadingVoidedJV ||
           loadingPrep

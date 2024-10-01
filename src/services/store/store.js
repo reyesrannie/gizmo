@@ -10,6 +10,7 @@ import transactionSlice from "../slice/transactionSlice";
 import logSlice from "../slice/logSlice";
 import optionsSlice from "../slice/optionsSlice";
 import headerSlice from "../slice/headerSlice";
+import { seconAPIRequest } from "./seconAPIRequest";
 
 export const store = configureStore({
   reducer: {
@@ -25,11 +26,13 @@ export const store = configureStore({
     [jsonServerAPI.reducerPath]: jsonServerAPI.reducer,
     [jsonSedarAPI.reducerPath]: jsonSedarAPI.reducer,
     [jsonFistoApi.reducerPath]: jsonFistoApi.reducer,
+    [seconAPIRequest.reducerPath]: seconAPIRequest.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
       jsonSedarAPI.middleware,
       jsonServerAPI.middleware,
-      jsonFistoApi.middleware
+      jsonFistoApi.middleware,
+      seconAPIRequest.middleware
     ),
 });

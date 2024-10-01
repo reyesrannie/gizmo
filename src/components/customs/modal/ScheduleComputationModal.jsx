@@ -67,7 +67,7 @@ import {
 import ComputationMenu from "./ComputationMenu";
 import { totalAccount, totalAmount } from "../../../services/functions/compute";
 import TransactionModalApprover from "./TransactionModalApprover";
-import socket from "../../../services/functions/serverSocket";
+
 import scheduleTransactionAPSchema from "../../../schemas/scheduleTransactionAPSchema";
 import { DatePicker } from "@mui/x-date-pickers";
 import DateChecker from "../../../services/functions/DateChecker";
@@ -276,7 +276,6 @@ const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
     try {
       const res = await checkScheduleTransaction(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      socket.emit("schedule_approval");
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
@@ -296,7 +295,6 @@ const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
     try {
       const res = await resetScheduleTransaction(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      socket.emit("schedule_reset");
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
@@ -312,7 +310,6 @@ const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
     try {
       const res = await generateTransaction(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      socket.emit("schedule_generate");
       dispatch(resetMenu());
       dispatch(resetPrompt());
       dispatch(setHeader("Approved"));
@@ -329,7 +326,6 @@ const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
     try {
       const res = await completeTransaction(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      socket.emit("schedule_updated");
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {

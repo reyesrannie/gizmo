@@ -9,7 +9,7 @@ const useTreasuryCheckHook = () => {
     pagination: null,
     sorts: null,
     allocation: "",
-    state: "Available",
+    state: "",
   });
 
   const onPageChange = (_, page) => {

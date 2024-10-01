@@ -67,7 +67,7 @@ import {
 import ReceiveEntry from "../ReceiveEntry";
 import { useNavigate } from "react-router-dom";
 import ShortcutHandler from "../../../services/functions/ShortcutHandler";
-import socket from "../../../services/functions/serverSocket";
+
 import {
   resetTransaction,
   setAddDocuments,
@@ -304,7 +304,6 @@ const ScheduleModal = ({ create, view, update, receive }) => {
           ? await updateTransaction(obj).unwrap()
           : await createTransaction(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      socket.emit(update || receive ? "schedule_updated" : "schedule_created");
       const docs = insertDocument(res?.result);
       const resData = await mapScheduledTransaction(
         res?.result,
@@ -337,7 +336,6 @@ const ScheduleModal = ({ create, view, update, receive }) => {
     try {
       const res = await receiveTransaction(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      socket.emit("schedule_received");
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {

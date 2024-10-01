@@ -41,7 +41,6 @@ import { useState } from "react";
 
 import {
   resetMenu,
-  setCheckMenu,
   setMenuData,
   setPreparation,
   setUpdateMenu,
@@ -51,14 +50,12 @@ import {
 
 import {
   useDocumentTypeQuery,
-  useFileCVoucherMutation,
   usePrepareCVoucherMutation,
   useReadTransactionCheckMutation,
 } from "../../services/store/request";
 import TransactionModalAp from "../../components/customs/modal/TransactionModalAp";
 import { resetOption, setVoucher } from "../../services/slice/optionsSlice";
 import TransactionModalApprover from "../../components/customs/modal/TransactionModalApprover";
-import socket from "../../services/functions/serverSocket";
 import { AdditionalFunction } from "../../services/functions/AdditionalFunction";
 import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
 import Autocomplete from "../../components/customs/AutoComplete";
@@ -68,6 +65,7 @@ import orderBySchema from "../../schemas/orderBySchema";
 import { enqueueSnackbar } from "notistack";
 import { resetPrompt } from "../../services/slice/promptSlice";
 import { singleError } from "../../services/functions/errorResponse";
+import dayjs from "dayjs";
 
 const CheckTable = ({
   params,
@@ -83,10 +81,8 @@ const CheckTable = ({
   const [anchorE1, setAnchorE1] = useState(null);
   const dispatch = useDispatch();
   const menuData = useSelector((state) => state.menu.menuData);
-  const receiveMenu = useSelector((state) => state.menu.receiveMenu);
   const updateMenu = useSelector((state) => state.menu.updateMenu);
   const viewMenu = useSelector((state) => state.menu.viewMenu);
-  const checkMenu = useSelector((state) => state.menu.checkMenu);
   const preparation = useSelector((state) => state.menu.preparation);
 
   const userData = useSelector((state) => state.auth.userData);
@@ -108,15 +104,12 @@ const CheckTable = ({
   const [prepareCheck, { isLoading: loadingPrep }] =
     usePrepareCVoucherMutation();
 
-  const [fileCheck, { isLoading: loadingFile }] = useFileCVoucherMutation();
-
   const handleRead = async (data) => {
     const obj = {
       id: data?.id,
     };
     try {
       const res = await readTransaction(obj).unwrap();
-      socket.emit("transaction_read");
     } catch (error) {}
   };
 
@@ -145,14 +138,8 @@ const CheckTable = ({
 
   const submitHandler = async (submitData) => {
     try {
-      const res =
-        params?.state !== "For Filing"
-          ? await prepareCheck(submitData).unwrap()
-          : await fileCheck(submitData).unwrap();
+      const res = await prepareCheck(submitData).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      socket.emit("transaction_preparation", {
-        submitData,
-      });
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
@@ -167,8 +154,7 @@ const CheckTable = ({
           <Table stickyHeader>
             <TableHead>
               <TableRow className="table-header1-import-tag-transaction">
-                {(params?.state === "approved" ||
-                  params?.state === "For Filing") && (
+                {params?.state === "approved" && (
                   <TableCell align="center">
                     <FormControlLabel
                       className="check-box-archive-ap"
@@ -246,15 +232,10 @@ const CheckTable = ({
             </TableHead>
 
             <TableBody>
-              {loadingPrep || loadingDocument || isLoading || loadingFile ? (
+              {loadingPrep || loadingDocument || isLoading ? (
                 <TableRow>
                   <TableCell
-                    colSpan={
-                      params?.state === "approved" ||
-                      params?.state === "For Filing"
-                        ? 7
-                        : 6
-                    }
+                    colSpan={params?.state === "approved" ? 7 : 6}
                     align="center"
                   >
                     <Lottie
@@ -266,12 +247,7 @@ const CheckTable = ({
               ) : isError ? (
                 <TableRow>
                   <TableCell
-                    colSpan={
-                      params?.state === "approved" ||
-                      params?.state === "For Filing"
-                        ? 7
-                        : 6
-                    }
+                    colSpan={params?.state === "approved" ? 7 : 6}
                     align="center"
                   >
                     <Lottie
@@ -286,6 +262,7 @@ const CheckTable = ({
                     (doc) =>
                       tag?.transactions?.document_type_id === doc?.id || null
                   );
+                  const tagMonthYear = dayjs(tag?.tag_year, "YYMM").toDate();
 
                   return (
                     <TableRow
@@ -320,8 +297,7 @@ const CheckTable = ({
                           dispatch(setPreparation(true));
                       }}
                     >
-                      {(params?.state === "approved" ||
-                        params?.state === "For Filing") && (
+                      {params?.state === "approved" && (
                         <TableCell align="center">
                           <FormControlLabel
                             className="check-box-archive-ap"
@@ -356,7 +332,9 @@ const CheckTable = ({
                         </TableCell>
                       )}
                       <TableCell>
-                        {`${tag?.transactions?.tag_year} - ${tag?.transactions?.tag_no}`}
+                        {`${tag?.transactions?.tag_no} - ${moment(
+                          tagMonthYear
+                        ).get("year")}`}
                       </TableCell>
                       <TableCell>
                         <Typography className="tag-transaction-company-name">
@@ -389,7 +367,9 @@ const CheckTable = ({
                           </Typography>
                         ) : (
                           <Typography className="tag-transaction-company-name">
-                            {`${tag?.transactions?.ap_tagging} - ${tag?.transactions?.tag_year} - ${tag?.transactions?.gtag_no} `}
+                            {`${tag?.transactions?.ap_tagging} - ${
+                              tag?.transactions?.gtag_no
+                            } - ${moment(tagMonthYear).get("year")}`}
                           </Typography>
                         )}
 
@@ -524,14 +504,7 @@ const CheckTable = ({
             {isFetching && (
               <TableFooter style={{ position: "sticky", bottom: 0 }}>
                 <TableRow className="table-footer-tag-transaction">
-                  <TableCell
-                    colSpan={
-                      params?.state === "approved" ||
-                      params?.state === "For Filing"
-                        ? 7
-                        : 6
-                    }
-                  >
+                  <TableCell colSpan={params?.state === "approved" ? 7 : 6}>
                     <LinearProgress color="secondary" />
                   </TableCell>
                 </TableRow>

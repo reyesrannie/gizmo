@@ -39,7 +39,6 @@ import {
 import Lottie from "lottie-react";
 import { enqueueSnackbar } from "notistack";
 import { singleError } from "../../services/functions/errorResponse";
-import socket from "../../services/functions/serverSocket";
 
 const ReceiveEntry = ({ check = false }) => {
   const dispatch = useDispatch();
@@ -164,10 +163,6 @@ const ReceiveEntry = ({ check = false }) => {
       const res = await receiveTransaction(obj);
       enqueueSnackbar("Transaction successfully received", {
         variant: "success",
-      });
-      socket.emit("transaction_received", {
-        ...obj,
-        message: `The transaction ${obj?.tag_no} has been recieved`,
       });
       dispatch(setIsContinue(true));
       dispatch(setNavigate(navigation));

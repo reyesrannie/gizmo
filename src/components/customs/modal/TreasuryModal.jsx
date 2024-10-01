@@ -61,15 +61,16 @@ import {
   setViewAccountingEntries,
 } from "../../../services/slice/menuSlice";
 import { resetOption } from "../../../services/slice/optionsSlice";
-import socket from "../../../services/functions/serverSocket";
+
 import { enqueueSnackbar } from "notistack";
-import { resetPrompt } from "../../../services/slice/promptSlice";
+import { resetPrompt, setReturn } from "../../../services/slice/promptSlice";
 import { singleError } from "../../../services/functions/errorResponse";
 import ClearCheck from "../ClearCheck";
 import dayjs from "dayjs";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { hasAccess } from "../../../services/functions/access";
+import ReasonInput from "../ReasonInput";
 
 const TreasuryModal = () => {
   const componentRef = useRef();
@@ -81,6 +82,7 @@ const TreasuryModal = () => {
   const taxData = useSelector((state) => state.menu.taxData);
   const updateCount = useSelector((state) => state.menu.updateCount);
   const createMenu = useSelector((state) => state.menu.createMenu);
+  const isReturn = useSelector((state) => state.prompt.return);
 
   const { convertToPeso } = AdditionalFunction();
 
@@ -117,8 +119,6 @@ const TreasuryModal = () => {
     setError,
     watch,
     clearErrors,
-    reset,
-    getValues,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(treasurySchema),
@@ -128,7 +128,9 @@ const TreasuryModal = () => {
       credit_coa_id: null,
       bank: null,
       check_no: "",
-      check_date: null,
+      check_date: dayjs(new Date(), {
+        locale: AdapterDayjs.locale,
+      }),
       type: "CHECK VOUCHER",
       check: [
         {
@@ -136,11 +138,30 @@ const TreasuryModal = () => {
           bank: null,
           check_no: "",
           amount: 0,
-          check_date: null,
+          check_date: dayjs(new Date(), {
+            locale: AdapterDayjs.locale,
+          }),
         },
       ],
     },
   });
+
+  useEffect(() => {
+    if (successTitles && menuData?.state === "For Preparation") {
+      const obj = {
+        debit_coa_id: accountTitles?.result?.find(
+          (item) => item.code === "211100"
+        ),
+        credit_coa_id: accountTitles?.result?.find(
+          (item) => item.code === "211100"
+        ),
+      };
+
+      Object.entries(obj).forEach(([key, value]) => {
+        setValue(key, value);
+      });
+    }
+  }, [successTitles]);
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -149,11 +170,6 @@ const TreasuryModal = () => {
 
   const [releaseVoucher, { isLoading: releaseLoading }] =
     useReleaseCVoucherMutation();
-
-  const [
-    forApprovalVoucher,
-    { isLoading: forApprovalLoading, error: forApprovalError },
-  ] = useForApprovalCVoucherMutation();
 
   const [releasedVoucher, { isLoading: releasedLoading }] =
     useReleasedCVoucherMutation();
@@ -223,7 +239,7 @@ const TreasuryModal = () => {
 
     try {
       if (submitData?.type === "CHECK VOUCHER") {
-        const res = await forApprovalVoucher(obj).unwrap();
+        const res = await releaseVoucher(obj).unwrap();
         enqueueSnackbar(res?.message, { variant: "success" });
       }
       if (submitData?.type === "Clearing") {
@@ -239,9 +255,6 @@ const TreasuryModal = () => {
         const res = await clearVoucher(forClearing).unwrap();
         enqueueSnackbar(res?.message, { variant: "success" });
       }
-      socket.emit("transaction_preparation", {
-        ...obj,
-      });
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
@@ -256,9 +269,6 @@ const TreasuryModal = () => {
     try {
       const res = await releasedVoucher(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      socket.emit("transaction_preparation", {
-        ...obj,
-      });
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
@@ -273,9 +283,6 @@ const TreasuryModal = () => {
     try {
       const res = await releaseVoucher(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      socket.emit("transaction_preparation", {
-        ...obj,
-      });
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
@@ -295,6 +302,12 @@ const TreasuryModal = () => {
     } else {
       clearErrors(`check.${index}.amount`);
     }
+  };
+
+  const handleReturn = async () => {
+    try {
+      console.log("return to ap");
+    } catch (error) {}
   };
 
   return (
@@ -636,7 +649,11 @@ const TreasuryModal = () => {
                               <Autocomplete
                                 control={control}
                                 name={"bank"}
-                                options={accountTitles?.result || []}
+                                options={
+                                  accountTitles?.result?.filter((coa) =>
+                                    coa?.name?.startsWith("CIB")
+                                  ) || []
+                                }
                                 getOptionLabel={(option) => `${option.name}`}
                                 isOptionEqualToValue={(option, value) =>
                                   option?.id === value?.id
@@ -746,7 +763,7 @@ const TreasuryModal = () => {
                             className="voucher-treasury content"
                           >
                             {items?.state !== "For Preparation" ? (
-                              <Typography>{`Check Date.: ${
+                              <Typography>{`Check Date : ${
                                 items?.treasuryCheck?.check_date
                                   ? moment(
                                       items?.treasuryCheck?.check_date
@@ -871,6 +888,16 @@ const TreasuryModal = () => {
                                             />
                                           }
                                           label="Debit Memo"
+                                        />
+                                        <FormControlLabel
+                                          value="OFFSET"
+                                          control={
+                                            <Radio
+                                              color="secondary"
+                                              size="small"
+                                            />
+                                          }
+                                          label="Offset"
                                         />
                                       </RadioGroup>
                                     )}
@@ -1168,7 +1195,11 @@ const TreasuryModal = () => {
                       <Autocomplete
                         control={control}
                         name={"bank"}
-                        options={accountTitles?.result || []}
+                        options={
+                          accountTitles?.result?.filter((coa) =>
+                            coa?.name?.startsWith("CIB")
+                          ) || []
+                        }
                         getOptionLabel={(option) => `${option.name}`}
                         isOptionEqualToValue={(option, value) =>
                           option?.id === value?.id
@@ -1276,13 +1307,15 @@ const TreasuryModal = () => {
                     className="voucher-treasury content"
                   >
                     {createMenu || menuData?.state !== "For Preparation" ? (
-                      <Typography>{`Check Date.: ${
-                        menuData?.treasuryChecks[0]?.check_date
-                          ? moment(
-                              menuData?.treasuryChecks[0]?.check_date
-                            ).format("MM/DD/YYYY")
-                          : ""
-                      }`}</Typography>
+                      <Typography>
+                        {`Check Date : ${
+                          menuData?.treasuryChecks[0]?.check_date
+                            ? moment(
+                                menuData?.treasuryChecks[0]?.check_date
+                              ).format("MM/DD/YYYY")
+                            : ""
+                        }`}
+                      </Typography>
                     ) : (
                       <Controller
                         name="check_date"
@@ -1393,6 +1426,13 @@ const TreasuryModal = () => {
                                   }
                                   label="Debit Memo"
                                 />
+                                <FormControlLabel
+                                  value="OFFSET EXPENSE MEMO"
+                                  control={
+                                    <Radio color="secondary" size="small" />
+                                  }
+                                  label="Offset"
+                                />
                               </RadioGroup>
                             )}
                           />
@@ -1499,18 +1539,8 @@ const TreasuryModal = () => {
                       }
                       color="primary"
                       className="transaction-tax-textBox treasury-array"
-                      error={Boolean(
-                        errors?.check?.[index]?.check_no ||
-                          forApprovalError?.data?.errors?.[
-                            `treasury_checks.${index}.check_no`
-                          ]
-                      )}
-                      helperText={
-                        errors?.check?.[index]?.check_no?.message ||
-                        forApprovalError?.data?.errors?.[
-                          `treasury_checks.${index}.check_no`
-                        ]?.[0]
-                      }
+                      error={Boolean(errors?.check?.[index]?.check_no)}
+                      helperText={errors?.check?.[index]?.check_no?.message}
                       variant="filled"
                     />
                     <AppTextBox
@@ -1529,7 +1559,11 @@ const TreasuryModal = () => {
                     <Autocomplete
                       control={control}
                       name={`check.${index}.bank`}
-                      options={accountTitles?.result || []}
+                      options={
+                        accountTitles?.result?.filter((coa) =>
+                          coa?.name?.startsWith("CIB")
+                        ) || []
+                      }
                       getOptionLabel={(option) => `${option.name}`}
                       isOptionEqualToValue={(option, value) =>
                         option?.id === value?.id
@@ -1605,7 +1639,9 @@ const TreasuryModal = () => {
                     bank: null,
                     check_no: "",
                     amount: 0,
-                    check_date: null,
+                    check_date: dayjs(new Date(), {
+                      locale: AdapterDayjs.locale,
+                    }),
                   })
                 }
               >
@@ -1669,6 +1705,16 @@ const TreasuryModal = () => {
                 {taxData === null ? "Clear" : "View OR"}
               </Button>
             )}
+            {menuData?.state === "For Preparation" && (
+              <Button
+                variant="contained"
+                color="error"
+                className="add-transaction-button"
+                onClick={() => dispatch(setReturn(true))}
+              >
+                Return
+              </Button>
+            )}
           </Box>
           <Box className="archive-transaction-button-container">
             {(taxData !== null ||
@@ -1711,12 +1757,27 @@ const TreasuryModal = () => {
           loadingTitles ||
           releaseLoading ||
           clearLoading ||
-          releasedLoading ||
-          forApprovalLoading
+          releasedLoading
         }
         className="loading-transaction-create"
       >
         <Lottie animationData={loading} loop />
+      </Dialog>
+
+      <Dialog open={isReturn}>
+        <ReasonInput
+          title={"Reason for return"}
+          reasonDesc={"Please enter the reason for returning this entry"}
+          warning={
+            "Please note that this entry will be forwarded back to Accounts Payable (AP) for further processing. Kindly provide a reason for this action."
+          }
+          confirmButton={"Confirm"}
+          cancelButton={"Cancel"}
+          cancelOnClick={() => {
+            dispatch(resetPrompt());
+          }}
+          confirmOnClick={(e) => handleReturn(e)}
+        />
       </Dialog>
 
       <Dialog

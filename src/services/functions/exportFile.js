@@ -565,7 +565,7 @@ const generateExcelReportPerATC = async (report, menuData, sheet) => {
   });
 
   for (let row = 1; row <= 3; row++) {
-    for (let col = 1; col <= 5; col++) {
+    for (let col = 1; col <= 3; col++) {
       const cell = worksheet.getCell(row, col);
       cell.fill = {
         type: "pattern",
@@ -581,7 +581,7 @@ const generateExcelReportPerATC = async (report, menuData, sheet) => {
   }
 
   for (let row = 4; row <= 4; row++) {
-    for (let col = 1; col <= 5; col++) {
+    for (let col = 1; col <= 3; col++) {
       const cell = worksheet.getCell(row, col);
 
       cell.font = {

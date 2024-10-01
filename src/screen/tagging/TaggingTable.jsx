@@ -38,6 +38,7 @@ import {
 import TransactionModal from "../../components/customs/modal/TransactionModal";
 import { useDocumentTypeQuery } from "../../services/store/request";
 import { AdditionalFunction } from "../../services/functions/AdditionalFunction";
+import dayjs from "dayjs";
 
 const TaggingTable = ({
   params,
@@ -118,6 +119,8 @@ const TaggingTable = ({
                   (doc) => tag?.documentType?.id === doc?.id || null
                 );
 
+                const tagMonthYear = dayjs(tag?.tag_year, "YYMM").toDate();
+
                 return (
                   <TableRow
                     className="table-body-tag-transaction"
@@ -128,7 +131,7 @@ const TaggingTable = ({
                     }}
                   >
                     <TableCell>
-                      {tag?.tag_year} - {tag?.tag_no}
+                      {tag?.tag_no} - {moment(tagMonthYear).get("year")}
                     </TableCell>
                     <TableCell>
                       <Typography className="tag-transaction-company-name">
@@ -156,7 +159,9 @@ const TaggingTable = ({
 
                     <TableCell>
                       <Typography className="tag-transaction-company-name">
-                        {`${tag?.apTagging?.company_code} - ${tag?.tag_year} - ${tag?.gtag_no} `}
+                        {`${tag?.apTagging?.company_code} - ${
+                          tag?.gtag_no
+                        } - ${moment(tagMonthYear).get("year")}`}
                       </Typography>
                       <Typography className="tag-transaction-company-type">
                         {document === null ? <>&mdash;</> : document?.name}

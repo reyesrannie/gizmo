@@ -1,4 +1,4 @@
-import React, { Suspense, useEffect } from "react";
+import React, { Suspense, useEffect, useRef } from "react";
 import {
   Box,
   Dialog,
@@ -24,7 +24,6 @@ import { Outlet } from "react-router-dom";
 import { decodeUser } from "../../services/functions/saveUser";
 import AccountMenu from "./AccountMenu";
 import ChangePassword from "./modal/ChangePassword";
-import socket from "../../services/functions/serverSocket";
 import { useSnackbar } from "notistack";
 import {
   jsonServerAPI,
@@ -36,11 +35,12 @@ import {
   useSchedTransactionQuery,
   useSupplierQuery,
 } from "../../services/store/request";
-import { events } from "../../services/constants/socketItems";
 import NotificationSchedule from "./NotificationSchedule";
 import { setOpenNotification } from "../../services/slice/promptSlice";
 import DateChecker from "../../services/functions/DateChecker";
 import { hasAccess } from "../../services/functions/access";
+import EchoInstance from "../../services/functions/backendSocket";
+import { socketEvents } from "../../services/constants/socketEvents";
 
 const AppBar = () => {
   const { enqueueSnackbar } = useSnackbar();
@@ -120,48 +120,44 @@ const AppBar = () => {
     pagination: "none",
   });
 
+  const channelListenersRef = useRef({});
+
   useEffect(() => {
-    const updateHandler = (value, data) => {
-      if (
-        userData?.scope_tagging?.some(
-          (item) => item?.ap_id === data?.ap_tagging_id
-        )
-      ) {
-        enqueueSnackbar(data?.message, { variant: "success" });
-      }
-      if (
-        value?.event === "transaction_received" &&
-        userData?.role?.access_permission?.includes("tagging")
-      ) {
-        enqueueSnackbar(data?.message, { variant: "success" });
-      }
-      if (
-        value?.event === "transaction_archived" &&
-        userData?.role?.access_permission?.includes("tagging")
-      ) {
-        enqueueSnackbar(data?.message, { variant: "success" });
-      }
-      if (
-        value?.event === "transaction_approval" &&
-        userData?.role?.access_permission?.includes("approver")
-      ) {
-        enqueueSnackbar(data?.message, { variant: "success" });
-      }
-      dispatch(jsonServerAPI?.util?.invalidateTags(value?.tags));
-    };
+    socketEvents?.forEach(({ channel, event, tags, action }) => {
+      const echoChannel = EchoInstance?.channel(channel);
+      channelListenersRef.current[channel] = echoChannel
+        .subscribed((event) => {})
+        .listen(event, (data) => {
+          if (action?.some((act) => act === "dispatch")) {
+            dispatch(jsonServerAPI?.util?.invalidateTags(tags));
+          } else if (action?.some((act) => act === "AP")) {
+            (data?.gas_status === "pending" ||
+              userData?.scope_tagging?.some(
+                (tag) => tag?.ap_id === data?.ap_tagging_id
+              )) &&
+              dispatch(jsonServerAPI?.util?.invalidateTags(tags));
 
-    const eventListeners = {};
-    Object.entries(events).forEach(([key, value]) => {
-      eventListeners[key] = (data) => updateHandler(value, data);
-      socket.on(value?.event, eventListeners[key]);
+            data?.gas_status === "For Computation" &&
+              hasAccess(["tagging"]) &&
+              dispatch(jsonServerAPI?.util?.invalidateTags(tags));
+
+            data?.gas_status === "For Approval" &&
+              hasAccess(["approver"]) &&
+              dispatch(jsonServerAPI?.util?.invalidateTags(tags));
+          } else {
+            enqueueSnackbar(data?.message, { variant: "success" });
+          }
+        });
     });
-
     return () => {
-      Object.entries(events).forEach(([key, value]) => {
-        socket.off(value?.event, eventListeners[key]);
-      });
+      Object.entries(channelListenersRef.current).forEach(
+        ([channel, listener]) => {
+          listener.stopListening(channel);
+          EchoInstance.leaveChannel(channel);
+        }
+      );
     };
-  }, [socket, userData]);
+  }, [socketEvents, EchoInstance, userData]);
 
   useEffect(() => {
     if (successSched) {

@@ -30,7 +30,6 @@ import { useSnackbar } from "notistack";
 import { objectError } from "../../../services/functions/errorResponse";
 import accountNumberSchema from "../../../schemas/accountNumberSchema";
 import Autocomplete from "../AutoComplete";
-import socket from "../../../services/functions/serverSocket";
 
 const AccountNumberModal = ({ accountNumberData, view, update }) => {
   const dispatch = useDispatch();
@@ -110,7 +109,6 @@ const AccountNumberModal = ({ accountNumberData, view, update }) => {
       try {
         const res = await updateAccountNumber(obj).unwrap();
         enqueueSnackbar(res?.message, { variant: "success" });
-        socket.emit("account_number_updated");
         dispatch(resetMenu());
       } catch (error) {
         objectError(error, setError, enqueueSnackbar);
@@ -119,7 +117,7 @@ const AccountNumberModal = ({ accountNumberData, view, update }) => {
       try {
         const res = await createAccountNumber(obj).unwrap();
         enqueueSnackbar(res?.message, { variant: "success" });
-        socket.emit("account_number_updated");
+
         dispatch(resetMenu());
       } catch (error) {
         objectError(error, setError, enqueueSnackbar);

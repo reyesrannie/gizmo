@@ -1,7 +1,8 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 // const baseURL = process.env.REACT_APP_API_KEY;
-const baseURL = "http://10.10.12.10:8000/api/";
+// const baseURL = "http://10.10.12.10:8000/api/";
+const baseURL = "http://192.168.254.132:8000/api/";
 
 export const jsonServerAPI = createApi({
   reducerPath: "jsonServerAPI",
@@ -132,7 +133,6 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["Users"],
     }),
     updateUser: builder.mutation({
       transformResponse: (response) => response,
@@ -141,7 +141,6 @@ export const jsonServerAPI = createApi({
         method: "PUT",
         body: payload,
       }),
-      invalidatesTags: ["Users"],
     }),
     archiveUser: builder.mutation({
       transformResponse: (response) => response,
@@ -150,7 +149,6 @@ export const jsonServerAPI = createApi({
         method: "PATCH",
         body: payload,
       }),
-      invalidatesTags: ["Users"],
     }),
     //end of Authentication
 
@@ -172,7 +170,6 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["Role"],
     }),
     updateRole: builder.mutation({
       transformResponse: (response) => response,
@@ -181,7 +178,6 @@ export const jsonServerAPI = createApi({
         method: "PUT",
         body: payload,
       }),
-      invalidatesTags: ["Role"],
     }),
     archiveRole: builder.mutation({
       transformResponse: (response) => response,
@@ -190,7 +186,6 @@ export const jsonServerAPI = createApi({
         method: "PATCH",
         body: payload,
       }),
-      invalidatesTags: ["Role"],
     }),
 
     //Company
@@ -210,7 +205,6 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["Company"],
     }),
     importCompany: builder.mutation({
       transformResponse: (response) => response,
@@ -219,7 +213,6 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["Company"],
     }),
     updateCompany: builder.mutation({
       transformResponse: (response) => response,
@@ -228,7 +221,6 @@ export const jsonServerAPI = createApi({
         method: "PUT",
         body: payload,
       }),
-      invalidatesTags: ["Company"],
     }),
     archiveCompany: builder.mutation({
       transformResponse: (response) => response,
@@ -237,7 +229,6 @@ export const jsonServerAPI = createApi({
         method: "PATCH",
         body: payload,
       }),
-      invalidatesTags: ["Company"],
     }),
 
     //Department
@@ -257,7 +248,6 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["Department"],
     }),
     importDepartment: builder.mutation({
       transformResponse: (response) => response,
@@ -266,7 +256,6 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["Department"],
     }),
     updateDepartment: builder.mutation({
       transformResponse: (response) => response,
@@ -275,7 +264,6 @@ export const jsonServerAPI = createApi({
         method: "PUT",
         body: payload,
       }),
-      invalidatesTags: ["Department"],
     }),
     archiveDepartment: builder.mutation({
       transformResponse: (response) => response,
@@ -284,7 +272,6 @@ export const jsonServerAPI = createApi({
         method: "PATCH",
         body: payload,
       }),
-      invalidatesTags: ["Department"],
     }),
 
     //Location
@@ -304,7 +291,6 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["Location"],
     }),
     importLocation: builder.mutation({
       transformResponse: (response) => response,
@@ -313,7 +299,6 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["Location"],
     }),
     updateLocation: builder.mutation({
       transformResponse: (response) => response,
@@ -322,7 +307,6 @@ export const jsonServerAPI = createApi({
         method: "PUT",
         body: payload,
       }),
-      invalidatesTags: ["Location"],
     }),
     archiveLocation: builder.mutation({
       transformResponse: (response) => response,
@@ -331,7 +315,6 @@ export const jsonServerAPI = createApi({
         method: "PATCH",
         body: payload,
       }),
-      invalidatesTags: ["Location"],
     }),
 
     //AP
@@ -351,7 +334,6 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["AP"],
     }),
     importAP: builder.mutation({
       transformResponse: (response) => response,
@@ -360,7 +342,6 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["AP"],
     }),
     updateAP: builder.mutation({
       transformResponse: (response) => response,
@@ -369,7 +350,6 @@ export const jsonServerAPI = createApi({
         method: "PUT",
         body: payload,
       }),
-      invalidatesTags: ["AP"],
     }),
     archiveAP: builder.mutation({
       transformResponse: (response) => response,
@@ -378,7 +358,6 @@ export const jsonServerAPI = createApi({
         method: "PATCH",
         body: payload,
       }),
-      invalidatesTags: ["AP"],
     }),
 
     //VAT
@@ -398,7 +377,6 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["VAT"],
     }),
     importVAT: builder.mutation({
       transformResponse: (response) => response,
@@ -407,7 +385,6 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["VAT"],
     }),
     updateVAT: builder.mutation({
       transformResponse: (response) => response,
@@ -416,7 +393,6 @@ export const jsonServerAPI = createApi({
         method: "PUT",
         body: payload,
       }),
-      invalidatesTags: ["VAT"],
     }),
     archiveVAT: builder.mutation({
       transformResponse: (response) => response,
@@ -425,7 +401,6 @@ export const jsonServerAPI = createApi({
         method: "PATCH",
         body: payload,
       }),
-      invalidatesTags: ["VAT"],
     }),
 
     //ATC
@@ -445,7 +420,6 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["ATC"],
     }),
     importATC: builder.mutation({
       transformResponse: (response) => response,
@@ -454,7 +428,6 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["ATC"],
     }),
     updateATC: builder.mutation({
       transformResponse: (response) => response,
@@ -463,7 +436,6 @@ export const jsonServerAPI = createApi({
         method: "PUT",
         body: payload,
       }),
-      invalidatesTags: ["ATC"],
     }),
     archiveATC: builder.mutation({
       transformResponse: (response) => response,
@@ -472,7 +444,6 @@ export const jsonServerAPI = createApi({
         method: "PATCH",
         body: payload,
       }),
-      invalidatesTags: ["ATC"],
     }),
 
     //SupplierType
@@ -492,7 +463,6 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["SupplierType"],
     }),
     importSupplierType: builder.mutation({
       transformResponse: (response) => response,
@@ -501,7 +471,6 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["SupplierType"],
     }),
     updateSupplierType: builder.mutation({
       transformResponse: (response) => response,
@@ -510,7 +479,6 @@ export const jsonServerAPI = createApi({
         method: "PUT",
         body: payload,
       }),
-      invalidatesTags: ["SupplierType"],
     }),
     archiveSupplierType: builder.mutation({
       transformResponse: (response) => response,
@@ -519,7 +487,6 @@ export const jsonServerAPI = createApi({
         method: "PATCH",
         body: payload,
       }),
-      invalidatesTags: ["SupplierType"],
     }),
 
     //Supplier
@@ -539,7 +506,6 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["Supplier"],
     }),
     importSupplier: builder.mutation({
       transformResponse: (response) => response,
@@ -548,7 +514,6 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["Supplier"],
     }),
     updateSupplier: builder.mutation({
       transformResponse: (response) => response,
@@ -557,7 +522,6 @@ export const jsonServerAPI = createApi({
         method: "PUT",
         body: payload,
       }),
-      invalidatesTags: ["Supplier"],
     }),
     archiveSupplier: builder.mutation({
       transformResponse: (response) => response,
@@ -566,7 +530,6 @@ export const jsonServerAPI = createApi({
         method: "PATCH",
         body: payload,
       }),
-      invalidatesTags: ["Supplier"],
     }),
 
     //DocumentType
@@ -586,7 +549,6 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["DocumentType"],
     }),
     importDocumentType: builder.mutation({
       transformResponse: (response) => response,
@@ -595,7 +557,6 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["DocumentType"],
     }),
     updateDocumentType: builder.mutation({
       transformResponse: (response) => response,
@@ -604,7 +565,6 @@ export const jsonServerAPI = createApi({
         method: "PUT",
         body: payload,
       }),
-      invalidatesTags: ["DocumentType"],
     }),
     archiveDocumentType: builder.mutation({
       transformResponse: (response) => response,
@@ -613,7 +573,6 @@ export const jsonServerAPI = createApi({
         method: "PATCH",
         body: payload,
       }),
-      invalidatesTags: ["DocumentType"],
     }),
 
     //Account Number
@@ -633,7 +592,6 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["AccountNumber"],
     }),
     importAccountNumber: builder.mutation({
       transformResponse: (response) => response,
@@ -642,7 +600,6 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["AccountNumber"],
     }),
     updateAccountNumber: builder.mutation({
       transformResponse: (response) => response,
@@ -651,7 +608,6 @@ export const jsonServerAPI = createApi({
         method: "PUT",
         body: payload,
       }),
-      invalidatesTags: ["AccountNumber"],
     }),
     archiveAccountNumber: builder.mutation({
       transformResponse: (response) => response,
@@ -660,7 +616,6 @@ export const jsonServerAPI = createApi({
         method: "PATCH",
         body: payload,
       }),
-      invalidatesTags: ["AccountNumber"],
     }),
 
     //Account Title
@@ -680,7 +635,6 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["AccountTitles"],
     }),
     importAccountTitles: builder.mutation({
       transformResponse: (response) => response,
@@ -689,7 +643,6 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["AccountTitles"],
     }),
     updateAccountTitles: builder.mutation({
       transformResponse: (response) => response,
@@ -698,7 +651,6 @@ export const jsonServerAPI = createApi({
         method: "PUT",
         body: payload,
       }),
-      invalidatesTags: ["AccountTitles"],
     }),
     archiveAccountTitles: builder.mutation({
       transformResponse: (response) => response,
@@ -707,7 +659,6 @@ export const jsonServerAPI = createApi({
         method: "PATCH",
         body: payload,
       }),
-      invalidatesTags: ["AccountTitles"],
     }),
 
     //Great GrandParent
@@ -727,7 +678,6 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["GGPAccountTitles"],
     }),
     importggpTitles: builder.mutation({
       transformResponse: (response) => response,
@@ -736,7 +686,6 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["GGPAccountTitles"],
     }),
     updateggpTitles: builder.mutation({
       transformResponse: (response) => response,
@@ -745,7 +694,6 @@ export const jsonServerAPI = createApi({
         method: "PUT",
         body: payload,
       }),
-      invalidatesTags: ["GGPAccountTitles"],
     }),
     archiveggpTitles: builder.mutation({
       transformResponse: (response) => response,
@@ -754,7 +702,6 @@ export const jsonServerAPI = createApi({
         method: "PATCH",
         body: payload,
       }),
-      invalidatesTags: ["GGPAccountTitles"],
     }),
 
     //Grand Parent
@@ -765,7 +712,6 @@ export const jsonServerAPI = createApi({
         method: "GET",
         params: payload,
       }),
-      providesTags: ["GPAccountTitles"],
     }),
     creategpTitles: builder.mutation({
       transformResponse: (response) => response,
@@ -774,7 +720,6 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["GPAccountTitles"],
     }),
     importgpTitles: builder.mutation({
       transformResponse: (response) => response,
@@ -783,7 +728,6 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["GPAccountTitles"],
     }),
     updategpTitles: builder.mutation({
       transformResponse: (response) => response,
@@ -792,7 +736,6 @@ export const jsonServerAPI = createApi({
         method: "PUT",
         body: payload,
       }),
-      invalidatesTags: ["GPAccountTitles"],
     }),
     archivegpTitles: builder.mutation({
       transformResponse: (response) => response,
@@ -801,7 +744,6 @@ export const jsonServerAPI = createApi({
         method: "PATCH",
         body: payload,
       }),
-      invalidatesTags: ["GPAccountTitles"],
     }),
 
     //Parent
@@ -812,7 +754,6 @@ export const jsonServerAPI = createApi({
         method: "GET",
         params: payload,
       }),
-      providesTags: ["PAccountTitles"],
     }),
     createpTitles: builder.mutation({
       transformResponse: (response) => response,
@@ -821,7 +762,6 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["PAccountTitles"],
     }),
     importpTitles: builder.mutation({
       transformResponse: (response) => response,
@@ -830,7 +770,6 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["PAccountTitles"],
     }),
     updatepTitles: builder.mutation({
       transformResponse: (response) => response,
@@ -839,7 +778,6 @@ export const jsonServerAPI = createApi({
         method: "PUT",
         body: payload,
       }),
-      invalidatesTags: ["PAccountTitles"],
     }),
     archivepTitles: builder.mutation({
       transformResponse: (response) => response,
@@ -848,7 +786,6 @@ export const jsonServerAPI = createApi({
         method: "PATCH",
         body: payload,
       }),
-      invalidatesTags: ["PAccountTitles"],
     }),
 
     //Child
@@ -860,7 +797,6 @@ export const jsonServerAPI = createApi({
         method: "GET",
         params: payload,
       }),
-      providesTags: ["CAccountTitles"],
     }),
     createcTitles: builder.mutation({
       transformResponse: (response) => response,
@@ -869,7 +805,6 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["CAccountTitles"],
     }),
     importcTitles: builder.mutation({
       transformResponse: (response) => response,
@@ -878,7 +813,6 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["CAccountTitles"],
     }),
     updatecTitles: builder.mutation({
       transformResponse: (response) => response,
@@ -887,7 +821,6 @@ export const jsonServerAPI = createApi({
         method: "PUT",
         body: payload,
       }),
-      invalidatesTags: ["CAccountTitles"],
     }),
     archivecTitles: builder.mutation({
       transformResponse: (response) => response,
@@ -896,7 +829,6 @@ export const jsonServerAPI = createApi({
         method: "PATCH",
         body: payload,
       }),
-      invalidatesTags: ["CAccountTitles"],
     }),
 
     //GrandChild
@@ -916,7 +848,6 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["GCAccountTitles"],
     }),
     importgcTitles: builder.mutation({
       transformResponse: (response) => response,
@@ -925,7 +856,6 @@ export const jsonServerAPI = createApi({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["GCAccountTitles"],
     }),
     updategcTitles: builder.mutation({
       transformResponse: (response) => response,
@@ -934,7 +864,6 @@ export const jsonServerAPI = createApi({
         method: "PUT",
         body: payload,
       }),
-      invalidatesTags: ["GCAccountTitles"],
     }),
     archivegcTitles: builder.mutation({
       transformResponse: (response) => response,
@@ -943,7 +872,6 @@ export const jsonServerAPI = createApi({
         method: "PATCH",
         body: payload,
       }),
-      invalidatesTags: ["GCAccountTitles"],
     }),
 
     //GTAG
@@ -1360,6 +1288,16 @@ export const jsonServerAPI = createApi({
       query: (payload) => ({
         url: `/is-read/transaction-check/${payload.id}`,
         method: "PATCH",
+        body: payload,
+      }),
+      invalidatesTags: ["CheckEntries", "Logs", "CountCheck", "CountTreasury"],
+    }),
+
+    updateCheckDate: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/update-releasing/transaction-check/${payload.id}`,
+        method: "POST",
         body: payload,
       }),
       invalidatesTags: ["CheckEntries", "Logs", "CountCheck", "CountTreasury"],
@@ -1932,6 +1870,7 @@ export const {
   useClearCVoucherMutation,
   useFileCVoucherMutation,
   useReadTransactionCheckMutation,
+  useUpdateCheckDateMutation,
 
   useJournalEntriesQuery,
   useCreateJournalEntriesMutation,

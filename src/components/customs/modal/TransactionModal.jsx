@@ -24,10 +24,10 @@ import {
   useApQuery,
   useArchiveTransactionMutation,
   useCheckTransactionQuery,
+  useCreateCheckEntriesMutation,
   useCreateTransactionMutation,
   useCutOffQuery,
   useDocumentTypeQuery,
-  useJournalTransactionQuery,
   useLocationQuery,
   useReceiveTransactionMutation,
   useSupplierQuery,
@@ -39,7 +39,6 @@ import { DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import {
   resetPrompt,
-  setEntryReceive,
   setIsContinue,
   setOpenReason,
   setReceive,
@@ -60,7 +59,6 @@ import transaction from "../../../assets/svg/transaction.svg";
 import AppTextBox from "../AppTextBox";
 import loading from "../../../assets/lottie/Loading-2.json";
 import Autocomplete from "../AutoComplete";
-import useTaggingHook from "../../../services/hooks/useTaggingHook";
 import transactionSchema from "../../../schemas/transactionSchema";
 import AppPrompt from "../AppPrompt";
 import warningImg from "../../../assets/svg/warning.svg";
@@ -80,10 +78,9 @@ import {
   clearValue,
   transactionDefaultValue,
 } from "../../../services/constants/defaultValues";
-import ReceiveEntry from "../ReceiveEntry";
 import { useNavigate } from "react-router-dom";
 import ShortcutHandler from "../../../services/functions/ShortcutHandler";
-import socket from "../../../services/functions/serverSocket";
+
 import {
   resetTransaction,
   setAddDocuments,
@@ -104,9 +101,7 @@ const TransactionModal = () => {
   const warning = useSelector((state) => state.prompt.warning);
   const openReason = useSelector((state) => state.prompt.openReason);
   const isReceive = useSelector((state) => state.prompt.receive);
-  const entryReceive = useSelector((state) => state.prompt.entryReceive);
   const isContinue = useSelector((state) => state.prompt.isContinue);
-  const navigateTo = useSelector((state) => state.prompt.navigate);
   const updateCount = useSelector((state) => state.menu.updateCount);
   const transactionData = useSelector((state) => state.menu.menuData);
   const documents = useSelector((state) => state.transaction.documents);
@@ -121,7 +116,7 @@ const TransactionModal = () => {
   const defaultValue = transactionDefaultValue();
   const { enqueueSnackbar } = useSnackbar();
   const { insertDocument, deepEqual } = AdditionalFunction();
-  const { shouldDisableYear, minDate, isDateNotCutOff } = DateChecker();
+  const { minDate, isDateNotCutOff } = DateChecker();
 
   const [createTransaction, { isLoading }] = useCreateTransactionMutation();
   const [updateTransaction, { isLoading: updateLoading }] =
@@ -195,23 +190,11 @@ const TransactionModal = () => {
     }
   );
 
-  const {
-    data: journalTransaction,
-    isLoading: loadingJournal,
-    isSuccess: journalSuccess,
-  } = useJournalTransactionQuery(
-    {
-      status: "active",
-      pagination: "none",
-      transaction_id: transactionData?.id,
-    },
-    {
-      skip: transactionData === null,
-    }
-  );
-
   const [receiveTransaction, { isLoading: receiveLoading }] =
     useReceiveTransactionMutation();
+
+  const [createCheckEntry, { isLoading: loadingCheck }] =
+    useCreateCheckEntriesMutation();
 
   const {
     control,
@@ -241,17 +224,6 @@ const TransactionModal = () => {
     }
   };
 
-  const disabledMonths =
-    cutOff?.result
-      ?.filter((item) => item?.state === "closed")
-      ?.map((item) => {
-        const date = dayjs(item?.date, "YYYY-MM-DD").toDate();
-        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
-          2,
-          "0"
-        )}`;
-      }) ?? [];
-
   const isLastMonthClosed = () => {
     const lastMonthDate = dayjs().subtract(1, "month");
     const lastMonthFormatted = lastMonthDate.format("YYYY-MM");
@@ -261,11 +233,6 @@ const TransactionModal = () => {
         item?.state === "closed" &&
         dayjs(item?.date, "YYYY-MM-DD").format("YYYY-MM") === lastMonthFormatted
     );
-  };
-
-  const shouldDisableMonth = (date) => {
-    const month = dayjs(date, "YYYY-MM-DD").format("YYYY-MM");
-    return disabledMonths.includes(month);
   };
 
   const handleAutoFill = () => {
@@ -407,19 +374,6 @@ const TransactionModal = () => {
           ? await updateTransaction(obj).unwrap()
           : await createTransaction(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      socket.emit(
-        transactionData !== null
-          ? "transaction_updated"
-          : "transaction_created",
-        {
-          ...obj,
-          message:
-            transactionData !== null
-              ? `The transaction ${obj?.tag_no} has been updated`
-              : `A new transaction has been created.`,
-        }
-      );
-
       const docs = insertDocument(res?.result);
       const resData = await mapResponse(
         res?.result,
@@ -471,10 +425,6 @@ const TransactionModal = () => {
     try {
       const res = await archiveTransaction(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      socket.emit("transaction_received", {
-        ...obj,
-        message: `The transaction ${obj?.tag_no} has been archived`,
-      });
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
@@ -491,8 +441,7 @@ const TransactionModal = () => {
     try {
       const res = await receiveTransaction(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      dispatch(resetMenu());
-      dispatch(resetPrompt());
+      dispatch(setIsContinue(true));
     } catch (error) {
       singleError(error, enqueueSnackbar);
     }
@@ -501,9 +450,8 @@ const TransactionModal = () => {
   const validateRoute = () => {
     const isZero =
       parseFloat(transactionData?.purchase_amount) ===
-      parseFloat(journalTransaction?.result?.amount || 0) +
-        parseFloat(checkTransaction?.result?.amount || 0);
-    isZero ? handleReceive() : dispatch(setEntryReceive(true));
+      parseFloat(checkTransaction?.result?.amount || 0);
+    isZero ? handleReceive() : handleCreateCheck();
   };
 
   const handleShortCut = () => {
@@ -535,6 +483,23 @@ const TransactionModal = () => {
     return hasChanges;
   };
 
+  const handleCreateCheck = async () => {
+    const obj = {
+      tag_year: transactionData?.tag_year,
+      transaction_id: transactionData?.id,
+      ap_tagging_id: transactionData?.apTagging?.id || null,
+      amount: transactionData?.purchase_amount,
+      id: !singleSuccess ? null : checkTransaction?.result?.id,
+    };
+
+    try {
+      const res = await createCheckEntry(obj).unwrap();
+      handleReceive();
+    } catch (error) {
+      singleError(error, enqueueSnackbar);
+    }
+  };
+
   return (
     <Paper className="transaction-modal-container">
       <ShortcutHandler
@@ -543,7 +508,6 @@ const TransactionModal = () => {
         }
         onEsc={() => dispatch(resetMenu())}
         onReceive={() => dispatch(setReceive(!checkChanges()))}
-        onConfirm={() => dispatch(setEntryReceive(true))}
       />
       <img
         src={transaction}
@@ -755,7 +719,7 @@ const TransactionModal = () => {
         )}
         <AppTextBox
           money
-          disabled={singleSuccess || forViewing || journalSuccess}
+          disabled={singleSuccess || forViewing}
           control={control}
           name={"amount"}
           label={"Amount *"}
@@ -939,7 +903,7 @@ const TransactionModal = () => {
           </Typography>
         </Box>
         <Autocomplete
-          disabled={forViewing || singleSuccess || journalSuccess}
+          disabled={forViewing || singleSuccess}
           control={control}
           name={"ap"}
           options={ap?.result || []}
@@ -969,15 +933,13 @@ const TransactionModal = () => {
                 disabled={forViewing}
                 className="transaction-form-date"
                 label="Tag year month *"
-                format="YY MM"
+                format="MMMM YYYY"
                 value={value}
                 views={["month", "year"]}
                 minDate={minDate}
                 onChange={(e) => {
                   onChange(e);
                 }}
-                shouldDisableMonth={shouldDisableMonth}
-                shouldDisableYear={shouldDisableYear}
                 slotProps={{
                   textField: {
                     error: Boolean(errors?.check_date),
@@ -995,7 +957,7 @@ const TransactionModal = () => {
             <Box className="add-transaction-button-receive">
               {hasAccess(["ap_tag"]) && (
                 <LoadingButton
-                  disabled={singleSuccess || journalSuccess}
+                  disabled={singleSuccess}
                   variant="contained"
                   color="error"
                   className="add-transaction-button"
@@ -1037,11 +999,7 @@ const TransactionModal = () => {
                 color="warning"
                 type="submit"
                 className="add-transaction-button"
-                disabled={
-                  !watch("tin") ||
-                  shouldDisableYear(watch("tag_month_year")) ||
-                  shouldDisableMonth(watch("tag_month_year"))
-                }
+                disabled={!watch("tin")}
               >
                 {transactionData === null ? "Add" : "Update"}
               </LoadingButton>
@@ -1072,8 +1030,8 @@ const TransactionModal = () => {
           loadingAp ||
           loadingLocation ||
           loadingSingle ||
-          loadingJournal ||
-          receiveLoading
+          receiveLoading ||
+          loadingCheck
         }
         className="loading-transaction-create"
       >
@@ -1093,13 +1051,6 @@ const TransactionModal = () => {
           }}
           confirmOnClick={() => validateRoute()}
         />
-      </Dialog>
-
-      <Dialog
-        open={entryReceive}
-        onClose={() => dispatch(setEntryReceive(false))}
-      >
-        <ReceiveEntry check />
       </Dialog>
 
       <Dialog open={warning} onClose={() => dispatch(setWarning(false))}>
@@ -1208,7 +1159,7 @@ const TransactionModal = () => {
             dispatch(resetMenu());
           }}
           confirmOnClick={() => {
-            navigate(navigateTo);
+            navigate("/ap/check");
             dispatch(resetPrompt());
             dispatch(resetMenu());
             dispatch(resetHeader());

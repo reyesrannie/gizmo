@@ -35,6 +35,11 @@ import {
   useVpCheckNumberQuery,
   useVpJournalNumberQuery,
 } from "../../../services/store/request";
+
+import {
+  useArchiveGJMutation,
+  useForApproveGJMutation,
+} from "../../../services/store/seconAPIRequest";
 import { useSnackbar } from "notistack";
 import { singleError } from "../../../services/functions/errorResponse";
 import { DatePicker } from "@mui/x-date-pickers";
@@ -69,7 +74,7 @@ import { resetOption } from "../../../services/slice/optionsSlice";
 import ComputationMenu from "./ComputationMenu";
 import { totalAccount, totalAmount } from "../../../services/functions/compute";
 import TransactionModalApprover from "./TransactionModalApprover";
-import socket from "../../../services/functions/serverSocket";
+
 import { AdditionalFunction } from "../../../services/functions/AdditionalFunction";
 
 const TransactionModalAp = () => {
@@ -176,13 +181,12 @@ const TransactionModalAp = () => {
 
   const [checkedCV, { isLoading: loadingChecked }] =
     useCheckedCVoucherMutation();
-  const [checkedJV, { isLoading: loadingJournal }] =
-    useCheckedJVoucherMutation();
+  const [forApproveGJ, { isLoading: loadingJournal }] =
+    useForApproveGJMutation();
 
   const [archiveCV, { isLoading: loadingArchiveCV }] =
     useArchiveCheckEntriesMutation();
-  const [archiveJV, { isLoading: loadingArchiveJV }] =
-    useArchiveJournalEntriesMutation();
+  const [archiveGJ, { isLoading: loadingArchiveJV }] = useArchiveGJMutation();
   const {
     control,
     handleSubmit,
@@ -276,16 +280,15 @@ const TransactionModalAp = () => {
       coa_id: submitData?.coa_id?.id,
       tag_no: transactionData?.transactions?.tag_no,
     };
+
     try {
       const res =
         voucher === "check"
           ? await checkedCV(obj).unwrap()
-          : await checkedJV(obj).unwrap();
+          : voucher === "gj"
+          ? await forApproveGJ(obj).unwrap()
+          : await forApproveGJ(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      socket.emit("transaction_approval", {
-        ...obj,
-        message: `The transaction ${obj?.tag_no} is now for approval`,
-      });
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
@@ -303,7 +306,7 @@ const TransactionModalAp = () => {
       const res =
         voucher === "check"
           ? await archiveCV(obj).unwrap()
-          : await archiveJV(obj).unwrap();
+          : await archiveGJ(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
       dispatch(resetMenu());
       dispatch(resetPrompt());
@@ -690,7 +693,7 @@ const TransactionModalAp = () => {
                       <Box className="tax-box-value">
                         {transactionData?.voucher_number === null && (
                           <Typography className="amount-tax">
-                            VP#: {voucher === "check" ? "CV" : "JV"}
+                            VP#: {voucher === "check" ? "CVRL" : "GJRL"}
                             {transactionData?.apTagging?.vp}
                             {formattedDate}-
                             {voucher === "check"
@@ -852,7 +855,9 @@ const TransactionModalAp = () => {
           image={warningImg}
           title={"Archive Entry?"}
           message={"You are about to archive this Entry"}
-          nextLineMessage={"Please confirm to archive it to tagging"}
+          nextLineMessage={
+            voucher === "check" ? "Please confirm to archive it to tagging" : ""
+          }
           confirmButton={"Yes, Archive it!"}
           cancelButton={"Cancel"}
           cancelOnClick={() => {

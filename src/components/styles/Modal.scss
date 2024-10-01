@@ -8,15 +8,15 @@
     gap: 10px;
   }
 }
-.table-container-for-print {
-  @media print {
-    &.MuiTableContainer-root {
-      width: 96%;
-      margin: 2%;
-      overflow: hidden;
-    }
-  }
-}
+// .table-container-for-print {
+//   @media print {
+//     &.MuiTableContainer-root {
+//       width: 90%;
+//       margin: 4%;
+//       overflow: hidden;
+//     }
+//   }
+// }
 
 .transaction-form-textBox {
   &.MuiFormControl-root {
@@ -112,6 +112,23 @@
   }
 }
 
+.transaction-form-check-date {
+  &.MuiFormControl-root {
+    .MuiInputBase-root {
+      font-family: Roboto-Medium;
+      letter-spacing: 1px;
+    }
+    .MuiFormLabel-root {
+      font-family: Roboto-Medium;
+      letter-spacing: 1px;
+    }
+    .MuiFormHelperText-root {
+      font-family: Roboto-Light;
+      letter-spacing: 1px;
+    }
+  }
+}
+
 .transaction-form-textBox.treasury {
   &.MuiFormControl-root {
     min-height: unset;
@@ -192,6 +209,17 @@
   &.MuiBox-root {
     .MuiTypography-root {
       font-size: 10px;
+    }
+  }
+}
+
+.check-date-edit.treasury {
+  .MuiSvgIcon-root {
+    font-size: 16px;
+  }
+  @media print {
+    .MuiSvgIcon-root {
+      display: none;
     }
   }
 }
@@ -408,4 +436,79 @@
       flex-direction: row;
     }
   }
+}
+
+.form-control-radio.general {
+  &.MuiFormControl-root {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    align-items: center;
+    justify-self: flex-start;
+
+    .MuiFormGroup-root {
+      display: flex;
+      flex-direction: row;
+      gap: 10px;
+      align-items: center;
+
+      .MuiTypography-root {
+        font-family: Roboto-Light;
+        font-size: 12px;
+      }
+    }
+  }
+}
+
+.tag-number-search {
+  &.MuiBox-root {
+    overflow: hidden;
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: row;
+
+    align-items: center;
+    justify-content: center;
+    justify-self: flex-start;
+    align-self: flex-start;
+    border: 1px solid #bbbbbb;
+    border-radius: 10px;
+    max-width: 180px;
+  }
+}
+
+.tag-number-search-text {
+  &.MuiFormControl-root {
+    .MuiInputBase-root {
+      font-family: Roboto-Medium;
+      letter-spacing: 1px;
+      max-width: 100px;
+    }
+    .MuiFormLabel-root {
+      font-family: Roboto-Medium;
+      letter-spacing: 1px;
+    }
+    .MuiFormHelperText-root {
+      font-family: Roboto-Light;
+      letter-spacing: 1px;
+    }
+  }
+}
+
+.tag-search {
+  &.MuiFormControl-root {
+    .MuiInputBase-root {
+      border-radius: 0%;
+      font-family: Roboto-Medium;
+      letter-spacing: 1px;
+      font-size: 14px;
+      max-height: 40px;
+    }
+  }
+}
+
+.no-data-found {
+  height: 500px;
+  opacity: 0.7;
+  filter: grayscale(0.3);
 }

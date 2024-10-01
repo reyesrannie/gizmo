@@ -66,7 +66,6 @@ import LocationModal from "../../../components/customs/modal/LocationModal";
 import { singleError } from "../../../services/functions/errorResponse";
 import { generateExcel } from "../../../services/functions/exportFile";
 import ImportModal from "../../../components/customs/modal/ImportModal";
-import socket from "../../../services/functions/serverSocket";
 
 const Location = () => {
   const excelItems = ["ID", "CODE", "NAME", "CREATED AT", "DATE MODIFIED"];
@@ -106,7 +105,6 @@ const Location = () => {
     try {
       const res = await archiveLocation(menuData).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      socket.emit("location_updated");
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
@@ -118,7 +116,6 @@ const Location = () => {
     try {
       const res = await importLocation(submitData).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      socket.emit("location_updated");
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {

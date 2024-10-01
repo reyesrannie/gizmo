@@ -11,6 +11,8 @@ const initialState = {
   checkMenu: false,
   computationMenu: false,
   updateMenu: false,
+  updateData: false,
+  checkID: "",
   receiveMenu: false,
   importMenu: false,
   importHasData: false,
@@ -30,6 +32,7 @@ const initialState = {
   schedComputation: false,
   approveMenu: false,
   preparation: false,
+  hasError: false,
 };
 
 const initialStateWithoutDrawer = {
@@ -91,6 +94,12 @@ const menutSlice = createSlice({
     },
     setUpdateMenu: (state, action) => {
       state.updateMenu = action.payload;
+    },
+    setUpdateData: (state, action) => {
+      state.updateData = action.payload;
+    },
+    setCheckID: (state, action) => {
+      state.checkID = action.payload;
     },
     setViewMenu: (state, action) => {
       state.viewMenu = action.payload;
@@ -156,6 +165,9 @@ const menutSlice = createSlice({
     setPreparation: (state, action) => {
       state.preparation = action.payload;
     },
+    setHasError: (state, action) => {
+      state.hasError = action.payload;
+    },
 
     resetMenu: () => {
       return initialState;
@@ -175,6 +187,8 @@ export const {
   setRolesData,
   setCreateMenu,
   setUpdateMenu,
+  setUpdateData,
+  setCheckID,
   setViewMenu,
   setImportMenu,
   setImportHasData,
@@ -198,6 +212,7 @@ export const {
   resetMenuWithoutDrawer,
   setApproveMenu,
   setMenuDataMultiple,
+  setHasError,
 } = menutSlice.actions;
 
 export default menutSlice.reducer;

@@ -17,11 +17,11 @@ const Tagging = lazy(() => import("../../screen/tagging/Tagging"));
 const AccountPayable = lazy(() => import("../../screen/ap/AccountPayable"));
 const Transaction = lazy(() => import("../../screen/ap/Transaction"));
 const CheckVoucher = lazy(() => import("../../screen/ap/CheckVoucher"));
-const JournalVoucher = lazy(() => import("../../screen/ap/JournalVoucher"));
+const History = lazy(() => import("../../screen/history/History"));
+const GeneralJournal = lazy(() => import("../../screen/ap/GeneralJournal"));
 const Approver = lazy(() => import("../../screen/approver/Approver"));
-const ApprovingJournal = lazy(() =>
-  import("../../screen/approver/ApprovingJournal")
-);
+const ApproverGJ = lazy(() => import("../../screen/approver/ApproverGJ"));
+
 const ApprovingCheck = lazy(() =>
   import("../../screen/approver/ApprovingCheck")
 );
@@ -73,6 +73,8 @@ const TransactionReport = lazy(() =>
 const Treasury = lazy(() => import("../../screen/treasury/Treasury"));
 const Check = lazy(() => import("../../screen/treasury/Check"));
 const CheckNumber = lazy(() => import("../../screen/treasury/CheckNumber"));
+const DebitMemo = lazy(() => import("../../screen/treasury/DebitMemo"));
+const Offset = lazy(() => import("../../screen/treasury/Offset"));
 
 const Routing = () => {
   const user = decodeUser();
@@ -289,12 +291,16 @@ const Routing = () => {
           ),
         },
         {
-          path: "journal",
+          path: "general-journal",
           element: hasAccess(["ap_tag"]) ? (
-            <JournalVoucher />
+            <GeneralJournal />
           ) : (
             <Navigate to={"/"} />
           ),
+        },
+        {
+          path: "history",
+          element: hasAccess(["ap_tag"]) ? <History /> : <Navigate to={"/"} />,
         },
       ],
     },
@@ -319,9 +325,9 @@ const Routing = () => {
           ),
         },
         {
-          path: "approvejournal",
+          path: "general-journal",
           element: hasAccess(["approver"]) ? (
-            <ApprovingJournal />
+            <ApproverGJ />
           ) : (
             <Navigate to={"/"} />
           ),
@@ -359,9 +365,9 @@ const Routing = () => {
           ),
         },
         {
-          path: "journal",
+          path: "debit-memo",
           element: hasAccess(["preparation", "releasing", "clearing"]) ? (
-            <ApprovingJournal />
+            <DebitMemo />
           ) : (
             <Navigate to={"/"} />
           ),
@@ -370,6 +376,14 @@ const Routing = () => {
           path: "checknumber",
           element: hasAccess(["preparation", "releasing", "clearing"]) ? (
             <CheckNumber />
+          ) : (
+            <Navigate to={"/"} />
+          ),
+        },
+        {
+          path: "offset",
+          element: hasAccess(["preparation", "releasing", "clearing"]) ? (
+            <Offset />
           ) : (
             <Navigate to={"/"} />
           ),

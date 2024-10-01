@@ -22,6 +22,7 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
+  IconButton,
 } from "@mui/material";
 
 import "../../styles/Modal.scss";
@@ -35,6 +36,7 @@ import {
   useReleaseCVoucherMutation,
   useReleasedCVoucherMutation,
   useTaxComputationQuery,
+  useUpdateCheckDateMutation,
 } from "../../../services/store/request";
 import Lottie from "lottie-react";
 import loading from "../../../assets/lottie/Loading-2.json";
@@ -51,15 +53,18 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import treasurySchema from "../../../schemas/treasurySchema";
 import moment from "moment";
 import AppTextBox from "../AppTextBox";
-import { DatePicker } from "@mui/x-date-pickers";
+import { DatePicker, MobileDatePicker } from "@mui/x-date-pickers";
 import ReactToPrint from "react-to-print";
 import {
   resetMenu,
+  setCheckID,
+  setMenuData,
   setReceiveMenu,
+  setUpdateData,
   setViewAccountingEntries,
 } from "../../../services/slice/menuSlice";
 import { resetOption } from "../../../services/slice/optionsSlice";
-import socket from "../../../services/functions/serverSocket";
+
 import { enqueueSnackbar } from "notistack";
 import { resetPrompt } from "../../../services/slice/promptSlice";
 import { singleError } from "../../../services/functions/errorResponse";
@@ -68,6 +73,7 @@ import dayjs from "dayjs";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { hasAccess } from "../../../services/functions/access";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import EditIcon from "@mui/icons-material/Edit";
 
 const TreasuryMultiple = () => {
   const componentRef = useRef();
@@ -76,6 +82,8 @@ const TreasuryMultiple = () => {
   const menuDataMultiple = useSelector((state) => state.menu.menuDataMultiple);
   const voucherData = useSelector((state) => state.transaction.voucherData);
   const receiveMenu = useSelector((state) => state.menu.receiveMenu);
+  const updateData = useSelector((state) => state.menu.updateData);
+  const checkID = useSelector((state) => state.menu.checkID);
   const taxData = useSelector((state) => state.menu.taxData);
 
   const { convertToPeso } = AdditionalFunction();
@@ -134,6 +142,9 @@ const TreasuryMultiple = () => {
 
   const [clearVoucher, { isLoading: clearLoading }] =
     useClearCVoucherMutation();
+
+  const [updateCheckDate, { isLoading: checkDateLoading }] =
+    useUpdateCheckDateMutation();
 
   useEffect(() => {
     if (taxSuccess || successTitles) {
@@ -201,9 +212,6 @@ const TreasuryMultiple = () => {
         const res = await clearVoucher(forClearing).unwrap();
         enqueueSnackbar(res?.message, { variant: "success" });
       }
-      socket.emit("transaction_preparation", {
-        ...obj,
-      });
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
@@ -218,9 +226,6 @@ const TreasuryMultiple = () => {
     try {
       const res = await releasedVoucher(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      socket.emit("transaction_preparation", {
-        ...obj,
-      });
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
@@ -235,9 +240,6 @@ const TreasuryMultiple = () => {
     try {
       const res = await releaseVoucher(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      socket.emit("transaction_preparation", {
-        ...obj,
-      });
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
@@ -245,6 +247,33 @@ const TreasuryMultiple = () => {
     }
   };
 
+  const handleUpdateCheckDate = async () => {
+    const obj = {
+      id: checkID,
+      check_date: moment(new Date(watch("check_date"))).format("YYYY-MM-DD"),
+    };
+    const updatedDate = {
+      ...menuData,
+      treasuryChecks: menuData?.treasuryChecks?.map((check) => {
+        if (checkID === check?.id) {
+          return {
+            ...check,
+            check_date: obj?.check_date,
+          };
+        } else return check;
+      }),
+    };
+
+    try {
+      const res = await updateCheckDate(obj).unwrap();
+      enqueueSnackbar(res?.message, { variant: "success" });
+      dispatch(setMenuData(updatedDate));
+      dispatch(setCheckID(""));
+      dispatch(setUpdateData(false));
+    } catch (error) {
+      singleError(error, enqueueSnackbar);
+    }
+  };
   return (
     <Paper className="transaction-modal-container">
       <form onSubmit={handleSubmit(submitHandler)}>
@@ -651,13 +680,28 @@ const TreasuryMultiple = () => {
                         className="voucher-treasury content"
                       >
                         {items?.state !== "For Preparation" ? (
-                          <Typography>{`Check Date.: ${
-                            menuData?.treasuryChecks[0]?.check_date
-                              ? moment(
-                                  menuData?.treasuryChecks[0]?.check_date
-                                ).format("MM/DD/YYYY")
-                              : ""
-                          }`}</Typography>
+                          <Typography>
+                            {`Check Date : ${
+                              menuData?.treasuryChecks[0]?.check_date
+                                ? moment(
+                                    menuData?.treasuryChecks[0]?.check_date
+                                  ).format("MM/DD/YYYY")
+                                : ""
+                            }`}
+                            {items?.state === "For Releasing" && (
+                              <IconButton
+                                className="check-date-edit treasury"
+                                onClick={() => {
+                                  dispatch(
+                                    setCheckID(menuData?.treasuryChecks[0]?.id)
+                                  );
+                                  dispatch(setUpdateData(true));
+                                }}
+                              >
+                                <EditIcon />
+                              </IconButton>
+                            )}
+                          </Typography>
                         ) : (
                           <Controller
                             name="check_date"
@@ -852,8 +896,18 @@ const TreasuryMultiple = () => {
                         <TableCell align="center">
                           <Typography className="check-item-typography">
                             {item?.check_date
-                              ? moment(item?.check_date).format("MM-DD-YYYY")
+                              ? moment(item?.check_date).format("MM/DD/YYYY")
                               : "-"}
+
+                            <IconButton
+                              className="check-date-edit treasury"
+                              onClick={() => {
+                                dispatch(setCheckID(item?.id));
+                                dispatch(setUpdateData(true));
+                              }}
+                            >
+                              <EditIcon />
+                            </IconButton>
                           </Typography>
                         </TableCell>
                       </TableRow>
@@ -869,7 +923,7 @@ const TreasuryMultiple = () => {
             <ReactToPrint
               trigger={() => (
                 <div>
-                  {menuData?.state === "Check Approval" &&
+                  {menuData?.state === "For Releasing" &&
                     !hasAccess("check_approval") && (
                       <Button
                         variant="contained"
@@ -907,7 +961,7 @@ const TreasuryMultiple = () => {
               </Button>
             )}
 
-            {menuData?.state === "Released" && (
+            {menuData?.state === "For Filling" && (
               <Button
                 variant="contained"
                 color="success"
@@ -956,7 +1010,8 @@ const TreasuryMultiple = () => {
           releaseLoading ||
           clearLoading ||
           releasedLoading ||
-          forApprovalLoading
+          forApprovalLoading ||
+          checkDateLoading
         }
         className="loading-transaction-create"
       >
@@ -968,6 +1023,25 @@ const TreasuryMultiple = () => {
         onClose={() => dispatch(setReceiveMenu(false))}
       >
         <ClearCheck />
+      </Dialog>
+
+      <Dialog open={updateData} onClose={() => dispatch(setUpdateData(false))}>
+        <MobileDatePicker
+          className="transaction-form-check-date"
+          label="Check Date *"
+          format="MM/DD/YYYY"
+          onChange={(e) => {
+            setValue("check_date", e);
+          }}
+          onAccept={() => handleUpdateCheckDate()}
+          slotProps={{
+            textField: {
+              variant: "filled",
+              error: Boolean(errors?.check_date),
+              helperText: errors?.check_date?.message,
+            },
+          }}
+        />
       </Dialog>
     </Paper>
   );

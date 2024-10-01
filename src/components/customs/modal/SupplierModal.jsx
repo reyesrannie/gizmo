@@ -35,7 +35,6 @@ import { useEffect } from "react";
 import { objectError } from "../../../services/functions/errorResponse";
 import { enqueueSnackbar } from "notistack";
 import supplierSchema from "../../../schemas/supplierSchema";
-import socket from "../../../services/functions/serverSocket";
 
 const SupplierModal = ({ supplierData, view, update }) => {
   const dispatch = useDispatch();
@@ -221,7 +220,6 @@ const SupplierModal = ({ supplierData, view, update }) => {
       try {
         const res = await updateSupplier(obj).unwrap();
         enqueueSnackbar(res.message, { variant: "success" });
-        socket.emit("supplier_updated");
         dispatch(resetMenu());
       } catch (error) {
         objectError(error, setError, enqueueSnackbar);
@@ -230,7 +228,6 @@ const SupplierModal = ({ supplierData, view, update }) => {
       try {
         const res = await createSupplier(obj).unwrap();
         enqueueSnackbar(res.message, { variant: "success" });
-        socket.emit("supplier_updated");
         dispatch(resetMenu());
       } catch (error) {
         objectError(error, setError, enqueueSnackbar);

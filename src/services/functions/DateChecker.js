@@ -1,8 +1,10 @@
 import moment from "moment";
-import { useGenerateTransactionMutation } from "../store/request";
+import {
+  useCutOffQuery,
+  useGenerateTransactionMutation,
+} from "../store/request";
 import { useSnackbar } from "notistack";
 import { useSelector } from "react-redux";
-import socket from "./serverSocket";
 import { hasAccess } from "./access";
 import { singleError } from "./errorResponse";
 import { useMemo } from "react";
@@ -10,6 +12,16 @@ import dayjs from "dayjs";
 
 const DateChecker = () => {
   const { enqueueSnackbar } = useSnackbar();
+
+  const {
+    data: cutOff,
+    isLoading: loadingCutOff,
+    isSuccess: cutOffSuccess,
+  } = useCutOffQuery({
+    status: "active",
+    pagination: "none",
+  });
+
   const [checkScheduleTransaction, { isError }] =
     useGenerateTransactionMutation();
   const userData = useSelector((state) => state.auth.userData);
@@ -61,7 +73,6 @@ const DateChecker = () => {
     ) {
       try {
         const res = await checkScheduleTransaction(payload).unwrap();
-        socket.emit("schedule_generate");
         enqueueSnackbar(res?.message, { variant: "success" });
       } catch (error) {
         singleError(error, enqueueSnackbar);
@@ -69,22 +80,23 @@ const DateChecker = () => {
     }
   };
 
-  const shouldDisableYear = (date) => {
-    const currentYear = moment().year();
-    const currentMonth = moment().month(); // January is 0
-
-    if (currentMonth === 0) {
-      return date.year() < currentYear - 1;
-    }
-    return date.year() < currentYear;
-  };
-
   const today = dayjs();
   const minDate = useMemo(() => {
-    if (today.date() <= 10) {
-      return today.subtract(1, "month").startOf("month");
+    const closedRecords = cutOff?.result?.filter(
+      (record) => record.state === "closed"
+    );
+    const mostRecentClosedDate = closedRecords?.reduce((latest, record) => {
+      return new Date(latest.date) > new Date(record.date) ? latest : record;
+    });
+
+    const recentClosedDate = mostRecentClosedDate
+      ? dayjs(mostRecentClosedDate.date)
+      : null;
+
+    if (today?.get("month") !== recentClosedDate?.get("month")) {
+      return today?.subtract(1, "month").startOf("month");
     } else {
-      return today.startOf("month");
+      return recentClosedDate?.startOf("month");
     }
   }, [today]);
 
@@ -97,7 +109,6 @@ const DateChecker = () => {
   return {
     isCoverageToday,
     isCoverageTodayTable,
-    shouldDisableYear,
     autoGenerateVoucher,
     isDateNotCutOff,
     minDate,

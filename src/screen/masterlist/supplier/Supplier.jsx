@@ -69,7 +69,6 @@ import {
 import { generateExcelwSupplier } from "../../../services/functions/exportFile";
 import SupplierModal from "../../../components/customs/modal/SupplierModal";
 import ImportModal from "../../../components/customs/modal/ImportModal";
-import socket from "../../../services/functions/serverSocket";
 
 const Supplier = () => {
   const excelItems = [
@@ -116,7 +115,6 @@ const Supplier = () => {
     try {
       const res = await archiveSupplier(menuData).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      socket.emit("supplier_updated");
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
@@ -128,7 +126,6 @@ const Supplier = () => {
     try {
       const res = await importSupplier(submitData).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      socket.emit("supplier_updated");
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {

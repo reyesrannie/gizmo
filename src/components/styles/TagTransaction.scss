@@ -96,6 +96,14 @@
   }
 }
 
+.tag-transaction-body-container.history {
+  &.MuiBox-root {
+    padding: 10px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
 .loading-tag-transaction {
   height: 500px;
 }

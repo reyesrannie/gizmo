@@ -12,7 +12,19 @@ const apHeader = [
   { name: "Approved", status: "approved", permission: "ap_tag" },
   { name: "Void", status: "voided", permission: "ap_tag" },
   { name: "Filing", status: "For Filing", permission: "filing" },
-  { name: "History", status: "", permission: "ap_tag" },
+];
+
+const apGJheader = [
+  { name: "Pending", status: "For Computation", permission: "ap_tag" },
+  { name: "For Approval", status: "For Approval", permission: "ap_tag" },
+  { name: "Returned", status: "returned", permission: "ap_tag" },
+  { name: "Approved", status: "approved", permission: "ap_tag" },
+  { name: "Void", status: "voided", permission: "ap_tag" },
+];
+
+const apHistoryHeader = [
+  { name: "Voucher's Payable", status: "For Filing", permission: "filing" },
+  { name: "General Journal", status: "", permission: "ap_tag" },
 ];
 
 const approverHeader = [
@@ -23,15 +35,22 @@ const approverHeader = [
   { name: "History", status: "", permission: "approver" },
 ];
 
+const approverGJHeader = [
+  { name: "Approval", status: "For Approval", permission: "approver" },
+  { name: "Returned", status: "returned", permission: "approver" },
+  { name: "Void", status: "voided", permission: "approver" },
+  { name: "Pending Void", status: "For Voiding", permission: "approver" },
+];
+
 const treasuryHeader = [
   { name: "Preparation", status: "For Preparation", permission: "preparation" },
-  {
-    name: "For Approval",
-    status: "Check Approval",
-    permission: ["releasing", "check_approval"],
-  },
+  // {
+  //   name: "For Approval",
+  //   status: "Check Approval",
+  //   permission: ["releasing", "check_approval"],
+  // },
   { name: "For Releasing", status: "For Releasing", permission: "releasing" },
-  { name: "Released", status: "Released", permission: "clearing" },
+  { name: "Clearing", status: "Released", permission: "clearing" },
 ];
 
 const checkHeader = [
@@ -212,6 +231,7 @@ export {
   titleHeader,
   taggingHeader,
   apHeader,
+  apHistoryHeader,
   approverHeader,
   coaHeader,
   schedTaggingHeader,
@@ -223,4 +243,6 @@ export {
   footerAtc,
   treasuryHeader,
   checkHeader,
+  apGJheader,
+  approverGJHeader,
 };

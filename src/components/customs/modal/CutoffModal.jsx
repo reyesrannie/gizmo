@@ -25,7 +25,7 @@ import cutoffSchema from "../../../schemas/cutoffSchema";
 import dayjs from "dayjs";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import moment from "moment";
-import socket from "../../../services/functions/serverSocket";
+
 import ReasonInput from "../ReasonInput";
 import { resetPrompt, setWarning } from "../../../services/slice/promptSlice";
 import { hasAccess } from "../../../services/functions/access";
@@ -78,7 +78,6 @@ const CutoffModal = ({ view, update }) => {
         ? await updateCutOff(obj).unwrap()
         : await createCutOff(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      socket.emit(update ? "cutoff_updated" : "cutoff_created");
       dispatch(resetMenu());
     } catch (error) {
       objectError(error, setError, enqueueSnackbar);
@@ -95,7 +94,6 @@ const CutoffModal = ({ view, update }) => {
     try {
       const res = await updateCutOff(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      socket.emit("cutoff_updated");
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
@@ -112,7 +110,6 @@ const CutoffModal = ({ view, update }) => {
     try {
       const res = await approveCutOff(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      socket.emit("cutoff_approved");
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {

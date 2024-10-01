@@ -73,7 +73,7 @@ export const totalAccountMapping = (taxComputation, items) => {
 
 export const totalAmountCheck = (item) => {
   const totalAmount = item?.reduce((acc, curr) => {
-    return acc + parseFloat(curr.amount || 0);
+    return acc + parseFloat(curr?.amount || 0);
   }, 0);
 
   return totalAmount;

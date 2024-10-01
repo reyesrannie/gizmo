@@ -1,5 +1,6 @@
 import moment from "moment";
 import { totalAccount } from "./compute";
+import dayjs from "dayjs";
 
 export const arrayFieldOne = (menuData, sumAmount, voucher, document) => {
   const doc = document?.result?.find(
@@ -35,9 +36,13 @@ export const arrayFieldOne = (menuData, sumAmount, voucher, document) => {
 };
 
 export const arrayFieldThree = (menuData, receiveBy) => {
+  const tagMonthYear = dayjs(menuData?.transactions?.tag_year, "YYMM").toDate();
+
   const obj = [
     {
-      tag_no: `${menuData?.transactions?.tag_year}-${menuData?.transactions?.tag_no}`,
+      tag_no: `${menuData?.transactions?.tag_no}-${moment(tagMonthYear).get(
+        "year"
+      )}`,
       time: undefined,
     },
     {

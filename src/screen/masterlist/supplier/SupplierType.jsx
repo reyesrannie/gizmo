@@ -69,7 +69,6 @@ import {
 import { generateExcel } from "../../../services/functions/exportFile";
 import SupplierTypeModal from "../../../components/customs/modal/SupplierTypeModal";
 import ImportModal from "../../../components/customs/modal/ImportModal";
-import socket from "../../../services/functions/serverSocket";
 
 const SupplierType = () => {
   const excelItems = ["ID", "CODE", "NAME", "CREATED AT", "DATE MODIFIED"];
@@ -109,7 +108,6 @@ const SupplierType = () => {
     try {
       const res = await archiveSupplierType(menuData).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      socket.emit("supplier_type_updated");
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
@@ -127,7 +125,6 @@ const SupplierType = () => {
     try {
       const res = await importSupplierType(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      socket.emit("supplier_type_updated");
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {

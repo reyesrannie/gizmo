@@ -1,8 +1,9 @@
 .table-container-for-print {
   @media print {
     &.MuiTableContainer-root {
-      width: 96%;
-      margin: 2%;
+      width: 94%;
+      margin: 3%;
+
       overflow: hidden;
     }
   }

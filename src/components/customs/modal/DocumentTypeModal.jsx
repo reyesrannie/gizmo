@@ -30,7 +30,6 @@ import { objectError } from "../../../services/functions/errorResponse";
 import documentTypeSchema from "../../../schemas/documentTypeSchema";
 import Autocomplete from "../AutoComplete";
 import { requiredFields } from "../../../services/constants/requiredFields";
-import socket from "../../../services/functions/serverSocket";
 
 const DocumentTypeModal = ({ dtypeData, view, update }) => {
   const dispatch = useDispatch();
@@ -77,7 +76,6 @@ const DocumentTypeModal = ({ dtypeData, view, update }) => {
       try {
         const res = await updateDocumentType(obj).unwrap();
         enqueueSnackbar(res?.message, { variant: "success" });
-        socket.emit("document_type_updated");
         dispatch(resetMenu());
       } catch (error) {
         objectError(error, setError, enqueueSnackbar);
@@ -86,7 +84,6 @@ const DocumentTypeModal = ({ dtypeData, view, update }) => {
       try {
         const res = await createDocumentType(obj).unwrap();
         enqueueSnackbar(res?.message, { variant: "success" });
-        socket.emit("document_type_updated");
         dispatch(resetMenu());
       } catch (error) {
         objectError(error, setError, enqueueSnackbar);
