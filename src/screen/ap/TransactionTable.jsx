@@ -43,7 +43,6 @@ import {
   useReadTransactionMutation,
 } from "../../services/store/request";
 import TransactionModal from "../../components/customs/modal/TransactionModal";
-import socket from "../../services/functions/serverSocket";
 import { AdditionalFunction } from "../../services/functions/AdditionalFunction";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -51,6 +50,7 @@ import orderBySchema from "../../schemas/orderBySchema";
 import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
 import ClearIcon from "@mui/icons-material/Clear";
 import Autocomplete from "../../components/customs/AutoComplete";
+import dayjs from "dayjs";
 
 const TransactionTable = ({
   params,
@@ -84,7 +84,6 @@ const TransactionTable = ({
     };
     try {
       const res = await readTransaction(obj).unwrap();
-      socket.emit("transaction_read");
     } catch (error) {}
   };
 
@@ -182,6 +181,7 @@ const TransactionTable = ({
                 const document = documentType?.result?.find(
                   (doc) => tag?.documentType?.id === doc?.id || null
                 );
+                const tagMonthYear = dayjs(tag?.tag_year, "YYMM").toDate();
 
                 return (
                   <TableRow
@@ -195,7 +195,7 @@ const TransactionTable = ({
                     }}
                   >
                     <TableCell>
-                      {tag?.tag_year} - {tag?.tag_no}
+                      {tag?.tag_no} - {moment(tagMonthYear).get("year")}
                     </TableCell>
                     <TableCell>
                       <Typography className="tag-transaction-company-name">
@@ -224,7 +224,9 @@ const TransactionTable = ({
                     <TableCell>
                       {tag?.vp_series === null ? (
                         <Typography className="tag-transaction-company-name">
-                          {`${tag?.apTagging?.company_code} - ${tag?.tag_year} - ${tag?.gtag_no} `}
+                          {`${tag?.apTagging?.company_code}  - ${
+                            tag?.gtag_no
+                          } - ${moment(tagMonthYear).get("year")} `}
                         </Typography>
                       ) : (
                         <Typography className="tag-transaction-company-name">
@@ -233,7 +235,9 @@ const TransactionTable = ({
                       )}
 
                       <Typography className="tag-transaction-company-name">
-                        {`${tag?.apTagging?.company_code} - ${tag?.tag_year} - ${tag?.gtag_no} `}
+                        {`${tag?.apTagging?.company_code}  - ${
+                          tag?.gtag_no
+                        } - ${moment(tagMonthYear).get("year")} `}
                       </Typography>
                       <Typography className="tag-transaction-company-type">
                         {document === null ? <>&mdash;</> : document?.name}

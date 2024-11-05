@@ -22,15 +22,19 @@ import { resetLogs } from "../../services/slice/logSlice";
 import { resetOption } from "../../services/slice/optionsSlice";
 import { resetTransaction } from "../../services/slice/transactionSlice";
 import { resetPrompt } from "../../services/slice/promptSlice";
+import { seconAPIRequest } from "../../services/store/seconAPIRequest";
 
 const AccountMenu = ({ onClose }) => {
   const userData = decodeUser();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [logout] = useLogoutMutation();
+  const [logout, { isLoading }] = useLogoutMutation();
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     logout();
+    dispatch(
+      seconAPIRequest?.util?.invalidateTags(["GeneralJournal", "CountGJ"])
+    );
     sessionStorage.removeItem("GIZMO");
     sessionStorage.removeItem("GIZMO_token");
     dispatch(resetAuth());

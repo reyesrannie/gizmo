@@ -9,6 +9,7 @@ const useApHook = () => {
     pagination: null,
     sorts: null,
     tagYear: "",
+    is_filed: true,
     state: "For Computation",
     allocation: "",
     access: "ap",

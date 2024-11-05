@@ -69,7 +69,6 @@ import {
 import { generateExcel } from "../../../services/functions/exportFile";
 import VatModal from "../../../components/customs/modal/VatModal";
 import ImportModal from "../../../components/customs/modal/ImportModal";
-import socket from "../../../services/functions/serverSocket";
 
 const Vat = () => {
   const excelItems = ["ID", "CODE", "NAME", "CREATED AT", "DATE MODIFIED"];
@@ -106,7 +105,6 @@ const Vat = () => {
     try {
       const res = await archiveVat(menuData).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      socket.emit("vat_updated");
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
@@ -118,7 +116,6 @@ const Vat = () => {
     try {
       const res = await importVat(submitData).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      socket.emit("vat_updated");
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {

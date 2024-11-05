@@ -55,7 +55,6 @@ import { setFilterBy } from "../../services/slice/transactionSlice";
 import TransactionModalAp from "../../components/customs/modal/TransactionModalAp";
 import { setVoucher } from "../../services/slice/optionsSlice";
 import TransactionModalApprover from "../../components/customs/modal/TransactionModalApprover";
-import socket from "../../services/functions/serverSocket";
 import { AdditionalFunction } from "../../services/functions/AdditionalFunction";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -102,7 +101,6 @@ const JournalTable = ({
     };
     try {
       const res = await readTransaction(obj).unwrap();
-      socket.emit("transaction_read");
     } catch (error) {}
   };
 
@@ -208,7 +206,9 @@ const JournalTable = ({
                     onClick={() => {
                       dispatch(setVoucher("journal"));
                       dispatch(setMenuData(tag));
-                      tag?.is_read === 0 && handleRead(tag);
+                      tag?.is_read === 0 &&
+                        tag?.state !== "For Approval" &&
+                        handleRead(tag);
                       tag?.state === "For Computation" &&
                         dispatch(setUpdateMenu(true));
 
@@ -275,38 +275,83 @@ const JournalTable = ({
                       {tag?.state === "For Computation" && (
                         <StatusIndicator
                           status="For Computation"
-                          className="pending-indicator"
-                        />
-                      )}
-                      {tag?.state === "For Approval" && (
-                        <StatusIndicator
-                          status="For Approval"
-                          className="checked-indicator"
+                          className="computation-indicator"
                         />
                       )}
 
-                      {tag?.state === "returned" && (
+                      {tag?.state === "For Approval" && (
                         <StatusIndicator
-                          status="Returned"
-                          className="inActive-indicator"
+                          status="For Approval"
+                          className="approval-indicator"
                         />
                       )}
 
                       {tag?.state === "approved" && (
                         <StatusIndicator
                           status="Approved"
-                          className="received-indicator"
+                          className="approved-indicator"
                         />
                       )}
+
+                      {tag?.state === "returned" && (
+                        <StatusIndicator
+                          status="Returned"
+                          className="return-indicator"
+                        />
+                      )}
+
                       {tag?.state === "For Voiding" && (
                         <StatusIndicator
                           status="For Voiding"
-                          className="pending-indicator"
+                          className="voiding-indicator"
                         />
                       )}
+
                       {tag?.state === "voided" && (
                         <StatusIndicator
                           status="Void"
+                          className="void-indicator"
+                        />
+                      )}
+
+                      {tag?.state === "For Preparation" && (
+                        <StatusIndicator
+                          status="Awaiting Prep"
+                          className="preparation-indicator"
+                        />
+                      )}
+
+                      {tag?.state === "For Releasing" && (
+                        <StatusIndicator
+                          status="Awaiting Release"
+                          className="release-indicator"
+                        />
+                      )}
+
+                      {tag?.state === "For Filing" && (
+                        <StatusIndicator
+                          status="Awaiting File"
+                          className="filing-indicator"
+                        />
+                      )}
+
+                      {tag?.state === "For Clearing" && (
+                        <StatusIndicator
+                          status="For Clearing"
+                          className="clearing-indicator"
+                        />
+                      )}
+
+                      {tag?.state === "Filed" && (
+                        <StatusIndicator
+                          status="Filed"
+                          className="filed-indicator"
+                        />
+                      )}
+
+                      {tag?.state === "Cancelled" && (
+                        <StatusIndicator
+                          status="Cancelled"
                           className="inActive-indicator"
                         />
                       )}
@@ -318,7 +363,9 @@ const JournalTable = ({
                       <IconButton>
                         <Badge
                           variant="dot"
-                          invisible={tag?.is_read !== 0}
+                          invisible={
+                            tag?.is_read !== 0 || tag?.state === "For Approval"
+                          }
                           color="error"
                           className="tag-transaction-badge"
                         >

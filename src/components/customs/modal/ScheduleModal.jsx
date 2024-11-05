@@ -67,7 +67,7 @@ import {
 import ReceiveEntry from "../ReceiveEntry";
 import { useNavigate } from "react-router-dom";
 import ShortcutHandler from "../../../services/functions/ShortcutHandler";
-import socket from "../../../services/functions/serverSocket";
+
 import {
   resetTransaction,
   setAddDocuments,
@@ -304,7 +304,6 @@ const ScheduleModal = ({ create, view, update, receive }) => {
           ? await updateTransaction(obj).unwrap()
           : await createTransaction(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      socket.emit(update || receive ? "schedule_updated" : "schedule_created");
       const docs = insertDocument(res?.result);
       const resData = await mapScheduledTransaction(
         res?.result,
@@ -316,6 +315,7 @@ const ScheduleModal = ({ create, view, update, receive }) => {
         docs
       );
       setOldValues(resData);
+
       update || receive
         ? Object.entries(resData).forEach(([key, value]) => {
             setValue(key, value);
@@ -337,7 +337,6 @@ const ScheduleModal = ({ create, view, update, receive }) => {
     try {
       const res = await receiveTransaction(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      socket.emit("schedule_received");
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
@@ -558,6 +557,54 @@ const ScheduleModal = ({ create, view, update, receive }) => {
             </Box>
           )}
         />
+        <Controller
+          name="start_date"
+          control={control}
+          render={({ field: { onChange, value, ...restField } }) => (
+            <Box className="date-picker-container-transaction">
+              <DatePicker
+                disabled={view}
+                className="transaction-form-date"
+                label="Date to Begin Generate *"
+                format="MMMM DD, YYYY"
+                value={value}
+                maxDate={watch("coverage_to")}
+                onChange={(e) => {
+                  onChange(e);
+                }}
+              />
+              {errors.start_date && (
+                <Typography variant="caption" color="error">
+                  {errors.start_date.message}
+                </Typography>
+              )}
+            </Box>
+          )}
+        />
+        <Controller
+          name="end_date"
+          control={control}
+          render={({ field: { onChange, value, ...restField } }) => (
+            <Box className="date-picker-container-transaction">
+              <DatePicker
+                disabled={view}
+                className="transaction-form-date"
+                label="Date to End Generate *"
+                minDate={watch("coverage_from")}
+                format="MMMM DD, YYYY"
+                value={value}
+                onChange={(e) => {
+                  onChange(e);
+                }}
+              />
+              {errors.end_date && (
+                <Typography variant="caption" color="error">
+                  {errors.end_date.message}
+                </Typography>
+              )}
+            </Box>
+          )}
+        />
         {watch("tin") && (
           <Autocomplete
             disabled={view}
@@ -622,6 +669,7 @@ const ScheduleModal = ({ create, view, update, receive }) => {
           <AppTextBox
             disabled
             money
+            showDecimal
             control={control}
             name={"month_amount"}
             label={"Amount per month"}

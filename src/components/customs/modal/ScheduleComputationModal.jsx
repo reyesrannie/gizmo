@@ -67,7 +67,7 @@ import {
 import ComputationMenu from "./ComputationMenu";
 import { totalAccount, totalAmount } from "../../../services/functions/compute";
 import TransactionModalApprover from "./TransactionModalApprover";
-import socket from "../../../services/functions/serverSocket";
+
 import scheduleTransactionAPSchema from "../../../schemas/scheduleTransactionAPSchema";
 import { DatePicker } from "@mui/x-date-pickers";
 import DateChecker from "../../../services/functions/DateChecker";
@@ -276,7 +276,6 @@ const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
     try {
       const res = await checkScheduleTransaction(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      socket.emit("schedule_approval");
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
@@ -296,7 +295,6 @@ const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
     try {
       const res = await resetScheduleTransaction(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      socket.emit("schedule_reset");
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
@@ -312,11 +310,9 @@ const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
     try {
       const res = await generateTransaction(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      socket.emit("schedule_generate");
       dispatch(resetMenu());
       dispatch(resetPrompt());
       dispatch(setHeader("Approved"));
-      navigate("/ap/check");
     } catch (error) {
       singleError(error, enqueueSnackbar);
     }
@@ -330,7 +326,6 @@ const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
     try {
       const res = await completeTransaction(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      socket.emit("schedule_updated");
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
@@ -479,6 +474,59 @@ const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
           />
         )}
 
+        {view && (
+          <Controller
+            name="start_date"
+            control={control}
+            render={({ field: { onChange, value, ...restField } }) => (
+              <Box className="date-picker-container-transaction">
+                <DatePicker
+                  disabled={view}
+                  className="transaction-form-date"
+                  label="Date to Begin Generate *"
+                  format="MMMM DD, YYYY"
+                  value={value}
+                  maxDate={watch("coverage_to")}
+                  onChange={(e) => {
+                    onChange(e);
+                  }}
+                />
+                {errors.start_date && (
+                  <Typography variant="caption" color="error">
+                    {errors.start_date.message}
+                  </Typography>
+                )}
+              </Box>
+            )}
+          />
+        )}
+        {view && (
+          <Controller
+            name="end_date"
+            control={control}
+            render={({ field: { onChange, value, ...restField } }) => (
+              <Box className="date-picker-container-transaction">
+                <DatePicker
+                  disabled={view}
+                  className="transaction-form-date"
+                  label="Date to End Generate *"
+                  minDate={watch("coverage_from")}
+                  format="MMMM DD, YYYY"
+                  value={value}
+                  onChange={(e) => {
+                    onChange(e);
+                  }}
+                />
+                {errors.end_date && (
+                  <Typography variant="caption" color="error">
+                    {errors.end_date.message}
+                  </Typography>
+                )}
+              </Box>
+            )}
+          />
+        )}
+
         <AppTextBox
           disabled
           control={control}
@@ -534,6 +582,7 @@ const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
         <AppTextBox
           disabled
           money
+          showDecimal
           control={control}
           name={"amount"}
           label={"Amount *"}
@@ -622,7 +671,7 @@ const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
                       <Box className="tax-box-value">
                         <Typography className="amount-tax">
                           Amount: <span>&#8369;</span>{" "}
-                          {convertToPeso(tax.amount)}
+                          {convertToPeso(parseFloat(tax.amount).toFixed(2))}
                         </Typography>
                         <Typography className="amount-tax">
                           Code: {type?.code}
@@ -634,42 +683,56 @@ const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
                       <Box className="tax-box-value">
                         <Typography className="amount-tax">
                           Input Tax: <span>&#8369;</span>{" "}
-                          {convertToPeso(tax.vat_input_tax)}
+                          {convertToPeso(
+                            parseFloat(tax.vat_input_tax).toFixed(2)
+                          )}
                         </Typography>
                         {tax?.nvat_local !== 0 && (
                           <Typography className="amount-tax">
                             Tax Based: <span>&#8369;</span>{" "}
-                            {convertToPeso(tax.nvat_local)}
+                            {convertToPeso(
+                              parseFloat(tax.nvat_local).toFixed(2)
+                            )}
                           </Typography>
                         )}
                         {tax?.nvat_service !== 0 && (
                           <Typography className="amount-tax">
                             Tax Based: <span>&#8369;</span>{" "}
-                            {convertToPeso(tax.nvat_service)}
+                            {convertToPeso(
+                              parseFloat(tax.nvat_service).toFixed(2)
+                            )}
                           </Typography>
                         )}
                         {tax?.vat_local !== 0 && (
                           <Typography className="amount-tax">
                             Tax Based: <span>&#8369;</span>{" "}
-                            {convertToPeso(tax.vat_local)}
+                            {convertToPeso(
+                              parseFloat(tax.vat_local).toFixed(2)
+                            )}
                           </Typography>
                         )}
                         {tax?.vat_service !== 0 && (
                           <Typography className="amount-tax">
                             Tax Based: <span>&#8369;</span>{" "}
-                            {convertToPeso(tax.vat_service)}
+                            {convertToPeso(
+                              parseFloat(tax.vat_service).toFixed(2)
+                            )}
                           </Typography>
                         )}
 
                         <Typography className="amount-tax">
                           Wtax Payable Expanded: <span>&#8369;</span>{" "}
-                          {convertToPeso(tax.wtax_payable_cr)}
+                          {convertToPeso(
+                            parseFloat(tax.wtax_payable_cr).toFixed(2)
+                          )}
                         </Typography>
                       </Box>
                       <Box className="tax-box-value">
                         <Typography className="amount-tax">
                           Total invoice amount: <span>&#8369;</span>{" "}
-                          {convertToPeso(tax.total_invoice_amount)}
+                          {convertToPeso(
+                            parseFloat(tax.total_invoice_amount).toFixed(2)
+                          )}
                         </Typography>
                       </Box>
                     </Box>
@@ -694,22 +757,19 @@ const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
                         )}
                       </Box>
                       <Box className="tax-box-value">
-                        {tax.credit_from !== null && (
-                          <Typography className="amount-tax">
-                            Credit From : {tax.credit_from}
-                          </Typography>
-                        )}
                         <Typography className="amount-tax">
                           {tax?.mode} : <span>&#8369;</span>{" "}
                           {tax?.mode === "Debit"
-                            ? convertToPeso(tax.debit)
-                            : convertToPeso(tax.credit)}
+                            ? convertToPeso(parseFloat(tax.debit).toFixed(2))
+                            : convertToPeso(parseFloat(tax.credit).toFixed(2))}
                         </Typography>
                         <Typography className="amount-tax">
                           Total amount: <span>&#8369;</span>{" "}
                           {tax?.mode === "Debit"
-                            ? convertToPeso(tax.account)
-                            : `-${convertToPeso(tax.credit)}`}
+                            ? convertToPeso(parseFloat(tax.account).toFixed(2))
+                            : `-${convertToPeso(
+                                parseFloat(tax.credit).toFixed(2)
+                              )}`}
                         </Typography>
                       </Box>
                     </Box>
@@ -725,8 +785,8 @@ const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
                   <Typography
                     className="amount-tax"
                     color={
-                      parseFloat(totalAmount(taxComputation)) ===
-                      parseFloat(watch("amount"))
+                      parseFloat(totalAmount(taxComputation)).toFixed(2) ===
+                      parseFloat(watch("amount")).toFixed(2)
                         ? "black"
                         : "error"
                     }
@@ -796,11 +856,11 @@ const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
                 className="add-transaction-button"
                 disabled={
                   errorTaxComputation ||
-                  parseFloat(totalAmount(taxComputation)) !==
-                    parseFloat(watch("amount"))
+                  parseFloat(totalAmount(taxComputation)).toFixed(2) !==
+                    parseFloat(watch("amount")).toFixed(2)
                 }
               >
-                Checked
+                Submit
               </LoadingButton>
             )}
             {transactionData?.state !== "completed" &&

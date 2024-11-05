@@ -62,9 +62,7 @@ const ApproverSchedule = () => {
     status,
   } = useSchedTransactionQuery(params);
 
-  const { countGrandChildcheck, countScheduleApprover } = CountDistribute();
-
-  const hasBadge = countScheduleApprover();
+  const { countGrandChildcheck } = CountDistribute();
 
   useEffect(() => {
     if (header) {
@@ -108,16 +106,7 @@ const ApproverSchedule = () => {
           >
             <AccordionSummary onClick={() => dispatch(setIsExpanded(false))}>
               <Typography className="page-text-indicator-tag-transaction">
-                <Badge
-                  badgeContent={
-                    header
-                      ? countGrandChildcheck(header, "Approver Schedule")
-                      : 0
-                  }
-                  color="error"
-                >
-                  {header}
-                </Badge>
+                {header}
               </Typography>
             </AccordionSummary>
             {approverScheduleHeader?.map(
@@ -134,19 +123,7 @@ const ApproverSchedule = () => {
                     }}
                   >
                     <Typography className="page-text-accord-tag-transaction">
-                      <Badge
-                        badgeContent={
-                          head?.name
-                            ? countGrandChildcheck(
-                                head?.name,
-                                "Approver Schedule"
-                              )
-                            : 0
-                        }
-                        color="error"
-                      >
-                        {head?.name}
-                      </Badge>
+                      {head?.name}
                     </Typography>
                   </AccordionSummary>
                 )
@@ -157,9 +134,7 @@ const ApproverSchedule = () => {
               dispatch(setIsExpanded(!isExpanded));
             }}
           >
-            <Badge variant="dot" color="error" invisible={hasBadge}>
-              <ArrowDropDownCircleOutlinedIcon />
-            </Badge>
+            <ArrowDropDownCircleOutlinedIcon />
           </IconButton>
         </Box>
         <Box className="tag-transaction-button-container">

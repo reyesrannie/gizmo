@@ -8,13 +8,14 @@ import {
   Dialog,
   FormControlLabel,
   Checkbox,
+  Stack,
 } from "@mui/material";
 import React from "react";
 import supplier from "../../../assets/svg/supplier.svg";
 
 import "../../styles/SupplierModal.scss";
 import AppTextBox from "../AppTextBox";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import Autocomplete from "../AutoComplete";
 import { useDispatch } from "react-redux";
@@ -34,7 +35,6 @@ import { useEffect } from "react";
 import { objectError } from "../../../services/functions/errorResponse";
 import { enqueueSnackbar } from "notistack";
 import supplierSchema from "../../../schemas/supplierSchema";
-import socket from "../../../services/functions/serverSocket";
 
 const SupplierModal = ({ supplierData, view, update }) => {
   const dispatch = useDispatch();
@@ -104,6 +104,7 @@ const SupplierModal = ({ supplierData, view, update }) => {
     resolver: yupResolver(supplierSchema),
     defaultValues: {
       noTin: false,
+      is_special_case: false,
       is_company: false,
       tin: "",
       company_name: "",
@@ -120,6 +121,10 @@ const SupplierModal = ({ supplierData, view, update }) => {
   useEffect(() => {
     if (successType && successAtc && successVat && successDocumentTypes) {
       const valuesItem = {
+        is_special_case:
+          supplierData?.is_special_case === null
+            ? 0
+            : supplierData?.is_special_case,
         noTin:
           supplierData?.tin?.length !== 15 && supplierData?.tin !== undefined,
         tin: supplierData?.tin || "",
@@ -215,7 +220,6 @@ const SupplierModal = ({ supplierData, view, update }) => {
       try {
         const res = await updateSupplier(obj).unwrap();
         enqueueSnackbar(res.message, { variant: "success" });
-        socket.emit("supplier_updated");
         dispatch(resetMenu());
       } catch (error) {
         objectError(error, setError, enqueueSnackbar);
@@ -224,7 +228,6 @@ const SupplierModal = ({ supplierData, view, update }) => {
       try {
         const res = await createSupplier(obj).unwrap();
         enqueueSnackbar(res.message, { variant: "success" });
-        socket.emit("supplier_updated");
         dispatch(resetMenu());
       } catch (error) {
         objectError(error, setError, enqueueSnackbar);
@@ -248,13 +251,32 @@ const SupplierModal = ({ supplierData, view, update }) => {
         <Typography className="form-title-text-supplier">
           Company Details
         </Typography>
-        <FormControlLabel
-          className="check-box-no-tin-supplier"
-          control={<Checkbox color="secondary" />}
-          label="Supplier has no TIN"
-          checked={watch("noTin")}
-          onChange={() => setValue("noTin", !watch("noTin"))}
-        />
+        <Stack flexDirection={"row"}>
+          <FormControlLabel
+            className="check-box-no-tin-supplier"
+            control={<Checkbox color="secondary" />}
+            label="Supplier has no TIN"
+            checked={watch("noTin")}
+            onChange={() => setValue("noTin", !watch("noTin"))}
+          />
+          <FormControlLabel
+            className="check-box-no-tin-supplier"
+            label="Special Process"
+            control={
+              <Controller
+                name="is_special_case"
+                control={control}
+                render={({ field }) => (
+                  <Checkbox
+                    {...field}
+                    color="secondary"
+                    checked={field.value}
+                  />
+                )}
+              />
+            }
+          />
+        </Stack>
       </Box>
       <form
         className="form-container-supplier"

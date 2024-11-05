@@ -29,8 +29,10 @@ function AppTextBox({
   handleRemove,
   enableEnter = false,
   select = false,
+  showDecimal = false,
   handleClear,
   sample,
+  autoChange,
   ...textField
 }) {
   const [showPassword, setShowPassword] = useState(false);
@@ -66,6 +68,7 @@ function AppTextBox({
 
         const formatDisplayValue = (value) => {
           const num = Number(value);
+
           return num % 1 === 0 ? num : num.toFixed(2);
         };
         return (
@@ -90,7 +93,7 @@ function AppTextBox({
                 error={error}
                 onChange={handleEditAuto} // send value to hook form
                 inputRef={ref}
-                value={formatDisplayValue(value)}
+                value={showDecimal ? formatDisplayValue(value) : value}
                 size="small"
                 variant={variant}
                 label={label}

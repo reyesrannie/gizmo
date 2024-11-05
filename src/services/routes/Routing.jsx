@@ -17,12 +17,11 @@ const Tagging = lazy(() => import("../../screen/tagging/Tagging"));
 const AccountPayable = lazy(() => import("../../screen/ap/AccountPayable"));
 const Transaction = lazy(() => import("../../screen/ap/Transaction"));
 const CheckVoucher = lazy(() => import("../../screen/ap/CheckVoucher"));
-const JournalVoucher = lazy(() => import("../../screen/ap/JournalVoucher"));
+const History = lazy(() => import("../../screen/history/History"));
+const GeneralJournal = lazy(() => import("../../screen/ap/GeneralJournal"));
 const Approver = lazy(() => import("../../screen/approver/Approver"));
+const ApproverGJ = lazy(() => import("../../screen/approver/ApproverGJ"));
 
-const ApprovingJournal = lazy(() =>
-  import("../../screen/approver/ApprovingJournal")
-);
 const ApprovingCheck = lazy(() =>
   import("../../screen/approver/ApprovingCheck")
 );
@@ -59,21 +58,24 @@ const RoleManagement = lazy(() =>
 const UserAccounts = lazy(() =>
   import("../../screen/user/accounts/UserAccounts")
 );
-
 const Schedule = lazy(() => import("../../screen/schedule/Schedule"));
 const RequestSchedule = lazy(() =>
   import("../../screen/schedule/RequestSchedule")
 );
-
 const APSchedule = lazy(() => import("../../screen/schedule/APSchedule"));
 const ApproverSchedule = lazy(() =>
   import("../../screen/schedule/ApproverSchedule")
 );
-
 const CutOff = lazy(() => import("../../screen/cutoff/Cutoff"));
 const TransactionReport = lazy(() =>
   import("../../screen/report/TransactionReport")
 );
+const Treasury = lazy(() => import("../../screen/treasury/Treasury"));
+const Check = lazy(() => import("../../screen/treasury/Check"));
+const CheckNumber = lazy(() => import("../../screen/treasury/CheckNumber"));
+const DebitMemo = lazy(() => import("../../screen/treasury/DebitMemo"));
+const Offset = lazy(() => import("../../screen/treasury/Offset"));
+const Balance = lazy(() => import("../../screen/treasury/Balance"));
 
 const Routing = () => {
   const user = decodeUser();
@@ -290,12 +292,16 @@ const Routing = () => {
           ),
         },
         {
-          path: "journal",
+          path: "general-journal",
           element: hasAccess(["ap_tag"]) ? (
-            <JournalVoucher />
+            <GeneralJournal />
           ) : (
             <Navigate to={"/"} />
           ),
+        },
+        {
+          path: "history",
+          element: hasAccess(["ap_tag"]) ? <History /> : <Navigate to={"/"} />,
         },
       ],
     },
@@ -320,12 +326,80 @@ const Routing = () => {
           ),
         },
         {
-          path: "approvejournal",
+          path: "general-journal",
           element: hasAccess(["approver"]) ? (
-            <ApprovingJournal />
+            <ApproverGJ />
           ) : (
             <Navigate to={"/"} />
           ),
+        },
+        {
+          path: "history",
+          element: hasAccess(["approver"]) ? (
+            <History />
+          ) : (
+            <Navigate to={"/"} />
+          ),
+        },
+      ],
+    },
+    {
+      path: "/treasury",
+      element: user ? <AppBar /> : <Navigate to={"/login"} />,
+      children: [
+        {
+          path: "",
+          element: hasAccess([
+            "preparation",
+            "releasing",
+            "clearing",
+            "check_approval",
+          ]) ? (
+            <Treasury />
+          ) : (
+            <Navigate to={"/"} />
+          ),
+        },
+        {
+          path: "check",
+          element: hasAccess([
+            "preparation",
+            "releasing",
+            "clearing",
+            "check_approval",
+          ]) ? (
+            <Check />
+          ) : (
+            <Navigate to={"/"} />
+          ),
+        },
+        {
+          path: "debit-memo",
+          element: hasAccess(["preparation", "releasing", "clearing"]) ? (
+            <DebitMemo />
+          ) : (
+            <Navigate to={"/"} />
+          ),
+        },
+        {
+          path: "checknumber",
+          element: hasAccess(["preparation", "releasing", "clearing"]) ? (
+            <CheckNumber />
+          ) : (
+            <Navigate to={"/"} />
+          ),
+        },
+        {
+          path: "offset",
+          element: hasAccess(["preparation", "releasing", "clearing"]) ? (
+            <Offset />
+          ) : (
+            <Navigate to={"/"} />
+          ),
+        },
+        {
+          path: "balance",
+          element: hasAccess(["balance"]) ? <Balance /> : <Navigate to={"/"} />,
         },
       ],
     },

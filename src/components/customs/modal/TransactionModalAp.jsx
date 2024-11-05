@@ -20,24 +20,26 @@ import {
   setTaxData,
   setUpdateTax,
   setViewAccountingEntries,
-  setViewMenu,
 } from "../../../services/slice/menuSlice";
 import {
   useAccountNumberQuery,
   useAccountTitlesQuery,
   useArchiveCheckEntriesMutation,
   useArchiveJournalEntriesMutation,
-  useAtcQuery,
   useCheckedCVoucherMutation,
   useCheckedJVoucherMutation,
   useDocumentTypeQuery,
-  useLocationQuery,
   useSupplierQuery,
   useSupplierTypeQuery,
   useTaxComputationQuery,
   useVpCheckNumberQuery,
   useVpJournalNumberQuery,
 } from "../../../services/store/request";
+
+import {
+  useArchiveGJMutation,
+  useForApproveGJMutation,
+} from "../../../services/store/seconAPIRequest";
 import { useSnackbar } from "notistack";
 import { singleError } from "../../../services/functions/errorResponse";
 import { DatePicker } from "@mui/x-date-pickers";
@@ -68,22 +70,14 @@ import ViewQuiltOutlinedIcon from "@mui/icons-material/ViewQuiltOutlined";
 import apTransactionSchema from "../../../schemas/apTransactionSchema";
 
 import TaxComputation from "./TaxComputation";
-import {
-  resetOption,
-  setDisableCheck,
-} from "../../../services/slice/optionsSlice";
+import { resetOption } from "../../../services/slice/optionsSlice";
 import ComputationMenu from "./ComputationMenu";
 import { totalAccount, totalAmount } from "../../../services/functions/compute";
 import TransactionModalApprover from "./TransactionModalApprover";
-import socket from "../../../services/functions/serverSocket";
 
-const TransactionModalAp = ({
-  view,
-  update,
-  receive,
-  checked,
-  viewVoucher,
-}) => {
+import { AdditionalFunction } from "../../../services/functions/AdditionalFunction";
+
+const TransactionModalAp = () => {
   const dispatch = useDispatch();
   const transactionData = useSelector((state) => state.menu.menuData);
   const createTax = useSelector((state) => state.menu.createTax);
@@ -96,10 +90,10 @@ const TransactionModalAp = ({
   const disableButton = useSelector((state) => state.options.disableButton);
   const disableCheck = useSelector((state) => state.options.disableCheck);
   const voucher = useSelector((state) => state.options.voucher);
-
   const isReturn = useSelector((state) => state.prompt.return);
 
   const { enqueueSnackbar } = useSnackbar();
+  const { convertToPeso } = AdditionalFunction();
 
   const hasRun = useRef(false);
 
@@ -137,7 +131,8 @@ const TransactionModalAp = ({
   } = useTaxComputationQuery(
     {
       status: "active",
-      transaction_id: transactionData?.transactions?.id,
+      transaction_id: voucher === "gj" ? [] : transactionData?.transactions?.id,
+      gj_id: voucher !== "gj" ? "" : transactionData?.id,
       voucher: voucher,
       pagination: "none",
     },
@@ -187,13 +182,12 @@ const TransactionModalAp = ({
 
   const [checkedCV, { isLoading: loadingChecked }] =
     useCheckedCVoucherMutation();
-  const [checkedJV, { isLoading: loadingJournal }] =
-    useCheckedJVoucherMutation();
+  const [forApproveGJ, { isLoading: loadingJournal }] =
+    useForApproveGJMutation();
 
   const [archiveCV, { isLoading: loadingArchiveCV }] =
     useArchiveCheckEntriesMutation();
-  const [archiveJV, { isLoading: loadingArchiveJV }] =
-    useArchiveJournalEntriesMutation();
+  const [archiveGJ, { isLoading: loadingArchiveJV }] = useArchiveGJMutation();
   const {
     control,
     handleSubmit,
@@ -259,15 +253,6 @@ const TransactionModalAp = ({
         setValue(key, value);
       });
 
-      if (update) {
-        const updateField = {
-          remarks: transactionData?.remarks,
-        };
-
-        Object.entries(updateField).forEach(([key, value]) => {
-          setValue(key, value);
-        });
-      }
       hasRun.current = true;
     }
   }, [
@@ -283,11 +268,7 @@ const TransactionModalAp = ({
     taxComputation,
     watch,
     dispatch,
-    receive,
     setValue,
-    update,
-    view,
-    checked,
     accountTitles,
   ]);
 
@@ -300,16 +281,15 @@ const TransactionModalAp = ({
       coa_id: submitData?.coa_id?.id,
       tag_no: transactionData?.transactions?.tag_no,
     };
+
     try {
       const res =
         voucher === "check"
           ? await checkedCV(obj).unwrap()
-          : await checkedJV(obj).unwrap();
+          : voucher === "gj"
+          ? await forApproveGJ(obj).unwrap()
+          : await forApproveGJ(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      socket.emit("transaction_approval", {
-        ...obj,
-        message: `The transaction ${obj?.tag_no} is now for approval`,
-      });
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
@@ -327,17 +307,13 @@ const TransactionModalAp = ({
       const res =
         voucher === "check"
           ? await archiveCV(obj).unwrap()
-          : await archiveJV(obj).unwrap();
+          : await archiveGJ(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
       singleError(error, enqueueSnackbar);
     }
-  };
-
-  const convertToPeso = (value) => {
-    return value?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
   return (
@@ -349,10 +325,7 @@ const TransactionModalAp = ({
         draggable="false"
       />
 
-      <Typography className="transaction-text">
-        {receive && "Transaction"}
-        {update && "Update Transaction"}
-      </Typography>
+      <Typography className="transaction-text">Transaction</Typography>
       <Divider orientation="horizontal" className="transaction-devider" />
       <Box className="form-title-transaction">
         <Typography className="form-title-text-transaction">
@@ -415,7 +388,7 @@ const TransactionModalAp = ({
           error={Boolean(errors?.proprietor)}
           helperText={errors?.proprietor?.message}
         />
-        {checked || receive ? (
+        {transactionData?.state === "For Approval" && (
           <AppTextBox
             disabled
             multiline
@@ -427,8 +400,6 @@ const TransactionModalAp = ({
             error={Boolean(errors.company_address)}
             helperText={errors.company_address?.message}
           />
-        ) : (
-          <></>
         )}
         <Box className="form-title-transaction">
           <Divider orientation="horizontal" className="transaction-devider" />
@@ -503,7 +474,9 @@ const TransactionModalAp = ({
           />
         )}
         <AppTextBox
-          disabled={checked || disableCheck}
+          disabled={
+            transactionData?.state !== "For Computation" || disableCheck
+          }
           control={control}
           name={"cip_no"}
           label={"CIP No. (Optional)"}
@@ -512,9 +485,13 @@ const TransactionModalAp = ({
           error={Boolean(errors?.cip_no)}
           helperText={errors?.cip_no?.message}
         />
-        {voucher === "journal" && (
+        {voucher === "gj" && (
           <Autocomplete
-            disabled={checked || disableCheck}
+            disabled={
+              (transactionData?.state !== "For Computation" &&
+                transactionData?.state !== "returned") ||
+              disableCheck
+            }
             control={control}
             name={"coa_id"}
             options={accountTitles?.result || []}
@@ -540,6 +517,7 @@ const TransactionModalAp = ({
         <AppTextBox
           disabled={true}
           money
+          showDecimal
           control={control}
           name={"amount"}
           label={"Amount *"}
@@ -561,9 +539,13 @@ const TransactionModalAp = ({
           helperText={errors.description?.message}
         />
 
-        {voucher === "journal" && (
+        {voucher === "gj" && (
           <AppTextBox
-            disabled={checked || disableCheck}
+            disabled={
+              (transactionData?.state !== "For Computation" &&
+                transactionData?.state !== "returned") ||
+              disableCheck
+            }
             multiline
             minRows={1}
             control={control}
@@ -574,7 +556,7 @@ const TransactionModalAp = ({
             helperText={errors.remarks?.message}
           />
         )}
-        {update || checked ? (
+        {transactionData?.state === "For Computation" ? (
           <Box className="form-title-transaction">
             <Divider orientation="horizontal" className="transaction-devider" />
             <Typography className="form-title-text-transaction">
@@ -584,223 +566,223 @@ const TransactionModalAp = ({
         ) : (
           <></>
         )}
-        {update || checked ? (
-          <Box className="form-tax-details">
-            {!checked && (
-              <Button
-                disabled={disableButton}
-                endIcon={<AddIcon />}
-                color="secondary"
-                variant="contained"
-                size="small"
-                className="add-tax-computation"
-                onClick={() => dispatch(setCreateTax(true))}
-              >
-                Add
-              </Button>
-            )}
-            <Box className="form-tax-box-details">
-              {taxComputation?.result?.map((tax, index) => {
-                const type = supplierType?.result?.find(
-                  (item) => tax?.stype_id === item.id
-                );
-                const title = accountTitles?.result?.find(
-                  (item) => tax?.coa_id === item?.id
-                );
 
-                const vpCheck = parseInt(vpCheckNumber?.result) + 1;
-                const vpJournal = parseInt(vpJournalNumber?.result) + 1;
+        <Box className="form-tax-details">
+          {transactionData?.state === "For Computation" && (
+            <Button
+              disabled={disableButton}
+              endIcon={<AddIcon />}
+              color="secondary"
+              variant="contained"
+              size="small"
+              className="add-tax-computation"
+              onClick={() => dispatch(setCreateTax(true))}
+            >
+              Add
+            </Button>
+          )}
+          <Box className="form-tax-box-details">
+            {taxComputation?.result?.map((tax, index) => {
+              const type = supplierType?.result?.find(
+                (item) => tax?.stype_id === item.id
+              );
+              const title = accountTitles?.result?.find(
+                (item) => tax?.coa_id === item?.id
+              );
 
-                const year = Math.floor(
-                  transactionData?.transactions?.tag_year / 100
-                );
-                const month = transactionData?.transactions?.tag_year % 100;
-                const formattedDate = `20${year}-${month
-                  .toString()
-                  .padStart(2, "0")}`;
-                return (
-                  !errorTaxComputation && (
-                    <Paper
-                      elevation={3}
-                      key={index}
-                      className="tax-details-value"
-                      onClick={() => {
-                        update && dispatch(setUpdateTax(true));
-                        update && dispatch(setTaxData(tax));
-                      }}
-                    >
-                      <LocalOfferOutlinedIcon />
-                      <Box className="tax-box-value-container">
-                        <Box className="tax-box-value">
-                          <Typography className="amount-tax">
-                            Amount: <span>&#8369;</span>{" "}
-                            {convertToPeso(parseFloat(tax.amount).toFixed(2))}
-                          </Typography>
-                          <Typography className="amount-tax">
-                            Code: {type?.code}
-                          </Typography>
-                          <Typography className="amount-tax">
-                            Wtax: {type?.wtax}
-                          </Typography>
-                        </Box>
-                        <Box className="tax-box-value">
-                          <Typography className="amount-tax">
-                            Input Tax: <span>&#8369;</span>{" "}
-                            {convertToPeso(
-                              parseFloat(tax.vat_input_tax).toFixed(2)
-                            )}
-                          </Typography>
-                          {tax?.nvat_local !== 0 && (
-                            <Typography className="amount-tax">
-                              Tax Based: <span>&#8369;</span>{" "}
-                              {convertToPeso(
-                                parseFloat(tax.nvat_local).toFixed(2)
-                              )}
-                            </Typography>
-                          )}
-                          {tax?.nvat_service !== 0 && (
-                            <Typography className="amount-tax">
-                              Tax Based: <span>&#8369;</span>{" "}
-                              {convertToPeso(
-                                parseFloat(tax.nvat_service).toFixed(2)
-                              )}
-                            </Typography>
-                          )}
-                          {tax?.vat_local !== 0 && (
-                            <Typography className="amount-tax">
-                              Tax Based: <span>&#8369;</span>{" "}
-                              {convertToPeso(
-                                parseFloat(tax.vat_local).toFixed(2)
-                              )}
-                            </Typography>
-                          )}
-                          {tax?.vat_service !== 0 && (
-                            <Typography className="amount-tax">
-                              Tax Based: <span>&#8369;</span>{" "}
-                              {convertToPeso(
-                                parseFloat(tax.vat_service).toFixed(2)
-                              )}
-                            </Typography>
-                          )}
+              const vpCheck = parseInt(vpCheckNumber?.result) + 1;
+              const vpJournal = parseInt(vpJournalNumber?.result) + 1;
 
-                          <Typography className="amount-tax">
-                            Wtax Payable Expanded: <span>&#8369;</span>{" "}
-                            {convertToPeso(
-                              parseFloat(tax.wtax_payable_cr).toFixed(2)
-                            )}
-                          </Typography>
-                        </Box>
-                        <Box className="tax-box-value">
-                          <Typography className="amount-tax">
-                            Total invoice amount: <span>&#8369;</span>{" "}
-                            {convertToPeso(
-                              parseFloat(tax.total_invoice_amount).toFixed(2)
-                            )}
-                          </Typography>
-                        </Box>
-                      </Box>
-                      <Divider
-                        orientation="horizontal"
-                        className="transaction-devider"
-                      />
-                      <Box className="tax-box-value-container">
-                        <Box className="tax-box-value">
-                          <Typography className="amount-tax">
-                            Account Code: {title?.code}
-                          </Typography>
-                          <Typography className="amount-tax">
-                            Account Title: {title?.name}
-                          </Typography>
-                        </Box>
-                        <Box className="tax-box-value">
-                          {transactionData?.voucher_number === null && (
-                            <Typography className="amount-tax">
-                              VP#: {voucher === "check" ? "CV" : "JV"}
-                              {transactionData?.apTagging?.vp}
-                              {formattedDate}-
-                              {voucher === "check"
-                                ? vpCheck.toString().padStart(4, "0")
-                                : vpJournal.toString().padStart(4, "0")}
-                            </Typography>
-                          )}
-                          {transactionData?.voucher_number !== null && (
-                            <Typography className="amount-tax">
-                              VP#: {transactionData?.voucher_number}
-                            </Typography>
-                          )}
-                          {tax?.remarks !== null && (
-                            <Typography className="amount-tax">
-                              Remarks: {tax?.remarks}
-                            </Typography>
-                          )}
-                        </Box>
-                        <Box className="tax-box-value">
-                          <Typography className="amount-tax">
-                            {tax?.mode} : <span>&#8369;</span>{" "}
-                            {tax?.mode === "Debit"
-                              ? convertToPeso(parseFloat(tax.debit).toFixed(2))
-                              : convertToPeso(
-                                  parseFloat(tax.credit).toFixed(2)
-                                )}
-                          </Typography>
-                          <Typography className="amount-tax">
-                            Total amount: <span>&#8369;</span>{" "}
-                            {tax?.mode === "Debit"
-                              ? convertToPeso(
-                                  parseFloat(tax.account).toFixed(2)
-                                )
-                              : `-${convertToPeso(
-                                  parseFloat(tax.credit).toFixed(2)
-                                )}`}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </Paper>
-                  )
-                );
-              })}
-              <Paper
-                elevation={3}
-                className="tax-details-value"
-                onClick={() => dispatch(setComputationMenu(true))}
-              >
-                <Box className="tax-total-value">
-                  <Typography
-                    className="amount-tax"
-                    color={
-                      !errorTaxComputation &&
-                      parseFloat(totalAmount(taxComputation)).toFixed(2) ===
-                        parseFloat(watch("amount")).toFixed(2)
-                        ? "black"
-                        : "error"
-                    }
+              const year = Math.floor(
+                transactionData?.transactions?.tag_year / 100
+              );
+              const month = transactionData?.transactions?.tag_year % 100;
+              const formattedDate = `20${year}-${month
+                .toString()
+                .padStart(2, "0")}`;
+
+              return (
+                !errorTaxComputation && (
+                  <Paper
+                    elevation={3}
+                    key={index}
+                    className="tax-details-value"
+                    onClick={() => {
+                      transactionData?.state === "For Computation" ||
+                        (transactionData?.state === "returned" &&
+                          dispatch(setUpdateTax(true)));
+                      transactionData?.state === "For Computation" ||
+                        (transactionData?.state === "returned" &&
+                          dispatch(setTaxData(tax)));
+                    }}
                   >
-                    Total invoice amount : <span>&#8369;</span>{" "}
-                    {errorTaxComputation
-                      ? convertToPeso((0).toFixed(2))
-                      : convertToPeso(totalAmount(taxComputation)?.toFixed(2))}
-                  </Typography>
-                  <Typography className="amount-tax">
-                    {voucher === "check" ? "Check amount" : "Total amount"}:{" "}
-                    <span>&#8369;</span>{" "}
-                    {errorTaxComputation
-                      ? convertToPeso((0).toFixed(2))
-                      : convertToPeso(totalAccount(taxComputation)?.toFixed(2))}
-                  </Typography>
-                </Box>
-              </Paper>
-            </Box>
+                    <LocalOfferOutlinedIcon />
+                    <Box className="tax-box-value-container">
+                      <Box className="tax-box-value">
+                        <Typography className="amount-tax">
+                          Amount: <span>&#8369;</span>{" "}
+                          {convertToPeso(parseFloat(tax.amount).toFixed(2))}
+                        </Typography>
+                        <Typography className="amount-tax">
+                          Code: {type?.code}
+                        </Typography>
+                        <Typography className="amount-tax">
+                          Wtax: {type?.wtax}
+                        </Typography>
+                      </Box>
+                      <Box className="tax-box-value">
+                        <Typography className="amount-tax">
+                          Input Tax: <span>&#8369;</span>{" "}
+                          {convertToPeso(
+                            parseFloat(tax.vat_input_tax).toFixed(2)
+                          )}
+                        </Typography>
+                        {tax?.nvat_local !== 0 && (
+                          <Typography className="amount-tax">
+                            Tax Based: <span>&#8369;</span>{" "}
+                            {convertToPeso(
+                              parseFloat(tax.nvat_local).toFixed(2)
+                            )}
+                          </Typography>
+                        )}
+                        {tax?.nvat_service !== 0 && (
+                          <Typography className="amount-tax">
+                            Tax Based: <span>&#8369;</span>{" "}
+                            {convertToPeso(
+                              parseFloat(tax.nvat_service).toFixed(2)
+                            )}
+                          </Typography>
+                        )}
+                        {tax?.vat_local !== 0 && (
+                          <Typography className="amount-tax">
+                            Tax Based: <span>&#8369;</span>{" "}
+                            {convertToPeso(
+                              parseFloat(tax.vat_local).toFixed(2)
+                            )}
+                          </Typography>
+                        )}
+                        {tax?.vat_service !== 0 && (
+                          <Typography className="amount-tax">
+                            Tax Based: <span>&#8369;</span>{" "}
+                            {convertToPeso(
+                              parseFloat(tax.vat_service).toFixed(2)
+                            )}
+                          </Typography>
+                        )}
+
+                        <Typography className="amount-tax">
+                          Wtax Payable Expanded: <span>&#8369;</span>{" "}
+                          {convertToPeso(
+                            parseFloat(tax.wtax_payable_cr).toFixed(2)
+                          )}
+                        </Typography>
+                      </Box>
+                      <Box className="tax-box-value">
+                        <Typography className="amount-tax">
+                          Total invoice amount: <span>&#8369;</span>{" "}
+                          {convertToPeso(
+                            parseFloat(tax.total_invoice_amount).toFixed(2)
+                          )}
+                        </Typography>
+                      </Box>
+                    </Box>
+                    <Divider
+                      orientation="horizontal"
+                      className="transaction-devider"
+                    />
+                    <Box className="tax-box-value-container">
+                      <Box className="tax-box-value">
+                        <Typography className="amount-tax">
+                          Account Code: {title?.code}
+                        </Typography>
+                        <Typography className="amount-tax">
+                          Account Title: {title?.name}
+                        </Typography>
+                      </Box>
+                      <Box className="tax-box-value">
+                        {transactionData?.voucher_number === null && (
+                          <Typography className="amount-tax">
+                            VP#: {voucher === "check" ? "VPRL" : "GJRL"}
+                            {transactionData?.apTagging?.vp}
+                            {formattedDate}-
+                            {voucher === "check"
+                              ? vpCheck.toString().padStart(4, "0")
+                              : vpJournal.toString().padStart(4, "0")}
+                          </Typography>
+                        )}
+                        {transactionData?.voucher_number !== null && (
+                          <Typography className="amount-tax">
+                            VP#: {transactionData?.voucher_number}
+                          </Typography>
+                        )}
+                        {tax?.remarks !== null && (
+                          <Typography className="amount-tax">
+                            Remarks: {tax?.remarks}
+                          </Typography>
+                        )}
+                      </Box>
+                      <Box className="tax-box-value">
+                        <Typography className="amount-tax">
+                          {tax?.mode} : <span>&#8369;</span>{" "}
+                          {tax?.mode === "Debit"
+                            ? convertToPeso(parseFloat(tax.debit).toFixed(2))
+                            : convertToPeso(parseFloat(tax.credit).toFixed(2))}
+                        </Typography>
+                        <Typography className="amount-tax">
+                          Total amount: <span>&#8369;</span>{" "}
+                          {tax?.mode === "Debit"
+                            ? convertToPeso(parseFloat(tax.account).toFixed(2))
+                            : `-${convertToPeso(
+                                parseFloat(tax.credit).toFixed(2)
+                              )}`}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </Paper>
+                )
+              );
+            })}
+            <Paper
+              elevation={3}
+              className="tax-details-value"
+              onClick={() => dispatch(setComputationMenu(true))}
+            >
+              <Box className="tax-total-value">
+                <Typography
+                  className="amount-tax"
+                  color={
+                    !errorTaxComputation &&
+                    parseFloat(totalAmount(taxComputation)).toFixed(2) ===
+                      parseFloat(watch("amount")).toFixed(2)
+                      ? "black"
+                      : "error"
+                  }
+                >
+                  Total invoice amount : <span>&#8369;</span>{" "}
+                  {errorTaxComputation
+                    ? convertToPeso((0).toFixed(2))
+                    : convertToPeso(totalAmount(taxComputation)?.toFixed(2))}
+                </Typography>
+                <Typography className="amount-tax">
+                  {voucher === "check" ? "Check amount" : "Total amount"}:{" "}
+                  <span>&#8369;</span>{" "}
+                  {errorTaxComputation
+                    ? convertToPeso((0).toFixed(2))
+                    : convertToPeso(totalAccount(taxComputation)?.toFixed(2))}
+                </Typography>
+              </Box>
+            </Paper>
           </Box>
-        ) : (
-          <></>
-        )}
+        </Box>
+
         <Box className="form-title-transaction">
           <Divider orientation="horizontal" className="transaction-devider" />
         </Box>
 
         <Box className="add-transaction-button-container">
           <Box className="return-receive-container">
-            {update && (
+            {(transactionData?.state === "returned" ||
+              transactionData?.state === "For Computation") && (
               <Button
                 variant="contained"
                 color="error"
@@ -811,7 +793,7 @@ const TransactionModalAp = ({
                 Archive
               </Button>
             )}
-            {!errorTaxComputation && viewVoucher && (
+            {!errorTaxComputation && (
               <Button
                 variant="contained"
                 color="success"
@@ -824,7 +806,8 @@ const TransactionModalAp = ({
             )}
           </Box>
           <Box className="archive-transaction-button-container">
-            {update && (
+            {(transactionData?.state === "returned" ||
+              transactionData?.state === "For Computation") && (
               <LoadingButton
                 variant="contained"
                 color="warning"
@@ -834,7 +817,7 @@ const TransactionModalAp = ({
                   errorTaxComputation || validateAmount(watch("amount"))
                 }
               >
-                Checked
+                Submit
               </LoadingButton>
             )}
             <Button
@@ -846,7 +829,11 @@ const TransactionModalAp = ({
               }}
               className="add-transaction-button"
             >
-              {view ? "Close" : update ? "Cancel" : "Cancel"}
+              {transactionData?.state !== "For Computation"
+                ? "Close"
+                : transactionData?.state === "For Computation"
+                ? "Cancel"
+                : "Cancel"}
             </Button>
           </Box>
         </Box>
@@ -877,7 +864,9 @@ const TransactionModalAp = ({
           image={warningImg}
           title={"Archive Entry?"}
           message={"You are about to archive this Entry"}
-          nextLineMessage={"Please confirm to archive it to tagging"}
+          nextLineMessage={
+            voucher === "check" ? "Please confirm to archive it to tagging" : ""
+          }
           confirmButton={"Yes, Archive it!"}
           cancelButton={"Cancel"}
           cancelOnClick={() => {
@@ -887,7 +876,8 @@ const TransactionModalAp = ({
         />
       </Dialog>
 
-      {view || update ? (
+      {transactionData?.state === "returned" ||
+      transactionData?.state === "For Computation" ? (
         <TransactionDrawer transactionData={transactionData?.transactions} />
       ) : (
         <></>

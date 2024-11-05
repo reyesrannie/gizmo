@@ -1,0 +1,216 @@
+import React, { useEffect } from "react";
+
+import Breadcrums from "../../components/customs/Breadcrums";
+import SearchText from "../../components/customs/SearchText";
+
+import {
+  Accordion,
+  AccordionSummary,
+  Box,
+  Button,
+  Dialog,
+  IconButton,
+  Typography,
+} from "@mui/material";
+
+import { useDispatch, useSelector } from "react-redux";
+
+import AddToPhotosOutlinedIcon from "@mui/icons-material/AddToPhotosOutlined";
+import ArrowDropDownCircleOutlinedIcon from "@mui/icons-material/ArrowDropDownCircleOutlined";
+
+import "../../components/styles/TagTransaction.scss";
+
+import { apGJheader } from "../../services/constants/headers";
+import GJTable from "./GJTable";
+import {
+  setFilterBy,
+  setIsExpanded,
+} from "../../services/slice/transactionSlice";
+import { setHeader } from "../../services/slice/headerSlice";
+import { resetMenu, setCreateMenu } from "../../services/slice/menuSlice";
+import { useGeneralJournalQuery } from "../../services/store/seconAPIRequest";
+import useApHook from "../../services/hooks/useApHook";
+import GeneralJournalModal from "../../components/customs/modal/GeneralJournalModal";
+import { setVoucher } from "../../services/slice/optionsSlice";
+
+const GeneralJournal = () => {
+  const dispatch = useDispatch();
+
+  const isExpanded = useSelector((state) => state.transaction.isExpanded);
+  const createMenu = useSelector((state) => state.menu.createMenu);
+
+  const header = useSelector((state) => state.headers.header) || "Pending";
+
+  const {
+    params,
+    onPageChange,
+    onRowChange,
+    onSearchData,
+    onSortTable,
+    onOrderBy,
+    onStateChange,
+    onShowAll,
+  } = useTreasuryHook();
+
+  const {
+    data: tagTransaction,
+    isLoading,
+    isError,
+    isFetching,
+  } = useGeneralJournalQuery(params);
+
+  useEffect(() => {
+    if (header) {
+      const statusChange = apGJheader?.find((item) => item?.name === header);
+      onStateChange(statusChange?.status);
+    }
+  }, [header]);
+
+  return (
+    <Box>
+      <Box>
+        <Breadcrums />
+      </Box>
+      <Box className="tag-transaction-head-container">
+        <Box className="tag-transaction-navigation-container">
+          <Accordion
+            expanded={isExpanded}
+            elevation={0}
+            className="tag-transaction-accordion"
+          >
+            <AccordionSummary onClick={() => dispatch(setIsExpanded(false))}>
+              <Typography className="page-text-indicator-tag-transaction">
+                {header}
+              </Typography>
+            </AccordionSummary>
+            {apGJheader?.map(
+              (head, index) =>
+                header !== head?.name && (
+                  <AccordionSummary
+                    key={index}
+                    onClick={() => {
+                      dispatch(setHeader(head.name));
+                      dispatch(setIsExpanded(false));
+                      onOrderBy("");
+                      dispatch(setFilterBy(""));
+                      onStateChange(head?.status);
+                    }}
+                  >
+                    <Typography className="page-text-accord-tag-transaction">
+                      {head?.name}
+                    </Typography>
+                  </AccordionSummary>
+                )
+            )}
+          </Accordion>
+          <IconButton
+            onClick={() => {
+              dispatch(setIsExpanded(!isExpanded));
+            }}
+          >
+            <ArrowDropDownCircleOutlinedIcon />
+          </IconButton>
+        </Box>
+        <Box className="tag-transaction-button-container">
+          <SearchText onSearchData={onSearchData} />
+          <Button
+            variant="contained"
+            color="secondary"
+            className="button-add-tag-transaction"
+            startIcon={<AddToPhotosOutlinedIcon />}
+            onClick={() => {
+              dispatch(setVoucher("gj"));
+              dispatch(setCreateMenu(true));
+            }}
+          >
+            Add
+          </Button>
+        </Box>
+      </Box>
+
+      {header === "Pending" && (
+        <GJTable
+          params={params}
+          onSortTable={onSortTable}
+          isError={isError}
+          isFetching={isFetching}
+          isLoading={isLoading}
+          onPageChange={onPageChange}
+          onRowChange={onRowChange}
+          tagTransaction={tagTransaction}
+          onOrderBy={onOrderBy}
+          state="For Computation"
+        />
+      )}
+
+      {header === "For Approval" && (
+        <GJTable
+          params={params}
+          onSortTable={onSortTable}
+          isError={isError}
+          isFetching={isFetching}
+          isLoading={isLoading}
+          onPageChange={onPageChange}
+          onRowChange={onRowChange}
+          tagTransaction={tagTransaction}
+          onOrderBy={onOrderBy}
+          state="For Approval"
+        />
+      )}
+      {header === "Approved" && (
+        <GJTable
+          params={params}
+          onSortTable={onSortTable}
+          isError={isError}
+          isFetching={isFetching}
+          isLoading={isLoading}
+          onPageChange={onPageChange}
+          onRowChange={onRowChange}
+          tagTransaction={tagTransaction}
+          onOrderBy={onOrderBy}
+          state="approved"
+        />
+      )}
+      {header === "Returned" && (
+        <GJTable
+          params={params}
+          onSortTable={onSortTable}
+          isError={isError}
+          isFetching={isFetching}
+          isLoading={isLoading}
+          onPageChange={onPageChange}
+          onRowChange={onRowChange}
+          tagTransaction={tagTransaction}
+          onOrderBy={onOrderBy}
+          state="returned"
+        />
+      )}
+      {header === "Void" && (
+        <GJTable
+          params={params}
+          onSortTable={onSortTable}
+          isError={isError}
+          isFetching={isFetching}
+          isLoading={isLoading}
+          onPageChange={onPageChange}
+          onRowChange={onRowChange}
+          tagTransaction={tagTransaction}
+          onOrderBy={onOrderBy}
+          state={"void"}
+        />
+      )}
+
+      <Dialog
+        open={createMenu}
+        className="transaction-modal-dialog"
+        onClose={() => {
+          dispatch(resetMenu());
+        }}
+      >
+        <GeneralJournalModal />
+      </Dialog>
+    </Box>
+  );
+};
+
+export default GeneralJournal;

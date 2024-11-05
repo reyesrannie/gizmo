@@ -69,7 +69,6 @@ import {
 import { generateExcelAccount } from "../../../services/functions/exportFile";
 import ImportModal from "../../../components/customs/modal/ImportModal";
 import AccountNumberModal from "../../../components/customs/modal/AccountNumberModal";
-import socket from "../../../services/functions/serverSocket";
 
 const AccountNumber = () => {
   const excelItems = [
@@ -115,7 +114,6 @@ const AccountNumber = () => {
     try {
       const res = await archiveAccountNumber(menuData).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      socket.emit("account_number_updated");
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
@@ -133,7 +131,6 @@ const AccountNumber = () => {
     try {
       const res = await importSupplier(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      socket.emit("account_number_updated");
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {

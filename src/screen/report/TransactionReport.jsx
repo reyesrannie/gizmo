@@ -126,11 +126,13 @@ const TransactionReport = () => {
                     color="secondary"
                   >
                     <TableRow
-                      onClick={() =>
-                        checkIfAvailable(tag?.tag_year)
-                          ? displayReport(tag)
-                          : null
-                      }
+                      onClick={() => {
+                        // checkIfAvailable(tag?.tag_year)
+                        //   ? displayReport(tag)
+                        //   : null;
+
+                        displayReport(tag);
+                      }}
                       className={
                         checkIfAvailable(tag?.tag_year)
                           ? "table-body-available"
@@ -194,13 +196,8 @@ const TransactionReport = () => {
         onClose={() => dispatch(setViewMenu(false))}
         className="transaction-modal-dialog-tax"
       >
-        <ReportModal transaction title={"Select Report"} />
+        <ReportModal />
       </Dialog>
-
-      {/* 
-      <Dialog open={archiveLoading} className="loading-role-create">
-        <Lottie animationData={loadingLight} loop={archiveLoading} />
-      </Dialog> */}
     </Box>
   );
 };

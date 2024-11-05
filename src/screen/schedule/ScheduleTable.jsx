@@ -33,6 +33,7 @@ import {
   setApproveMenu,
   setMenuData,
   setReceiveMenu,
+  setSched,
   setSchedComputation,
   setUpdateMenu,
   setViewAccountingEntries,
@@ -43,6 +44,7 @@ import ScheduleModal from "../../components/customs/modal/ScheduleModal";
 import ScheduleComputationModal from "../../components/customs/modal/ScheduleComputationModal";
 import ScheduleTransactionApproverModal from "../../components/customs/modal/ScheduleTransactionApproverModal";
 import DateChecker from "../../services/functions/DateChecker";
+import { setVoucher } from "../../services/slice/optionsSlice";
 
 const ScheduleTable = ({
   params,
@@ -119,7 +121,7 @@ const ScheduleTable = ({
                 </TableCell>
               </TableRow>
             ) : (
-              tagTransaction?.result?.data?.map((tag) => {
+              tagTransaction?.result?.data?.map((tag, index) => {
                 const isToday = isCoverageTodayTable(tag);
 
                 const getOrdinalSuffix = (day) => {
@@ -136,16 +138,18 @@ const ScheduleTable = ({
                   }
                 };
 
-                const coverageFrom = tag?.coverage_from;
+                const coverageFrom = tag?.start_date;
                 const day = moment(coverageFrom).format("D");
                 const dayWithSuffix = day + getOrdinalSuffix(Number(day));
 
                 return (
                   <TableRow
                     className="table-body-tag-transaction"
-                    key={tag?.id}
+                    key={index}
                     onClick={() => {
                       dispatch(setMenuData(tag));
+                      dispatch(setVoucher("check"));
+                      dispatch(setSched(true));
 
                       tag?.state === "pending" &&
                         !ap &&

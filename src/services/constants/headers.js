@@ -1,25 +1,63 @@
 const taggingHeader = [
-  { name: "Tag Transaction", status: "pending" },
-  { name: "Returned", status: "returned" },
-  { name: "Archived", status: "archived" },
-  { name: "History", status: "" },
+  { name: "Pending", status: "pending", permission: "tagging" },
+  { name: "Returned", status: "returned", permission: "tagging" },
+  { name: "Archived", status: "archived", permission: "tagging" },
+  { name: "History", status: "", permission: "tagging" },
 ];
 
 const apHeader = [
-  { name: "Received", status: "For Computation" },
-  { name: "Checked", status: "For Approval" },
-  { name: "Returned", status: "returned" },
-  { name: "Approved", status: "approved" },
-  { name: "Void", status: "voided" },
-  { name: "History", status: "" },
+  { name: "Received", status: "For Computation", permission: "ap_tag" },
+  { name: "For Approval", status: "For Approval", permission: "ap_tag" },
+  { name: "Returned", status: "returned", permission: "ap_tag" },
+  { name: "Approved", status: "approved", permission: "ap_tag" },
+  { name: "Void", status: "voided", permission: "ap_tag" },
+  { name: "Filing", status: "Released", permission: "filing" },
+];
+
+const apGJheader = [
+  { name: "Pending", status: "For Computation", permission: "ap_tag" },
+  { name: "For Approval", status: "For Approval", permission: "ap_tag" },
+  { name: "Returned", status: "returned", permission: "ap_tag" },
+  { name: "Approved", status: "approved", permission: "ap_tag" },
+  { name: "Void", status: "voided", permission: "ap_tag" },
+];
+
+const apHistoryHeader = [
+  { name: "Voucher's Payable", status: "", permission: "ap_tag" },
+  { name: "General Journal", status: "", permission: "ap_tag" },
 ];
 
 const approverHeader = [
-  { name: "For Approval", status: "For Approval" },
-  { name: "Returned", status: "returned" },
-  { name: "Void", status: "voided" },
-  { name: "Pending Void", status: "For Voiding" },
-  { name: "History", status: "" },
+  { name: "Approval", status: "For Approval", permission: "approver" },
+  { name: "Returned", status: "returned", permission: "approver" },
+  { name: "Void", status: "voided", permission: "approver" },
+  { name: "Pending Void", status: "For Voiding", permission: "approver" },
+  { name: "History", status: "", permission: "approver" },
+];
+
+const approverGJHeader = [
+  { name: "Approval", status: "For Approval", permission: "approver" },
+  { name: "Returned", status: "returned", permission: "approver" },
+  { name: "Void", status: "voided", permission: "approver" },
+  { name: "Pending Void", status: "For Voiding", permission: "approver" },
+];
+
+const treasuryHeader = [
+  { name: "Preparation", status: "For Preparation", permission: "preparation" },
+  // {
+  //   name: "For Approval",
+  //   status: "Check Approval",
+  //   permission: ["releasing", "check_approval"],
+  // },
+  { name: "For Releasing", status: "For Releasing", permission: "releasing" },
+  { name: "Clearing", status: "Released", permission: "clearing" },
+];
+
+const checkHeader = [
+  { name: "Available", status: "Available" },
+  { name: "Released", status: "Released" },
+  { name: "Cleared", status: "Cleared" },
+  { name: "Cancelled", status: "Cancelled" },
 ];
 
 const coaHeader = [
@@ -39,7 +77,7 @@ const schedTaggingHeader = [
 const schedAPHeader = [
   { name: "Pending", status: "pending" },
   { name: "Received", status: "For Computation" },
-  { name: "Checked", status: "For Approval" },
+  { name: "For Approval", status: "For Approval" },
   { name: "Returned", status: "returned" },
   { name: "Approved", status: "approved" },
   { name: "History", status: "" },
@@ -188,11 +226,69 @@ const titleHeaderATC = [
   },
 ];
 
+const debitType = [
+  { name: "Debit Memo", value: "dm" },
+  { name: "Credit Memo", value: "cm" },
+  { name: "Manager's Check", value: "mc" },
+  { name: "Telegraphic", value: "telegraphic" },
+];
+
+const apDash = [
+  {
+    name: "Pending",
+    status: "pending",
+    permission: "ap_tag",
+    path: "/ap/pending",
+  },
+  {
+    name: "Received",
+    status: "For Computation",
+    permission: "ap_tag",
+    path: "/ap/check",
+  },
+
+  {
+    name: "Returned",
+    status: "returned",
+    permission: "ap_tag",
+    path: "/ap/check",
+  },
+  {
+    name: "Approved",
+    status: "approved",
+    permission: "ap_tag",
+    path: "/ap/check",
+  },
+  { name: "Void", status: "voided", permission: "ap_tag", path: "/ap/check" },
+  {
+    name: "Filing",
+    status: "Released",
+    permission: "filing",
+    path: "/ap/check",
+  },
+];
+
+const approverDash = [
+  {
+    name: "Approval",
+    status: "For Approval",
+    permission: "approver",
+    path: "/approver/approvecheck",
+  },
+  {
+    name: "Pending Void",
+    status: "For Voiding",
+    permission: "approver",
+    path: "/approver/approvecheck",
+  },
+];
+
 export {
   titleFirstHeader,
   titleHeader,
   taggingHeader,
   apHeader,
+  apHistoryHeader,
   approverHeader,
   coaHeader,
   schedTaggingHeader,
@@ -202,4 +298,11 @@ export {
   footer,
   titleHeaderATC,
   footerAtc,
+  treasuryHeader,
+  checkHeader,
+  apGJheader,
+  approverGJHeader,
+  debitType,
+  apDash,
+  approverDash,
 };

@@ -30,15 +30,25 @@ import PendingActionsOutlinedIcon from "@mui/icons-material/PendingActionsOutlin
 import AssessmentOutlinedIcon from "@mui/icons-material/AssessmentOutlined";
 import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
 import DeviceHubOutlinedIcon from "@mui/icons-material/DeviceHubOutlined";
+import AccountBalanceRoundedIcon from "@mui/icons-material/AccountBalanceRounded";
+import CreditScoreRoundedIcon from "@mui/icons-material/CreditScoreRounded";
+import FolderOpenOutlinedIcon from "@mui/icons-material/FolderOpenOutlined";
+import SummarizeOutlinedIcon from "@mui/icons-material/SummarizeOutlined";
+import BalanceOutlinedIcon from "@mui/icons-material/BalanceOutlined";
 
 import "../../components/styles/CardNavigation.scss";
 import {
+  apGJheader,
   apHeader,
+  apHistoryHeader,
+  approverGJHeader,
   approverHeader,
   approverScheduleHeader,
+  checkHeader,
   schedAPHeader,
   schedTaggingHeader,
   taggingHeader,
+  treasuryHeader,
 } from "./headers";
 const user = [
   {
@@ -258,8 +268,8 @@ const apTransaction = [
   },
   {
     path: "/ap/check",
-    desc: "Check Voucher transaction",
-    name: "Check Voucher",
+    desc: "Voucher's Payable transaction",
+    name: "Voucher's Payable",
     permission: ["ap_tag"],
     firstIcon: (
       <CreditScoreOutlinedIcon
@@ -271,13 +281,37 @@ const apTransaction = [
       <NavigationOutlinedIcon className="icon-last" color="secondary" />
     ),
   },
+  // {
+  //   path: "/ap/journal",
+  //   desc: "Journal Voucher transaction",
+  //   name: "Journal Voucher",
+  //   permission: ["ap_tag"],
+  //   firstIcon: (
+  //     <NewspaperOutlinedIcon color="secondary" className="icon-card-details" />
+  //   ),
+  //   lastIcon: (
+  //     <NavigationOutlinedIcon className="icon-last" color="secondary" />
+  //   ),
+  // },
   {
-    path: "/ap/journal",
-    desc: "Journal Voucher transaction",
-    name: "Journal Voucher",
+    path: "/ap/general-journal",
+    desc: "General Journal transaction",
+    name: "General Journal",
     permission: ["ap_tag"],
     firstIcon: (
       <NewspaperOutlinedIcon color="secondary" className="icon-card-details" />
+    ),
+    lastIcon: (
+      <NavigationOutlinedIcon className="icon-last" color="secondary" />
+    ),
+  },
+  {
+    path: "/ap/history",
+    desc: "History of transaction by year and month",
+    name: "History",
+    permission: ["ap_tag"],
+    firstIcon: (
+      <FolderOpenOutlinedIcon color="secondary" className="icon-card-details" />
     ),
     lastIcon: (
       <NavigationOutlinedIcon className="icon-last" color="secondary" />
@@ -288,7 +322,7 @@ const approver = [
   {
     path: "/approver/approvecheck",
     desc: "Approving of check entries to appropriate Approver.",
-    name: "Check Approval",
+    name: "Voucher Approval",
     permission: ["approver"],
     firstIcon: (
       <PlaylistAddCheckOutlinedIcon
@@ -301,12 +335,78 @@ const approver = [
     ),
   },
   {
-    path: "/approver/approvejournal",
-    desc: "Approving of journal entries to appropriate Approver.",
-    name: "Journal Approval",
+    path: "/approver/general-journal",
+    desc: "General Journal transaction",
+    name: "General Journal",
     permission: ["approver"],
     firstIcon: (
-      <TaskOutlinedIcon color="secondary" className="icon-card-details" />
+      <NewspaperOutlinedIcon color="secondary" className="icon-card-details" />
+    ),
+    lastIcon: (
+      <NavigationOutlinedIcon className="icon-last" color="secondary" />
+    ),
+  },
+  // {
+  //   path: "/approver/approvejournal",
+  //   desc: "Approving of journal entries to appropriate Approver.",
+  //   name: "Journal Approval",
+  //   permission: ["approver"],
+  //   firstIcon: (
+  //     <TaskOutlinedIcon color="secondary" className="icon-card-details" />
+  //   ),
+  //   lastIcon: (
+  //     <NavigationOutlinedIcon className="icon-last" color="secondary" />
+  //   ),
+  // },
+];
+
+const treasury = [
+  {
+    path: "/treasury/check",
+    desc: "Preparation of Check to clearing of check process",
+    name: "Check Voucher",
+    permission: ["preparation", "releasing", "clearing", "check_approval"],
+    firstIcon: (
+      <PlaylistAddCheckOutlinedIcon
+        color="secondary"
+        className="icon-card-details"
+      />
+    ),
+    lastIcon: (
+      <NavigationOutlinedIcon className="icon-last" color="secondary" />
+    ),
+  },
+  {
+    path: "/treasury/checknumber",
+    desc: "Checks status",
+    name: "Check Number",
+    permission: ["preparation", "releasing", "clearing"],
+    firstIcon: (
+      <CreditScoreRoundedIcon color="secondary" className="icon-card-details" />
+    ),
+    lastIcon: (
+      <NavigationOutlinedIcon className="icon-last" color="secondary" />
+    ),
+  },
+  {
+    path: "/treasury/debit-memo",
+    desc: "Debit memo list",
+    name: "Debit Memo",
+    permission: ["preparation", "releasing", "clearing"],
+    firstIcon: (
+      <SummarizeOutlinedIcon color="secondary" className="icon-card-details" />
+    ),
+    lastIcon: (
+      <NavigationOutlinedIcon className="icon-last" color="secondary" />
+    ),
+  },
+  {
+    path: "/treasury/offset",
+    desc: "Masterlist of Checks available",
+    name: "Offset list",
+    permission: ["preparation", "releasing", "clearing"],
+    firstIcon: (
+      <LocalOfferOutlinedIcon color="secondary" className="icon-card-details" />
     ),
     lastIcon: (
       <NavigationOutlinedIcon className="icon-last" color="secondary" />
@@ -515,22 +615,27 @@ const menu = [
         permission: ["account-titles"],
         child: [
           {
+            permission: "account-titles",
             desc: "Great Grandparent",
             icon: <MediationOutlinedIcon />,
           },
           {
+            permission: "account-titles",
             desc: "Grandparent",
             icon: <MediationOutlinedIcon />,
           },
           {
+            permission: "account-titles",
             desc: "Parent",
             icon: <MediationOutlinedIcon />,
           },
           {
+            permission: "account-titles",
             desc: "Child",
             icon: <MediationOutlinedIcon />,
           },
           {
+            permission: "account-titles",
             desc: "Grandchild",
             icon: <MediationOutlinedIcon />,
           },
@@ -550,7 +655,11 @@ const menu = [
         path: "/tagging/tagtransact",
         permission: ["tagging"],
         child: taggingHeader?.map((item) => {
-          return { desc: item?.name, icon: <MediationOutlinedIcon /> };
+          return {
+            permission: item?.permission,
+            desc: item?.name,
+            icon: <MediationOutlinedIcon />,
+          };
         }),
       },
     ],
@@ -568,21 +677,55 @@ const menu = [
         permission: ["ap_tag"],
       },
       {
-        desc: "Check Voucher",
+        desc: "Voucher's Payable",
         icon: <CreditScoreOutlinedIcon />,
         path: "/ap/check",
         permission: ["ap_tag"],
         child: apHeader?.map((item) => {
-          return { desc: item?.name, icon: <MediationOutlinedIcon /> };
+          return {
+            permission: item?.permission,
+            desc: item?.name,
+            icon: <MediationOutlinedIcon />,
+          };
+        }),
+      },
+      // {
+      //   desc: "Journal Voucher",
+      //   icon: <NewspaperOutlinedIcon />,
+      //   path: "/ap/journal",
+      //   permission: ["ap_tag"],
+      //   child: apHeader?.map((item) => {
+      //     return {
+      //       permission: item?.permission,
+      //       desc: item?.name,
+      //       icon: <MediationOutlinedIcon />,
+      //     };
+      //   }),
+      // },
+      {
+        desc: "General Journal",
+        icon: <NewspaperOutlinedIcon />,
+        path: "/ap/general-journal",
+        permission: ["ap_tag"],
+        child: apGJheader?.map((item) => {
+          return {
+            permission: item?.permission,
+            desc: item?.name,
+            icon: <MediationOutlinedIcon />,
+          };
         }),
       },
       {
-        desc: "Journal Voucher",
-        icon: <NewspaperOutlinedIcon />,
-        path: "/ap/journal",
+        desc: "History",
+        icon: <FolderOpenOutlinedIcon />,
+        path: "/ap/history",
         permission: ["ap_tag"],
-        child: apHeader?.map((item) => {
-          return { desc: item?.name, icon: <MediationOutlinedIcon /> };
+        child: apHistoryHeader?.map((item) => {
+          return {
+            permission: item?.permission,
+            desc: item?.name,
+            icon: <MediationOutlinedIcon />,
+          };
         }),
       },
     ],
@@ -594,32 +737,105 @@ const menu = [
     permission: ["approver"],
     children: [
       {
-        desc: "Check Approval",
+        desc: "Voucher Approval",
         icon: <PlaylistAddCheckOutlinedIcon />,
         path: "/approver/approvecheck",
         permission: ["approver"],
         child: approverHeader?.map((item) => {
-          return { desc: item?.name, icon: <MediationOutlinedIcon /> };
+          return {
+            permission: item?.permission,
+            desc: item?.name,
+            icon: <MediationOutlinedIcon />,
+          };
         }),
       },
       {
-        desc: "Journal Approval",
-        icon: <TaskOutlinedIcon />,
-        path: "/approver/approvejournal",
+        desc: "General Journal",
+        icon: <NewspaperOutlinedIcon />,
+        path: "/approver/general-journal",
         permission: ["approver"],
-        child: approverHeader?.map((item) => {
-          return { desc: item?.name, icon: <MediationOutlinedIcon /> };
+        child: approverGJHeader?.map((item) => {
+          return {
+            permission: item?.permission,
+            desc: item?.name,
+            icon: <MediationOutlinedIcon />,
+          };
         }),
       },
+      {
+        desc: "History",
+        icon: <FolderOpenOutlinedIcon />,
+        path: "/approver/history",
+        permission: ["approver"],
+        child: apHistoryHeader?.map((item) => {
+          return {
+            permission: item?.permission,
+            desc: item?.name,
+            icon: <MediationOutlinedIcon />,
+          };
+        }),
+      },
+      // {
+      //   desc: "Journal Approval",
+      //   icon: <TaskOutlinedIcon />,
+      //   path: "/approver/approvejournal",
+      //   permission: ["approver"],
+      //   child: approverHeader?.map((item) => {
+      //     return {
+      //       permission: item?.permission,
+      //       desc: item?.name,
+      //       icon: <MediationOutlinedIcon />,
+      //     };
+      //   }),
+      // },
     ],
   },
   {
-    desc: "Cutoff",
-    icon: <LockPersonOutlinedIcon />,
-    path: "/cutoff",
-    permission: ["cutOff_requestor", "cutOff_approver"],
-    children: [],
+    desc: "Treasury",
+    icon: <AccountBalanceRoundedIcon />,
+    path: "/treasury",
+    permission: ["preparation", "releasing", "clearing", "check_approval"],
+    children: [
+      {
+        desc: "Check Voucher",
+        icon: <PlaylistAddCheckOutlinedIcon />,
+        path: "/treasury/check",
+        permission: ["preparation", "releasing", "clearing", "check_approval"],
+        child: treasuryHeader?.map((item) => {
+          return {
+            permission: item?.permission,
+            desc: item?.name,
+            icon: <MediationOutlinedIcon />,
+          };
+        }),
+      },
+      {
+        desc: "Check Number",
+        icon: <CreditScoreRoundedIcon />,
+        path: "/treasury/checknumber",
+        permission: ["preparation", "releasing", "clearing"],
+      },
+      {
+        desc: "Debit Memo",
+        icon: <SummarizeOutlinedIcon />,
+        path: "/treasury/debit-memo",
+        permission: ["preparation", "releasing", "clearing"],
+      },
+      {
+        desc: "Offset",
+        icon: <LocalOfferOutlinedIcon />,
+        path: "/treasury/offset",
+        permission: ["preparation", "releasing", "clearing"],
+      },
+      {
+        desc: "Balance",
+        icon: <BalanceOutlinedIcon />,
+        path: "/treasury/balance",
+        permission: ["balance"],
+      },
+    ],
   },
+
   {
     desc: "Scheduled",
     icon: <PendingActionsOutlinedIcon />,
@@ -636,7 +852,11 @@ const menu = [
         permission: ["sched_transact_requestor"],
         path: "/sched_transact/request",
         child: schedTaggingHeader?.map((item) => {
-          return { desc: item?.name, icon: <MediationOutlinedIcon /> };
+          return {
+            permission: "sched_transact_requestor",
+            desc: item?.name,
+            icon: <MediationOutlinedIcon />,
+          };
         }),
       },
       {
@@ -645,7 +865,11 @@ const menu = [
         permission: ["sched_transact_ap"],
         path: "/sched_transact/ap",
         child: schedAPHeader?.map((item) => {
-          return { desc: item?.name, icon: <MediationOutlinedIcon /> };
+          return {
+            permission: "sched_transact_ap",
+            desc: item?.name,
+            icon: <MediationOutlinedIcon />,
+          };
         }),
       },
       {
@@ -654,10 +878,21 @@ const menu = [
         permission: ["sched_transact_approver"],
         path: "/sched_transact/approve",
         child: approverScheduleHeader?.map((item) => {
-          return { desc: item?.name, icon: <MediationOutlinedIcon /> };
+          return {
+            permission: "sched_transact_approver",
+            desc: item?.name,
+            icon: <MediationOutlinedIcon />,
+          };
         }),
       },
     ],
+  },
+  {
+    desc: "Cutoff",
+    icon: <LockPersonOutlinedIcon />,
+    path: "/cutoff",
+    permission: ["cutOff_requestor", "cutOff_approver"],
+    children: [],
   },
   {
     desc: "Report",
@@ -752,11 +987,19 @@ const routes = [
       },
       {
         path: "/ap/check",
-        name: "Check Voucher",
+        name: "Voucher's Payable",
+      },
+      // {
+      //   path: "/ap/journal",
+      //   name: "Journal Voucher",
+      // },
+      {
+        path: "/ap/general-journal",
+        name: "General Journal",
       },
       {
-        path: "/ap/journal",
-        name: "Journal Voucher",
+        path: "/ap/history",
+        name: "History",
       },
     ],
   },
@@ -766,11 +1009,12 @@ const routes = [
     children: [
       {
         path: "/approver/approvecheck",
-        name: "Check Approval",
+        name: "Voucher Approval",
       },
+
       {
-        path: "/approver/approvejournal",
-        name: "Journal Approval",
+        path: "/approver/general-journal",
+        name: "General Journal",
       },
     ],
   },
@@ -810,6 +1054,33 @@ const routes = [
       },
     ],
   },
+
+  {
+    path: "/treasury",
+    name: "Treasury",
+    children: [
+      {
+        path: "/treasury/check",
+        name: "Check Voucher",
+      },
+      {
+        path: "/treasury/checknumber",
+        name: "Check Number",
+      },
+      {
+        path: "/treasury/debit-memo",
+        name: "Debit Memo",
+      },
+      {
+        path: "/treasury/offset",
+        name: "Offset",
+      },
+      {
+        path: "/treasury/balance",
+        name: "Beginning Balance",
+      },
+    ],
+  },
 ];
 
 export {
@@ -822,4 +1093,5 @@ export {
   routes,
   schedule,
   report,
+  treasury,
 };

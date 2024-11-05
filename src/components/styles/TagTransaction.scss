@@ -96,6 +96,14 @@
   }
 }
 
+.tag-transaction-body-container.history {
+  &.MuiBox-root {
+    padding: 10px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
 .loading-tag-transaction {
   height: 500px;
 }
@@ -199,7 +207,7 @@
   &.MuiTableRow-root {
     .MuiTableCell-root {
       border: none;
-      padding: 1px;
+      padding: 5px;
       background-color: #fff;
 
       .MuiTablePagination-root {
@@ -337,6 +345,12 @@
 .transaction-modal-dialog-tax {
   .MuiPaper-root {
     max-width: none;
+  }
+}
+
+.check-box-filing {
+  .MuiSvgIcon-root {
+    color: #f4ce92;
   }
 }
 

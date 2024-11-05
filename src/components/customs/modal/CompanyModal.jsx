@@ -19,7 +19,6 @@ import {
 } from "../../../services/store/request";
 import { useSnackbar } from "notistack";
 import { objectError } from "../../../services/functions/errorResponse";
-import socket from "../../../services/functions/serverSocket";
 
 const CompanyModal = ({ companyData, view, update }) => {
   const dispatch = useDispatch();
@@ -60,7 +59,6 @@ const CompanyModal = ({ companyData, view, update }) => {
       try {
         const res = await updateCompany(obj).unwrap();
         enqueueSnackbar(res?.message, { variant: "success" });
-        socket.emit("company_updated");
         dispatch(resetMenu());
       } catch (error) {
         objectError(error, setError, enqueueSnackbar);
@@ -69,7 +67,6 @@ const CompanyModal = ({ companyData, view, update }) => {
       try {
         const res = await createCompany(obj).unwrap();
         enqueueSnackbar(res?.message, { variant: "success" });
-        socket.emit("company_updated");
         dispatch(resetMenu());
       } catch (error) {
         objectError(error, setError, enqueueSnackbar);

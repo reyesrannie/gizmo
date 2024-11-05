@@ -172,6 +172,18 @@
   gap: 10px;
 }
 
+.form-container-transaction.clearing {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.form-container-transaction.width {
+  max-width: 100px;
+}
+
 .transaction-devider {
   &.MuiDivider-root {
     width: 100%;
@@ -215,6 +227,24 @@
   &.MuiFormControl-root {
     min-width: 230px;
     max-width: 230px;
+    min-height: unset;
+  }
+}
+
+.transaction-form-textBox.preparation {
+  &.MuiFormControl-root {
+    min-width: 150px;
+    margin: 5px;
+    max-width: 0px;
+    min-height: 0px;
+    max-height: 50px;
+    .MuiInputBase-root {
+      overflow: hidden;
+      font-size: 0.75rem;
+    }
+    .MuiFormLabel-root {
+      font-size: 0.75rem;
+    }
   }
 }
 
@@ -282,6 +312,66 @@
   }
 }
 
+.transaction-form-date.recieve {
+  &.MuiFormControl-root {
+    min-height: unset;
+  }
+}
+
+.transaction-form-date.preparation {
+  &.MuiFormControl-root {
+    min-width: 150px;
+    margin: 0px;
+    max-width: 0px;
+    min-height: 0px;
+    max-height: 50px;
+    background-color: #f0f0f0;
+    margin: 5px;
+    .MuiInputBase-root {
+      border-radius: 10px;
+      font-family: Roboto-Medium;
+      letter-spacing: 1px;
+      font-size: 0.75rem;
+      max-height: 40px;
+    }
+    .MuiFormLabel-root {
+      background-color: #ffffff;
+      line-height: 0.5rem;
+      letter-spacing: 1px;
+      font-size: 0.75rem;
+    }
+  }
+}
+
+.transaction-form-date.history {
+  &.MuiFormControl-root {
+    margin: 0px;
+    min-height: 0px;
+    max-height: 50px;
+    background-color: #f0f0f0;
+    margin: 5px;
+    .MuiInputBase-root {
+      border-radius: 10px;
+      font-family: Roboto-Medium;
+      letter-spacing: 1px;
+      font-size: 0.75rem;
+      min-height: 39px;
+    }
+    .MuiFormLabel-root {
+      background-color: #ffffff;
+      line-height: 0.5rem;
+      letter-spacing: 1px;
+      font-size: 0.75rem;
+    }
+  }
+}
+
+.date-picker-container-transaction.preparation {
+  &.MuiBox-root {
+    align-items: center;
+  }
+}
+
 .date-picker-container-transaction {
   &.MuiBox-root {
     position: relative;
@@ -295,6 +385,25 @@
       margin-left: 15px;
       bottom: 0;
     }
+  }
+}
+
+.history-box-container {
+  &.MuiBox-root {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+}
+
+.history-box-container.history {
+  &.MuiBox-root {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    width: 100%;
   }
 }
 
@@ -389,6 +498,12 @@
   &.MuiButtonBase-root {
     font-family: Roboto-Medium;
     text-transform: none;
+  }
+}
+
+.add-transaction-button.treasury {
+  &.MuiButtonBase-root {
+    width: 70%;
   }
 }
 

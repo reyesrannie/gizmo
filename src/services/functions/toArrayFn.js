@@ -1,9 +1,10 @@
 import moment from "moment";
 import { totalAccount } from "./compute";
+import dayjs from "dayjs";
 
 export const arrayFieldOne = (menuData, sumAmount, voucher, document) => {
   const doc = document?.result?.find(
-    (item) => item?.id === menuData?.transactions?.document_type_id
+    (item) => item?.id === menuData?.transactions?.documentType?.id
   )?.code;
 
   const obj = [
@@ -35,9 +36,13 @@ export const arrayFieldOne = (menuData, sumAmount, voucher, document) => {
 };
 
 export const arrayFieldThree = (menuData, receiveBy) => {
+  const tagMonthYear = dayjs(menuData?.transactions?.tag_year, "YYMM").toDate();
+
   const obj = [
     {
-      tag_no: `${menuData?.transactions?.tag_year}-${menuData?.transactions?.tag_no}`,
+      tag_no: `${menuData?.transactions?.tag_no}-${moment(tagMonthYear).get(
+        "year"
+      )}`,
       time: undefined,
     },
     {
@@ -174,7 +179,7 @@ export const coaArrays = (coa, taxComputation, supTypePercent, coa_id) => {
     const coa = new Map();
 
     if (item?.length > 0) {
-      item?.forEach((data) => {
+      item?.forEach((data, index) => {
         const coaId = data?.id;
         const amount = data?.amount;
         const mode = data?.mode;
@@ -183,12 +188,13 @@ export const coaArrays = (coa, taxComputation, supTypePercent, coa_id) => {
 
         if (coa.has(code)) {
           const existingCoa = coa?.get(code);
-
+          const isDebit = existingCoa.amount > amount ? existingCoa.mode : mode;
           existingCoa.mode !== mode
             ? (existingCoa.amount -= amount)
             : (existingCoa.amount += amount);
 
-          const isDebit = existingCoa.amount > amount ? existingCoa.mode : mode;
+          existingCoa.amount = Math.abs(existingCoa.amount);
+
           existingCoa.mode = isDebit;
         } else {
           coa.set(code, {
@@ -197,6 +203,7 @@ export const coaArrays = (coa, taxComputation, supTypePercent, coa_id) => {
             mode: mode,
             name: name,
             code: code,
+            index: index,
           });
         }
       });
@@ -208,8 +215,6 @@ export const coaArrays = (coa, taxComputation, supTypePercent, coa_id) => {
 
     return combinedItems;
   };
-
-  console.log(...theSameCoa());
 
   const itemCollected = [
     ...theSameCoa(),
@@ -315,6 +320,9 @@ export const getAllSupplier = (report) => {
 
   report?.result?.forEach((item) => {
     const supplierId = item?.transactions?.supplier?.id;
+    const atcId = item?.atc?.id;
+    const supplierKey = `${supplierId}-${atcId}`;
+
     const vatValue = {
       nvat_local: item?.nvat_local,
       nvat_service: item?.nvat_service,
@@ -324,8 +332,9 @@ export const getAllSupplier = (report) => {
     const taxBased = Object.keys(vatValue).find((key) => vatValue[key] !== 0);
     const tax = vatValue[taxBased] || 0;
     const wtax = item?.wtax_payable_cr || 0;
-    if (supplier.has(supplierId)) {
-      const existingSup = supplier.get(supplierId);
+
+    if (supplier.has(supplierKey)) {
+      const existingSup = supplier.get(supplierKey);
       if (item.mode === "Credit") {
         existingSup.amount -= item?.amount;
         existingSup.wtax -= wtax;
@@ -336,7 +345,7 @@ export const getAllSupplier = (report) => {
         existingSup.taxBased += tax;
       }
     } else {
-      supplier.set(supplierId, {
+      supplier.set(supplierKey, {
         code: item?.transactions?.supplier,
         amount: item?.amount,
         source: item?.transactions?.apTagging,
@@ -357,9 +366,11 @@ export const getAllSupplier = (report) => {
       });
     }
   });
+
   const combinedItems = Array.from(supplier.values()).map((item) => ({
     ...item,
     amount: item.amount,
   }));
+
   return combinedItems;
 };

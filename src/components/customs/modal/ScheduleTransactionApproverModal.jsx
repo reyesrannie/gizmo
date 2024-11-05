@@ -54,7 +54,6 @@ import ReasonInput from "../ReasonInput";
 import { enqueueSnackbar } from "notistack";
 import { singleError } from "../../../services/functions/errorResponse";
 import ComputationMenu from "./ComputationMenu";
-import socket from "../../../services/functions/serverSocket";
 
 const ScheduleTransactionApproverModal = ({
   view,
@@ -236,7 +235,6 @@ const ScheduleTransactionApproverModal = ({
     try {
       const res = await returnCheckEntry(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      socket.emit("schedule_returned");
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
@@ -252,7 +250,6 @@ const ScheduleTransactionApproverModal = ({
     try {
       const res = await approveCheckEntry(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      socket.emit("schedule_approved");
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {

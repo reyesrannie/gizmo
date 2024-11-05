@@ -59,3 +59,31 @@ export const totalCredit = (taxComputation, property) => {
 
   return total;
 };
+
+export const totalAccountMapping = (taxComputation, items) => {
+  const getAllSameID = taxComputation?.result?.filter(
+    (item) => items?.transactions?.id === item?.transaction_id
+  );
+
+  return (getAllSameID || []).reduce((acc, curr) => {
+    const value = parseFloat(curr?.account ?? 0);
+    return curr?.credit !== 0 ? acc - value : acc + value;
+  }, 0);
+};
+
+export const totalAmountCheck = (item) => {
+  const totalAmount = item?.reduce((acc, curr) => {
+    const value = parseFloat(curr?.checkNo?.amount || 0);
+    return curr?.checkNo?.state === "Cancelled" ? acc + 0 : acc + value;
+  }, 0);
+
+  return totalAmount;
+};
+
+export const totalAmountCheckForm = (item) => {
+  const totalAmount = item?.reduce((acc, curr) => {
+    return acc + parseFloat(curr?.amount || 0);
+  }, 0);
+
+  return totalAmount;
+};

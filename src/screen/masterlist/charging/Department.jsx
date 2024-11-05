@@ -67,7 +67,6 @@ import { useSnackbar } from "notistack";
 import { singleError } from "../../../services/functions/errorResponse";
 import { generateExcelwTag } from "../../../services/functions/exportFile";
 import ImportModal from "../../../components/customs/modal/ImportModal";
-import socket from "../../../services/functions/serverSocket";
 
 const Department = () => {
   const excelItems = ["ID", "CODE", "NAME", "CREATED AT", "DATE MODIFIED"];
@@ -117,7 +116,6 @@ const Department = () => {
     try {
       const res = await archiveDepartment(menuData).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      socket.emit("department_updated");
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
@@ -129,7 +127,6 @@ const Department = () => {
     try {
       const res = await importDepartment(submitData).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      socket.emit("department_updated");
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {

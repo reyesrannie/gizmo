@@ -55,6 +55,29 @@
   }
 }
 
+.add-atc-textbox.autocomplete {
+  &.MuiFormControl-root {
+    border-radius: 10px;
+    min-width: 350px;
+    max-width: 350px;
+    min-height: 60px;
+
+    .MuiInputBase-root {
+      border-radius: 10px;
+      font-family: Roboto-Medium;
+      letter-spacing: 1px;
+    }
+    .MuiFormLabel-root {
+      font-family: Roboto-Medium;
+      letter-spacing: 1px;
+    }
+    .MuiFormHelperText-root {
+      font-family: Roboto-Light;
+      letter-spacing: 1px;
+    }
+  }
+}
+
 .add-atc-button-container {
   &.MuiBox-root {
     margin-top: 10px;

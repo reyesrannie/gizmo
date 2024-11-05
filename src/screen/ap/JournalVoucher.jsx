@@ -53,10 +53,6 @@ const JournalVoucher = () => {
     status,
   } = useJournalEntriesQuery(params);
 
-  const { countHeaderAPJL, countJournal } = CountDistribute();
-
-  const hasBadge = countJournal();
-
   useEffect(() => {
     if (header) {
       const statusChange = apHeader?.find((item) => item?.name === header);
@@ -97,12 +93,7 @@ const JournalVoucher = () => {
           >
             <AccordionSummary onClick={() => dispatch(setIsExpanded(false))}>
               <Typography className="page-text-indicator-tag-transaction">
-                <Badge
-                  badgeContent={header ? countHeaderAPJL(header) : 0}
-                  color="error"
-                >
-                  {header}
-                </Badge>
+                {header}
               </Typography>
             </AccordionSummary>
             {apHeader?.map(
@@ -118,14 +109,7 @@ const JournalVoucher = () => {
                     }}
                   >
                     <Typography className="page-text-accord-tag-transaction">
-                      <Badge
-                        badgeContent={
-                          head?.name ? countHeaderAPJL(head?.name) : 0
-                        }
-                        color="error"
-                      >
-                        {head?.name}
-                      </Badge>
+                      {head?.name}
                     </Typography>
                   </AccordionSummary>
                 )
@@ -136,9 +120,7 @@ const JournalVoucher = () => {
               dispatch(setIsExpanded(!isExpanded));
             }}
           >
-            <Badge variant="dot" invisible={hasBadge} color="error">
-              <ArrowDropDownCircleOutlinedIcon />
-            </Badge>
+            <ArrowDropDownCircleOutlinedIcon />
           </IconButton>
         </Box>
         <Box className="tag-transaction-button-container">
@@ -236,7 +218,7 @@ const JournalVoucher = () => {
           state={""}
         />
       )}
-      {header === "Checked" && (
+      {header === "For Approval" && (
         <JournalTable
           params={params}
           onSortTable={onSortTable}

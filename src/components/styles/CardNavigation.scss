@@ -7,10 +7,31 @@
   }
 }
 
+.card-navigation-container.history {
+  &.MuiCard-root {
+    background-color: #1a1d24;
+    min-width: 280px;
+    max-width: 220px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin: 10px;
+  }
+}
+
 .card-content {
   &.MuiCardContent-root {
     min-height: 170px;
     max-height: 170px;
+  }
+}
+
+.card-content.history {
+  &.MuiCardContent-root {
+    min-height: 30px;
+    max-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
   }
 }
 
@@ -23,11 +44,58 @@
   }
 }
 
+.icon-card-details.history {
+  &.MuiSvgIcon-root {
+    background-color: #1a1d24;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 0px;
+  }
+}
+
 .card-title {
   &.MuiTypography-root {
     font-family: Roboto-Black;
     font-size: 16px;
     margin-bottom: 5px;
+    color: #1a1d24;
+  }
+}
+
+.card-title.history {
+  &.MuiTypography-root {
+    font-family: Roboto-Black;
+    font-size: 18px;
+    margin-bottom: 0px;
+    color: #f4ce92;
+  }
+}
+
+.card-details.history {
+  &.MuiTypography-root {
+    font-family: Roboto-Light;
+    font-size: 14px;
+    color: #f4ce92;
+  }
+}
+
+.card-details-number {
+  &.MuiTypography-root {
+    font-family: Roboto-Strong;
+    font-size: 26px;
+    padding: 5px;
+    color: #f4ce92;
+  }
+}
+
+.card-count {
+  &.MuiBox-root {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 50px;
+    background-color: #1a1d24;
+    border-radius: 50%;
   }
 }
 

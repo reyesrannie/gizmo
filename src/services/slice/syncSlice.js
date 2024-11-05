@@ -3,6 +3,9 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   date: false,
   isSyncing: true,
+  clearChecks: false,
+  isDisplayed: false,
+  isShownTable: false,
 };
 
 const syncSlice = createSlice({
@@ -15,6 +18,15 @@ const syncSlice = createSlice({
     setIsSyncing: (state, action) => {
       state.isSyncing = action.payload;
     },
+    setClearChecks: (state, action) => {
+      state.clearChecks = action.payload;
+    },
+    setDisplayed: (state, action) => {
+      state.isDisplayed = action.payload;
+    },
+    setShownTable: (state, action) => {
+      state.isShownTable = action.payload;
+    },
 
     resetSync: () => {
       return initialState;
@@ -22,6 +34,13 @@ const syncSlice = createSlice({
   },
 });
 
-export const { setDate, setIsSyncing, resetSync } = syncSlice.actions;
+export const {
+  setDate,
+  setIsSyncing,
+  setClearChecks,
+  setDisplayed,
+  setShownTable,
+  resetSync,
+} = syncSlice.actions;
 
 export default syncSlice.reducer;

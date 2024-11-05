@@ -92,6 +92,7 @@ const UserModal = ({ menuData, view, update }) => {
     },
   });
 
+  console.log(menuData);
   useEffect(() => {
     if (successSedar && successAP && successRole) {
       const valuesItem = {

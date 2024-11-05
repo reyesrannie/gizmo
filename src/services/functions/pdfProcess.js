@@ -61,7 +61,6 @@ const joinAddressParts = (addressParts, startIndex, endIndex) => {
 // Start PDF
 
 export const printPDF = async (data) => {
-  console.log(data);
   const vpl = data?.tax?.reduce((acc, curr) => {
     return curr?.credit != 0
       ? acc - parseFloat(curr.vat_local)
@@ -125,11 +124,6 @@ export const printPDF = async (data) => {
         : acc,
     0
   );
-
-  console.log(wTaxL);
-  console.log(wTaxS);
-  console.log(wNTaxL);
-  console.log(wNTaxS);
 
   const dateToday = new Date();
   const response = await fetch(pdfFileAsset);

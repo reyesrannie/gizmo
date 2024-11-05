@@ -7,7 +7,6 @@ import {
   Button,
   Dialog,
   InputAdornment,
-  IconButton,
   FormControlLabel,
   Checkbox,
   Tooltip,
@@ -52,7 +51,6 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
   const dispatch = useDispatch();
   const transactionData = useSelector((state) => state.menu.menuData);
   const taxData = useSelector((state) => state.menu.taxData);
-  const disableCreate = useSelector((state) => state.options.disableCreate);
   const voucher = useSelector((state) => state.options.voucher);
 
   const {
@@ -229,17 +227,17 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
         total_invoice_amount: taxData?.total_invoice_amount,
         debit: taxData?.debit,
         credit: taxData?.credit,
-        account: taxData?.account,
+        account: parseFloat(taxData?.account),
         remarks: taxData?.remarks || "",
       };
-
-      Object.entries(obj).forEach(([key, value]) => {
-        setValue(key, value);
-      });
 
       const tinType = tin?.result?.find(
         (item) => item?.id === transactionData?.transactions?.supplier_id
       );
+
+      Object.entries(obj).forEach(([key, value]) => {
+        setValue(key, value);
+      });
 
       dispatch(setSupplyType(tinType));
       hasRun.current = true;
@@ -337,17 +335,6 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
     }
   };
 
-  const handleChangeAmount = () => {
-    const wtaxString = watch("wtax_payable_cr");
-    const wtaxNumber = parseFloat(wtaxString.replace(/,/g, ""));
-    setValue(
-      "account",
-      watch("isTaxBased")
-        ? parseFloat(parseFloat(watch("amount")) - parseFloat(wtaxNumber))
-        : parseFloat(parseFloat(watch("debit")) - parseFloat(wtaxNumber))
-    );
-  };
-
   const handleClear = () => {
     const obj = {
       vat_local: "",
@@ -369,12 +356,18 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
     setRequiredFieldsValue(watch("amount"));
   };
 
+  console.log(transactionData);
   const submitHandler = async (submitData) => {
     const obj = {
       ...submitData,
       location_id: submitData?.location_id?.id,
-      transaction_id: schedule ? null : transactionData?.transactions?.id,
+      transaction_id: schedule
+        ? null
+        : voucher === "gj"
+        ? null
+        : transactionData?.transactions?.id,
       schedule_id: schedule ? transactionData?.id : null,
+      gj_id: voucher === "gj" ? transactionData?.id : null,
       stype_id: submitData?.stype_id?.id,
       coa_id: submitData?.coa_id?.id,
       atc_id: submitData?.atc_id?.id,
@@ -406,6 +399,27 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
     } catch (error) {
       objectError(error, setError, enqueueSnackbar);
     }
+  };
+
+  const handleChangeAmount = () => {
+    const wtaxString = watch("wtax_payable_cr");
+    const wtaxNumber = parseFloat(wtaxString);
+    setValue(
+      "account",
+      watch("isTaxBased")
+        ? parseFloat(parseFloat(watch("amount")) - parseFloat(wtaxNumber))
+        : parseFloat(parseFloat(watch("debit")) - parseFloat(wtaxNumber))
+    );
+  };
+
+  const autoChangeWtax = (e) => {
+    const baseAmount = parseFloat(e.target.value.replace(/,/g, ""));
+    setValue(
+      "wtax_payable_cr",
+      (baseAmount * parseFloat(watch("stype_id")?.wtax)) / 100
+    );
+
+    handleChangeAmount();
   };
 
   return (
@@ -476,8 +490,17 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
 
         <Autocomplete
           control={control}
-          name={"atc_id"}
-          options={atc?.result || []}
+          name="atc_id"
+          options={
+            atc?.result?.filter((item) => {
+              const supplierAtcs = schedule
+                ? transactionData?.supplier?.supplier_atcs
+                : transactionData?.transactions?.supplier?.supplier_atcs;
+              return supplierAtcs?.some(
+                (data) => item?.id.toString() === data?.atc_id?.toString()
+              );
+            }) || []
+          }
           getOptionLabel={(option) => `${option.code} - ${option.name}`}
           isOptionEqualToValue={(option, value) => option?.code === value?.code}
           renderInput={(params) => (
@@ -544,6 +567,7 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
 
         <AppTextBox
           money
+          showDecimal
           control={control}
           name={"amount"}
           label={"Amount *"}
@@ -558,6 +582,8 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
 
         {checkField("vat_local") && (
           <AppTextBox
+            onKeyUp={autoChangeWtax}
+            showDecimal
             money
             control={control}
             name={"vat_local"}
@@ -570,6 +596,8 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
         )}
         {checkField("vat_service") && (
           <AppTextBox
+            onKeyUp={autoChangeWtax}
+            showDecimal
             money
             control={control}
             name={"vat_service"}
@@ -582,6 +610,8 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
         )}
         {checkField("nvat_local") && (
           <AppTextBox
+            onKeyUp={autoChangeWtax}
+            showDecimal
             money
             control={control}
             name={"nvat_local"}
@@ -594,6 +624,8 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
         )}
         {checkField("nvat_service") && (
           <AppTextBox
+            onKeyUp={autoChangeWtax}
+            showDecimal
             money
             control={control}
             name={"nvat_service"}
@@ -605,6 +637,7 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
           />
         )}
         <AppTextBox
+          showDecimal
           money
           control={control}
           name={"vat_input_tax"}
@@ -615,6 +648,7 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
           helperText={errors?.vat_input_tax?.message}
         />
         <AppTextBox
+          showDecimal
           money
           control={control}
           name={"wtax_payable_cr"}
@@ -651,6 +685,7 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
           }}
         />
         <AppTextBox
+          showDecimal
           money
           control={control}
           name={"total_invoice_amount"}
@@ -662,6 +697,7 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
         />
         {watch("mode") === "Debit" && (
           <AppTextBox
+            showDecimal
             money
             control={control}
             name={"debit"}
@@ -674,6 +710,7 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
         )}
         {watch("mode") === "Credit" && (
           <AppTextBox
+            showDecimal
             money
             control={control}
             name={"credit"}
@@ -686,6 +723,7 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
         )}
 
         <AppTextBox
+          showDecimal
           money
           control={control}
           name={"account"}

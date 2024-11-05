@@ -34,7 +34,7 @@ const ApprovingCheck = () => {
   const dispatch = useDispatch();
 
   const isExpanded = useSelector((state) => state.transaction.isExpanded);
-  const header = useSelector((state) => state.headers.header) || "For Approval";
+  const header = useSelector((state) => state.headers.header) || "Approval";
 
   const {
     params,
@@ -54,10 +54,6 @@ const ApprovingCheck = () => {
     isFetching,
     status,
   } = useCheckEntriesQuery(params);
-
-  const { countHeaderApproverCH, countApproveCheck } = CountDistribute();
-
-  const hasBadge = countApproveCheck();
 
   useEffect(() => {
     if (header) {
@@ -118,14 +114,7 @@ const ApprovingCheck = () => {
                     }}
                   >
                     <Typography className="page-text-accord-tag-transaction">
-                      <Badge
-                        badgeContent={
-                          head?.name ? countHeaderApproverCH(head?.name) : 0
-                        }
-                        color="error"
-                      >
-                        {head?.name}
-                      </Badge>
+                      {head?.name}
                     </Typography>
                   </AccordionSummary>
                 )
@@ -136,16 +125,14 @@ const ApprovingCheck = () => {
               dispatch(setIsExpanded(!isExpanded));
             }}
           >
-            <Badge variant="dot" color="error" invisible={hasBadge}>
-              <ArrowDropDownCircleOutlinedIcon />
-            </Badge>
+            <ArrowDropDownCircleOutlinedIcon />
           </IconButton>
         </Box>
         <Box className="tag-transaction-button-container">
           <SearchText onSearchData={onSearchData} />
         </Box>
       </Box>
-      {header === "For Approval" && (
+      {header === "Approval" && (
         <CheckTable
           params={params}
           onSortTable={onSortTable}
@@ -161,22 +148,7 @@ const ApprovingCheck = () => {
           onShowAll={onShowAll}
         />
       )}
-      {header === "Checked" && (
-        <CheckTable
-          params={params}
-          onSortTable={onSortTable}
-          isError={isError}
-          isFetching={isFetching}
-          isLoading={isLoading}
-          onPageChange={onPageChange}
-          onRowChange={onRowChange}
-          status={status}
-          tagTransaction={tagTransaction}
-          onOrderBy={onOrderBy}
-          state="checked"
-          onShowAll={onShowAll}
-        />
-      )}
+
       {header === "Returned" && (
         <CheckTable
           params={params}

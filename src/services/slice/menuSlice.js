@@ -11,6 +11,8 @@ const initialState = {
   checkMenu: false,
   computationMenu: false,
   updateMenu: false,
+  updateData: false,
+  checkID: "",
   receiveMenu: false,
   importMenu: false,
   importHasData: false,
@@ -19,6 +21,7 @@ const initialState = {
   importError: null,
   viewMenu: false,
   menuData: null,
+  menuDataMultiple: [],
   createTax: false,
   updateTax: false,
   taxData: null,
@@ -27,7 +30,10 @@ const initialState = {
   viewAccountingEntries: false,
   voidMenu: false,
   schedComputation: false,
+  isSched: false,
   approveMenu: false,
+  preparation: false,
+  hasError: false,
 };
 
 const initialStateWithoutDrawer = {
@@ -49,6 +55,7 @@ const initialStateWithoutDrawer = {
   importError: null,
   viewMenu: false,
   menuData: null,
+  menuDataMultiple: [],
   createTax: false,
   updateTax: false,
   taxData: null,
@@ -58,6 +65,7 @@ const initialStateWithoutDrawer = {
   voidMenu: false,
   schedComputation: false,
   approveMenu: false,
+  preparation: false,
 };
 
 const menutSlice = createSlice({
@@ -88,6 +96,12 @@ const menutSlice = createSlice({
     setUpdateMenu: (state, action) => {
       state.updateMenu = action.payload;
     },
+    setUpdateData: (state, action) => {
+      state.updateData = action.payload;
+    },
+    setCheckID: (state, action) => {
+      state.checkID = action.payload;
+    },
     setViewMenu: (state, action) => {
       state.viewMenu = action.payload;
     },
@@ -108,6 +122,10 @@ const menutSlice = createSlice({
     },
     setMenuData: (state, action) => {
       state.menuData = action.payload;
+    },
+
+    setMenuDataMultiple: (state, action) => {
+      state.menuDataMultiple = action.payload;
     },
     setReceiveMenu: (state, action) => {
       state.receiveMenu = action.payload;
@@ -146,6 +164,15 @@ const menutSlice = createSlice({
     setApproveMenu: (state, action) => {
       state.approveMenu = action.payload;
     },
+    setPreparation: (state, action) => {
+      state.preparation = action.payload;
+    },
+    setHasError: (state, action) => {
+      state.hasError = action.payload;
+    },
+    setSched: (state, action) => {
+      state.isSched = action.payload;
+    },
 
     resetMenu: () => {
       return initialState;
@@ -165,6 +192,8 @@ export const {
   setRolesData,
   setCreateMenu,
   setUpdateMenu,
+  setUpdateData,
+  setCheckID,
   setViewMenu,
   setImportMenu,
   setImportHasData,
@@ -184,8 +213,12 @@ export const {
   setVoidMenu,
   setSchedComputation,
   setViewAccountingEntries,
+  setPreparation,
   resetMenuWithoutDrawer,
   setApproveMenu,
+  setMenuDataMultiple,
+  setHasError,
+  setSched,
 } = menutSlice.actions;
 
 export default menutSlice.reducer;

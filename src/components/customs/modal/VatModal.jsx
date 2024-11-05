@@ -19,7 +19,6 @@ import {
 import { useSnackbar } from "notistack";
 import { objectError } from "../../../services/functions/errorResponse";
 import vatSchema from "../../../schemas/vatSchema";
-import socket from "../../../services/functions/serverSocket";
 
 const VatModal = ({ vatData, view, update }) => {
   const dispatch = useDispatch();
@@ -59,7 +58,6 @@ const VatModal = ({ vatData, view, update }) => {
       try {
         const res = await updateVat(obj).unwrap();
         enqueueSnackbar(res?.message, { variant: "success" });
-        socket.emit("vat_updated");
         dispatch(resetMenu());
       } catch (error) {
         objectError(error, setError, enqueueSnackbar);
@@ -68,7 +66,6 @@ const VatModal = ({ vatData, view, update }) => {
       try {
         const res = await createVat(obj).unwrap();
         enqueueSnackbar(res?.message, { variant: "success" });
-        socket.emit("vat_updated");
         dispatch(resetMenu());
       } catch (error) {
         objectError(error, setError, enqueueSnackbar);

@@ -57,7 +57,6 @@ import {
 import TransactionModalAp from "../../components/customs/modal/TransactionModalAp";
 import { setVoucher } from "../../services/slice/optionsSlice";
 import TransactionModalApprover from "../../components/customs/modal/TransactionModalApprover";
-import socket from "../../services/functions/serverSocket";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import orderBySchema from "../../schemas/orderBySchema";
@@ -65,6 +64,7 @@ import Autocomplete from "../../components/customs/AutoComplete";
 import ClearIcon from "@mui/icons-material/Clear";
 import { AdditionalFunction } from "../../services/functions/AdditionalFunction";
 import { hasAccess } from "../../services/functions/access";
+import dayjs from "dayjs";
 
 const CheckTable = ({
   params,
@@ -105,7 +105,6 @@ const CheckTable = ({
     };
     try {
       const res = await readTransaction(obj).unwrap();
-      socket.emit("transaction_read");
     } catch (error) {}
   };
 
@@ -228,6 +227,11 @@ const CheckTable = ({
                     tag?.transactions?.document_type_id === doc?.id || null
                 );
 
+                const tagMonthYear = dayjs(
+                  tag?.transactions?.tag_year,
+                  "YYMM"
+                ).toDate();
+
                 return (
                   <TableRow
                     className="table-body-tag-transaction"
@@ -235,7 +239,10 @@ const CheckTable = ({
                     onClick={() => {
                       dispatch(setMenuData(tag));
                       dispatch(setVoucher("check"));
-                      tag?.is_read === 0 && handleRead(tag);
+                      tag?.is_read === 0 &&
+                        tag?.state !== "returned" &&
+                        tag?.state !== "voided" &&
+                        handleRead(tag);
                       tag?.state === "approved" && dispatch(setViewMenu(true));
 
                       tag?.state === "For Voiding" &&
@@ -251,7 +258,9 @@ const CheckTable = ({
                     }}
                   >
                     <TableCell>
-                      {`${tag?.transactions?.tag_year} - ${tag?.transactions?.tag_no}`}
+                      {`${tag?.transactions?.tag_no} - ${moment(
+                        tagMonthYear
+                      ).get("year")}`}
                     </TableCell>
                     <TableCell>
                       <Typography className="tag-transaction-company-name">
@@ -284,7 +293,9 @@ const CheckTable = ({
                         </Typography>
                       ) : (
                         <Typography className="tag-transaction-company-name">
-                          {`${tag?.transactions?.ap_tagging} - ${tag?.transactions?.tag_year} - ${tag?.transactions?.gtag_no} `}
+                          {`${tag?.transactions?.ap_tagging} - ${
+                            tag?.transactions?.gtag_no
+                          }- ${moment(tagMonthYear).get("year")}`}
                         </Typography>
                       )}
 
@@ -296,35 +307,86 @@ const CheckTable = ({
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
+                      {tag?.state === "For Computation" && (
+                        <StatusIndicator
+                          status="For Computation"
+                          className="computation-indicator"
+                        />
+                      )}
+
                       {tag?.state === "For Approval" && (
                         <StatusIndicator
                           status="For Approval"
-                          className="checked-indicator"
+                          className="approval-indicator"
                         />
                       )}
-                      {tag?.state === "returned" && (
-                        <StatusIndicator
-                          status="Returned"
-                          className="inActive-indicator"
-                        />
-                      )}
+
                       {tag?.state === "approved" && (
                         <StatusIndicator
                           status="Approved"
-                          className="received-indicator"
+                          className="approved-indicator"
+                        />
+                      )}
+
+                      {tag?.state === "returned" && (
+                        <StatusIndicator
+                          status="Returned"
+                          className="return-indicator"
                         />
                       )}
 
                       {tag?.state === "For Voiding" && (
                         <StatusIndicator
                           status="For Voiding"
-                          className="pending-indicator"
+                          className="voiding-indicator"
                         />
                       )}
 
                       {tag?.state === "voided" && (
                         <StatusIndicator
                           status="Void"
+                          className="void-indicator"
+                        />
+                      )}
+
+                      {tag?.state === "For Preparation" && (
+                        <StatusIndicator
+                          status="Awaiting Prep"
+                          className="preparation-indicator"
+                        />
+                      )}
+
+                      {tag?.state === "For Releasing" && (
+                        <StatusIndicator
+                          status="Awaiting Release"
+                          className="release-indicator"
+                        />
+                      )}
+
+                      {tag?.state === "For Filing" && (
+                        <StatusIndicator
+                          status="Awaiting File"
+                          className="filing-indicator"
+                        />
+                      )}
+
+                      {tag?.state === "For Clearing" && (
+                        <StatusIndicator
+                          status="For Clearing"
+                          className="clearing-indicator"
+                        />
+                      )}
+
+                      {tag?.state === "Filed" && (
+                        <StatusIndicator
+                          status="Filed"
+                          className="filed-indicator"
+                        />
+                      )}
+
+                      {tag?.state === "Cancelled" && (
+                        <StatusIndicator
+                          status="Cancelled"
                           className="inActive-indicator"
                         />
                       )}

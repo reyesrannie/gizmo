@@ -59,9 +59,7 @@ const APSchedule = () => {
     status,
   } = useSchedTransactionQuery(params);
 
-  const { countGrandChildcheck, countScheduleAP } = CountDistribute();
-
-  const hasBadge = countScheduleAP();
+  const { countGrandChildcheck } = CountDistribute();
 
   useEffect(() => {
     if (header) {
@@ -103,14 +101,7 @@ const APSchedule = () => {
           >
             <AccordionSummary onClick={() => dispatch(setIsExpanded(false))}>
               <Typography className="page-text-indicator-tag-transaction">
-                <Badge
-                  badgeContent={
-                    header ? countGrandChildcheck(header, "AP Schedule") : 0
-                  }
-                  color="error"
-                >
-                  {header}
-                </Badge>
+                {header}
               </Typography>
             </AccordionSummary>
             {schedAPHeader?.map(
@@ -127,16 +118,7 @@ const APSchedule = () => {
                     }}
                   >
                     <Typography className="page-text-accord-tag-transaction">
-                      <Badge
-                        badgeContent={
-                          head?.name
-                            ? countGrandChildcheck(head?.name, "AP Schedule")
-                            : 0
-                        }
-                        color="error"
-                      >
-                        {head?.name}
-                      </Badge>
+                      {head?.name}
                     </Typography>
                   </AccordionSummary>
                 )
@@ -147,9 +129,7 @@ const APSchedule = () => {
               dispatch(setIsExpanded(!isExpanded));
             }}
           >
-            <Badge variant="dot" color="error" invisible={hasBadge}>
-              <ArrowDropDownCircleOutlinedIcon />
-            </Badge>
+            <ArrowDropDownCircleOutlinedIcon />
           </IconButton>
         </Box>
         <Box className="tag-transaction-button-container">
@@ -188,7 +168,7 @@ const APSchedule = () => {
           ap
         />
       )}
-      {header === "Checked" && (
+      {header === "For Approval" && (
         <ScheduleTable
           params={params}
           onSortTable={onSortTable}

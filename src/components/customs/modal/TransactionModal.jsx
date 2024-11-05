@@ -24,10 +24,10 @@ import {
   useApQuery,
   useArchiveTransactionMutation,
   useCheckTransactionQuery,
+  useCreateCheckEntriesMutation,
   useCreateTransactionMutation,
   useCutOffQuery,
   useDocumentTypeQuery,
-  useJournalTransactionQuery,
   useLocationQuery,
   useReceiveTransactionMutation,
   useSupplierQuery,
@@ -39,7 +39,6 @@ import { DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import {
   resetPrompt,
-  setEntryReceive,
   setIsContinue,
   setOpenReason,
   setReceive,
@@ -60,7 +59,6 @@ import transaction from "../../../assets/svg/transaction.svg";
 import AppTextBox from "../AppTextBox";
 import loading from "../../../assets/lottie/Loading-2.json";
 import Autocomplete from "../AutoComplete";
-import useTaggingHook from "../../../services/hooks/useTaggingHook";
 import transactionSchema from "../../../schemas/transactionSchema";
 import AppPrompt from "../AppPrompt";
 import warningImg from "../../../assets/svg/warning.svg";
@@ -70,10 +68,8 @@ import receiveImg from "../../../assets/svg/receive.svg";
 
 import dayjs from "dayjs";
 import Lottie from "lottie-react";
-import moment from "moment";
 import ClearIcon from "@mui/icons-material/Clear";
 import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
-import FmdBadOutlinedIcon from "@mui/icons-material/FmdBadOutlined";
 import HandshakeOutlinedIcon from "@mui/icons-material/HandshakeOutlined";
 import AddIcon from "@mui/icons-material/Add";
 
@@ -82,10 +78,9 @@ import {
   clearValue,
   transactionDefaultValue,
 } from "../../../services/constants/defaultValues";
-import ReceiveEntry from "../ReceiveEntry";
 import { useNavigate } from "react-router-dom";
 import ShortcutHandler from "../../../services/functions/ShortcutHandler";
-import socket from "../../../services/functions/serverSocket";
+
 import {
   resetTransaction,
   setAddDocuments,
@@ -96,28 +91,32 @@ import { AdditionalFunction } from "../../../services/functions/AdditionalFuncti
 import { convertToArray } from "../../../services/functions/toArrayFn";
 import DateChecker from "../../../services/functions/DateChecker";
 import { resetHeader } from "../../../services/slice/headerSlice";
-import { isAp } from "../../../services/functions/access";
+import { hasAccess, isAp } from "../../../services/functions/access";
+import moment from "moment";
 
-const TransactionModal = ({ create, view, update, receive }) => {
+const TransactionModal = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [oldValues, setOldValues] = useState(null);
   const warning = useSelector((state) => state.prompt.warning);
   const openReason = useSelector((state) => state.prompt.openReason);
   const isReceive = useSelector((state) => state.prompt.receive);
-  const entryReceive = useSelector((state) => state.prompt.entryReceive);
   const isContinue = useSelector((state) => state.prompt.isContinue);
-  const navigateTo = useSelector((state) => state.prompt.navigate);
   const updateCount = useSelector((state) => state.menu.updateCount);
   const transactionData = useSelector((state) => state.menu.menuData);
   const documents = useSelector((state) => state.transaction.documents);
   const addDocuments = useSelector((state) => state.transaction.addDocuments);
-  const userData = useSelector((state) => state.auth.userData);
+
+  const forViewing =
+    transactionData?.gas_status !== "pending" &&
+    transactionData?.gas_status !== "archived" &&
+    transactionData?.gas_status !== "returned" &&
+    transactionData !== null;
 
   const defaultValue = transactionDefaultValue();
   const { enqueueSnackbar } = useSnackbar();
   const { insertDocument, deepEqual } = AdditionalFunction();
-  const { shouldDisableYear } = DateChecker();
+  const { minDate, isDateNotCutOff } = DateChecker();
 
   const [createTransaction, { isLoading }] = useCreateTransactionMutation();
   const [updateTransaction, { isLoading: updateLoading }] =
@@ -191,23 +190,11 @@ const TransactionModal = ({ create, view, update, receive }) => {
     }
   );
 
-  const {
-    data: journalTransaction,
-    isLoading: loadingJournal,
-    isSuccess: journalSuccess,
-  } = useJournalTransactionQuery(
-    {
-      status: "active",
-      pagination: "none",
-      transaction_id: transactionData?.id,
-    },
-    {
-      skip: transactionData === null,
-    }
-  );
-
   const [receiveTransaction, { isLoading: receiveLoading }] =
     useReceiveTransactionMutation();
+
+  const [createCheckEntry, { isLoading: loadingCheck }] =
+    useCreateCheckEntriesMutation();
 
   const {
     control,
@@ -237,17 +224,6 @@ const TransactionModal = ({ create, view, update, receive }) => {
     }
   };
 
-  const disabledMonths =
-    cutOff?.result
-      ?.filter((item) => item?.state === "closed")
-      ?.map((item) => {
-        const date = dayjs(item?.date, "YYYY-MM-DD").toDate();
-        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
-          2,
-          "0"
-        )}`;
-      }) ?? [];
-
   const isLastMonthClosed = () => {
     const lastMonthDate = dayjs().subtract(1, "month");
     const lastMonthFormatted = lastMonthDate.format("YYYY-MM");
@@ -257,11 +233,6 @@ const TransactionModal = ({ create, view, update, receive }) => {
         item?.state === "closed" &&
         dayjs(item?.date, "YYYY-MM-DD").format("YYYY-MM") === lastMonthFormatted
     );
-  };
-
-  const shouldDisableMonth = (date) => {
-    const month = dayjs(date, "YYYY-MM-DD").format("YYYY-MM");
-    return disabledMonths.includes(month);
   };
 
   const handleAutoFill = () => {
@@ -308,7 +279,7 @@ const TransactionModal = ({ create, view, update, receive }) => {
       apSuccess &&
       accountSuccess &&
       locationSuccess &&
-      !create &&
+      transactionData !== null &&
       !hasRun?.current
     ) {
       const tagMonthYear = dayjs(transactionData?.tag_year, "YYMM").toDate();
@@ -350,10 +321,6 @@ const TransactionModal = ({ create, view, update, receive }) => {
     location,
     accountNumber,
     tin,
-    create,
-    update,
-    view,
-    receive,
     setValue,
     setOldValues,
   ]);
@@ -397,27 +364,16 @@ const TransactionModal = ({ create, view, update, receive }) => {
     const mappedData = mapTransaction(submitData);
     const obj = {
       ...mappedData,
-      id: !create ? transactionData?.id : null,
+      id: transactionData !== null ? transactionData?.id : null,
       reference_no: addedDocs,
     };
 
     try {
       const res =
-        update || receive
+        transactionData !== null
           ? await updateTransaction(obj).unwrap()
           : await createTransaction(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      socket.emit(
-        update || receive ? "transaction_updated" : "transaction_created",
-        {
-          ...obj,
-          message:
-            update || receive
-              ? `The transaction ${obj?.tag_no} has been updated`
-              : `A new transaction has been created.`,
-        }
-      );
-
       const docs = insertDocument(res?.result);
       const resData = await mapResponse(
         res?.result,
@@ -429,7 +385,7 @@ const TransactionModal = ({ create, view, update, receive }) => {
       );
       setOldValues(resData);
 
-      update || receive
+      transactionData !== null
         ? Object.entries(resData).forEach(([key, value]) => {
             setValue(key, value);
           })
@@ -448,6 +404,7 @@ const TransactionModal = ({ create, view, update, receive }) => {
                 locale: AdapterDayjs.locale,
               })
             : null,
+          gas_status: res?.result?.gas_status,
         })
       );
 
@@ -468,21 +425,11 @@ const TransactionModal = ({ create, view, update, receive }) => {
     try {
       const res = await archiveTransaction(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      socket.emit("transaction_received", {
-        ...obj,
-        message: `The transaction ${obj?.tag_no} has been archived`,
-      });
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
       singleError(error, enqueueSnackbar);
     }
-  };
-
-  const convertToPeso = (value) => {
-    return parseFloat(value)
-      .toFixed(2)
-      .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
   const handleReceive = async () => {
@@ -494,8 +441,7 @@ const TransactionModal = ({ create, view, update, receive }) => {
     try {
       const res = await receiveTransaction(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      dispatch(resetMenu());
-      dispatch(resetPrompt());
+      dispatch(setIsContinue(true));
     } catch (error) {
       singleError(error, enqueueSnackbar);
     }
@@ -504,9 +450,8 @@ const TransactionModal = ({ create, view, update, receive }) => {
   const validateRoute = () => {
     const isZero =
       parseFloat(transactionData?.purchase_amount) ===
-      parseFloat(journalTransaction?.result?.amount || 0) +
-        parseFloat(checkTransaction?.result?.amount || 0);
-    isZero ? handleReceive() : dispatch(setEntryReceive(true));
+      parseFloat(checkTransaction?.result?.amount || 0);
+    isZero ? handleReceive() : handleCreateCheck();
   };
 
   const handleShortCut = () => {
@@ -538,6 +483,23 @@ const TransactionModal = ({ create, view, update, receive }) => {
     return hasChanges;
   };
 
+  const handleCreateCheck = async () => {
+    const obj = {
+      tag_year: transactionData?.tag_year,
+      transaction_id: transactionData?.id,
+      ap_tagging_id: transactionData?.apTagging?.id || null,
+      amount: transactionData?.purchase_amount,
+      id: !singleSuccess ? null : checkTransaction?.result?.id,
+    };
+
+    try {
+      const res = await createCheckEntry(obj).unwrap();
+      handleReceive();
+    } catch (error) {
+      singleError(error, enqueueSnackbar);
+    }
+  };
+
   return (
     <Paper className="transaction-modal-container">
       <ShortcutHandler
@@ -546,7 +508,6 @@ const TransactionModal = ({ create, view, update, receive }) => {
         }
         onEsc={() => dispatch(resetMenu())}
         onReceive={() => dispatch(setReceive(!checkChanges()))}
-        onConfirm={() => dispatch(setEntryReceive(true))}
       />
       <img
         src={transaction}
@@ -556,10 +517,9 @@ const TransactionModal = ({ create, view, update, receive }) => {
       />
 
       <Typography className="transaction-text">
-        {view && "Transaction"}
-        {update && "Update Transaction"}
-        {create && "Add Transaction"}
-        {receive && "Transaction"}
+        {forViewing && "Transaction"}
+        {transactionData?.gas_status === "pending" && "Update Transaction"}
+        {transactionData === null && "Add Transaction"}
       </Typography>
       <Divider orientation="horizontal" className="transaction-devider" />
       <Box className="form-title-transaction">
@@ -583,7 +543,7 @@ const TransactionModal = ({ create, view, update, receive }) => {
           helperText={errors?.tag_no?.message}
         />
         <Autocomplete
-          disabled={view}
+          disabled={forViewing}
           control={control}
           name={"tin"}
           options={tin?.result || []}
@@ -663,7 +623,7 @@ const TransactionModal = ({ create, view, update, receive }) => {
           </Typography>
 
           <Button
-            disabled={view}
+            disabled={forViewing}
             endIcon={<AddIcon />}
             color="secondary"
             variant="contained"
@@ -676,7 +636,7 @@ const TransactionModal = ({ create, view, update, receive }) => {
         </Box>
         {watch("tin") && (
           <Autocomplete
-            disabled={view}
+            disabled={forViewing}
             control={control}
             name={"document_type"}
             options={document?.result || []}
@@ -704,7 +664,7 @@ const TransactionModal = ({ create, view, update, receive }) => {
           render={({ field: { onChange, value, ...restField } }) => (
             <Box className="date-picker-container-transaction">
               <DatePicker
-                disabled={view}
+                disabled={forViewing}
                 className="transaction-form-date"
                 label="Date Invoice *"
                 format="MMMM DD, YYYY"
@@ -723,7 +683,7 @@ const TransactionModal = ({ create, view, update, receive }) => {
         />
         {false && (
           <AppTextBox
-            disabled={view}
+            disabled={forViewing}
             control={control}
             name={"name_in_receipt"}
             label={"Name in receipt *"}
@@ -735,7 +695,7 @@ const TransactionModal = ({ create, view, update, receive }) => {
         )}
         {checkField("invoice_no") && (
           <AppTextBox
-            disabled={view}
+            disabled={forViewing}
             control={control}
             name={"invoice_no"}
             label={"Invoice No. *"}
@@ -747,7 +707,7 @@ const TransactionModal = ({ create, view, update, receive }) => {
         )}
         {checkField("ref_no") && (
           <AppTextBox
-            disabled={view}
+            disabled={forViewing}
             control={control}
             name={"ref_no"}
             label={"Ref No. *"}
@@ -759,7 +719,7 @@ const TransactionModal = ({ create, view, update, receive }) => {
         )}
         <AppTextBox
           money
-          disabled={singleSuccess || view || journalSuccess}
+          disabled={singleSuccess || forViewing}
           control={control}
           name={"amount"}
           label={"Amount *"}
@@ -771,7 +731,7 @@ const TransactionModal = ({ create, view, update, receive }) => {
         {checkField("amount_withheld") && (
           <AppTextBox
             money
-            disabled={view}
+            disabled={forViewing}
             control={control}
             name={"amount_withheld"}
             label={"Amount withheld *"}
@@ -784,7 +744,7 @@ const TransactionModal = ({ create, view, update, receive }) => {
         {checkField("amount_check") && (
           <AppTextBox
             money
-            disabled={view}
+            disabled={forViewing}
             control={control}
             name={"amount_check"}
             label={"Amount of check *"}
@@ -797,7 +757,7 @@ const TransactionModal = ({ create, view, update, receive }) => {
         {checkField("vat") && (
           <AppTextBox
             money
-            disabled={view}
+            disabled={forViewing}
             control={control}
             name={"vat"}
             label={"Vat *"}
@@ -810,7 +770,7 @@ const TransactionModal = ({ create, view, update, receive }) => {
         {checkField("cost") && (
           <AppTextBox
             money
-            disabled={view}
+            disabled={forViewing}
             control={control}
             name={"cost"}
             label={"Cost *"}
@@ -825,7 +785,7 @@ const TransactionModal = ({ create, view, update, receive }) => {
             return (
               <AppTextBox
                 key={index}
-                disabled={view}
+                disabled={forViewing}
                 control={control}
                 name={`${item?.code}`}
                 label={`${item?.code}`}
@@ -837,9 +797,9 @@ const TransactionModal = ({ create, view, update, receive }) => {
               />
             );
           })}
-        {receive && (
+        {hasAccess(["ap_tag"]) && (
           <AppTextBox
-            disabled={view}
+            disabled={forViewing}
             multiline
             minRows={1}
             control={control}
@@ -868,7 +828,7 @@ const TransactionModal = ({ create, view, update, receive }) => {
               render={({ field: { onChange, value, ...restField } }) => (
                 <Box className="date-picker-container-transaction">
                   <DatePicker
-                    disabled={view}
+                    disabled={forViewing}
                     className="transaction-form-date"
                     label="From (If Applicable)"
                     format="MMMM DD, YYYY"
@@ -892,7 +852,7 @@ const TransactionModal = ({ create, view, update, receive }) => {
               render={({ field: { onChange, value, ...restField } }) => (
                 <Box className="date-picker-container-transaction">
                   <DatePicker
-                    disabled={view}
+                    disabled={forViewing}
                     className="transaction-form-date"
                     label="To (If Applicable)"
                     minDate={watch("coverage_from")}
@@ -902,18 +862,13 @@ const TransactionModal = ({ create, view, update, receive }) => {
                       onChange(e);
                     }}
                   />
-                  {errors.coverage_to && (
-                    <Typography variant="caption" color="error">
-                      {errors.coverage_to.message}
-                    </Typography>
-                  )}
                 </Box>
               )}
             />
 
             {checkField("account_number") && (
               <Autocomplete
-                disabled={view}
+                disabled={forViewing}
                 control={control}
                 name={"account_number"}
                 options={
@@ -942,46 +897,13 @@ const TransactionModal = ({ create, view, update, receive }) => {
           </>
         )}
         <Box className="form-title-transaction">
-          {singleSuccess || journalSuccess ? (
-            <Box className="note-transaction-container">
-              <FmdBadOutlinedIcon
-                color="warning"
-                className="icon-prompt-text"
-              />
-              <Typography className="app-prompt-text-note">
-                The transaction has been split into separate entries, leaving a
-                balance of: <span>&#8369;</span>
-                {convertToPeso(
-                  transactionData?.purchase_amount -
-                    (checkTransaction?.result?.amount || 0) -
-                    (journalTransaction?.result?.amount || 0)
-                )}
-                {singleSuccess && (
-                  <>
-                    <br />
-                    Check Voucher: <span>&#8369;</span>
-                    {convertToPeso(checkTransaction?.result?.amount)}
-                  </>
-                )}
-                {journalSuccess && (
-                  <>
-                    <br />
-                    Journal Voucher: <span>&#8369;</span>
-                    {convertToPeso(journalTransaction?.result?.amount)}
-                  </>
-                )}
-              </Typography>
-            </Box>
-          ) : (
-            <></>
-          )}
           <Divider orientation="horizontal" className="transaction-devider" />
           <Typography className="form-title-text-transaction">
             Allocation
           </Typography>
         </Box>
         <Autocomplete
-          disabled={view || singleSuccess || journalSuccess}
+          disabled={forViewing || singleSuccess}
           control={control}
           name={"ap"}
           options={ap?.result || []}
@@ -1008,70 +930,78 @@ const TransactionModal = ({ create, view, update, receive }) => {
           render={({ field: { onChange, value, ...restField } }) => (
             <Box className="date-picker-container-transaction">
               <DatePicker
-                disabled={view}
+                disabled={forViewing}
                 className="transaction-form-date"
                 label="Tag year month *"
-                format="YY MM"
+                format="MMMM YYYY"
                 value={value}
                 views={["month", "year"]}
+                minDate={minDate}
                 onChange={(e) => {
                   onChange(e);
                 }}
-                shouldDisableMonth={shouldDisableMonth}
-                shouldDisableYear={shouldDisableYear}
+                slotProps={{
+                  textField: {
+                    error: Boolean(errors?.check_date),
+                    helperText: errors?.check_date?.message,
+                  },
+                }}
               />
-              {errors.tag_month_year && (
-                <Typography variant="caption" color="error">
-                  {errors.tag_month_year.message}
-                </Typography>
-              )}
             </Box>
           )}
         />
 
         <Box className="add-transaction-button-container">
-          {receive ? (
+          {transactionData !== null &&
+          transactionData?.gas_status === "pending" ? (
             <Box className="add-transaction-button-receive">
-              <LoadingButton
-                disabled={singleSuccess || journalSuccess}
-                variant="contained"
-                color="error"
-                className="add-transaction-button"
-                onClick={() => dispatch(setWarning(true))}
-                startIcon={<DeleteForeverOutlinedIcon />}
-              >
-                Archive
-              </LoadingButton>
-
-              <LoadingButton
-                variant="contained"
-                color="success"
-                className="add-transaction-button"
-                disabled={checkChanges()}
-                onClick={() => dispatch(setReceive(!checkChanges()))}
-                // onClick={() => checkChanges()}
-                startIcon={<HandshakeOutlinedIcon />}
-              >
-                Receive
-              </LoadingButton>
+              {hasAccess(["ap_tag"]) && (
+                <LoadingButton
+                  disabled={singleSuccess}
+                  variant="contained"
+                  color="error"
+                  className="add-transaction-button"
+                  onClick={() => dispatch(setWarning(true))}
+                  startIcon={<DeleteForeverOutlinedIcon />}
+                >
+                  Archive
+                </LoadingButton>
+              )}
+              {hasAccess(["ap_tag"]) && (
+                <LoadingButton
+                  variant="contained"
+                  color="success"
+                  className="add-transaction-button"
+                  disabled={
+                    checkChanges() ||
+                    !isDateNotCutOff(
+                      moment(new Date(watch("tag_month_year"))).format(
+                        "YYYY-MM"
+                      )
+                    )
+                  }
+                  onClick={() => dispatch(setReceive(!checkChanges()))}
+                  // onClick={() => checkChanges()}
+                  startIcon={<HandshakeOutlinedIcon />}
+                >
+                  Receive
+                </LoadingButton>
+              )}
             </Box>
           ) : (
             "."
           )}
+
           <Box className="archive-transaction-button-container">
-            {!view && (
+            {!forViewing && (
               <LoadingButton
                 variant="contained"
                 color="warning"
                 type="submit"
                 className="add-transaction-button"
-                disabled={
-                  !watch("tin") ||
-                  shouldDisableYear(watch("tag_month_year")) ||
-                  shouldDisableMonth(watch("tag_month_year"))
-                }
+                disabled={!watch("tin")}
               >
-                {create ? "Add" : "Update"}
+                {transactionData === null ? "Add" : "Update"}
               </LoadingButton>
             )}
 
@@ -1084,7 +1014,7 @@ const TransactionModal = ({ create, view, update, receive }) => {
               }}
               className="add-transaction-button"
             >
-              {view ? "Close" : "Cancel"}
+              {forViewing ? "Close" : "Cancel"}
             </Button>
           </Box>
         </Box>
@@ -1100,8 +1030,8 @@ const TransactionModal = ({ create, view, update, receive }) => {
           loadingAp ||
           loadingLocation ||
           loadingSingle ||
-          loadingJournal ||
-          receiveLoading
+          receiveLoading ||
+          loadingCheck
         }
         className="loading-transaction-create"
       >
@@ -1121,13 +1051,6 @@ const TransactionModal = ({ create, view, update, receive }) => {
           }}
           confirmOnClick={() => validateRoute()}
         />
-      </Dialog>
-
-      <Dialog
-        open={entryReceive}
-        onClose={() => dispatch(setEntryReceive(false))}
-      >
-        <ReceiveEntry />
       </Dialog>
 
       <Dialog open={warning} onClose={() => dispatch(setWarning(false))}>
@@ -1183,7 +1106,7 @@ const TransactionModal = ({ create, view, update, receive }) => {
         onClose={() => dispatch(setAddDocuments(false))}
       >
         <Autocomplete
-          disabled={view}
+          disabled={forViewing}
           control={control}
           name={"addedDocuments"}
           options={
@@ -1236,7 +1159,7 @@ const TransactionModal = ({ create, view, update, receive }) => {
             dispatch(resetMenu());
           }}
           confirmOnClick={() => {
-            navigate(navigateTo);
+            navigate("/ap/check");
             dispatch(resetPrompt());
             dispatch(resetMenu());
             dispatch(resetHeader());

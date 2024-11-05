@@ -32,14 +32,13 @@ import "../../components/styles/TagTransaction.scss";
 import {
   resetMenu,
   setMenuData,
-  setUpdateMenu,
   setViewMenu,
 } from "../../services/slice/menuSlice";
 
 import TransactionModal from "../../components/customs/modal/TransactionModal";
 import { useDocumentTypeQuery } from "../../services/store/request";
-import { setFilterBy } from "../../services/slice/transactionSlice";
 import { AdditionalFunction } from "../../services/functions/AdditionalFunction";
+import dayjs from "dayjs";
 
 const TaggingTable = ({
   params,
@@ -52,9 +51,6 @@ const TaggingTable = ({
   onRowChange,
 }) => {
   const dispatch = useDispatch();
-  const menuData = useSelector((state) => state.menu.menuData);
-  const createMenu = useSelector((state) => state.menu.createMenu);
-  const updateMenu = useSelector((state) => state.menu.updateMenu);
   const viewMenu = useSelector((state) => state.menu.viewMenu);
 
   const { convertToPeso } = AdditionalFunction();
@@ -123,33 +119,19 @@ const TaggingTable = ({
                   (doc) => tag?.documentType?.id === doc?.id || null
                 );
 
+                const tagMonthYear = dayjs(tag?.tag_year, "YYMM").toDate();
+
                 return (
                   <TableRow
                     className="table-body-tag-transaction"
                     key={tag?.id}
                     onClick={() => {
                       dispatch(setMenuData(tag));
-
-                      tag?.gas_status === "pending" &&
-                        dispatch(setUpdateMenu(true));
-                      tag?.gas_status === "archived" &&
-                        dispatch(setUpdateMenu(true));
-                      tag?.gas_status === "returned" &&
-                        dispatch(setUpdateMenu(true));
-                      tag?.gas_status === "received" &&
-                        dispatch(setViewMenu(true));
-                      tag?.gas_status === "checked" &&
-                        dispatch(setViewMenu(true));
-                      tag?.gas_status === "approved" &&
-                        dispatch(setViewMenu(true));
-                      tag?.gas_status === "For Voiding" &&
-                        dispatch(setViewMenu(true));
-                      tag?.gas_status === "voided" &&
-                        dispatch(setViewMenu(true));
+                      dispatch(setViewMenu(true));
                     }}
                   >
                     <TableCell>
-                      {tag?.tag_year} - {tag?.tag_no}
+                      {tag?.tag_no} - {moment(tagMonthYear).get("year")}
                     </TableCell>
                     <TableCell>
                       <Typography className="tag-transaction-company-name">
@@ -177,7 +159,9 @@ const TaggingTable = ({
 
                     <TableCell>
                       <Typography className="tag-transaction-company-name">
-                        {`${tag?.apTagging?.company_code} - ${tag?.tag_year} - ${tag?.gtag_no} `}
+                        {`${tag?.apTagging?.company_code} - ${
+                          tag?.gtag_no
+                        } - ${moment(tagMonthYear).get("year")}`}
                       </Typography>
                       <Typography className="tag-transaction-company-type">
                         {document === null ? <>&mdash;</> : document?.name}
@@ -196,7 +180,7 @@ const TaggingTable = ({
                       {tag?.gas_status === "received" && (
                         <StatusIndicator
                           status="Received"
-                          className="checked-indicator"
+                          className="received-indicator"
                         />
                       )}
                       {tag?.gas_status === "archived" && (
@@ -208,31 +192,31 @@ const TaggingTable = ({
                       {tag?.gas_status === "returned" && (
                         <StatusIndicator
                           status="Returned"
-                          className="inActive-indicator"
+                          className="return-indicator"
                         />
                       )}
                       {tag?.gas_status === "checked" && (
                         <StatusIndicator
                           status="Checking"
-                          className="checked-indicator"
+                          className="computation-indicator"
                         />
                       )}
                       {tag?.gas_status === "approved" && (
                         <StatusIndicator
                           status="Approved"
-                          className="received-indicator"
+                          className="approved-indicator"
                         />
                       )}
                       {tag?.gas_status === "For Voiding" && (
                         <StatusIndicator
                           status="For Voiding"
-                          className="pending-indicator"
+                          className="voiding-indicator"
                         />
                       )}
                       {tag?.gas_status === "voided" && (
                         <StatusIndicator
                           status="Voided"
-                          className="inActive-indicator"
+                          className="void-indicator"
                         />
                       )}
                     </TableCell>
@@ -292,27 +276,11 @@ const TaggingTable = ({
       </TableContainer>
 
       <Dialog
-        open={createMenu}
-        className="transaction-modal-dialog"
-        onClose={() => dispatch(resetMenu())}
-      >
-        <TransactionModal create />
-      </Dialog>
-
-      <Dialog
         open={viewMenu}
         className="transaction-modal-dialog"
         onClose={() => dispatch(resetMenu())}
       >
-        <TransactionModal transactionData={menuData} view />
-      </Dialog>
-
-      <Dialog
-        open={updateMenu}
-        className="transaction-modal-dialog"
-        onClose={() => dispatch(resetMenu())}
-      >
-        <TransactionModal transactionData={menuData} update />
+        <TransactionModal />
       </Dialog>
     </Box>
   );

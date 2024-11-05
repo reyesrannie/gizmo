@@ -2,6 +2,7 @@ import * as Yup from "yup";
 
 const supplierSchema = Yup.object({
   noTin: Yup.boolean(),
+  is_special_case: Yup.boolean(),
   is_company: Yup.boolean(),
   tin: Yup.string()
     .required("Tin is required")

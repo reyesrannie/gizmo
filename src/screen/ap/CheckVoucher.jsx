@@ -53,10 +53,6 @@ const CheckVoucher = () => {
     status,
   } = useCheckEntriesQuery(params);
 
-  const { countHeaderAPCH, countCheck } = CountDistribute();
-
-  const hasBadge = countCheck();
-
   useEffect(() => {
     if (header) {
       const statusChange = apHeader?.find((item) => item?.name === header);
@@ -97,12 +93,7 @@ const CheckVoucher = () => {
           >
             <AccordionSummary onClick={() => dispatch(setIsExpanded(false))}>
               <Typography className="page-text-indicator-tag-transaction">
-                <Badge
-                  badgeContent={header ? countHeaderAPCH(header) : 0}
-                  color="error"
-                >
-                  {header}
-                </Badge>
+                {header}
               </Typography>
             </AccordionSummary>
             {apHeader?.map(
@@ -118,14 +109,7 @@ const CheckVoucher = () => {
                     }}
                   >
                     <Typography className="page-text-accord-tag-transaction">
-                      <Badge
-                        badgeContent={
-                          head?.name ? countHeaderAPCH(head?.name) : 0
-                        }
-                        color="error"
-                      >
-                        {head?.name}
-                      </Badge>
+                      {head?.name}
                     </Typography>
                   </AccordionSummary>
                 )
@@ -136,9 +120,7 @@ const CheckVoucher = () => {
               dispatch(setIsExpanded(!isExpanded));
             }}
           >
-            <Badge variant="dot" color="error" invisible={hasBadge}>
-              <ArrowDropDownCircleOutlinedIcon />
-            </Badge>
+            <ArrowDropDownCircleOutlinedIcon />
           </IconButton>
         </Box>
         <Box className="tag-transaction-button-container">
@@ -175,7 +157,7 @@ const CheckVoucher = () => {
           state={"voided"}
         />
       )}
-      {header === "Checked" && (
+      {header === "For Approval" && (
         <CheckTable
           params={params}
           onSortTable={onSortTable}
@@ -218,6 +200,21 @@ const CheckVoucher = () => {
           tagTransaction={tagTransaction}
           onOrderBy={onOrderBy}
           state={"approved"}
+        />
+      )}
+      {header === "Filing" && (
+        <CheckTable
+          params={params}
+          onSortTable={onSortTable}
+          isError={isError}
+          isFetching={isFetching}
+          isLoading={isLoading}
+          onPageChange={onPageChange}
+          onRowChange={onRowChange}
+          status={status}
+          tagTransaction={tagTransaction}
+          onOrderBy={onOrderBy}
+          state={""}
         />
       )}
       {header === "History" && (
