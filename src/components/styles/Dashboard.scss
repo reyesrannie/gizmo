@@ -51,6 +51,15 @@
   margin-bottom: 15px;
 }
 
+.dashboard-card-container {
+  &.MuiBox-root {
+    display: flex;
+    flex-direction: row;
+    margin-left: 60px;
+    flex-wrap: wrap;
+  }
+}
+
 @media (max-width: 320px) {
   .page-text-indicator {
     &.MuiTypography-root {

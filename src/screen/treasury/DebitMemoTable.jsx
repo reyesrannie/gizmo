@@ -3,7 +3,6 @@ import React from "react";
 import {
   Badge,
   Box,
-  Button,
   Checkbox,
   Dialog,
   FormControlLabel,
@@ -43,49 +42,26 @@ import { useState } from "react";
 
 import {
   resetMenu,
-  setCheckMenu,
-  setCreateMenu,
-  setImportError,
-  setImportMenu,
   setMenuData,
   setUpdateMenu,
-  setViewAccountingEntries,
-  setViewMenu,
-  setVoidMenu,
 } from "../../services/slice/menuSlice";
 
-import {
-  useAccountTitlesQuery,
-  useApQuery,
-  useDocumentTypeQuery,
-  useImportChecksMutation,
-  useReadTransactionCheckMutation,
-} from "../../services/store/request";
-import TransactionModalAp from "../../components/customs/modal/TransactionModalAp";
-import { setVoucher } from "../../services/slice/optionsSlice";
-import TransactionModalApprover from "../../components/customs/modal/TransactionModalApprover";
+import { useApQuery } from "../../services/store/request";
+
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import orderBySchema from "../../schemas/orderBySchema";
 import Autocomplete from "../../components/customs/AutoComplete";
 import ClearIcon from "@mui/icons-material/Clear";
 import { AdditionalFunction } from "../../services/functions/AdditionalFunction";
-import { hasAccess } from "../../services/functions/access";
-import TreasuryModal from "../../components/customs/modal/TreasuryModal";
-import CheckNumberModal from "../../components/customs/modal/CheckNumberModal";
-import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
-import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
-import {
-  generateChecks,
-  generateExcel,
-} from "../../services/functions/exportFile";
-import ImportModal from "../../components/customs/modal/ImportModal";
-import { enqueueSnackbar } from "notistack";
-import { resetPrompt } from "../../services/slice/promptSlice";
-import { singleError } from "../../services/functions/errorResponse";
 
-const CheckNumberTable = ({
+import DebitMemoModal from "../../components/customs/modal/DebitMemoModal";
+
+const DebitMemoTable = ({
+  params,
+  onSortTable,
   isLoading,
+  onShowAll,
   isError,
   tagTransaction,
   isFetching,
@@ -93,37 +69,17 @@ const CheckNumberTable = ({
   onRowChange,
   onOrderBy,
 }) => {
-  const excelItems = [
-    "Check Number",
-    "Bank",
-    "Amount",
-    "Status",
-    "Date Modified",
-  ];
   const [anchorE1, setAnchorE1] = useState(null);
   const dispatch = useDispatch();
   const updateMenu = useSelector((state) => state.menu.updateMenu);
   const createMenu = useSelector((state) => state.menu.createMenu);
-  const importMenu = useSelector((state) => state.menu.importMenu);
 
   const { convertToPeso } = AdditionalFunction();
-
-  const {
-    data: accountTitles,
-    isLoading: loadingTitles,
-    isSuccess: successTitles,
-  } = useAccountTitlesQuery({
-    status: "active",
-    pagination: "none",
-  });
 
   const { data: ap } = useApQuery({
     status: "active",
     pagination: "none",
   });
-
-  const [importChecks, { isLoading: loadingImport }] =
-    useImportChecksMutation();
 
   const {
     control,
@@ -137,68 +93,17 @@ const CheckNumberTable = ({
     },
   });
 
-  const importCompanyHandler = async (submitData) => {
-    const obj = submitData?.map((items) => ({
-      check_no: items?.[`Check Number`],
-      coa_id: accountTitles?.result?.find(
-        (coa) => coa.code.toString() === items?.Code.toString()
-      )?.id,
-    }));
-
-    try {
-      const res = await importChecks(obj).unwrap();
-      enqueueSnackbar(res?.message, { variant: "success" });
-      dispatch(resetMenu());
-      dispatch(resetPrompt());
-    } catch (error) {
-      dispatch(setImportError(error?.data?.errors));
-      singleError(error, enqueueSnackbar);
-    }
-  };
-
   return (
     <Box className="tag-transaction-body-container">
       <TableContainer className="tag-transaction-table-container">
         <Table stickyHeader>
           <TableHead>
-            <TableRow className="table-header1-supplier">
-              <TableCell colSpan={7}>
-                <Stack flexDirection={"row"} justifyContent="space-between">
-                  .
-                  <Box>
-                    <Button
-                      variant="contained"
-                      className="button-export-supplier"
-                      startIcon={<FileUploadOutlinedIcon />}
-                      onClick={() =>
-                        generateChecks(
-                          "Check Numbers",
-                          tagTransaction?.result?.data,
-                          excelItems
-                        )
-                      }
-                    >
-                      Export
-                    </Button>
-                    <Button
-                      variant="contained"
-                      color="secondary"
-                      className="button-export-supplier"
-                      startIcon={<FileDownloadOutlinedIcon />}
-                      onClick={() => dispatch(setImportMenu(true))}
-                    >
-                      Import
-                    </Button>
-                  </Box>
-                </Stack>
-              </TableCell>
-            </TableRow>
             <TableRow className="table-header1-import-tag-transaction">
-              <TableCell>Check No.</TableCell>
+              <TableCell>Id</TableCell>
               <TableCell>Supplier</TableCell>
               <TableCell>Amount</TableCell>
               <TableCell align="center">Bank</TableCell>
-              <TableCell align="center">Check Date</TableCell>
+              <TableCell align="center">Date</TableCell>
               <TableCell align="center">Status</TableCell>
               <TableCell align="center">View</TableCell>
             </TableRow>
@@ -234,13 +139,21 @@ const CheckNumberTable = ({
                       dispatch(setUpdateMenu(true));
                     }}
                   >
-                    <TableCell>{tag?.check_no}</TableCell>
+                    <TableCell>{tag?.id}</TableCell>
                     <TableCell>
                       <Typography className="tag-transaction-company-name">
-                        {tag?.supplier?.name ? tag.supplier.name : <>&mdash;</>}
+                        {tag?.transaction?.supplier?.name ? (
+                          tag?.transaction?.supplier.name
+                        ) : (
+                          <>&mdash;</>
+                        )}
                       </Typography>
                       <Typography className="tag-transaction-company-tin">
-                        {tag?.supplier?.name ? tag.supplier.tin : <>&mdash;</>}
+                        {tag?.transaction?.supplier === null ? (
+                          <>&mdash;</>
+                        ) : (
+                          tag?.transaction?.supplier?.tin
+                        )}
                       </Typography>
                     </TableCell>
 
@@ -255,12 +168,12 @@ const CheckNumberTable = ({
                     </TableCell>
                     <TableCell align="center">
                       <Typography className="tag-transaction-company-name">
-                        {tag?.coa?.name}
+                        {tag?.bank?.name}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
-                      {tag?.check_date ? (
-                        moment(tag?.check_date).format("MMM DD YYYY")
+                      {tag?.dm_date ? (
+                        moment(tag?.dm_date).format("MMM DD YYYY")
                       ) : (
                         <>&mdash;</>
                       )}
@@ -268,7 +181,7 @@ const CheckNumberTable = ({
                     <TableCell align="center">
                       <StatusIndicator
                         status={tag?.state}
-                        className="computation-indicator"
+                        className="clearing-indicator"
                       />
                     </TableCell>
 
@@ -383,18 +296,10 @@ const CheckNumberTable = ({
         onClose={() => dispatch(resetMenu())}
         className="transaction-modal-dialog"
       >
-        <CheckNumberModal />
-      </Dialog>
-
-      <Dialog open={importMenu}>
-        <ImportModal
-          title="Check Numbers"
-          importData={importCompanyHandler}
-          isLoading={loadingImport}
-        />
+        <DebitMemoModal />
       </Dialog>
     </Box>
   );
 };
 
-export default CheckNumberTable;
+export default DebitMemoTable;

@@ -27,6 +27,8 @@ export const transactionDefaultValue = () => {
     store: null,
     coverage_from: null,
     coverage_to: null,
+    start_date: null,
+    end_date: null,
     addedDocuments: null,
     month_total: "",
     month_amount: "",

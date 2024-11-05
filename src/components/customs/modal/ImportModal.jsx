@@ -79,7 +79,6 @@ const ImportModal = ({
     dispatch(setImportError(null));
 
     const filesArray = Array.from(e.target.files);
-
     try {
       dispatch(setImportLoading(true));
       const read = await readExcelFile(filesArray);

@@ -26,12 +26,11 @@ import {
   resetMenu,
   setComputationMenu,
   setPrintable,
-  setViewAccountingEntries,
+  setReceiveMenu,
 } from "../../../services/slice/menuSlice";
 import { resetOption } from "../../../services/slice/optionsSlice";
 import {
   resetPrompt,
-  setEntryReceive,
   setOpenVoid,
   setReturn,
 } from "../../../services/slice/promptSlice";
@@ -76,23 +75,23 @@ import {
 } from "../../../services/functions/compute";
 import DateChecker from "../../../services/functions/DateChecker";
 import { hasAccess } from "../../../services/functions/access";
-import ReceiveEntry from "../ReceiveEntry";
 import {
   useApproveGJMutation,
   useReturnGJMutation,
   useVoidGJMutation,
 } from "../../../services/store/seconAPIRequest";
+import ClearCheck from "../ClearCheck";
+import { setDisplayed } from "../../../services/slice/syncSlice";
 
 const TransactionModalApprover = () => {
   const dispatch = useDispatch();
   const isReturn = useSelector((state) => state.prompt.return);
   const menuData = useSelector((state) => state.menu.menuData);
   const computationMenu = useSelector((state) => state.menu.computationMenu);
-
   const voucher = useSelector((state) => state.options.voucher);
   const voucherData = useSelector((state) => state.transaction.voucherData);
   const openVoid = useSelector((state) => state.prompt.openVoid);
-  const entryReceive = useSelector((state) => state.prompt.entryReceive);
+  const receiveMenu = useSelector((state) => state.menu.receiveMenu);
 
   const { isDateNotCutOff } = DateChecker();
 
@@ -121,7 +120,8 @@ const TransactionModalApprover = () => {
   } = useTaxComputationQuery(
     {
       status: "active",
-      transaction_id: menuData?.transactions?.id,
+      transaction_id: voucher === "gj" ? [] : menuData?.transactions?.id,
+      gj_id: voucher !== "gj" ? "" : menuData?.id,
       voucher: voucher,
       pagination: "none",
     },
@@ -243,7 +243,7 @@ const TransactionModalApprover = () => {
       );
 
       const coa_id = accountTitles?.result?.find(
-        (item) => menuData?.coa_id === item?.id
+        (item) => menuData?.coa?.id === item?.id
       );
 
       const preparedBy = logs?.result?.find(
@@ -351,7 +351,7 @@ const TransactionModalApprover = () => {
     const obj = {
       id: menuData?.id,
       voucher_number:
-        voucher === "check" ? `CVRL${formattedDate}` : `GJRL${formattedDate}`,
+        voucher === "check" ? `VPRL${formattedDate}` : `GJRL${formattedDate}`,
       ap_tagging_id: menuData?.apTagging?.id,
     };
 
@@ -471,7 +471,7 @@ const TransactionModalApprover = () => {
               >
                 <Typography>
                   {menuData?.voucher_number === null &&
-                    (voucher === "check" ? "CVRL" : "GJRL") +
+                    (voucher === "check" ? "VPRL" : "GJRL") +
                       formattedDate +
                       "-" +
                       (voucher === "check"
@@ -604,7 +604,7 @@ const TransactionModalApprover = () => {
               );
             })}
 
-            {voucher === "journal" && (
+            {voucher === "gj" && (
               <TableRow>
                 <TableCell
                   align="center"
@@ -811,7 +811,7 @@ const TransactionModalApprover = () => {
                 </TableRow>
               );
             })}
-            {voucher === "journal" && (
+            {voucher === "gj" && (
               <TableRow>
                 <TableCell
                   align="left"
@@ -914,12 +914,12 @@ const TransactionModalApprover = () => {
                 </Stack>
               </TableCell>
               <TableCell align="left" className="voucher-payment-footer">
-                <Typography>{voucher === "check" ? "CV" : "GJ"} NO.</Typography>
+                <Typography>{voucher === "check" ? "VP" : "GJ"} NO.</Typography>
               </TableCell>
               <TableCell align="center" className="voucher-payment-footer">
                 <Typography>
                   {menuData?.voucher_number === null &&
-                    (voucher === "check" ? "CVRL" : "GJRL") +
+                    (voucher === "check" ? "VPRL" : "GJRL") +
                       formattedDate +
                       "-" +
                       (voucher === "check"
@@ -954,17 +954,19 @@ const TransactionModalApprover = () => {
       )}
       <Box className="add-transaction-button-container">
         <Box className="return-receive-container">
-          {menuData?.state === "For Approval" && hasAccess("approver") && (
-            <Button
-              variant="contained"
-              color="error"
-              className="add-transaction-button"
-              // startIcon={<DeleteForeverOutlinedIcon />}
-              onClick={() => dispatch(setReturn(true))}
-            >
-              Return
-            </Button>
-          )}
+          {(menuData?.state === "For Approval" ||
+            menuData?.state === "For Voiding") &&
+            hasAccess("approver") && (
+              <Button
+                variant="contained"
+                color="error"
+                className="add-transaction-button"
+                // startIcon={<DeleteForeverOutlinedIcon />}
+                onClick={() => dispatch(setReturn(true))}
+              >
+                Return
+              </Button>
+            )}
 
           {(menuData?.state === "approved" && hasAccess("approver")) ||
             (menuData?.state === "For Approval" && (
@@ -978,35 +980,6 @@ const TransactionModalApprover = () => {
                 Details
               </Button>
             ))}
-
-          {voucher === "check" &&
-            menuData?.state === "approved" &&
-            hasAccess("ap_tag") && (
-              <Button
-                variant="contained"
-                color="success"
-                className="add-transaction-button"
-                // startIcon={<DeleteForeverOutlinedIcon />}
-                onClick={() => handlePrepareCheck()}
-              >
-                {voucher === "check" ? "Prepare Check" : "Prepare"}
-              </Button>
-            )}
-
-          {voucher === "check" &&
-            menuData?.state === "approved" &&
-            !isDateNotCutOff(formattedDate) &&
-            hasAccess("ap_tag") && (
-              <Button
-                variant="contained"
-                color="success"
-                className="add-transaction-button"
-                // startIcon={<DeleteForeverOutlinedIcon />}
-                onClick={() => dispatch(setEntryReceive(true))}
-              >
-                Adjustment
-              </Button>
-            )}
 
           {menuData?.state === "approved" && hasAccess("ap_tag") && (
             <ReactToPrint
@@ -1048,7 +1021,7 @@ const TransactionModalApprover = () => {
             </LoadingButton>
           )}
 
-          {menuData?.state === "For voiding" && hasAccess("approver") && (
+          {menuData?.state === "For Voiding" && hasAccess("approver") && (
             <LoadingButton
               variant="contained"
               color="warning"
@@ -1058,24 +1031,47 @@ const TransactionModalApprover = () => {
               Approve Void
             </LoadingButton>
           )}
-          {menuData?.state === "approved" &&
-            (isDateNotCutOff(formattedDate) || voucher !== "check") &&
+          {menuData?.state === "approved" && hasAccess("ap_tag") && (
+            <Button
+              variant="contained"
+              color="error"
+              className="add-transaction-button"
+              onClick={() => dispatch(setOpenVoid(true))}
+            >
+              Void
+            </Button>
+          )}
+          {voucher === "check" &&
+            menuData?.state === "approved" &&
             hasAccess("ap_tag") && (
               <Button
                 variant="contained"
-                color="error"
+                color="success"
                 className="add-transaction-button"
-                onClick={() => dispatch(setOpenVoid(true))}
+                // startIcon={<DeleteForeverOutlinedIcon />}
+                onClick={() => handlePrepareCheck()}
               >
-                Void
+                {voucher === "check" ? "Prepare Check" : "Prepare"}
               </Button>
             )}
+
+          {menuData?.state === "Released" && hasAccess("ap_tag") && (
+            <Button
+              variant="contained"
+              color="success"
+              className="add-transaction-button"
+              onClick={() => dispatch(setReceiveMenu(true))}
+            >
+              File
+            </Button>
+          )}
           <Button
             variant="contained"
             color="primary"
             onClick={() => {
               dispatch(resetMenu());
               dispatch(resetOption());
+              dispatch(setDisplayed(false));
             }}
             className="add-transaction-button"
           >
@@ -1142,14 +1138,15 @@ const TransactionModalApprover = () => {
         />
       </Dialog>
 
-      <Dialog
-        open={entryReceive}
-        onClose={() => dispatch(setEntryReceive(false))}
-      >
-        <ReceiveEntry />
-      </Dialog>
-
       <TransactionDrawer transactionData={menuData?.transactions} />
+
+      <Dialog
+        open={receiveMenu}
+        onClose={() => dispatch(setReceiveMenu(false))}
+        className="transaction-modal-dialog-tax"
+      >
+        <ClearCheck />
+      </Dialog>
     </Paper>
   );
 };

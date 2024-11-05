@@ -38,10 +38,12 @@ import {
   totalCredit,
   totalVat,
 } from "../../../services/functions/compute";
+import moment from "moment";
 
 const ComputationMenu = ({ details, schedule }) => {
   const dispatch = useDispatch();
   const menuData = useSelector((state) => state.menu.menuData);
+
   const voucher = useSelector((state) => state.options.voucher);
 
   const {
@@ -53,9 +55,11 @@ const ComputationMenu = ({ details, schedule }) => {
   } = useTaxComputationQuery(
     {
       status: "active",
-      transaction_id: schedule ? "" : menuData?.transactions?.id,
+      transaction_id:
+        voucher === "gj" ? [] : !schedule ? menuData?.transactions?.id : "",
       schedule_id: schedule ? menuData?.id : "",
-      voucher: schedule ? "" : voucher,
+      gj_id: voucher !== "gj" ? "" : menuData?.id,
+      voucher: !schedule ? voucher : "",
     },
     { skip: menuData === null }
   );
@@ -170,7 +174,23 @@ const ComputationMenu = ({ details, schedule }) => {
               <TableBody>
                 <TableRow className="table-body-tag-transaction">
                   <TableCell>
-                    {`${menuData?.transactions?.tag_year} - ${menuData?.transactions?.tag_no}`}
+                    {!schedule &&
+                      `${menuData?.transactions?.tag_year} - ${menuData?.transactions?.tag_no}`}
+
+                    {schedule && (
+                      <Typography className="supplier-company-address">
+                        {`From: ${moment(
+                          new Date(menuData?.coverage_from)
+                        ).format("MM/DD/YYYY")}`}
+                      </Typography>
+                    )}
+                    {schedule && (
+                      <Typography className="supplier-company-address">
+                        {`To: ${moment(new Date(menuData?.coverage_to)).format(
+                          "MM/DD/YYYY"
+                        )}`}
+                      </Typography>
+                    )}
                   </TableCell>
                   <TableCell>
                     <Stack>
@@ -200,6 +220,7 @@ const ComputationMenu = ({ details, schedule }) => {
                     <Stack>
                       <Typography className="supplier-company-name">
                         {!schedule && menuData?.transactions?.invoice_no}
+                        {schedule && menuData?.invoice_no}
                       </Typography>
                       <Typography className="supplier-company-money">
                         {convertToPeso(

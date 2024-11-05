@@ -28,6 +28,7 @@ import {
 import moment from "moment";
 import { useRef } from "react";
 import { useEffect } from "react";
+import { useGjStatusLogsQuery } from "../../services/store/seconAPIRequest";
 
 const CustomIndicator = ({ props, item }) => {
   const { completed, active } = props;
@@ -79,6 +80,16 @@ const CustomIndicator = ({ props, item }) => {
       {completed && item?.state === "completed" && (
         <RecommendOutlinedIcon color="success" />
       )}
+      {completed && item?.status === "For Preparation" && (
+        <CheckCircleOutlinedIcon color="warning" />
+      )}
+      {completed && item?.status === "For Releasing" && (
+        <CheckCircleOutlinedIcon color="warning" />
+      )}
+
+      {completed && item?.status === "Released" && (
+        <CheckCircleOutlinedIcon color="success" />
+      )}
       {completed && item?.state === "pending" && (
         <CheckCircleOutlinedIcon color="secondary" />
       )}
@@ -100,13 +111,19 @@ const TransactionDrawer = ({
   schedule = false,
 }) => {
   const menuData = useSelector((state) => state.menu.menuData);
+  const voucher = useSelector((state) => state.options.voucher);
 
   const { data: logs } = useStatusLogsQuery(
     {
       transaction_id: transactionData?.id,
       pagination: "none",
     },
-    { skip: transactionData === null || transactionData === undefined }
+    {
+      skip:
+        transactionData === null ||
+        transactionData === undefined ||
+        voucher === "gj",
+    }
   );
 
   const { data: cutOffLogs } = useCutOffLogsQuery(
@@ -124,6 +141,19 @@ const TransactionDrawer = ({
       pagination: "none",
     },
     { skip: !schedule }
+  );
+
+  const { data: gjLogs } = useGjStatusLogsQuery(
+    {
+      gj_id: menuData?.id,
+      pagination: "none",
+    },
+    {
+      skip:
+        transactionData === null ||
+        transactionData === undefined ||
+        voucher !== "gj",
+    }
   );
 
   const paperRef = useRef(null);
@@ -284,6 +314,42 @@ const TransactionDrawer = ({
                             {item?.status?.toUpperCase()}
                           </Typography>
                         )}
+
+                        {item?.status === "For Preparation" && (
+                          <Typography
+                            color="#B6622d"
+                            className="logs-indicator-transaction"
+                          >
+                            {item?.status?.toUpperCase()}
+                          </Typography>
+                        )}
+
+                        {item?.status === "For Releasing" && (
+                          <Typography
+                            color="#B6622d"
+                            className="logs-indicator-transaction"
+                          >
+                            {item?.status?.toUpperCase()}
+                          </Typography>
+                        )}
+
+                        {item?.status === "Released" && (
+                          <Typography
+                            color="green"
+                            className="logs-indicator-transaction"
+                          >
+                            {item?.status?.toUpperCase()}
+                          </Typography>
+                        )}
+
+                        {item?.status === "For Clearing" && (
+                          <Typography
+                            color="#B6622d"
+                            className="logs-indicator-transaction"
+                          >
+                            {item?.status?.toUpperCase()}
+                          </Typography>
+                        )}
                         {item?.status === "approved" && (
                           <Typography
                             color="green"
@@ -401,6 +467,260 @@ const TransactionDrawer = ({
                           </Typography>
                         </Box>
                       )}
+                      <Box className={"logs-details-transaction"}>
+                        <Typography className="logs-indicator-transaction">
+                          Date:
+                        </Typography>
+                        <Typography className="logs-details-text-transaction">
+                          {moment(item?.updated_at).format(
+                            "MMM DD, YYYY, hh:mm A"
+                          )}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </StepLabel>
+                </Step>
+              );
+            })}
+          </Stepper>
+        )}
+
+        {voucher === "gj" && (
+          <Stepper activeStep={gjLogs?.result.length} orientation="vertical">
+            {gjLogs?.result?.map((item, index) => {
+              return (
+                <Step key={index}>
+                  <StepLabel
+                    StepIconComponent={(props) => (
+                      <CustomIndicator props={props} item={item} />
+                    )}
+                  >
+                    <Box className="logs-transaction-container">
+                      {item?.createdBy !== null && (
+                        <>
+                          <Typography className="logs-title-transaction">
+                            Transaction Created
+                          </Typography>
+                          <Box className={"logs-details-transaction"}>
+                            <Typography className="logs-indicator-transaction">
+                              Created By:
+                            </Typography>
+                            <Typography className="logs-details-text-transaction">
+                              {`${item?.createdBy?.first_name}  ${item?.createdBy?.last_name}`}
+                            </Typography>
+                          </Box>
+                        </>
+                      )}
+
+                      {item?.createdBy === null && (
+                        <>
+                          <Typography className="logs-title-transaction">
+                            Transaction Updated
+                          </Typography>
+                          <Box className={"logs-details-transaction"}>
+                            <Typography className="logs-indicator-transaction">
+                              Updated By:
+                            </Typography>
+                            <Typography className="logs-details-text-transaction">
+                              {`${item?.updatedBy?.first_name}  ${item?.updatedBy?.last_name}`}
+                            </Typography>
+                          </Box>
+                        </>
+                      )}
+                      <Box className={"logs-details-transaction"}>
+                        <Typography className="logs-indicator-transaction">
+                          Status:
+                        </Typography>
+                        {item?.status === "pending" && (
+                          <Typography
+                            color="secondary"
+                            className="logs-indicator-transaction"
+                          >
+                            {item?.status?.toUpperCase()}
+                          </Typography>
+                        )}
+                        {item?.status === "For Computation" && (
+                          <Typography
+                            color="blueviolet"
+                            className="logs-indicator-transaction"
+                          >
+                            {item?.status?.toUpperCase()}
+                          </Typography>
+                        )}
+                        {item?.status === "archived" && (
+                          <Typography
+                            color="error"
+                            className="logs-indicator-transaction"
+                          >
+                            {item?.status?.toUpperCase()}
+                          </Typography>
+                        )}
+                        {item?.status === "received" && (
+                          <Typography
+                            color="green"
+                            className="logs-indicator-transaction"
+                          >
+                            {item?.status?.toUpperCase()} by AP
+                          </Typography>
+                        )}
+                        {item?.status === "returned" && (
+                          <Typography
+                            color="error"
+                            className="logs-indicator-transaction"
+                          >
+                            {item?.status?.toUpperCase()}
+                          </Typography>
+                        )}
+                        {item?.status === "checked" && (
+                          <Typography
+                            color="#B6622d"
+                            className="logs-indicator-transaction"
+                          >
+                            {item?.status?.toUpperCase()}
+                          </Typography>
+                        )}
+                        {item?.status === "For Approval" && (
+                          <Typography
+                            color="#B6622d"
+                            className="logs-indicator-transaction"
+                          >
+                            {item?.status?.toUpperCase()}
+                          </Typography>
+                        )}
+
+                        {item?.status === "For Preparation" && (
+                          <Typography
+                            color="#B6622d"
+                            className="logs-indicator-transaction"
+                          >
+                            {item?.status?.toUpperCase()}
+                          </Typography>
+                        )}
+
+                        {item?.status === "For Releasing" && (
+                          <Typography
+                            color="#B6622d"
+                            className="logs-indicator-transaction"
+                          >
+                            {item?.status?.toUpperCase()}
+                          </Typography>
+                        )}
+
+                        {item?.status === "Released" && (
+                          <Typography
+                            color="green"
+                            className="logs-indicator-transaction"
+                          >
+                            {item?.status?.toUpperCase()}
+                          </Typography>
+                        )}
+
+                        {item?.status === "For Clearing" && (
+                          <Typography
+                            color="#B6622d"
+                            className="logs-indicator-transaction"
+                          >
+                            {item?.status?.toUpperCase()}
+                          </Typography>
+                        )}
+                        {item?.status === "approved" && (
+                          <Typography
+                            color="green"
+                            className="logs-indicator-transaction"
+                          >
+                            {item?.status?.toUpperCase()}
+                          </Typography>
+                        )}
+                        {item?.status === "For Voiding" && (
+                          <Typography
+                            color="secondary"
+                            className="logs-indicator-transaction"
+                          >
+                            {item?.status?.toUpperCase()}
+                          </Typography>
+                        )}
+                        {item?.status === "voided" && (
+                          <Typography
+                            color="error"
+                            className="logs-indicator-transaction"
+                          >
+                            {item?.status?.toUpperCase()}
+                          </Typography>
+                        )}
+                      </Box>
+                      {item?.voucher_type !== null && (
+                        <Box className={"logs-details-transaction"}>
+                          <Typography className="logs-indicator-transaction">
+                            Entry:
+                          </Typography>
+                          <Typography className="logs-details-text-transaction">
+                            {item?.voucher_type}
+                          </Typography>
+                        </Box>
+                      )}
+
+                      {item?.reason !== null && (
+                        <Box className={"logs-details-transaction"}>
+                          <Typography className="logs-indicator-transaction">
+                            Reason:
+                          </Typography>
+                          <Typography className="logs-details-text-transaction">
+                            {item?.reason}
+                          </Typography>
+                        </Box>
+                      )}
+
+                      {item?.amount !== null && (
+                        <Box className={"logs-details-transaction"}>
+                          <Typography className="logs-indicator-transaction">
+                            Amount:
+                          </Typography>
+                          <Typography
+                            color="green"
+                            className="logs-details-text-transaction"
+                          >
+                            <span>&#8369;</span>
+                            {item?.amount
+                              ?.toString()
+                              .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                          </Typography>
+                        </Box>
+                      )}
+                      {item?.edited_amount_from !== item?.edited_amount_to &&
+                        item?.edited_amount_from !== null && (
+                          <Box className={"logs-details-transaction"}>
+                            <Typography className="logs-indicator-transaction">
+                              Prev. Amount:
+                            </Typography>
+                            <Typography
+                              color="red"
+                              className="logs-details-text-transaction"
+                            >
+                              <span>&#8369;</span>
+                              {item?.edited_amount_from
+                                ?.toString()
+                                .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                            </Typography>
+                          </Box>
+                        )}
+                      {item?.edited_amount_from !== item?.edited_amount_to &&
+                        item?.edited_amount_to !== null && (
+                          <Box className={"logs-details-transaction"}>
+                            <Typography className="logs-indicator-transaction">
+                              New Amount:
+                            </Typography>
+                            <Typography
+                              color="green"
+                              className="logs-details-text-transaction"
+                            >
+                              <span>&#8369;</span>
+                              {item?.edited_amount_to
+                                ?.toString()
+                                .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                            </Typography>
+                          </Box>
+                        )}
+
                       <Box className={"logs-details-transaction"}>
                         <Typography className="logs-indicator-transaction">
                           Date:

@@ -1,8 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-// const baseURL = process.env.REACT_APP_API_KEY;
+const baseURL = process.env.REACT_APP_API_KEY;
 // const baseURL = "http://10.10.12.10:8000/api/";
-const baseURL = "http://192.168.254.132:8000/api/";
 
 export const jsonServerAPI = createApi({
   reducerPath: "jsonServerAPI",
@@ -50,6 +49,7 @@ export const jsonServerAPI = createApi({
     "ScheduleLogs",
     "TagYear",
     "CountTreasury",
+    "DebitMemo",
   ],
   endpoints: (builder) => ({
     //Authentication and users
@@ -1232,7 +1232,7 @@ export const jsonServerAPI = createApi({
     prepareCVoucher: builder.mutation({
       transformResponse: (response) => response,
       query: (payload) => ({
-        url: `/preparation/transaction-check/`,
+        url: `/preparation/transaction-check`,
         method: "POST",
         body: payload,
       }),
@@ -1241,7 +1241,7 @@ export const jsonServerAPI = createApi({
     forApprovalCVoucher: builder.mutation({
       transformResponse: (response) => response,
       query: (payload) => ({
-        url: `/check-approval/transaction-check/`,
+        url: `/check-approval/transaction-check`,
         method: "POST",
         body: payload,
       }),
@@ -1250,7 +1250,7 @@ export const jsonServerAPI = createApi({
     releaseCVoucher: builder.mutation({
       transformResponse: (response) => response,
       query: (payload) => ({
-        url: `/releasing/transaction-check/`,
+        url: `/releasing/transaction-check`,
         method: "POST",
         body: payload,
       }),
@@ -1259,7 +1259,7 @@ export const jsonServerAPI = createApi({
     releasedCVoucher: builder.mutation({
       transformResponse: (response) => response,
       query: (payload) => ({
-        url: `/released/transaction-check/`,
+        url: `/released/transaction-check/${payload.id}`,
         method: "POST",
         body: payload,
       }),
@@ -1277,7 +1277,7 @@ export const jsonServerAPI = createApi({
     fileCVoucher: builder.mutation({
       transformResponse: (response) => response,
       query: (payload) => ({
-        url: `/filing/transaction-check/`,
+        url: `/filing/transaction-check/${payload?.id}`,
         method: "POST",
         body: payload,
       }),
@@ -1287,6 +1287,16 @@ export const jsonServerAPI = createApi({
       transformResponse: (response) => response,
       query: (payload) => ({
         url: `/is-read/transaction-check/${payload.id}`,
+        method: "PATCH",
+        body: payload,
+      }),
+      invalidatesTags: ["CheckEntries", "Logs", "CountCheck", "CountTreasury"],
+    }),
+
+    printCVoucher: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/is-print/transaction-check/${payload.id}`,
         method: "PATCH",
         body: payload,
       }),
@@ -1690,6 +1700,17 @@ export const jsonServerAPI = createApi({
       }),
       providesTags: ["CheckNumber"],
     }),
+
+    importChecks: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/import/check`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["CheckNumber"],
+    }),
+
     createCheckNumber: builder.mutation({
       transformResponse: (response) => response,
       query: (payload) => ({
@@ -1716,6 +1737,44 @@ export const jsonServerAPI = createApi({
         body: payload,
       }),
       invalidatesTags: ["CheckNumber"],
+    }),
+
+    voidCheckNumber: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/cancelled/check/${payload?.id}`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["CheckNumber"],
+    }),
+
+    debitMemo: builder.query({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/debit-memo`,
+        method: "GET",
+        params: payload,
+      }),
+      providesTags: ["DebitMemo"],
+    }),
+    clearDebitMemo: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/cleared/debit-memo`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["DebitMemo"],
+    }),
+    returnDebitMemo: builder.mutation({
+      transformResponse: (response) => response,
+      query: (payload) => ({
+        url: `/cancelled/debit-memo/${payload.id}`,
+        method: "POST",
+        body: payload,
+      }),
+      invalidatesTags: ["DebitMemo"],
     }),
   }),
 });
@@ -1856,6 +1915,7 @@ export const {
   useArchiveTaxComputationMutation,
 
   useCheckEntriesQuery,
+  useLazyCheckEntriesQuery,
   useCreateCheckEntriesMutation,
   useUpdateCheckEntriesMutation,
   useArchiveCheckEntriesMutation,
@@ -1871,6 +1931,7 @@ export const {
   useFileCVoucherMutation,
   useReadTransactionCheckMutation,
   useUpdateCheckDateMutation,
+  usePrintCVoucherMutation,
 
   useJournalEntriesQuery,
   useCreateJournalEntriesMutation,
@@ -1914,7 +1975,14 @@ export const {
   useReportQuery,
 
   useCheckNumberQuery,
+  useLazyCheckNumberQuery,
   useCreateCheckNumberMutation,
   useArchiveCheckNumberMutation,
   useUpdateCheckNumberMutation,
+  useVoidCheckNumberMutation,
+  useImportChecksMutation,
+
+  useDebitMemoQuery,
+  useClearDebitMemoMutation,
+  useReturnDebitMemoMutation,
 } = jsonServerAPI;

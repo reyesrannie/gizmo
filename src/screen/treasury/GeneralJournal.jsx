@@ -20,7 +20,7 @@ import ArrowDropDownCircleOutlinedIcon from "@mui/icons-material/ArrowDropDownCi
 
 import "../../components/styles/TagTransaction.scss";
 
-import { apGJheader, approverGJHeader } from "../../services/constants/headers";
+import { apGJheader } from "../../services/constants/headers";
 import GJTable from "./GJTable";
 import {
   setFilterBy,
@@ -29,16 +29,17 @@ import {
 import { setHeader } from "../../services/slice/headerSlice";
 import { resetMenu, setCreateMenu } from "../../services/slice/menuSlice";
 import { useGeneralJournalQuery } from "../../services/store/seconAPIRequest";
+import useApHook from "../../services/hooks/useApHook";
 import GeneralJournalModal from "../../components/customs/modal/GeneralJournalModal";
-import useApproverHook from "../../services/hooks/useApproverHook";
+import { setVoucher } from "../../services/slice/optionsSlice";
 
-const ApproverGJ = () => {
+const GeneralJournal = () => {
   const dispatch = useDispatch();
 
   const isExpanded = useSelector((state) => state.transaction.isExpanded);
   const createMenu = useSelector((state) => state.menu.createMenu);
 
-  const header = useSelector((state) => state.headers.header) || "Approval";
+  const header = useSelector((state) => state.headers.header) || "Pending";
 
   const {
     params,
@@ -48,7 +49,8 @@ const ApproverGJ = () => {
     onSortTable,
     onOrderBy,
     onStateChange,
-  } = useApproverHook();
+    onShowAll,
+  } = useTreasuryHook();
 
   const {
     data: tagTransaction,
@@ -59,9 +61,7 @@ const ApproverGJ = () => {
 
   useEffect(() => {
     if (header) {
-      const statusChange = approverGJHeader?.find(
-        (item) => item?.name === header
-      );
+      const statusChange = apGJheader?.find((item) => item?.name === header);
       onStateChange(statusChange?.status);
     }
   }, [header]);
@@ -83,7 +83,7 @@ const ApproverGJ = () => {
                 {header}
               </Typography>
             </AccordionSummary>
-            {approverGJHeader?.map(
+            {apGJheader?.map(
               (head, index) =>
                 header !== head?.name && (
                   <AccordionSummary
@@ -113,10 +113,37 @@ const ApproverGJ = () => {
         </Box>
         <Box className="tag-transaction-button-container">
           <SearchText onSearchData={onSearchData} />
+          <Button
+            variant="contained"
+            color="secondary"
+            className="button-add-tag-transaction"
+            startIcon={<AddToPhotosOutlinedIcon />}
+            onClick={() => {
+              dispatch(setVoucher("gj"));
+              dispatch(setCreateMenu(true));
+            }}
+          >
+            Add
+          </Button>
         </Box>
       </Box>
 
-      {header === "Approval" && (
+      {header === "Pending" && (
+        <GJTable
+          params={params}
+          onSortTable={onSortTable}
+          isError={isError}
+          isFetching={isFetching}
+          isLoading={isLoading}
+          onPageChange={onPageChange}
+          onRowChange={onRowChange}
+          tagTransaction={tagTransaction}
+          onOrderBy={onOrderBy}
+          state="For Computation"
+        />
+      )}
+
+      {header === "For Approval" && (
         <GJTable
           params={params}
           onSortTable={onSortTable}
@@ -130,7 +157,20 @@ const ApproverGJ = () => {
           state="For Approval"
         />
       )}
-
+      {header === "Approved" && (
+        <GJTable
+          params={params}
+          onSortTable={onSortTable}
+          isError={isError}
+          isFetching={isFetching}
+          isLoading={isLoading}
+          onPageChange={onPageChange}
+          onRowChange={onRowChange}
+          tagTransaction={tagTransaction}
+          onOrderBy={onOrderBy}
+          state="approved"
+        />
+      )}
       {header === "Returned" && (
         <GJTable
           params={params}
@@ -156,25 +196,21 @@ const ApproverGJ = () => {
           onRowChange={onRowChange}
           tagTransaction={tagTransaction}
           onOrderBy={onOrderBy}
-          state="void"
+          state={"void"}
         />
       )}
-      {header === "Pending Void" && (
-        <GJTable
-          params={params}
-          onSortTable={onSortTable}
-          isError={isError}
-          isFetching={isFetching}
-          isLoading={isLoading}
-          onPageChange={onPageChange}
-          onRowChange={onRowChange}
-          tagTransaction={tagTransaction}
-          onOrderBy={onOrderBy}
-          state="For Voiding"
-        />
-      )}
+
+      <Dialog
+        open={createMenu}
+        className="transaction-modal-dialog"
+        onClose={() => {
+          dispatch(resetMenu());
+        }}
+      >
+        <GeneralJournalModal />
+      </Dialog>
     </Box>
   );
 };
 
-export default ApproverGJ;
+export default GeneralJournal;

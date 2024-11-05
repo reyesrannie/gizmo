@@ -21,7 +21,7 @@ const TagNumberText = ({ searchTag }) => {
     resolver: yupResolver(tagSearchSchema),
     defaultValues: {
       year: null,
-      month: null,
+      tag: "",
     },
   });
 

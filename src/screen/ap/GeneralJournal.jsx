@@ -31,6 +31,7 @@ import { resetMenu, setCreateMenu } from "../../services/slice/menuSlice";
 import { useGeneralJournalQuery } from "../../services/store/seconAPIRequest";
 import useApHook from "../../services/hooks/useApHook";
 import GeneralJournalModal from "../../components/customs/modal/GeneralJournalModal";
+import { setVoucher } from "../../services/slice/optionsSlice";
 
 const GeneralJournal = () => {
   const dispatch = useDispatch();
@@ -116,7 +117,10 @@ const GeneralJournal = () => {
             color="secondary"
             className="button-add-tag-transaction"
             startIcon={<AddToPhotosOutlinedIcon />}
-            onClick={() => dispatch(setCreateMenu(true))}
+            onClick={() => {
+              dispatch(setVoucher("gj"));
+              dispatch(setCreateMenu(true));
+            }}
           >
             Add
           </Button>

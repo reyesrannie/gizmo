@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 import {
   Badge,
@@ -69,6 +69,7 @@ import { enqueueSnackbar } from "notistack";
 import { resetPrompt } from "../../services/slice/promptSlice";
 import { singleError } from "../../services/functions/errorResponse";
 import TreasuryMultiple from "../../components/customs/modal/TreasuryMultiple";
+import { setClearChecks } from "../../services/slice/syncSlice";
 
 const CheckTable = ({
   params,
@@ -86,6 +87,7 @@ const CheckTable = ({
 
   const viewMenu = useSelector((state) => state.menu.viewMenu);
   const updateMenu = useSelector((state) => state.menu.updateMenu);
+  const clearChecks = useSelector((state) => state.sync.clearChecks);
 
   const { convertToPeso } = AdditionalFunction();
 
@@ -130,6 +132,12 @@ const CheckTable = ({
     },
   });
 
+  useEffect(() => {
+    if (clearChecks) {
+      setValue("check_ids", []);
+    }
+  }, [clearChecks]);
+
   const handleReleaseVoucher = async () => {
     const obj = { check_ids: watch("check_ids") };
     try {
@@ -163,9 +171,7 @@ const CheckTable = ({
           <Table stickyHeader>
             <TableHead>
               <TableRow className="table-header1-import-tag-transaction">
-                {(hasAccess("check_approval") ||
-                  params?.state === "For Releasing" ||
-                  params?.state === "For Preparation") && (
+                {params?.state === "For Preparation" && (
                   <TableCell align="center">
                     <FormControlLabel
                       className="check-box-archive-ap"
@@ -183,6 +189,7 @@ const CheckTable = ({
                             tagTransaction?.result?.total
                           }
                           onChange={(e) => {
+                            dispatch(setClearChecks(false));
                             const ids = tagTransaction?.result?.data?.map(
                               (items) => items.id
                             );
@@ -257,13 +264,7 @@ const CheckTable = ({
               isLoading ? (
                 <TableRow>
                   <TableCell
-                    colSpan={
-                      hasAccess("check_approval") ||
-                      params?.state === "For Releasing" ||
-                      params?.state === "For Preparation"
-                        ? 7
-                        : 6
-                    }
+                    colSpan={params?.state === "For Preparation" ? 7 : 6}
                     align="center"
                   >
                     <Lottie
@@ -275,13 +276,7 @@ const CheckTable = ({
               ) : isError ? (
                 <TableRow>
                   <TableCell
-                    colSpan={
-                      hasAccess("check_approval") ||
-                      params?.state === "For Releasing" ||
-                      params?.state === "For Preparation"
-                        ? 7
-                        : 6
-                    }
+                    colSpan={params?.state === "For Preparation" ? 7 : 6}
                     align="center"
                   >
                     <Lottie
@@ -320,14 +315,13 @@ const CheckTable = ({
                           watch("check_ids")?.length === 0 &&
                           dispatch(setViewMenu(true));
 
-                        params?.state !== "For Preparation" &&
+                        (params?.state === "For Releasing" ||
+                          params?.state === "Released") &&
                           watch("check_ids")?.length === 0 &&
                           dispatch(setUpdateMenu(true));
                       }}
                     >
-                      {(hasAccess("check_approval") ||
-                        params?.state === "For Releasing" ||
-                        params?.state === "For Preparation") && (
+                      {params?.state === "For Preparation" && (
                         <TableCell align="center">
                           <FormControlLabel
                             className="check-box-archive-ap"
@@ -338,47 +332,24 @@ const CheckTable = ({
                                 render={({ field }) => (
                                   <Checkbox
                                     disabled={
-                                      params.state === "For Releasing" ||
-                                      params.state === "Check Approval" ||
-                                      hasAccess("check_approval")
-                                        ? false
-                                        : watch("check_ids")?.length === 0
-                                        ? false
-                                        : watch("check_ids")[0]?.transactions
-                                            ?.supplier?.id ===
+                                      watch("check_ids").length !== 0
+                                        ? watch("check_ids")[0]?.transactions
+                                            ?.supplier?.id !==
                                           tag?.transactions?.supplier?.id
-                                        ? false
-                                        : true
+                                        : false
                                     }
                                     color="secondary"
                                     sx={{ zIndex: 0 }}
-                                    checked={
-                                      params.state === "For Releasing" ||
-                                      params.state === "Check Approval" ||
-                                      hasAccess("check_approval")
-                                        ? watch("check_ids")?.includes(tag?.id)
-                                        : watch("check_ids")?.includes(tag)
-                                    }
+                                    checked={watch("check_ids")?.includes(tag)}
                                     onClick={(event) => event.stopPropagation()}
                                     onChange={(event) => {
                                       const checked = event.target.checked;
                                       const currentValue =
                                         watch("check_ids") || [];
                                       const newValue = checked
-                                        ? [
-                                            ...currentValue,
-                                            params.state === "For Releasing" ||
-                                            params.state === "Check Approval" ||
-                                            hasAccess("check_approval")
-                                              ? tag?.id
-                                              : tag,
-                                          ]
-                                        : currentValue.filter((id) =>
-                                            params.state === "For Releasing" ||
-                                            params.state === "Check Approval" ||
-                                            hasAccess("check_approval")
-                                              ? id !== tag?.id
-                                              : id?.id !== tag?.id
+                                        ? [...currentValue, tag]
+                                        : currentValue.filter(
+                                            (id) => id?.id !== tag?.id
                                           );
                                       field.onChange(newValue);
                                     }}
@@ -494,8 +465,20 @@ const CheckTable = ({
 
                         {tag?.state === "Released" && (
                           <StatusIndicator
-                            status="Released"
-                            className="approved-indicator"
+                            status={
+                              tag?.is_filed !== null
+                                ? "Filed"
+                                : tag?.is_cleared !== null
+                                ? "Cleared"
+                                : "Released"
+                            }
+                            className={
+                              tag?.is_filed !== null
+                                ? "clearing-indicator"
+                                : tag?.is_cleared !== null
+                                ? "clearing-indicator"
+                                : "approved-indicator"
+                            }
                           />
                         )}
 

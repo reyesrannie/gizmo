@@ -356,12 +356,18 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
     setRequiredFieldsValue(watch("amount"));
   };
 
+  console.log(transactionData);
   const submitHandler = async (submitData) => {
     const obj = {
       ...submitData,
       location_id: submitData?.location_id?.id,
-      transaction_id: schedule ? null : transactionData?.transactions?.id,
+      transaction_id: schedule
+        ? null
+        : voucher === "gj"
+        ? null
+        : transactionData?.transactions?.id,
       schedule_id: schedule ? transactionData?.id : null,
+      gj_id: voucher === "gj" ? transactionData?.id : null,
       stype_id: submitData?.stype_id?.id,
       coa_id: submitData?.coa_id?.id,
       atc_id: submitData?.atc_id?.id,
@@ -484,13 +490,16 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
 
         <Autocomplete
           control={control}
-          name={"atc_id"}
+          name="atc_id"
           options={
-            atc?.result?.filter((item) =>
-              transactionData?.transactions?.supplier?.supplier_atcs?.some(
+            atc?.result?.filter((item) => {
+              const supplierAtcs = schedule
+                ? transactionData?.supplier?.supplier_atcs
+                : transactionData?.transactions?.supplier?.supplier_atcs;
+              return supplierAtcs?.some(
                 (data) => item?.id.toString() === data?.atc_id?.toString()
-              )
-            ) || []
+              );
+            }) || []
           }
           getOptionLabel={(option) => `${option.code} - ${option.name}`}
           isOptionEqualToValue={(option, value) => option?.code === value?.code}
@@ -558,6 +567,7 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
 
         <AppTextBox
           money
+          showDecimal
           control={control}
           name={"amount"}
           label={"Amount *"}

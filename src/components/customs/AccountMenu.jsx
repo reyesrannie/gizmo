@@ -32,7 +32,9 @@ const AccountMenu = ({ onClose }) => {
 
   const handleLogout = async () => {
     logout();
-    dispatch(seconAPIRequest?.util?.invalidateTags(["GeneralJournal"]));
+    dispatch(
+      seconAPIRequest?.util?.invalidateTags(["GeneralJournal", "CountGJ"])
+    );
     sessionStorage.removeItem("GIZMO");
     sessionStorage.removeItem("GIZMO_token");
     dispatch(resetAuth());

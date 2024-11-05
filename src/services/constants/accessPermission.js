@@ -81,6 +81,10 @@ const accessPermission = [
         access_permission: "check_approval",
         label: "Check Approval",
       },
+      {
+        access_permission: "balance",
+        label: "Beginning Balance",
+      },
     ],
   },
   {

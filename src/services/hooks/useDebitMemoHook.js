@@ -1,18 +1,15 @@
 // import moment from "moment";
 import { useState } from "react";
 
-const useApHook = () => {
+const useDebitMemoHook = () => {
   const [params, setParams] = useState({
     status: "active",
     page: 1,
     per_page: 10,
     pagination: null,
     sorts: null,
-    tagYear: "",
-    is_filed: true,
-    state: "For Computation",
     allocation: "",
-    access: "ap",
+    state: "Clearing",
   });
 
   const onPageChange = (_, page) => {
@@ -82,4 +79,4 @@ const useApHook = () => {
   };
 };
 
-export default useApHook;
+export default useDebitMemoHook;

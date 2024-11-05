@@ -33,6 +33,7 @@ import {
   setApproveMenu,
   setMenuData,
   setReceiveMenu,
+  setSched,
   setSchedComputation,
   setUpdateMenu,
   setViewAccountingEntries,
@@ -43,6 +44,7 @@ import ScheduleModal from "../../components/customs/modal/ScheduleModal";
 import ScheduleComputationModal from "../../components/customs/modal/ScheduleComputationModal";
 import ScheduleTransactionApproverModal from "../../components/customs/modal/ScheduleTransactionApproverModal";
 import DateChecker from "../../services/functions/DateChecker";
+import { setVoucher } from "../../services/slice/optionsSlice";
 
 const ScheduleTable = ({
   params,
@@ -136,7 +138,7 @@ const ScheduleTable = ({
                   }
                 };
 
-                const coverageFrom = tag?.coverage_from;
+                const coverageFrom = tag?.start_date;
                 const day = moment(coverageFrom).format("D");
                 const dayWithSuffix = day + getOrdinalSuffix(Number(day));
 
@@ -146,6 +148,8 @@ const ScheduleTable = ({
                     key={index}
                     onClick={() => {
                       dispatch(setMenuData(tag));
+                      dispatch(setVoucher("check"));
+                      dispatch(setSched(true));
 
                       tag?.state === "pending" &&
                         !ap &&

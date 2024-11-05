@@ -9,8 +9,9 @@
 
 .card-navigation-container.history {
   &.MuiCard-root {
-    min-width: 180px;
-    max-width: 180px;
+    background-color: #1a1d24;
+    min-width: 280px;
+    max-width: 220px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     margin: 10px;
   }
@@ -29,6 +30,7 @@
     max-height: 120px;
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 20px;
   }
 }
@@ -56,14 +58,44 @@
     font-family: Roboto-Black;
     font-size: 16px;
     margin-bottom: 5px;
+    color: #1a1d24;
   }
 }
 
 .card-title.history {
   &.MuiTypography-root {
     font-family: Roboto-Black;
-    font-size: 16px;
-    margin-bottom: 5px;
+    font-size: 18px;
+    margin-bottom: 0px;
+    color: #f4ce92;
+  }
+}
+
+.card-details.history {
+  &.MuiTypography-root {
+    font-family: Roboto-Light;
+    font-size: 14px;
+    color: #f4ce92;
+  }
+}
+
+.card-details-number {
+  &.MuiTypography-root {
+    font-family: Roboto-Strong;
+    font-size: 26px;
+    padding: 5px;
+    color: #f4ce92;
+  }
+}
+
+.card-count {
+  &.MuiBox-root {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 50px;
+    background-color: #1a1d24;
+    border-radius: 50%;
   }
 }
 

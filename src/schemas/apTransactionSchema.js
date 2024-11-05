@@ -15,12 +15,12 @@ const apTransactionSchema = Yup.object({
   cip_no: Yup.string().nullable(),
   voucherType: Yup.string().nullable(),
   remarks: Yup.string().when("voucherType", {
-    is: (voucherType) => voucherType === "journal",
+    is: (voucherType) => voucherType === "gj",
     then: () => Yup.string().required("Remarks is required"),
   }),
 
   coa_id: Yup.object().when("voucherType", {
-    is: (voucherType) => voucherType === "journal",
+    is: (voucherType) => voucherType === "gj",
     then: () =>
       Yup.object()
         .required("Account Title is required")

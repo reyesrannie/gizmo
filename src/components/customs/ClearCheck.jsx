@@ -5,17 +5,20 @@ import {
   Typography,
   TextField as MuiTextField,
   Dialog,
+  IconButton,
 } from "@mui/material";
 import React, { useEffect } from "react";
 import "../styles/AppPrompt.scss";
 import "../styles/TransactionModal.scss";
 import "../styles/RolesModal.scss";
 
+import DoNotDisturbOnOutlinedIcon from "@mui/icons-material/DoNotDisturbOnOutlined";
+import ControlPointRoundedIcon from "@mui/icons-material/ControlPointRounded";
 import { LoadingButton } from "@mui/lab";
 import receiveImg from "../../assets/svg/receive.svg";
 import { useDispatch, useSelector } from "react-redux";
 import { resetPrompt } from "../../services/slice/promptSlice";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 
 import loadingLight from "../../assets/lottie/Loading.json";
@@ -26,17 +29,27 @@ import Lottie from "lottie-react";
 
 import clearingSchema from "../../schemas/clearingSchema";
 import Autocomplete from "./AutoComplete";
-import { useDocumentTypeQuery } from "../../services/store/request";
+import {
+  useDocumentTypeQuery,
+  useFileCVoucherMutation,
+} from "../../services/store/request";
 import { DatePicker } from "@mui/x-date-pickers";
-import { setReceiveMenu, setTaxData } from "../../services/slice/menuSlice";
+import {
+  resetMenu,
+  setReceiveMenu,
+  setTaxData,
+} from "../../services/slice/menuSlice";
 import moment from "moment";
 import dayjs from "dayjs";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { enqueueSnackbar } from "notistack";
+import { objectError } from "../../services/functions/errorResponse";
 
 const ClearCheck = () => {
   const dispatch = useDispatch();
   const disableProceed = useSelector((state) => state.prompt.disableProceed);
   const taxData = useSelector((state) => state.menu.taxData);
+  const menuData = useSelector((state) => state.menu.menuData);
 
   const {
     data: document,
@@ -47,17 +60,26 @@ const ClearCheck = () => {
     pagination: "none",
   });
 
+  const [fileVoucher, { isLoading: loadingFile }] = useFileCVoucherMutation();
+
   const {
     control,
     handleSubmit,
     setValue,
+    watch,
+    setError,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(clearingSchema),
     defaultValues: {
-      or_document_id: null,
-      or_no: "",
-      or_date: null,
+      treasury_receipts: [
+        {
+          id: Date.now(),
+          or_document_id: null,
+          or_no: "",
+          or_date: null,
+        },
+      ],
     },
   });
 
@@ -81,15 +103,27 @@ const ClearCheck = () => {
   }, [taxData]);
 
   const submitHandler = async (submitData) => {
-    dispatch(
-      setTaxData({
-        ...submitData,
-        or_document_id: submitData?.or_document_id?.id,
-        or_date: moment(submitData?.or_date).format("YYYY-MM-DD"),
-      })
-    );
-    dispatch(setReceiveMenu(false));
+    const obj = {
+      id: menuData?.id,
+      treasury_receipts: submitData?.treasury_receipts?.map((item) => ({
+        receipt_id: item?.or_document_id?.id,
+        receipt_no: item?.or_no,
+        receipt_date: moment(item?.or_date).format("YYYY-MM-DD"),
+      })),
+    };
+    try {
+      const res = await fileVoucher(obj).unwrap();
+      enqueueSnackbar(res?.message, { variant: "success" });
+      dispatch(resetMenu());
+    } catch (error) {
+      objectError(error, setError, enqueueSnackbar);
+    }
   };
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "treasury_receipts",
+  });
 
   return (
     <Paper className="app-prompt-container">
@@ -104,84 +138,127 @@ const ClearCheck = () => {
         Please fill out the following
       </Typography>
 
-      <form
-        className="form-container-transaction clearing"
-        onSubmit={handleSubmit(submitHandler)}
-      >
-        <Autocomplete
-          control={control}
-          name={"or_document_id"}
-          options={document?.result || []}
-          getOptionLabel={(option) => `${option?.code} - ${option?.name}`}
-          isOptionEqualToValue={(option, value) => option.code === value.code}
-          renderInput={(params) => (
-            <MuiTextField
-              name="document_type"
-              {...params}
-              label="OR Document Type *"
-              size="small"
-              variant="outlined"
-              error={Boolean(errors.or_document_id)}
-              helperText={errors.or_document_id?.message}
-              className="transaction-form-textBox receive"
-            />
-          )}
-        />
-        <AppTextBox
-          control={control}
-          name={"or_no"}
-          label={"OR NO. *"}
-          color="primary"
-          className="transaction-form-textBox receive"
-          error={Boolean(errors?.or_no)}
-          helperText={errors?.or_no?.message}
-        />
-
-        <Controller
-          name="or_date"
-          control={control}
-          render={({ field: { onChange, value, ...restField } }) => (
-            <Box className="date-picker-container">
-              <DatePicker
-                className="transaction-form-date"
-                label="OR Date *"
-                format="MM/DD/YYYY"
-                value={value}
-                onChange={(e) => {
-                  onChange(e);
-                }}
-                slotProps={{
-                  textField: {
-                    error: Boolean(errors?.or_date),
-                    helperText: errors?.or_date?.message,
-                  },
-                }}
+      <form onSubmit={handleSubmit(submitHandler)}>
+        {fields?.map((item, index) => {
+          return (
+            <Box className="form-container-transaction clearing" key={item?.id}>
+              <Autocomplete
+                control={control}
+                name={`treasury_receipts.${index}.or_document_id`}
+                options={document?.result || []}
+                getOptionLabel={(option) => `${option?.code} - ${option?.name}`}
+                isOptionEqualToValue={(option, value) =>
+                  option.code === value.code
+                }
+                renderInput={(params) => (
+                  <MuiTextField
+                    name="document_type"
+                    {...params}
+                    label="OR Document Type *"
+                    size="small"
+                    variant="outlined"
+                    error={Boolean(
+                      errors?.treasury_receipts?.[index]?.or_document_id
+                    )}
+                    helperText={
+                      errors?.treasury_receipts?.[index]?.or_document_id
+                        ?.message
+                    }
+                    className="transaction-form-textBox receive"
+                  />
+                )}
               />
+              <AppTextBox
+                control={control}
+                name={`treasury_receipts.${index}.or_no`}
+                label={"OR NO. *"}
+                color="primary"
+                className="transaction-form-textBox receive"
+                error={Boolean(errors?.treasury_receipts?.[index]?.or_no)}
+                helperText={errors?.treasury_receipts?.[index]?.or_no?.message}
+              />
+
+              <Controller
+                name={`treasury_receipts.${index}.or_date`}
+                control={control}
+                render={({ field: { onChange, value, ...restField } }) => (
+                  <DatePicker
+                    className="transaction-form-date recieve"
+                    label="OR Date *"
+                    format="MM/DD/YYYY"
+                    value={value}
+                    onChange={(e) => {
+                      onChange(e);
+                    }}
+                    slotProps={{
+                      textField: {
+                        error: Boolean(
+                          errors?.treasury_receipts?.[index]?.or_date
+                        ),
+                        helperText:
+                          errors?.treasury_receipts?.[index]?.or_date?.message,
+                      },
+                    }}
+                  />
+                )}
+              />
+              <IconButton
+                onClick={() => {
+                  remove(index);
+                }}
+                disabled={fields?.length === 1}
+              >
+                <DoNotDisturbOnOutlinedIcon
+                  color={fields?.length === 1 ? "disabled" : "error"}
+                />
+              </IconButton>
             </Box>
-          )}
-        />
+          );
+        })}
         <Box className="app-prompt-button-container">
-          <LoadingButton
-            disabled={disableProceed}
-            variant="contained"
-            color="warning"
-            className="change-password-button"
-            type="submit"
-          >
-            Proceed
-          </LoadingButton>
-          <Button
-            variant="contained"
-            color="primary"
-            className="change-password-button"
-            onClick={() => dispatch(setReceiveMenu(false))}
-          >
-            cancel
-          </Button>
+          <Box>
+            <Button
+              variant="contained"
+              color="success"
+              className="change-password-button"
+              onClick={() =>
+                append({
+                  id: Date.now(),
+                  or_document_id: null,
+                  or_no: "",
+                  or_date: null,
+                })
+              }
+            >
+              Add
+            </Button>
+          </Box>
+          <Box className="app-prompt-button-container buttons">
+            <LoadingButton
+              disabled={disableProceed}
+              variant="contained"
+              color="warning"
+              className="change-password-button"
+              type="submit"
+            >
+              Proceed
+            </LoadingButton>
+            <Button
+              variant="contained"
+              color="primary"
+              className="change-password-button"
+              onClick={() => dispatch(setReceiveMenu(false))}
+            >
+              cancel
+            </Button>
+          </Box>
         </Box>
       </form>
 
-      <Dialog open={loadingDocument} className="loading-role-create">
+      <Dialog
+        open={loadingDocument || loadingFile}
+        className="loading-role-create"
+      >
         <Lottie animationData={loadingLight} loop />
       </Dialog>
     </Paper>

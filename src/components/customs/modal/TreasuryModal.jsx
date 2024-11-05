@@ -28,12 +28,14 @@ import {
 import "../../styles/Modal.scss";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  jsonServerAPI,
   useAccountTitlesQuery,
   useClearCVoucherMutation,
-  useForApprovalCVoucherMutation,
+  useLazyCheckNumberQuery,
   useReleaseCVoucherMutation,
   useReleasedCVoucherMutation,
   useTaxComputationQuery,
+  useVoidCVoucherMutation,
 } from "../../../services/store/request";
 import DoNotDisturbOnOutlinedIcon from "@mui/icons-material/DoNotDisturbOnOutlined";
 import Lottie from "lottie-react";
@@ -42,6 +44,7 @@ import {
   totalAccount,
   totalAccountMapping,
   totalAmountCheck,
+  totalAmountCheckForm,
 } from "../../../services/functions/compute";
 import { setVoucherData } from "../../../services/slice/transactionSlice";
 import { AdditionalFunction } from "../../../services/functions/AdditionalFunction";
@@ -71,6 +74,9 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { hasAccess } from "../../../services/functions/access";
 import ReasonInput from "../ReasonInput";
+import TransactionDrawer from "../TransactionDrawer";
+import { debitType } from "../../../services/constants/headers";
+import { setClearChecks } from "../../../services/slice/syncSlice";
 
 const TreasuryModal = () => {
   const componentRef = useRef();
@@ -94,6 +100,16 @@ const TreasuryModal = () => {
     status: "active",
     pagination: "none",
   });
+
+  const [
+    triggerSearchCheckNumber,
+    {
+      data: searchedData,
+      isFetching: loadingSearch,
+      isSuccess: successSearch,
+      isError: errorSearch,
+    },
+  ] = useLazyCheckNumberQuery();
 
   const {
     data: taxComputation,
@@ -126,8 +142,9 @@ const TreasuryModal = () => {
       multiple: false,
       debit_coa_id: null,
       credit_coa_id: null,
+      debit_type: null,
       bank: null,
-      check_no: "",
+      check_no: null,
       check_date: dayjs(new Date(), {
         locale: AdapterDayjs.locale,
       }),
@@ -135,8 +152,9 @@ const TreasuryModal = () => {
       check: [
         {
           id: Date.now(),
+          check_no: null,
+          debit_type: null,
           bank: null,
-          check_no: "",
           amount: 0,
           check_date: dayjs(new Date(), {
             locale: AdapterDayjs.locale,
@@ -147,12 +165,13 @@ const TreasuryModal = () => {
   });
 
   useEffect(() => {
-    if (successTitles && menuData?.state === "For Preparation") {
+    if (
+      successTitles &&
+      (menuData?.state === "For Preparation" ||
+        menuDataMultiple[0]?.state === "For Preparation")
+    ) {
       const obj = {
         debit_coa_id: accountTitles?.result?.find(
-          (item) => item.code === "211100"
-        ),
-        credit_coa_id: accountTitles?.result?.find(
           (item) => item.code === "211100"
         ),
       };
@@ -176,6 +195,9 @@ const TreasuryModal = () => {
 
   const [clearVoucher, { isLoading: clearLoading }] =
     useClearCVoucherMutation();
+
+  const [voidedCVoucher, { isLoading: loadingReturn }] =
+    useVoidCVoucherMutation();
 
   useEffect(() => {
     if (taxSuccess || successTitles) {
@@ -216,11 +238,12 @@ const TreasuryModal = () => {
           : menuDataMultiple?.map((items) => items.id),
       debit_coa_id: submitData?.debit_coa_id?.id,
       credit_coa_id: submitData?.credit_coa_id?.id,
+      treasury_type: submitData?.type === "CHECK VOUCHER" ? "cv" : "dm",
       treasury_checks: watch("multiple")
         ? submitData?.check?.map((items) => {
             return {
-              check_no: items.check_no,
-              coa_id: items?.bank?.id,
+              check_no_id: items.check_no?.id,
+              coa_id: submitData?.bank?.id,
               amount: items.amount,
               check_date: items?.check_date
                 ? moment(items?.check_date).format("YYYY-MM-DD")
@@ -230,7 +253,7 @@ const TreasuryModal = () => {
         : [
             {
               coa_id: submitData?.bank?.id,
-              check_no: submitData?.check_no,
+              check_no_id: submitData?.check_no?.id,
               amount: voucherData?.amount,
               check_date: moment(submitData?.check_date).format("YYYY-MM-DD"),
             },
@@ -255,6 +278,37 @@ const TreasuryModal = () => {
         const res = await clearVoucher(forClearing).unwrap();
         enqueueSnackbar(res?.message, { variant: "success" });
       }
+      if (submitData?.type === "DEBIT MEMO") {
+        const dm = {
+          ...obj,
+          treasury_checks: [],
+          debit_memos: watch("multiple")
+            ? submitData?.check?.map((items) => {
+                return {
+                  bank_id: items?.bank?.id,
+                  dm_type: items?.debit_type?.value, // dm,mc,telegraphic or cm
+                  amount: items.amount,
+                  check_no_id: items.check_no?.id,
+                  dm_date: items?.check_date
+                    ? moment(items?.check_date).format("YYYY-MM-DD")
+                    : null,
+                };
+              })
+            : [
+                {
+                  bank_id: submitData?.bank?.id,
+                  dm_type: submitData?.debit_type?.value, // dm,mc,telegraphic or cm
+                  amount: voucherData?.amount,
+                  dm_date: moment(submitData?.check_date).format("YYYY-MM-DD"),
+                },
+              ],
+        };
+
+        const res = await releaseVoucher(dm).unwrap();
+        enqueueSnackbar(res?.message, { variant: "success" });
+      }
+      dispatch(jsonServerAPI?.util?.invalidateTags(["CheckNumber"]));
+      dispatch(setClearChecks(true));
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
@@ -268,20 +322,6 @@ const TreasuryModal = () => {
     };
     try {
       const res = await releasedVoucher(obj).unwrap();
-      enqueueSnackbar(res?.message, { variant: "success" });
-      dispatch(resetMenu());
-      dispatch(resetPrompt());
-    } catch (error) {
-      singleError(error, enqueueSnackbar);
-    }
-  };
-
-  const handleApproveVoucher = async () => {
-    const obj = {
-      check_ids: [menuData?.id],
-    };
-    try {
-      const res = await releaseVoucher(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
       dispatch(resetMenu());
       dispatch(resetPrompt());
@@ -304,10 +344,35 @@ const TreasuryModal = () => {
     }
   };
 
-  const handleReturn = async () => {
+  const handleReturn = async (reason) => {
+    const obj = {
+      id: menuData?.id,
+      ...reason,
+    };
     try {
-      console.log("return to ap");
-    } catch (error) {}
+      const res = await voidedCVoucher(obj).unwrap();
+      enqueueSnackbar(res?.message, { variant: "success" });
+      dispatch(resetPrompt());
+      dispatch(resetMenu());
+    } catch (error) {
+      singleError(error, enqueueSnackbar);
+    }
+  };
+
+  const handleGetCheckNo = async () => {
+    const bank = watch("bank");
+    fields?.map((item, index) => setValue(`check.${index}.check_no`, null));
+    if (bank) {
+      const obj = {
+        state: "Available",
+        pagination: "none",
+        coa_id: bank.id,
+      };
+      try {
+        const res = await triggerSearchCheckNumber(obj).unwrap();
+        setValue("check_no", null);
+      } catch (error) {}
+    }
   };
 
   return (
@@ -495,7 +560,7 @@ const TreasuryModal = () => {
                             className="voucher-treasury left"
                             align="right"
                           >
-                            {taxData === null && menuData?.debitCoa ? (
+                            {menuData?.debitCoa ? (
                               <Typography>
                                 {menuData?.debitCoa?.name}{" "}
                               </Typography>
@@ -567,7 +632,7 @@ const TreasuryModal = () => {
                             colSpan={2}
                             className="voucher-treasury center"
                           >
-                            {taxData === null && menuData?.creditCoa ? (
+                            {menuData?.creditCoa ? (
                               <Typography>
                                 {menuData?.creditCoa?.name}
                               </Typography>
@@ -575,11 +640,19 @@ const TreasuryModal = () => {
                               <Autocomplete
                                 control={control}
                                 name={"credit_coa_id"}
-                                options={accountTitles?.result || []}
+                                options={
+                                  accountTitles?.result?.filter((coa) =>
+                                    coa?.name?.startsWith("CIB")
+                                  ) || []
+                                }
                                 getOptionLabel={(option) => `${option.name}`}
                                 isOptionEqualToValue={(option, value) =>
                                   option?.id === value?.id
                                 }
+                                onClose={() => {
+                                  setValue("bank", watch("credit_coa_id"));
+                                  handleGetCheckNo();
+                                }}
                                 renderInput={(params) => (
                                   <MuiTextField
                                     name="credit_coa_id"
@@ -658,6 +731,10 @@ const TreasuryModal = () => {
                                 isOptionEqualToValue={(option, value) =>
                                   option?.id === value?.id
                                 }
+                                onClose={() => {
+                                  setValue("credit_coa_id", watch("bank"));
+                                  handleGetCheckNo();
+                                }}
                                 renderInput={(params) => (
                                   <MuiTextField
                                     name="bank"
@@ -723,24 +800,55 @@ const TreasuryModal = () => {
                                   ? items?.treasuryCheck?.check_no
                                   : ""
                               }`}</Typography>
-                            ) : (
-                              <AppTextBox
-                                showDecimal
-                                type={
-                                  watch("type") === "DEBIT MEMO" ? "" : "number"
+                            ) : watch("type") === "DEBIT MEMO" ? (
+                              <Autocomplete
+                                control={control}
+                                name={"debit_type"}
+                                loading={loadingSearch}
+                                options={debitType || []}
+                                getOptionLabel={(option) => `${option?.name}`}
+                                isOptionEqualToValue={(option, value) =>
+                                  option.value === value.value
                                 }
+                                renderInput={(params) => (
+                                  <MuiTextField
+                                    name="bank"
+                                    {...params}
+                                    label="Debit Type*"
+                                    size="small"
+                                    variant="filled"
+                                    error={Boolean(errors.debit_type)}
+                                    helperText={errors.debit_type?.message}
+                                    className="transaction-form-textBox treasury"
+                                  />
+                                )}
+                                disableClearable
+                              />
+                            ) : (
+                              <Autocomplete
                                 control={control}
                                 name={"check_no"}
-                                label={
-                                  watch("type") === "CHECK VOUCHER"
-                                    ? "Check No. *"
-                                    : "Remarks"
+                                loading={loadingSearch}
+                                options={searchedData?.result || []}
+                                getOptionLabel={(option) =>
+                                  `${option.check_no}`
                                 }
-                                color="primary"
-                                className="transaction-tax-textBox treasury"
-                                error={Boolean(errors?.check_no)}
-                                helperText={errors?.check_no?.message}
-                                variant="filled"
+                                isOptionEqualToValue={(option, value) =>
+                                  option?.id === value?.id
+                                }
+                                renderInput={(params) => (
+                                  <MuiTextField
+                                    name="bank"
+                                    {...params}
+                                    label="Check Number*"
+                                    size="small"
+                                    variant="filled"
+                                    error={Boolean(errors.check_no)}
+                                    helperText={errors.check_no?.message}
+                                    className="transaction-form-textBox treasury"
+                                  />
+                                )}
+                                disableClearable
                               />
                             )}
                           </TableCell>
@@ -750,7 +858,7 @@ const TreasuryModal = () => {
                             className="voucher-treasury content"
                           >
                             <Stack flexDirection={"row"} gap={1}>
-                              <Typography>CV. No. :</Typography>
+                              <Typography>VP. No. :</Typography>
                               <Typography>{items?.voucher_number}</Typography>
                             </Stack>
                           </TableCell>
@@ -878,6 +986,10 @@ const TreasuryModal = () => {
                                             />
                                           }
                                           label="Check Voucher"
+                                          onChange={() => {
+                                            setValue("check_no", null);
+                                            setValue("debit_type", null);
+                                          }}
                                         />
                                         <FormControlLabel
                                           value="DEBIT MEMO"
@@ -888,8 +1000,12 @@ const TreasuryModal = () => {
                                             />
                                           }
                                           label="Debit Memo"
+                                          onChange={() => {
+                                            setValue("check_no", null);
+                                            setValue("debit_type", null);
+                                          }}
                                         />
-                                        <FormControlLabel
+                                        {/* <FormControlLabel
                                           value="OFFSET"
                                           control={
                                             <Radio
@@ -898,7 +1014,7 @@ const TreasuryModal = () => {
                                             />
                                           }
                                           label="Offset"
-                                        />
+                                        /> */}
                                       </RadioGroup>
                                     )}
                                   />
@@ -1121,11 +1237,20 @@ const TreasuryModal = () => {
                       <Autocomplete
                         control={control}
                         name={"credit_coa_id"}
-                        options={accountTitles?.result || []}
+                        options={
+                          accountTitles?.result?.filter((coa) =>
+                            coa?.name?.startsWith("CIB")
+                          ) || []
+                        }
                         getOptionLabel={(option) => `${option.name}`}
                         isOptionEqualToValue={(option, value) =>
                           option?.id === value?.id
                         }
+                        onClose={() => {
+                          setValue("bank", watch("credit_coa_id"));
+                          setValue("check_no", null);
+                          handleGetCheckNo();
+                        }}
                         renderInput={(params) => (
                           <MuiTextField
                             name="credit_coa_id"
@@ -1204,6 +1329,11 @@ const TreasuryModal = () => {
                         isOptionEqualToValue={(option, value) =>
                           option?.id === value?.id
                         }
+                        onClose={() => {
+                          setValue("credit_coa_id", watch("bank"));
+                          setValue("check_no", null);
+                          handleGetCheckNo();
+                        }}
                         renderInput={(params) => (
                           <MuiTextField
                             name="bank"
@@ -1269,22 +1399,52 @@ const TreasuryModal = () => {
                           ? menuData?.treasuryChecks[0]?.check_no
                           : ""
                       }`}</Typography>
+                    ) : watch("type") === "DEBIT MEMO" ? (
+                      <Autocomplete
+                        control={control}
+                        name={"debit_type"}
+                        loading={loadingSearch}
+                        options={debitType || []}
+                        getOptionLabel={(option) => `${option?.name}`}
+                        isOptionEqualToValue={(option, value) =>
+                          option.value === value.value
+                        }
+                        renderInput={(params) => (
+                          <MuiTextField
+                            name="bank"
+                            {...params}
+                            label="Debit Type*"
+                            size="small"
+                            variant="filled"
+                            error={Boolean(errors.debit_type)}
+                            helperText={errors.debit_type?.message}
+                            className="transaction-form-textBox treasury"
+                          />
+                        )}
+                        disableClearable
+                      />
                     ) : (
-                      <AppTextBox
-                        showDecimal
-                        type={watch("type") === "DEBIT MEMO" ? "" : "number"}
+                      <Autocomplete
                         control={control}
                         name={"check_no"}
-                        label={
-                          watch("type") === "CHECK VOUCHER"
-                            ? "Check No. *"
-                            : "Remarks"
+                        options={searchedData?.result || []}
+                        getOptionLabel={(option) => `${option.check_no}`}
+                        isOptionEqualToValue={(option, value) =>
+                          option?.id === value?.id
                         }
-                        color="primary"
-                        className="transaction-tax-textBox treasury"
-                        error={Boolean(errors?.check_no)}
-                        helperText={errors?.check_no?.message}
-                        variant="filled"
+                        renderInput={(params) => (
+                          <MuiTextField
+                            name="check_no"
+                            {...params}
+                            label="Check Number*"
+                            size="small"
+                            variant="filled"
+                            error={Boolean(errors.check_no)}
+                            helperText={errors.check_no?.message}
+                            className="transaction-form-textBox treasury"
+                          />
+                        )}
+                        disableClearable
                       />
                     )}
                   </TableCell>
@@ -1294,7 +1454,7 @@ const TreasuryModal = () => {
                     className="voucher-treasury content"
                   >
                     <Stack flexDirection={"row"} gap={1}>
-                      <Typography>CV. No. :</Typography>
+                      <Typography>VP. No. :</Typography>
                       <Typography>{menuData?.voucher_number}</Typography>
                     </Stack>
                   </TableCell>
@@ -1418,6 +1578,10 @@ const TreasuryModal = () => {
                                     <Radio color="secondary" size="small" />
                                   }
                                   label="Check Voucher"
+                                  onChange={() => {
+                                    setValue("check_no", null);
+                                    setValue("debit_type", null);
+                                  }}
                                 />
                                 <FormControlLabel
                                   value="DEBIT MEMO"
@@ -1425,14 +1589,18 @@ const TreasuryModal = () => {
                                     <Radio color="secondary" size="small" />
                                   }
                                   label="Debit Memo"
+                                  onChange={() => {
+                                    setValue("check_no", null);
+                                    setValue("debit_type", null);
+                                  }}
                                 />
-                                <FormControlLabel
+                                {/* <FormControlLabel
                                   value="OFFSET EXPENSE MEMO"
                                   control={
                                     <Radio color="secondary" size="small" />
                                   }
                                   label="Offset"
-                                />
+                                /> */}
                               </RadioGroup>
                             )}
                           />
@@ -1461,9 +1629,8 @@ const TreasuryModal = () => {
                           className="add-transaction-button"
                           onClick={() => {
                             setValue("bank", null);
-                            setValue("bank", null);
                             setValue("check_date", null);
-                            setValue("check_no", "");
+                            setValue("check_no", null);
                             setValue("multiple", true);
                             dispatch(setCreateMenu(true));
                           }}
@@ -1506,14 +1673,15 @@ const TreasuryModal = () => {
                   className="name-supplier-typo-treasury name"
                   align="center"
                   color={
-                    parseFloat(totalAmountCheck(watch("check"))).toFixed(2) !==
-                    parseFloat(voucherData?.amount).toFixed(2)
+                    parseFloat(totalAmountCheckForm(watch("check"))).toFixed(
+                      2
+                    ) !== parseFloat(voucherData?.amount).toFixed(2)
                       ? "error"
                       : ""
                   }
                 >
                   {`Total Amount: ₱ ${convertToPeso(
-                    parseFloat(totalAmountCheck(watch("check"))).toFixed(2)
+                    parseFloat(totalAmountCheckForm(watch("check"))).toFixed(2)
                   )}`}
                 </Typography>
               </Stack>
@@ -1528,21 +1696,61 @@ const TreasuryModal = () => {
                     alignItems={"center"}
                     justifyContent={"center"}
                   >
-                    <AppTextBox
-                      type={watch("type") === "DEBIT MEMO" ? "" : "number"}
-                      control={control}
-                      name={`check.${index}.check_no`}
-                      label={
-                        watch("type") === "CHECK VOUCHER"
-                          ? "Check No. *"
-                          : "Remarks"
-                      }
-                      color="primary"
-                      className="transaction-tax-textBox treasury-array"
-                      error={Boolean(errors?.check?.[index]?.check_no)}
-                      helperText={errors?.check?.[index]?.check_no?.message}
-                      variant="filled"
-                    />
+                    {watch("type") === "DEBIT MEMO" ? (
+                      <Autocomplete
+                        control={control}
+                        name={`check.${index}.debit_type`}
+                        loading={loadingSearch}
+                        options={debitType || []}
+                        getOptionLabel={(option) => `${option?.name}`}
+                        isOptionEqualToValue={(option, value) =>
+                          option.value === value.value
+                        }
+                        renderInput={(params) => (
+                          <MuiTextField
+                            name="bank"
+                            {...params}
+                            label="Debit Type*"
+                            size="small"
+                            variant="filled"
+                            error={Boolean(errors.debit_type)}
+                            helperText={errors.debit_type?.message}
+                            className="transaction-tax-textBox treasury-array"
+                          />
+                        )}
+                        disableClearable
+                      />
+                    ) : (
+                      <Autocomplete
+                        control={control}
+                        name={`check.${index}.check_no`}
+                        options={searchedData?.result || []}
+                        getOptionLabel={(option) => `${option.check_no}`}
+                        getOptionDisabled={(option) => {
+                          return watch("check")?.some(
+                            (checks) => checks.check_no?.id === option.id
+                          );
+                        }}
+                        isOptionEqualToValue={(option, value) =>
+                          option?.id === value?.id
+                        }
+                        renderInput={(params) => (
+                          <MuiTextField
+                            name="check_no"
+                            {...params}
+                            label="Check Number*"
+                            size="small"
+                            variant="filled"
+                            error={Boolean(errors?.check?.[index]?.check_no)}
+                            helperText={
+                              errors?.check?.[index]?.check_no?.message
+                            }
+                            className="transaction-tax-textBox treasury-array"
+                          />
+                        )}
+                        disableClearable
+                      />
+                    )}
                     <AppTextBox
                       showDecimal
                       money
@@ -1556,32 +1764,66 @@ const TreasuryModal = () => {
                       variant="filled"
                       onKeyUp={(e) => handleCheckAmount(e, index)}
                     />
-                    <Autocomplete
-                      control={control}
-                      name={`check.${index}.bank`}
-                      options={
-                        accountTitles?.result?.filter((coa) =>
-                          coa?.name?.startsWith("CIB")
-                        ) || []
-                      }
-                      getOptionLabel={(option) => `${option.name}`}
-                      isOptionEqualToValue={(option, value) =>
-                        option?.id === value?.id
-                      }
-                      renderInput={(params) => (
-                        <MuiTextField
-                          name="bank"
-                          {...params}
-                          label="Bank*"
-                          size="small"
-                          variant="filled"
-                          error={Boolean(errors?.check?.[index]?.bank)}
-                          helperText={errors?.check?.[index]?.bank?.message}
-                          className="transaction-form-textBox treasury-array"
-                        />
-                      )}
-                      disableClearable
-                    />
+                    {watch("type") === "DEBIT MEMO" ? (
+                      <Autocomplete
+                        control={control}
+                        name={`check.${index}.bank`}
+                        options={
+                          accountTitles?.result?.filter((coa) =>
+                            coa?.name?.startsWith("CIB")
+                          ) || []
+                        }
+                        getOptionLabel={(option) => `${option.name}`}
+                        isOptionEqualToValue={(option, value) =>
+                          option?.id === value?.id
+                        }
+                        renderInput={(params) => (
+                          <MuiTextField
+                            name="bank"
+                            {...params}
+                            label="Bank*"
+                            size="small"
+                            variant="filled"
+                            error={Boolean(errors.bank)}
+                            helperText={errors.bank?.message}
+                            className="transaction-form-textBox treasury-array"
+                          />
+                        )}
+                        disableClearable
+                      />
+                    ) : (
+                      <Autocomplete
+                        control={control}
+                        name={"bank"}
+                        options={
+                          accountTitles?.result?.filter((coa) =>
+                            coa?.name?.startsWith("CIB")
+                          ) || []
+                        }
+                        getOptionLabel={(option) => `${option.name}`}
+                        isOptionEqualToValue={(option, value) =>
+                          option?.id === value?.id
+                        }
+                        onClose={() => {
+                          setValue("credit_coa_id", watch("bank"));
+                          handleGetCheckNo();
+                        }}
+                        renderInput={(params) => (
+                          <MuiTextField
+                            name="bank"
+                            {...params}
+                            label="Bank*"
+                            size="small"
+                            variant="filled"
+                            error={Boolean(errors.bank)}
+                            helperText={errors.bank?.message}
+                            className="transaction-form-textBox treasury-array"
+                          />
+                        )}
+                        disableClearable
+                      />
+                    )}
+
                     <Controller
                       name={`check.${index}.check_date`}
                       control={control}
@@ -1636,9 +1878,10 @@ const TreasuryModal = () => {
                 onClick={() =>
                   append({
                     id: Date.now(),
-                    bank: null,
                     check_no: "",
+                    bank: watch("credit_coa_id"),
                     amount: 0,
+                    check_no: null,
                     check_date: dayjs(new Date(), {
                       locale: AdapterDayjs.locale,
                     }),
@@ -1671,17 +1914,6 @@ const TreasuryModal = () => {
               )}
               content={() => componentRef.current}
             />
-
-            {hasAccess("check_approval") && (
-              <Button
-                variant="contained"
-                color="success"
-                className="add-transaction-button"
-                onClick={() => handleApproveVoucher()}
-              >
-                Approve
-              </Button>
-            )}
 
             {menuData?.state === "For Releasing" && (
               <Button
@@ -1724,8 +1956,9 @@ const TreasuryModal = () => {
               <Button
                 disabled={
                   watch("multiple") === true &&
-                  parseFloat(totalAmountCheck(watch("check"))).toFixed(2) !==
-                    parseFloat(voucherData?.amount).toFixed(2)
+                  parseFloat(totalAmountCheckForm(watch("check"))).toFixed(
+                    2
+                  ) !== parseFloat(voucherData?.amount).toFixed(2)
                 }
                 variant="contained"
                 color="success"
@@ -1740,6 +1973,7 @@ const TreasuryModal = () => {
               variant="contained"
               color="primary"
               onClick={() => {
+                dispatch(jsonServerAPI?.util?.invalidateTags(["CheckNumber"]));
                 dispatch(resetMenu());
                 dispatch(resetOption());
                 dispatch(setViewAccountingEntries(false));
@@ -1757,7 +1991,9 @@ const TreasuryModal = () => {
           loadingTitles ||
           releaseLoading ||
           clearLoading ||
-          releasedLoading
+          releasedLoading ||
+          loadingReturn ||
+          loadingSearch
         }
         className="loading-transaction-create"
       >
@@ -1769,7 +2005,7 @@ const TreasuryModal = () => {
           title={"Reason for return"}
           reasonDesc={"Please enter the reason for returning this entry"}
           warning={
-            "Please note that this entry will be forwarded back to Accounts Payable (AP) for further processing. Kindly provide a reason for this action."
+            "Please note that this entry will be forwarded back to Approver for further processing. Kindly provide a reason for this action."
           }
           confirmButton={"Confirm"}
           cancelButton={"Cancel"}
@@ -1786,6 +2022,8 @@ const TreasuryModal = () => {
       >
         <ClearCheck />
       </Dialog>
+
+      <TransactionDrawer transactionData={menuData?.transactions} />
     </Paper>
   );
 };

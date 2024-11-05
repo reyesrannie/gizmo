@@ -131,7 +131,8 @@ const TransactionModalAp = () => {
   } = useTaxComputationQuery(
     {
       status: "active",
-      transaction_id: transactionData?.transactions?.id,
+      transaction_id: voucher === "gj" ? [] : transactionData?.transactions?.id,
+      gj_id: voucher !== "gj" ? "" : transactionData?.id,
       voucher: voucher,
       pagination: "none",
     },
@@ -484,10 +485,12 @@ const TransactionModalAp = () => {
           error={Boolean(errors?.cip_no)}
           helperText={errors?.cip_no?.message}
         />
-        {voucher === "journal" && (
+        {voucher === "gj" && (
           <Autocomplete
             disabled={
-              transactionData?.state !== "For Computation" || disableCheck
+              (transactionData?.state !== "For Computation" &&
+                transactionData?.state !== "returned") ||
+              disableCheck
             }
             control={control}
             name={"coa_id"}
@@ -514,6 +517,7 @@ const TransactionModalAp = () => {
         <AppTextBox
           disabled={true}
           money
+          showDecimal
           control={control}
           name={"amount"}
           label={"Amount *"}
@@ -535,10 +539,12 @@ const TransactionModalAp = () => {
           helperText={errors.description?.message}
         />
 
-        {voucher === "journal" && (
+        {voucher === "gj" && (
           <AppTextBox
             disabled={
-              transactionData?.state !== "For Computation" || disableCheck
+              (transactionData?.state !== "For Computation" &&
+                transactionData?.state !== "returned") ||
+              disableCheck
             }
             multiline
             minRows={1}
@@ -594,6 +600,7 @@ const TransactionModalAp = () => {
               const formattedDate = `20${year}-${month
                 .toString()
                 .padStart(2, "0")}`;
+
               return (
                 !errorTaxComputation && (
                   <Paper
@@ -601,10 +608,12 @@ const TransactionModalAp = () => {
                     key={index}
                     className="tax-details-value"
                     onClick={() => {
-                      transactionData?.state === "For Computation" &&
-                        dispatch(setUpdateTax(true));
-                      transactionData?.state === "For Computation" &&
-                        dispatch(setTaxData(tax));
+                      transactionData?.state === "For Computation" ||
+                        (transactionData?.state === "returned" &&
+                          dispatch(setUpdateTax(true)));
+                      transactionData?.state === "For Computation" ||
+                        (transactionData?.state === "returned" &&
+                          dispatch(setTaxData(tax)));
                     }}
                   >
                     <LocalOfferOutlinedIcon />
@@ -693,7 +702,7 @@ const TransactionModalAp = () => {
                       <Box className="tax-box-value">
                         {transactionData?.voucher_number === null && (
                           <Typography className="amount-tax">
-                            VP#: {voucher === "check" ? "CVRL" : "GJRL"}
+                            VP#: {voucher === "check" ? "VPRL" : "GJRL"}
                             {transactionData?.apTagging?.vp}
                             {formattedDate}-
                             {voucher === "check"

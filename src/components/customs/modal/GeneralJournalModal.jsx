@@ -81,6 +81,7 @@ import {
   useLazySearchTagQuery,
 } from "../../../services/store/seconAPIRequest";
 import { singleError } from "../../../services/functions/errorResponse";
+import moment from "moment";
 
 const GeneralJournalModal = () => {
   const dispatch = useDispatch();
@@ -258,10 +259,6 @@ const GeneralJournalModal = () => {
 
       const values = {
         ...mapData,
-        tag_month_year:
-          dayjs(new Date(tagMonthYear), {
-            locale: AdapterDayjs.locale,
-          }) || null,
       };
 
       Object.entries(values).forEach(([key, value]) => {
@@ -275,12 +272,18 @@ const GeneralJournalModal = () => {
     return watch("document_type")?.required_fields?.includes(field);
   };
 
-  const submitHandler = async (submitData) => {
+  const submitHandler = () => {
+    dispatch(setOpenReason(true));
+  };
+
+  const submitHandlerReason = async (submitData) => {
     const obj = {
       check_id: searchedData?.result?.id,
       amount: watch("amount"),
       type: watch("type"),
       reason: submitData?.reason,
+      category: submitData?.category,
+      tag_year: moment(new Date(watch("tag_month_year"))).format("YYMM"),
     };
     try {
       const res = await createGJ(obj).unwrap();
@@ -407,7 +410,6 @@ const GeneralJournalModal = () => {
           helperText={errors?.tag_no?.message}
         />
         <Autocomplete
-          disabled
           control={control}
           name={"tin"}
           options={tin?.result || []}
@@ -487,7 +489,6 @@ const GeneralJournalModal = () => {
           </Typography>
 
           <Button
-            disabled
             endIcon={<AddIcon />}
             color="secondary"
             variant="contained"
@@ -500,7 +501,6 @@ const GeneralJournalModal = () => {
         </Box>
         {watch("tin") && (
           <Autocomplete
-            disabled
             control={control}
             name={"document_type"}
             options={document?.result || []}
@@ -528,7 +528,6 @@ const GeneralJournalModal = () => {
           render={({ field: { onChange, value, ...restField } }) => (
             <Box className="date-picker-container-transaction">
               <DatePicker
-                disabled
                 className="transaction-form-date"
                 label="Date Invoice *"
                 format="MMMM DD, YYYY"
@@ -547,7 +546,6 @@ const GeneralJournalModal = () => {
         />
         {false && (
           <AppTextBox
-            disabled
             control={control}
             name={"name_in_receipt"}
             label={"Name in receipt *"}
@@ -559,7 +557,6 @@ const GeneralJournalModal = () => {
         )}
         {checkField("invoice_no") && (
           <AppTextBox
-            disabled
             control={control}
             name={"invoice_no"}
             label={"Invoice No. *"}
@@ -571,7 +568,6 @@ const GeneralJournalModal = () => {
         )}
         {checkField("ref_no") && (
           <AppTextBox
-            disabled
             control={control}
             name={"ref_no"}
             label={"Ref No. *"}
@@ -594,7 +590,6 @@ const GeneralJournalModal = () => {
         {checkField("amount_withheld") && (
           <AppTextBox
             money
-            disabled
             control={control}
             name={"amount_withheld"}
             label={"Amount withheld *"}
@@ -607,7 +602,6 @@ const GeneralJournalModal = () => {
         {checkField("amount_check") && (
           <AppTextBox
             money
-            disabled
             control={control}
             name={"amount_check"}
             label={"Amount of check *"}
@@ -620,7 +614,6 @@ const GeneralJournalModal = () => {
         {checkField("vat") && (
           <AppTextBox
             money
-            disabled
             control={control}
             name={"vat"}
             label={"Vat *"}
@@ -633,7 +626,6 @@ const GeneralJournalModal = () => {
         {checkField("cost") && (
           <AppTextBox
             money
-            disabled
             control={control}
             name={"cost"}
             label={"Cost *"}
@@ -648,7 +640,6 @@ const GeneralJournalModal = () => {
             return (
               <AppTextBox
                 key={index}
-                disabled
                 control={control}
                 name={`${item?.code}`}
                 label={`${item?.code}`}
@@ -662,7 +653,6 @@ const GeneralJournalModal = () => {
           })}
         {hasAccess(["ap_tag"]) && (
           <AppTextBox
-            disabled
             multiline
             minRows={1}
             control={control}
@@ -691,7 +681,6 @@ const GeneralJournalModal = () => {
               render={({ field: { onChange, value, ...restField } }) => (
                 <Box className="date-picker-container-transaction">
                   <DatePicker
-                    disabled
                     className="transaction-form-date"
                     label="From (If Applicable)"
                     format="MMMM DD, YYYY"
@@ -715,7 +704,6 @@ const GeneralJournalModal = () => {
               render={({ field: { onChange, value, ...restField } }) => (
                 <Box className="date-picker-container-transaction">
                   <DatePicker
-                    disabled
                     className="transaction-form-date"
                     label="To (If Applicable)"
                     minDate={watch("coverage_from")}
@@ -731,7 +719,6 @@ const GeneralJournalModal = () => {
 
             {checkField("account_number") && (
               <Autocomplete
-                disabled
                 control={control}
                 name={"account_number"}
                 options={
@@ -766,7 +753,6 @@ const GeneralJournalModal = () => {
           </Typography>
         </Box>
         <Autocomplete
-          disabled
           control={control}
           name={"ap"}
           options={ap?.result || []}
@@ -793,7 +779,6 @@ const GeneralJournalModal = () => {
           render={({ field: { onChange, value, ...restField } }) => (
             <Box className="date-picker-container-transaction">
               <DatePicker
-                disabled
                 className="transaction-form-date"
                 label="Tag year month *"
                 format="MMMM YYYY"
@@ -805,8 +790,8 @@ const GeneralJournalModal = () => {
                 }}
                 slotProps={{
                   textField: {
-                    error: Boolean(errors?.check_date),
-                    helperText: errors?.check_date?.message,
+                    error: Boolean(errors?.tag_month_year),
+                    helperText: errors?.tag_month_year?.message,
                   },
                 }}
               />
@@ -821,9 +806,9 @@ const GeneralJournalModal = () => {
               <LoadingButton
                 variant="contained"
                 color="warning"
-                onClick={() => dispatch(setOpenReason(true))}
                 className="add-transaction-button"
                 disabled={!watch("tin") || watch("type") === ""}
+                type="submit"
               >
                 Add
               </LoadingButton>
@@ -868,7 +853,7 @@ const GeneralJournalModal = () => {
           cancelOnClick={() => {
             dispatch(resetPrompt());
           }}
-          confirmOnClick={submitHandler}
+          confirmOnClick={submitHandlerReason}
         />
       </Dialog>
 

@@ -3,11 +3,9 @@ import Echo from "laravel-echo";
 
 window.Pusher = Pusher;
 
-Pusher.logToConsole = true;
-// const baseUrl = "10.10.12.10";
-const baseUrl = "192.168.254.132";
+const baseUrl = process.env.REACT_APP_WEBSOCKET_URL;
 
-// const baseUrl = process.env.REACT_APP_WEBSOCKET_URL;
+Pusher.logToConsole = true;
 
 const EchoInstance = new Echo({
   broadcaster: "pusher",

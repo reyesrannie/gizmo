@@ -174,9 +174,10 @@
 
 .form-container-transaction.clearing {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
+  margin-bottom: 20px;
 }
 
 .form-container-transaction.width {
@@ -226,6 +227,7 @@
   &.MuiFormControl-root {
     min-width: 230px;
     max-width: 230px;
+    min-height: unset;
   }
 }
 
@@ -310,6 +312,12 @@
   }
 }
 
+.transaction-form-date.recieve {
+  &.MuiFormControl-root {
+    min-height: unset;
+  }
+}
+
 .transaction-form-date.preparation {
   &.MuiFormControl-root {
     min-width: 150px;
@@ -382,21 +390,11 @@
 
 .history-box-container {
   &.MuiBox-root {
+    padding: 10px;
     display: flex;
     flex-direction: column;
     gap: 10px;
     flex-wrap: wrap;
-  }
-}
-
-.history-box-container.history-noData {
-  &.MuiBox-root {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    width: 100%;
   }
 }
 

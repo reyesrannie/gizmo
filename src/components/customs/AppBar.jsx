@@ -41,6 +41,7 @@ import DateChecker from "../../services/functions/DateChecker";
 import { hasAccess } from "../../services/functions/access";
 import EchoInstance from "../../services/functions/backendSocket";
 import { socketEvents } from "../../services/constants/socketEvents";
+import { seconAPIRequest } from "../../services/store/seconAPIRequest";
 
 const AppBar = () => {
   const { enqueueSnackbar } = useSnackbar();
@@ -130,20 +131,46 @@ const AppBar = () => {
         .listen(event, (data) => {
           if (action?.some((act) => act === "dispatch")) {
             dispatch(jsonServerAPI?.util?.invalidateTags(tags));
+            dispatch(seconAPIRequest?.util?.invalidateTags(tags));
           } else if (action?.some((act) => act === "AP")) {
-            (data?.gas_status === "pending" ||
+            if (
+              data?.gas_status === "pending" ||
               userData?.scope_tagging?.some(
                 (tag) => tag?.ap_id === data?.ap_tagging_id
-              )) &&
+              )
+            ) {
               dispatch(jsonServerAPI?.util?.invalidateTags(tags));
+              dispatch(seconAPIRequest?.util?.invalidateTags(tags));
+            }
 
-            data?.gas_status === "For Computation" &&
-              hasAccess(["tagging"]) &&
+            if (data?.state === "For Computation" && hasAccess(["tagging"])) {
               dispatch(jsonServerAPI?.util?.invalidateTags(tags));
+              dispatch(seconAPIRequest?.util?.invalidateTags(tags));
+            }
 
-            data?.gas_status === "For Approval" &&
-              hasAccess(["approver"]) &&
+            if (data?.state === "For Approval" && hasAccess(["approver"])) {
               dispatch(jsonServerAPI?.util?.invalidateTags(tags));
+              dispatch(seconAPIRequest?.util?.invalidateTags(tags));
+            }
+            if (
+              data?.state === "approved" &&
+              userData?.scope_tagging?.some(
+                (tag) => tag?.ap_id === data?.ap_tagging_id
+              )
+            ) {
+              dispatch(jsonServerAPI?.util?.invalidateTags(tags));
+              dispatch(seconAPIRequest?.util?.invalidateTags(tags));
+            }
+          } else if (action?.some((act) => act === "Treasury")) {
+            if (
+              hasAccess(["preparation", "releasing", "clearing"]) ||
+              userData?.scope_tagging?.some((tag) =>
+                data?.ap_tagging_id?.includes(tag?.ap_id)
+              )
+            ) {
+              dispatch(jsonServerAPI?.util?.invalidateTags(tags));
+              dispatch(seconAPIRequest?.util?.invalidateTags(tags));
+            }
           } else {
             enqueueSnackbar(data?.message, { variant: "success" });
           }

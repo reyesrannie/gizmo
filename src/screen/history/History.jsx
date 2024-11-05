@@ -3,29 +3,20 @@ import React, { useEffect, useRef } from "react";
 import Breadcrums from "../../components/customs/Breadcrums";
 import SearchText from "../../components/customs/SearchText";
 
-import {
-  Accordion,
-  AccordionSummary,
-  Box,
-  IconButton,
-  Typography,
-} from "@mui/material";
+import { Box, Dialog, Typography } from "@mui/material";
 
 import { useDispatch, useSelector } from "react-redux";
-import { useCheckEntriesQuery } from "../../services/store/request";
-
-import ArrowDropDownCircleOutlinedIcon from "@mui/icons-material/ArrowDropDownCircleOutlined";
+import { useLazyCheckEntriesQuery } from "../../services/store/request";
 
 import "../../components/styles/TagTransaction.scss";
 
 import { apHistoryHeader } from "../../services/constants/headers";
-import {
-  setFilterBy,
-  setIsExpanded,
-} from "../../services/slice/transactionSlice";
-import useApHook from "../../services/hooks/useApHook";
-import { setHeader } from "../../services/slice/headerSlice";
+import { setIsExpanded } from "../../services/slice/transactionSlice";
 import Voucher from "./Voucher";
+
+import { HistoryContext } from "../../services/context/HistoryContext";
+import useApHistoryHook from "../../services/hooks/useApHistoryHook";
+import TransactionModal from "../../components/customs/modal/TransactionModal";
 
 const History = () => {
   const dispatch = useDispatch();
@@ -42,15 +33,13 @@ const History = () => {
     onSortTable,
     onOrderBy,
     onStateChange,
-  } = useApHook();
+    onTagYearChange,
+  } = useApHistoryHook();
 
-  const {
-    data: tagTransaction,
-    isLoading,
-    isError,
-    isFetching,
-    status,
-  } = useCheckEntriesQuery(params);
+  const [
+    getChecks,
+    { data: tagTransaction, isLoading, isError, isFetching, status },
+  ] = useLazyCheckEntriesQuery();
 
   useEffect(() => {
     if (header) {
@@ -80,22 +69,37 @@ const History = () => {
   }, [accordionRef, dispatch]);
 
   return (
-    <Box>
+    <HistoryContext.Provider
+      value={{
+        params,
+        onPageChange,
+        onRowChange,
+        onSearchData,
+        onSortTable,
+        onOrderBy,
+        onStateChange,
+        getChecks,
+        onTagYearChange,
+        tagTransaction,
+      }}
+    >
       <Box>
-        <Breadcrums />
-      </Box>
-      <Box className="tag-transaction-head-container">
-        <Box className="tag-transaction-navigation-container">
-          <Typography className="page-text-indicator-tag-transaction">
-            {header}
-          </Typography>
+        <Box>
+          <Breadcrums />
         </Box>
-        <Box className="tag-transaction-button-container">
-          <SearchText onSearchData={onSearchData} />
+        <Box className="tag-transaction-head-container">
+          <Box className="tag-transaction-navigation-container">
+            <Typography className="page-text-indicator-tag-transaction">
+              {header}
+            </Typography>
+          </Box>
+          <Box className="tag-transaction-button-container">
+            <SearchText onSearchData={onSearchData} />
+          </Box>
         </Box>
+        <Voucher />
       </Box>
-      a<Voucher />
-    </Box>
+    </HistoryContext.Provider>
   );
 };
 

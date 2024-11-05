@@ -5,12 +5,16 @@ import SearchText from "../../components/customs/SearchText";
 
 import { Box, Typography } from "@mui/material";
 
-import { useCheckNumberQuery } from "../../services/store/request";
+import {
+  useCheckNumberQuery,
+  useDebitMemoQuery,
+} from "../../services/store/request";
 
 import "../../components/styles/TagTransaction.scss";
 
-import CheckNumberTable from "./CheckNumberTable";
 import useTreasuryCheckHook from "../../services/hooks/useTreasuryCheckHook";
+import DebitMemoTable from "./DebitMemoTable";
+import useDebitMemoHook from "../../services/hooks/useDebitMemoHook";
 
 const DebitMemo = () => {
   const {
@@ -21,7 +25,7 @@ const DebitMemo = () => {
     onSortTable,
     onOrderBy,
     onShowAll,
-  } = useTreasuryCheckHook();
+  } = useDebitMemoHook();
 
   const {
     data: tagTransaction,
@@ -29,7 +33,7 @@ const DebitMemo = () => {
     isError,
     isFetching,
     status,
-  } = useCheckNumberQuery(params);
+  } = useDebitMemoQuery(params);
 
   return (
     <Box>
@@ -46,7 +50,7 @@ const DebitMemo = () => {
           <SearchText onSearchData={onSearchData} />
         </Box>
       </Box>
-      <CheckNumberTable
+      <DebitMemoTable
         params={params}
         onSortTable={onSortTable}
         isError={isError}

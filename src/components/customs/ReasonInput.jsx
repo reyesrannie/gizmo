@@ -1,14 +1,27 @@
-import { Box, Button, Paper, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  FormControl,
+  FormControlLabel,
+  FormLabel,
+  Paper,
+  Radio,
+  RadioGroup,
+  Stack,
+  Typography,
+} from "@mui/material";
 import React from "react";
 import "../styles/ReasonInput.scss";
+import "../styles/AppPrompt.scss";
 
 import FmdBadOutlinedIcon from "@mui/icons-material/FmdBadOutlined";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { LoadingButton } from "@mui/lab";
 
 import reasonSchema from "../../schemas/reasonSchema";
 import AppTextBox from "./AppTextBox";
+import { useSelector } from "react-redux";
 
 const ReasonInput = ({
   title,
@@ -19,6 +32,7 @@ const ReasonInput = ({
   warning,
   reasonDesc,
 }) => {
+  const voucher = useSelector((state) => state.options.voucher);
   const {
     control,
     handleSubmit,
@@ -28,6 +42,7 @@ const ReasonInput = ({
     resolver: yupResolver(reasonSchema),
     defaultValues: {
       reason: "",
+      category: "",
     },
   });
 
@@ -51,10 +66,37 @@ const ReasonInput = ({
         error={Boolean(errors?.reason)}
         helperText={errors?.reason?.message}
       />
+      {voucher === "gj" && (
+        <Stack flexDirection={"row"} gap={1}>
+          <FormControl className="form-control-radio treasury">
+            <Controller
+              name="category"
+              control={control}
+              defaultValue=""
+              render={({ field }) => (
+                <RadioGroup {...field}>
+                  <FormControlLabel
+                    value="short"
+                    control={<Radio color="secondary" size="small" />}
+                    label="Short Payment"
+                  />
+                  <FormControlLabel
+                    value="over"
+                    control={<Radio color="secondary" size="small" />}
+                    label="Over Payment"
+                  />
+                </RadioGroup>
+              )}
+            />
+          </FormControl>
+        </Stack>
+      )}
       <form onSubmit={handleSubmit(confirmOnClick)}>
         <Box className="reason-prompt-button-container">
           <LoadingButton
-            disabled={!watch("reason")}
+            disabled={
+              !watch("reason") || (voucher === "gj" && !watch("category"))
+            }
             variant="contained"
             color="warning"
             className="change-password-button"

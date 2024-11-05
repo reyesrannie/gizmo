@@ -315,6 +315,7 @@ const ScheduleModal = ({ create, view, update, receive }) => {
         docs
       );
       setOldValues(resData);
+
       update || receive
         ? Object.entries(resData).forEach(([key, value]) => {
             setValue(key, value);
@@ -556,6 +557,54 @@ const ScheduleModal = ({ create, view, update, receive }) => {
             </Box>
           )}
         />
+        <Controller
+          name="start_date"
+          control={control}
+          render={({ field: { onChange, value, ...restField } }) => (
+            <Box className="date-picker-container-transaction">
+              <DatePicker
+                disabled={view}
+                className="transaction-form-date"
+                label="Date to Begin Generate *"
+                format="MMMM DD, YYYY"
+                value={value}
+                maxDate={watch("coverage_to")}
+                onChange={(e) => {
+                  onChange(e);
+                }}
+              />
+              {errors.start_date && (
+                <Typography variant="caption" color="error">
+                  {errors.start_date.message}
+                </Typography>
+              )}
+            </Box>
+          )}
+        />
+        <Controller
+          name="end_date"
+          control={control}
+          render={({ field: { onChange, value, ...restField } }) => (
+            <Box className="date-picker-container-transaction">
+              <DatePicker
+                disabled={view}
+                className="transaction-form-date"
+                label="Date to End Generate *"
+                minDate={watch("coverage_from")}
+                format="MMMM DD, YYYY"
+                value={value}
+                onChange={(e) => {
+                  onChange(e);
+                }}
+              />
+              {errors.end_date && (
+                <Typography variant="caption" color="error">
+                  {errors.end_date.message}
+                </Typography>
+              )}
+            </Box>
+          )}
+        />
         {watch("tin") && (
           <Autocomplete
             disabled={view}
@@ -620,6 +669,7 @@ const ScheduleModal = ({ create, view, update, receive }) => {
           <AppTextBox
             disabled
             money
+            showDecimal
             control={control}
             name={"month_amount"}
             label={"Amount per month"}

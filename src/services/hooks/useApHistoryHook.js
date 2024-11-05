@@ -1,18 +1,40 @@
 // import moment from "moment";
 import { useState } from "react";
+import { useSelector } from "react-redux";
 
-const useApHook = () => {
+const useApHistoryHook = () => {
+  const userData = useSelector((state) => state.auth.userData);
+  const getAccess = () => {
+    const validAccess = ["ap_tag", "approver", "treasury"];
+
+    const mappedPermissions = userData?.role?.access_permission?.map(
+      (permission) =>
+        permission.toLowerCase() === "ap" ? "ap_tag" : permission.toLowerCase()
+    );
+
+    const matchingPermissions = mappedPermissions?.filter((permission) =>
+      validAccess.includes(permission)
+    );
+
+    if (matchingPermissions?.length === 1) {
+      return matchingPermissions[0] === "ap_tag"
+        ? "ap"
+        : matchingPermissions[0];
+    }
+
+    return null;
+  };
+
   const [params, setParams] = useState({
     status: "active",
-    page: 1,
+    page: 10,
     per_page: 10,
     pagination: null,
     sorts: null,
     tagYear: "",
-    is_filed: true,
-    state: "For Computation",
+    state: null,
     allocation: "",
-    access: "ap",
+    access: getAccess(),
   });
 
   const onPageChange = (_, page) => {
@@ -70,6 +92,13 @@ const useApHook = () => {
     }));
   };
 
+  const onTagYearChange = (tagYear) => {
+    setParams((currentValue) => ({
+      ...currentValue,
+      tagYear: tagYear,
+    }));
+  };
+
   return {
     params,
     onPageChange,
@@ -79,7 +108,8 @@ const useApHook = () => {
     onSortTable,
     onStateChange,
     onOrderBy,
+    onTagYearChange,
   };
 };
 
-export default useApHook;
+export default useApHistoryHook;

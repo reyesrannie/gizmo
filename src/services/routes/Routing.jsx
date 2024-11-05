@@ -75,6 +75,7 @@ const Check = lazy(() => import("../../screen/treasury/Check"));
 const CheckNumber = lazy(() => import("../../screen/treasury/CheckNumber"));
 const DebitMemo = lazy(() => import("../../screen/treasury/DebitMemo"));
 const Offset = lazy(() => import("../../screen/treasury/Offset"));
+const Balance = lazy(() => import("../../screen/treasury/Balance"));
 
 const Routing = () => {
   const user = decodeUser();
@@ -332,6 +333,14 @@ const Routing = () => {
             <Navigate to={"/"} />
           ),
         },
+        {
+          path: "history",
+          element: hasAccess(["approver"]) ? (
+            <History />
+          ) : (
+            <Navigate to={"/"} />
+          ),
+        },
       ],
     },
     {
@@ -387,6 +396,10 @@ const Routing = () => {
           ) : (
             <Navigate to={"/"} />
           ),
+        },
+        {
+          path: "balance",
+          element: hasAccess(["balance"]) ? <Balance /> : <Navigate to={"/"} />,
         },
       ],
     },

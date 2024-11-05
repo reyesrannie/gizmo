@@ -9,6 +9,7 @@ const useTreasuryHook = () => {
     pagination: null,
     sorts: null,
     allocation: "",
+    is_cleared: true,
     state: "For Preparation",
     access: "treasury",
     complete: "",

@@ -11,7 +11,7 @@ const apHeader = [
   { name: "Returned", status: "returned", permission: "ap_tag" },
   { name: "Approved", status: "approved", permission: "ap_tag" },
   { name: "Void", status: "voided", permission: "ap_tag" },
-  { name: "Filing", status: "For Filing", permission: "filing" },
+  { name: "Filing", status: "Released", permission: "filing" },
 ];
 
 const apGJheader = [
@@ -23,7 +23,7 @@ const apGJheader = [
 ];
 
 const apHistoryHeader = [
-  { name: "Voucher's Payable", status: "For Filing", permission: "filing" },
+  { name: "Voucher's Payable", status: "", permission: "ap_tag" },
   { name: "General Journal", status: "", permission: "ap_tag" },
 ];
 
@@ -226,6 +226,63 @@ const titleHeaderATC = [
   },
 ];
 
+const debitType = [
+  { name: "Debit Memo", value: "dm" },
+  { name: "Credit Memo", value: "cm" },
+  { name: "Manager's Check", value: "mc" },
+  { name: "Telegraphic", value: "telegraphic" },
+];
+
+const apDash = [
+  {
+    name: "Pending",
+    status: "pending",
+    permission: "ap_tag",
+    path: "/ap/pending",
+  },
+  {
+    name: "Received",
+    status: "For Computation",
+    permission: "ap_tag",
+    path: "/ap/check",
+  },
+
+  {
+    name: "Returned",
+    status: "returned",
+    permission: "ap_tag",
+    path: "/ap/check",
+  },
+  {
+    name: "Approved",
+    status: "approved",
+    permission: "ap_tag",
+    path: "/ap/check",
+  },
+  { name: "Void", status: "voided", permission: "ap_tag", path: "/ap/check" },
+  {
+    name: "Filing",
+    status: "Released",
+    permission: "filing",
+    path: "/ap/check",
+  },
+];
+
+const approverDash = [
+  {
+    name: "Approval",
+    status: "For Approval",
+    permission: "approver",
+    path: "/approver/approvecheck",
+  },
+  {
+    name: "Pending Void",
+    status: "For Voiding",
+    permission: "approver",
+    path: "/approver/approvecheck",
+  },
+];
+
 export {
   titleFirstHeader,
   titleHeader,
@@ -245,4 +302,7 @@ export {
   checkHeader,
   apGJheader,
   approverGJHeader,
+  debitType,
+  apDash,
+  approverDash,
 };

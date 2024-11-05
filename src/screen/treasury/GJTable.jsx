@@ -50,8 +50,8 @@ import {
 
 import {
   useDocumentTypeQuery,
+  useFileCVoucherMutation,
   usePrepareCVoucherMutation,
-  useReadTransactionCheckMutation,
 } from "../../services/store/request";
 import TransactionModalAp from "../../components/customs/modal/TransactionModalAp";
 import { resetOption, setVoucher } from "../../services/slice/optionsSlice";
@@ -66,9 +66,9 @@ import { enqueueSnackbar } from "notistack";
 import { resetPrompt } from "../../services/slice/promptSlice";
 import { singleError } from "../../services/functions/errorResponse";
 import dayjs from "dayjs";
-import { LoadingButton } from "@mui/lab";
+import { useReadTransactionGJMutation } from "../../services/store/seconAPIRequest";
 
-const CheckTable = ({
+const GJTable = ({
   params,
   onSortTable,
   isLoading,
@@ -100,10 +100,12 @@ const CheckTable = ({
       pagination: "none",
     });
 
-  const [readTransaction] = useReadTransactionCheckMutation();
+  const [readTransaction] = useReadTransactionGJMutation();
 
   const [prepareCheck, { isLoading: loadingPrep }] =
     usePrepareCVoucherMutation();
+
+  const [fileCheck, { isLoading: loadingFile }] = useFileCVoucherMutation();
 
   const handleRead = async (data) => {
     const obj = {
@@ -139,9 +141,11 @@ const CheckTable = ({
 
   const submitHandler = async (submitData) => {
     try {
-      const res = await prepareCheck(submitData).unwrap();
+      const res =
+        params?.state !== "For Filing"
+          ? await prepareCheck(submitData).unwrap()
+          : await fileCheck(submitData).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
-      setValue("check_ids", []);
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
@@ -156,7 +160,8 @@ const CheckTable = ({
           <Table stickyHeader>
             <TableHead>
               <TableRow className="table-header1-import-tag-transaction">
-                {params?.state === "approved" && (
+                {(params?.state === "approved" ||
+                  params?.state === "For Filing") && (
                   <TableCell align="center">
                     <FormControlLabel
                       className="check-box-archive-ap"
@@ -234,10 +239,15 @@ const CheckTable = ({
             </TableHead>
 
             <TableBody>
-              {loadingPrep || loadingDocument || isLoading ? (
+              {loadingPrep || loadingDocument || isLoading || loadingFile ? (
                 <TableRow>
                   <TableCell
-                    colSpan={params?.state === "approved" ? 7 : 6}
+                    colSpan={
+                      params?.state === "approved" ||
+                      params?.state === "For Filing"
+                        ? 7
+                        : 6
+                    }
                     align="center"
                   >
                     <Lottie
@@ -249,7 +259,12 @@ const CheckTable = ({
               ) : isError ? (
                 <TableRow>
                   <TableCell
-                    colSpan={params?.state === "approved" ? 7 : 6}
+                    colSpan={
+                      params?.state === "approved" ||
+                      params?.state === "For Filing"
+                        ? 7
+                        : 6
+                    }
                     align="center"
                   >
                     <Lottie
@@ -264,15 +279,15 @@ const CheckTable = ({
                     (doc) =>
                       tag?.transactions?.document_type_id === doc?.id || null
                   );
-                  const tagMonthYear = dayjs(tag?.tag_year, "YYMM").toDate();
 
+                  const tagMonthYear = dayjs(tag?.tag_year, "YYMM").toDate();
                   return (
                     <TableRow
                       className="table-body-tag-transaction"
                       key={tag?.id}
                       onClick={() => {
                         dispatch(setMenuData(tag));
-                        dispatch(setVoucher("check"));
+                        dispatch(setVoucher("gj"));
                         tag?.is_read === 0 &&
                           tag?.state !== "For Approval" &&
                           tag?.state !== "For Preparation" &&
@@ -284,7 +299,8 @@ const CheckTable = ({
                           tag?.state === "approved" ||
                           tag?.state === "voided" ||
                           tag?.state === "For Voiding" ||
-                          tag?.state === "Check Approval") &&
+                          tag?.state === "Check Approval" ||
+                          tag?.state === "Released") &&
                           dispatch(setViewMenu(true));
                         //approved
 
@@ -292,13 +308,10 @@ const CheckTable = ({
                           tag?.state === "returned" ||
                           tag?.state === "For Approval") &&
                           dispatch(setUpdateMenu(true));
-
-                        (tag?.state === "For Preparation" ||
-                          tag?.state === "Released") &&
-                          dispatch(setPreparation(true));
                       }}
                     >
-                      {params?.state === "approved" && (
+                      {(params?.state === "approved" ||
+                        params?.state === "For Filing") && (
                         <TableCell align="center">
                           <FormControlLabel
                             className="check-box-archive-ap"
@@ -356,7 +369,7 @@ const CheckTable = ({
                           {tag?.amount === null ? (
                             <>&mdash;</>
                           ) : (
-                            convertToPeso(parseFloat(tag?.amount).toFixed(2))
+                            convertToPeso(tag?.amount)
                           )}
                         </Typography>
                       </TableCell>
@@ -384,7 +397,7 @@ const CheckTable = ({
                       <TableCell align="center">
                         {tag?.state === "For Computation" && (
                           <StatusIndicator
-                            status="For Computation"
+                            status="Pending"
                             className="computation-indicator"
                           />
                         )}
@@ -438,25 +451,6 @@ const CheckTable = ({
                           />
                         )}
 
-                        {tag?.state === "Released" && (
-                          <StatusIndicator
-                            status={
-                              tag?.is_filed !== null
-                                ? "Filed"
-                                : tag?.is_cleared !== null
-                                ? "Cleared"
-                                : "Released"
-                            }
-                            className={
-                              tag?.is_filed !== null
-                                ? "clearing-indicator"
-                                : tag?.is_cleared !== null
-                                ? "clearing-indicator"
-                                : "approved-indicator"
-                            }
-                          />
-                        )}
-
                         {tag?.state === "For Filing" && (
                           <StatusIndicator
                             status="For Filing"
@@ -491,6 +485,12 @@ const CheckTable = ({
                             className="approval-indicator"
                           />
                         )}
+                        {tag?.state === "Released" && (
+                          <StatusIndicator
+                            status="Released"
+                            className="approved-indicator"
+                          />
+                        )}
                       </TableCell>
                       <TableCell align="center">
                         {moment(tag?.updated_at).format("MMM DD YYYY")}
@@ -518,7 +518,14 @@ const CheckTable = ({
             {isFetching && (
               <TableFooter style={{ position: "sticky", bottom: 0 }}>
                 <TableRow className="table-footer-tag-transaction">
-                  <TableCell colSpan={params?.state === "approved" ? 7 : 6}>
+                  <TableCell
+                    colSpan={
+                      params?.state === "approved" ||
+                      params?.state === "For Filing"
+                        ? 7
+                        : 6
+                    }
+                  >
                     <LinearProgress color="secondary" />
                   </TableCell>
                 </TableRow>
@@ -529,15 +536,14 @@ const CheckTable = ({
                 <TableRow className="table-footer-tag-transaction">
                   {watch("check_ids").length !== 0 && (
                     <TableCell align="center">
-                      <LoadingButton
-                        loading={loadingPrep}
+                      <Button
                         variant="contained"
                         color="success"
                         className="add-transaction-button treasury"
                         type="submit"
                       >
                         {params?.state === "approved" ? "Prepare" : "File"}
-                      </LoadingButton>
+                      </Button>
                     </TableCell>
                   )}
                   <TableCell colSpan={params?.state === "approved" ? 7 : 6}>
@@ -672,4 +678,4 @@ const CheckTable = ({
   );
 };
 
-export default CheckTable;
+export default GJTable;

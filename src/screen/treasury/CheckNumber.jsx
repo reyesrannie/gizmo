@@ -2,8 +2,9 @@ import React, { useEffect, useRef } from "react";
 
 import Breadcrums from "../../components/customs/Breadcrums";
 import SearchText from "../../components/customs/SearchText";
+import AddToPhotosOutlinedIcon from "@mui/icons-material/AddToPhotosOutlined";
 
-import { Box, Typography } from "@mui/material";
+import { Box, Button, Dialog, Typography } from "@mui/material";
 
 import { useCheckNumberQuery } from "../../services/store/request";
 
@@ -11,8 +12,13 @@ import "../../components/styles/TagTransaction.scss";
 
 import CheckNumberTable from "./CheckNumberTable";
 import useTreasuryCheckHook from "../../services/hooks/useTreasuryCheckHook";
+import { setCreateMenu } from "../../services/slice/menuSlice";
+import { useDispatch, useSelector } from "react-redux";
+import CheckNumberModal from "../../components/customs/modal/CheckNumberModal";
 
 const CheckNumber = () => {
+  const dispatch = useDispatch();
+
   const {
     params,
     onPageChange,
@@ -44,6 +50,15 @@ const CheckNumber = () => {
         </Box>
         <Box className="tag-transaction-button-container">
           <SearchText onSearchData={onSearchData} />
+          <Button
+            variant="contained"
+            color="secondary"
+            className="button-add-tag-transaction"
+            startIcon={<AddToPhotosOutlinedIcon />}
+            onClick={() => dispatch(setCreateMenu(true))}
+          >
+            Add
+          </Button>
         </Box>
       </Box>
       <CheckNumberTable

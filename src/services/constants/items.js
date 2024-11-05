@@ -34,12 +34,14 @@ import AccountBalanceRoundedIcon from "@mui/icons-material/AccountBalanceRounded
 import CreditScoreRoundedIcon from "@mui/icons-material/CreditScoreRounded";
 import FolderOpenOutlinedIcon from "@mui/icons-material/FolderOpenOutlined";
 import SummarizeOutlinedIcon from "@mui/icons-material/SummarizeOutlined";
+import BalanceOutlinedIcon from "@mui/icons-material/BalanceOutlined";
 
 import "../../components/styles/CardNavigation.scss";
 import {
   apGJheader,
   apHeader,
   apHistoryHeader,
+  approverGJHeader,
   approverHeader,
   approverScheduleHeader,
   checkHeader,
@@ -750,9 +752,22 @@ const menu = [
       {
         desc: "General Journal",
         icon: <NewspaperOutlinedIcon />,
-        path: "/ap/general-journal",
+        path: "/approver/general-journal",
         permission: ["approver"],
-        child: apGJheader?.map((item) => {
+        child: approverGJHeader?.map((item) => {
+          return {
+            permission: item?.permission,
+            desc: item?.name,
+            icon: <MediationOutlinedIcon />,
+          };
+        }),
+      },
+      {
+        desc: "History",
+        icon: <FolderOpenOutlinedIcon />,
+        path: "/approver/history",
+        permission: ["approver"],
+        child: apHistoryHeader?.map((item) => {
           return {
             permission: item?.permission,
             desc: item?.name,
@@ -811,6 +826,12 @@ const menu = [
         icon: <LocalOfferOutlinedIcon />,
         path: "/treasury/offset",
         permission: ["preparation", "releasing", "clearing"],
+      },
+      {
+        desc: "Balance",
+        icon: <BalanceOutlinedIcon />,
+        path: "/treasury/balance",
+        permission: ["balance"],
       },
     ],
   },
@@ -1053,6 +1074,10 @@ const routes = [
       {
         path: "/treasury/offset",
         name: "Offset",
+      },
+      {
+        path: "/treasury/balance",
+        name: "Beginning Balance",
       },
     ],
   },

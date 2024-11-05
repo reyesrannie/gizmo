@@ -34,6 +34,12 @@ const schedulTransactionSchema = Yup.object({
   coverage_to: Yup.date()
     .required("Coverage is required")
     .typeError("Coverage is required"),
+  start_date: Yup.date()
+    .required("Start date is required")
+    .typeError("Start date is required"),
+  end_date: Yup.date()
+    .required("End date is required")
+    .typeError("End date is required"),
 });
 
 export default schedulTransactionSchema;

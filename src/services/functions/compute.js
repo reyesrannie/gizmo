@@ -73,6 +73,15 @@ export const totalAccountMapping = (taxComputation, items) => {
 
 export const totalAmountCheck = (item) => {
   const totalAmount = item?.reduce((acc, curr) => {
+    const value = parseFloat(curr?.checkNo?.amount || 0);
+    return curr?.checkNo?.state === "Cancelled" ? acc + 0 : acc + value;
+  }, 0);
+
+  return totalAmount;
+};
+
+export const totalAmountCheckForm = (item) => {
+  const totalAmount = item?.reduce((acc, curr) => {
     return acc + parseFloat(curr?.amount || 0);
   }, 0);
 

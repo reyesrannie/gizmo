@@ -30,6 +30,7 @@ const initialState = {
   viewAccountingEntries: false,
   voidMenu: false,
   schedComputation: false,
+  isSched: false,
   approveMenu: false,
   preparation: false,
   hasError: false,
@@ -122,6 +123,7 @@ const menutSlice = createSlice({
     setMenuData: (state, action) => {
       state.menuData = action.payload;
     },
+
     setMenuDataMultiple: (state, action) => {
       state.menuDataMultiple = action.payload;
     },
@@ -168,6 +170,9 @@ const menutSlice = createSlice({
     setHasError: (state, action) => {
       state.hasError = action.payload;
     },
+    setSched: (state, action) => {
+      state.isSched = action.payload;
+    },
 
     resetMenu: () => {
       return initialState;
@@ -213,6 +218,7 @@ export const {
   setApproveMenu,
   setMenuDataMultiple,
   setHasError,
+  setSched,
 } = menutSlice.actions;
 
 export default menutSlice.reducer;

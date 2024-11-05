@@ -7,7 +7,6 @@ const useHistoryHook = () => {
   });
 
   const onChangeDate = (year) => {
-    console.log(year);
     setParams(() => ({
       year: year,
     }));

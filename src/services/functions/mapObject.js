@@ -177,7 +177,6 @@ const mapViewTransactionGJ = (
     ...docs,
   };
 
-  console.log(ap?.result);
   return values;
 };
 
@@ -334,6 +333,14 @@ const mapScheduledTransaction = (
       dayjs(new Date(transactionData?.coverage_to), {
         locale: AdapterDayjs.locale,
       }) || null,
+    start_date:
+      dayjs(new Date(transactionData?.start_date), {
+        locale: AdapterDayjs.locale,
+      }) || null,
+    end_date:
+      dayjs(new Date(transactionData?.end_date), {
+        locale: AdapterDayjs.locale,
+      }) || null,
     ...docs,
   };
 
@@ -363,6 +370,13 @@ const mapScheduleTransactionData = (submitData) => {
     coverage_to:
       submitData?.coverage_to !== null
         ? moment(submitData?.coverage_to).format("YYYY-MM-DD")
+        : null,
+    start_date: submitData?.start_date
+      ? moment(submitData?.start_date).format("YYYY-MM-DD")
+      : null,
+    end_date:
+      submitData?.end_date !== null
+        ? moment(submitData?.end_date).format("YYYY-MM-DD")
         : null,
     account_number_id: submitData?.account_number?.id,
     ap_tagging_id: submitData?.ap?.id,
@@ -405,6 +419,14 @@ const mapAPScheduleTransaction = (
       }) || null,
     coverage_to:
       dayjs(new Date(transactionData?.coverage_to), {
+        locale: AdapterDayjs.locale,
+      }) || null,
+    start_date:
+      dayjs(new Date(transactionData?.start_date), {
+        locale: AdapterDayjs.locale,
+      }) || null,
+    end_date:
+      dayjs(new Date(transactionData?.end_date), {
         locale: AdapterDayjs.locale,
       }) || null,
   };

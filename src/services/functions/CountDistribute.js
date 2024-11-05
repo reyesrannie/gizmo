@@ -8,6 +8,7 @@ import {
 } from "../store/request";
 import { useSelector } from "react-redux";
 import { hasAccess } from "./access";
+import { useGjCountQuery } from "../store/seconAPIRequest";
 
 const CountDistribute = () => {
   const userData = useSelector((state) => state.auth.userData);
@@ -25,6 +26,7 @@ const CountDistribute = () => {
   const { data: badgeCheck } = useCheckCountQuery(queryParams);
   const { data: badgeJournal } = useJournalCountQuery(queryParams);
   const { data: scheduleTransaction } = useCountScheduleQuery(queryParams);
+  const { data: badgeGj } = useGjCountQuery(queryParams);
   const { data: treasuryCount } = useTreasuryCountQuery();
 
   const sumResult = (result, keys) => {
@@ -33,7 +35,7 @@ const CountDistribute = () => {
 
   const resultMap = {
     "Voucher's Payable": badgeCheck?.result,
-    "Journal Voucher": badgeJournal?.result,
+    "General Journal": badgeGj?.result,
     "Voucher Approval": badgeCheck?.result,
     "Journal Approval": badgeJournal?.result,
     "AP Schedule": scheduleTransaction?.result,
@@ -67,7 +69,7 @@ const CountDistribute = () => {
             "returned",
             "For Filing",
           ]) +
-          sumResult(badgeJournal?.result, [
+          sumResult(badgeGj?.result, [
             "For Computation",
             "approved",
             "voided",
@@ -129,14 +131,13 @@ const CountDistribute = () => {
           "returned",
           "voided",
         ]);
-      case "Journal Voucher":
-        return sumResult(badgeJournal?.result, [
-          "For Computation",
-          "returned",
-          "approved",
-          "voided",
-        ]);
-
+      case "General Journal":
+        return sumResult(
+          badgeGj?.result,
+          hasAccess("approver")
+            ? ["For Approval", "returned", "voided", "For Voiding"]
+            : ["For Computation", "returned", "approved", "voided"]
+        );
       case "Voucher Approval":
         return sumResult(badgeCheck?.result, [
           "For Approval",
