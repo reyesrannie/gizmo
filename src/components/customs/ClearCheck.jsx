@@ -29,10 +29,6 @@ import Lottie from "lottie-react";
 
 import clearingSchema from "../../schemas/clearingSchema";
 import Autocomplete from "./AutoComplete";
-import {
-  useDocumentTypeQuery,
-  useFileCVoucherMutation,
-} from "../../services/store/request";
 import { DatePicker } from "@mui/x-date-pickers";
 import {
   resetMenu,
@@ -44,6 +40,8 @@ import dayjs from "dayjs";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { enqueueSnackbar } from "notistack";
 import { objectError } from "../../services/functions/errorResponse";
+import { useDocumentTypeQuery } from "../../services/api/documentTypeApi";
+import { useFileCVoucherMutation } from "../../services/api/checkVoucherApi";
 
 const ClearCheck = () => {
   const dispatch = useDispatch();
@@ -249,7 +247,7 @@ const ClearCheck = () => {
               className="change-password-button"
               onClick={() => dispatch(setReceiveMenu(false))}
             >
-              cancel
+              Cancel
             </Button>
           </Box>
         </Box>

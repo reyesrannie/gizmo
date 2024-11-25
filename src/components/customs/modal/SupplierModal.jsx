@@ -23,18 +23,18 @@ import { resetMenu } from "../../../services/slice/menuSlice";
 import Lottie from "lottie-react";
 import loading from "../../../assets/lottie/Loading.json";
 
-import {
-  useSupplierTypeQuery,
-  useAtcQuery,
-  useVatQuery,
-  useCreateSupplierMutation,
-  useUpdateSupplierMutation,
-  useDocumentTypeQuery,
-} from "../../../services/store/request";
 import { useEffect } from "react";
 import { objectError } from "../../../services/functions/errorResponse";
 import { enqueueSnackbar } from "notistack";
 import supplierSchema from "../../../schemas/supplierSchema";
+import { useVatQuery } from "../../../services/api/vatApi";
+import { useAtcQuery } from "../../../services/api/atcApi";
+import { useSupplierTypeQuery } from "../../../services/api/supplierTypeApi";
+import {
+  useCreateSupplierMutation,
+  useUpdateSupplierMutation,
+} from "../../../services/api/supplierApi";
+import { useDocumentTypeQuery } from "../../../services/api/documentTypeApi";
 
 const SupplierModal = ({ supplierData, view, update }) => {
   const dispatch = useDispatch();

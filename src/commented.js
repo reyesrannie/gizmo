@@ -148,3 +148,27 @@
 // locationLoading ||
 // companyLoading ||
 // departmentLoading ||
+
+//Receive Transaction
+
+// const handleReceive = async () => {
+//   const obj = {
+//     tag_no: transactionData?.tag_no,
+//     id: transactionData?.id,
+//   };
+
+//   try {
+//     const res = await receiveTransaction(obj).unwrap();
+//     enqueueSnackbar(res?.message, { variant: "success" });
+//     dispatch(setIsContinue(true));
+//   } catch (error) {
+//     singleError(error, enqueueSnackbar);
+//   }
+// };
+
+// const validateRoute = () => {
+//     const isZero =
+//       parseFloat(transactionData?.purchase_amount) ===
+//       parseFloat(checkTransaction?.result?.amount || 0);
+//     isZero ? handleReceive() : handleCreateCheck();
+//   };

@@ -31,11 +31,6 @@ import moment from "moment";
 import Lottie from "lottie-react";
 
 import { useDispatch, useSelector } from "react-redux";
-import {
-  useArchiveSupplierMutation,
-  useImportSupplierMutation,
-  useSupplierQuery,
-} from "../../../services/store/request";
 
 import AddToPhotosOutlinedIcon from "@mui/icons-material/AddToPhotosOutlined";
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
@@ -69,6 +64,11 @@ import {
 import { generateExcelwSupplier } from "../../../services/functions/exportFile";
 import SupplierModal from "../../../components/customs/modal/SupplierModal";
 import ImportModal from "../../../components/customs/modal/ImportModal";
+import {
+  useArchiveSupplierMutation,
+  useImportSupplierMutation,
+  useSupplierQuery,
+} from "../../../services/api/supplierApi";
 
 const Supplier = () => {
   const excelItems = [

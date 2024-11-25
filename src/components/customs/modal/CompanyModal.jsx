@@ -13,12 +13,13 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useDispatch } from "react-redux";
 import { resetMenu } from "../../../services/slice/menuSlice";
+
+import { useSnackbar } from "notistack";
+import { objectError } from "../../../services/functions/errorResponse";
 import {
   useCreateCompanyMutation,
   useUpdateCompanyMutation,
-} from "../../../services/store/request";
-import { useSnackbar } from "notistack";
-import { objectError } from "../../../services/functions/errorResponse";
+} from "../../../services/api/companyApi";
 
 const CompanyModal = ({ companyData, view, update }) => {
   const dispatch = useDispatch();

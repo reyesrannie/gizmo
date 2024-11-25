@@ -41,18 +41,15 @@ import { useState } from "react";
 
 import {
   resetMenu,
+  setCreateMenu,
   setMenuData,
+  setMenuDataMultiple,
   setPreparation,
   setUpdateMenu,
   setViewAccountingEntries,
   setViewMenu,
 } from "../../services/slice/menuSlice";
 
-import {
-  useDocumentTypeQuery,
-  usePrepareCVoucherMutation,
-  useReadTransactionCheckMutation,
-} from "../../services/store/request";
 import TransactionModalAp from "../../components/customs/modal/TransactionModalAp";
 import { resetOption, setVoucher } from "../../services/slice/optionsSlice";
 import TransactionModalApprover from "../../components/customs/modal/TransactionModalApprover";
@@ -67,6 +64,12 @@ import { resetPrompt } from "../../services/slice/promptSlice";
 import { singleError } from "../../services/functions/errorResponse";
 import dayjs from "dayjs";
 import { LoadingButton } from "@mui/lab";
+import MultipleVoucherPrinting from "../../components/customs/MultipleVoucherPrinting";
+import { useDocumentTypeQuery } from "../../services/api/documentTypeApi";
+import {
+  usePrepareCVoucherMutation,
+  useReadTransactionCheckMutation,
+} from "../../services/api/checkVoucherApi";
 
 const CheckTable = ({
   params,
@@ -82,6 +85,9 @@ const CheckTable = ({
   const [anchorE1, setAnchorE1] = useState(null);
   const dispatch = useDispatch();
   const menuData = useSelector((state) => state.menu.menuData);
+  const menuDataMultiple = useSelector((state) => state.menu.menuDataMultiple);
+
+  const createMenu = useSelector((state) => state.menu.createMenu);
   const updateMenu = useSelector((state) => state.menu.updateMenu);
   const viewMenu = useSelector((state) => state.menu.viewMenu);
   const preparation = useSelector((state) => state.menu.preparation);
@@ -132,8 +138,10 @@ const CheckTable = ({
     const ids = tagTransaction?.result?.data?.map((items) => items.id);
     if (e?.target?.checked) {
       setValue("check_ids", ids);
+      dispatch(setMenuDataMultiple(tagTransaction?.result?.data));
     } else {
       setValue("check_ids", []);
+      dispatch(setMenuDataMultiple([]));
     }
   };
 
@@ -147,6 +155,18 @@ const CheckTable = ({
     } catch (error) {
       singleError(error, enqueueSnackbar);
     }
+  };
+
+  const handleAfterPrint = () => {
+    try {
+      menuDataMultiple?.map(async (item) => {
+        const res = await readTransaction({
+          id: item?.id,
+        }).unwrap();
+      });
+      setValue("check_ids", []);
+      dispatch(resetMenu([]));
+    } catch (error) {}
   };
 
   return (
@@ -323,6 +343,17 @@ const CheckTable = ({
                                         : currentValue.filter(
                                             (id) => id !== tag.id
                                           );
+
+                                      dispatch(
+                                        setMenuDataMultiple(
+                                          checked
+                                            ? [...menuDataMultiple, tag]
+                                            : menuDataMultiple?.filter(
+                                                (item) => tag?.id !== item?.id
+                                              )
+                                        )
+                                      );
+
                                       field.onChange(newValue);
                                     }}
                                   />
@@ -532,11 +563,27 @@ const CheckTable = ({
                       <LoadingButton
                         loading={loadingPrep}
                         variant="contained"
-                        color="success"
+                        color="warning"
                         className="add-transaction-button treasury"
                         type="submit"
                       >
                         {params?.state === "approved" ? "Prepare" : "File"}
+                      </LoadingButton>
+                    </TableCell>
+                  )}
+                  {watch("check_ids").length !== 0 && (
+                    <TableCell align="left">
+                      <LoadingButton
+                        loading={loadingPrep}
+                        variant="contained"
+                        color="success"
+                        className="add-transaction-button treasury"
+                        onClick={() => {
+                          dispatch(setVoucher("check"));
+                          dispatch(setCreateMenu(true));
+                        }}
+                      >
+                        Print
                       </LoadingButton>
                     </TableCell>
                   )}
@@ -667,6 +714,17 @@ const CheckTable = ({
         }}
       >
         <TransactionModalApprover approved ap preparation />
+      </Dialog>
+
+      <Dialog
+        open={createMenu}
+        className="transaction-modal-dialog"
+        onClose={() => {
+          dispatch(setCreateMenu(false));
+          dispatch(resetOption());
+        }}
+      >
+        <MultipleVoucherPrinting afterPrint={handleAfterPrint} />
       </Dialog>
     </Box>
   );

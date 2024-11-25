@@ -57,14 +57,15 @@ import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 
 import useParamsHook from "../../../services/hooks/useParamsHook";
+
+import AccountsPayableModal from "../../../components/customs/modal/AccountsPayableModal";
+import { generateExcel } from "../../../services/functions/exportFile";
+import ImportModal from "../../../components/customs/modal/ImportModal";
 import {
   useApQuery,
   useArchiveAPMutation,
   useImportAPMutation,
-} from "../../../services/store/request";
-import AccountsPayableModal from "../../../components/customs/modal/AccountsPayableModal";
-import { generateExcel } from "../../../services/functions/exportFile";
-import ImportModal from "../../../components/customs/modal/ImportModal";
+} from "../../../services/api/apApi";
 
 const AccountsPayable = () => {
   const excelItems = ["ID", "CODE", "NAME", "CREATED AT", "DATE MODIFIED"];

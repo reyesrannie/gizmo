@@ -810,10 +810,10 @@ const menu = [
         }),
       },
       {
-        desc: "Check Number",
+        desc: "Bank",
         icon: <CreditScoreRoundedIcon />,
-        path: "/treasury/checknumber",
-        permission: ["preparation", "releasing", "clearing"],
+        path: "/treasury/bank",
+        permission: ["bank_registry"],
       },
       {
         desc: "Debit Memo",
@@ -1064,8 +1064,8 @@ const routes = [
         name: "Check Voucher",
       },
       {
-        path: "/treasury/checknumber",
-        name: "Check Number",
+        path: "/treasury/bank",
+        name: "Bank",
       },
       {
         path: "/treasury/debit-memo",

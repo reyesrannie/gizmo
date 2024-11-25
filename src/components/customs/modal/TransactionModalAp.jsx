@@ -21,25 +21,7 @@ import {
   setUpdateTax,
   setViewAccountingEntries,
 } from "../../../services/slice/menuSlice";
-import {
-  useAccountNumberQuery,
-  useAccountTitlesQuery,
-  useArchiveCheckEntriesMutation,
-  useArchiveJournalEntriesMutation,
-  useCheckedCVoucherMutation,
-  useCheckedJVoucherMutation,
-  useDocumentTypeQuery,
-  useSupplierQuery,
-  useSupplierTypeQuery,
-  useTaxComputationQuery,
-  useVpCheckNumberQuery,
-  useVpJournalNumberQuery,
-} from "../../../services/store/request";
 
-import {
-  useArchiveGJMutation,
-  useForApproveGJMutation,
-} from "../../../services/store/seconAPIRequest";
 import { useSnackbar } from "notistack";
 import { singleError } from "../../../services/functions/errorResponse";
 import { DatePicker } from "@mui/x-date-pickers";
@@ -76,6 +58,21 @@ import { totalAccount, totalAmount } from "../../../services/functions/compute";
 import TransactionModalApprover from "./TransactionModalApprover";
 
 import { AdditionalFunction } from "../../../services/functions/AdditionalFunction";
+import { useSupplierTypeQuery } from "../../../services/api/supplierTypeApi";
+import { useSupplierQuery } from "../../../services/api/supplierApi";
+import { useDocumentTypeQuery } from "../../../services/api/documentTypeApi";
+import { useAccountNumberQuery } from "../../../services/api/accountNumberApi";
+import { useAccountTitlesQuery } from "../../../services/api/coaApi";
+import {
+  useArchiveCheckEntriesMutation,
+  useCheckedCVoucherMutation,
+  useVpCheckNumberQuery,
+} from "../../../services/api/vouchersPayableApi";
+import { useTaxComputationQuery } from "../../../services/api/taxComputationApi";
+import {
+  useArchiveGJMutation,
+  useForApproveGJMutation,
+} from "../../../services/api/generalJournalApi";
 
 const TransactionModalAp = () => {
   const dispatch = useDispatch();
@@ -167,18 +164,6 @@ const TransactionModalAp = () => {
         voucher === "journal" || voucher === null || transactionData === null,
     }
   );
-
-  const { data: vpJournalNumber, isLoading: loadingJournalVP } =
-    useVpJournalNumberQuery(
-      {
-        ap_tagging_id: transactionData?.apTagging?.id,
-        yearMonth: transactionData?.tag_year,
-      },
-      {
-        skip:
-          voucher === "check" || voucher === null || transactionData === null,
-      }
-    );
 
   const [checkedCV, { isLoading: loadingChecked }] =
     useCheckedCVoucherMutation();
@@ -591,7 +576,6 @@ const TransactionModalAp = () => {
               );
 
               const vpCheck = parseInt(vpCheckNumber?.result) + 1;
-              const vpJournal = parseInt(vpJournalNumber?.result) + 1;
 
               const year = Math.floor(
                 transactionData?.transactions?.tag_year / 100
@@ -600,7 +584,6 @@ const TransactionModalAp = () => {
               const formattedDate = `20${year}-${month
                 .toString()
                 .padStart(2, "0")}`;
-
               return (
                 !errorTaxComputation && (
                   <Paper
@@ -608,12 +591,12 @@ const TransactionModalAp = () => {
                     key={index}
                     className="tax-details-value"
                     onClick={() => {
-                      transactionData?.state === "For Computation" ||
-                        (transactionData?.state === "returned" &&
-                          dispatch(setUpdateTax(true)));
-                      transactionData?.state === "For Computation" ||
-                        (transactionData?.state === "returned" &&
-                          dispatch(setTaxData(tax)));
+                      (transactionData?.state === "For Computation" ||
+                        transactionData?.state === "returned") &&
+                        dispatch(setUpdateTax(true));
+                      (transactionData?.state === "For Computation" ||
+                        transactionData?.state === "returned") &&
+                        dispatch(setTaxData(tax));
                     }}
                   >
                     <LocalOfferOutlinedIcon />
@@ -705,9 +688,7 @@ const TransactionModalAp = () => {
                             VP#: {voucher === "check" ? "VPRL" : "GJRL"}
                             {transactionData?.apTagging?.vp}
                             {formattedDate}-
-                            {voucher === "check"
-                              ? vpCheck.toString().padStart(4, "0")
-                              : vpJournal.toString().padStart(4, "0")}
+                            {vpCheck.toString().padStart(4, "0")}
                           </Typography>
                         )}
                         {transactionData?.voucher_number !== null && (
@@ -850,7 +831,6 @@ const TransactionModalAp = () => {
           loadingVp ||
           loadingChecked ||
           loadingJournal ||
-          loadingJournalVP ||
           loadingArchiveCV ||
           loadingArchiveJV
         }

@@ -48,11 +48,6 @@ import {
   setViewMenu,
 } from "../../services/slice/menuSlice";
 
-import {
-  useDocumentTypeQuery,
-  useFileCVoucherMutation,
-  usePrepareCVoucherMutation,
-} from "../../services/store/request";
 import TransactionModalAp from "../../components/customs/modal/TransactionModalAp";
 import { resetOption, setVoucher } from "../../services/slice/optionsSlice";
 import TransactionModalApprover from "../../components/customs/modal/TransactionModalApprover";
@@ -66,7 +61,13 @@ import { enqueueSnackbar } from "notistack";
 import { resetPrompt } from "../../services/slice/promptSlice";
 import { singleError } from "../../services/functions/errorResponse";
 import dayjs from "dayjs";
-import { useReadTransactionGJMutation } from "../../services/store/seconAPIRequest";
+import GeneralJournalModal from "../../components/customs/modal/GeneralJournalModal";
+import { useDocumentTypeQuery } from "../../services/api/documentTypeApi";
+import {
+  useFileCVoucherMutation,
+  usePrepareCVoucherMutation,
+} from "../../services/api/checkVoucherApi";
+import { useReadTransactionGJMutation } from "../../services/api/generalJournalApi";
 
 const GJTable = ({
   params,
@@ -195,7 +196,7 @@ const GJTable = ({
                     direction={"desc"}
                     IconComponent={FilterAltOutlinedIcon}
                   >
-                    Allocation
+                    Charging of Accounts
                   </TableSortLabel>
                   {params.allocation !== "" && (
                     <TableSortLabel
@@ -287,7 +288,7 @@ const GJTable = ({
                       key={tag?.id}
                       onClick={() => {
                         dispatch(setMenuData(tag));
-                        dispatch(setVoucher("gj"));
+                        // dispatch(setVoucher("gj"));
                         tag?.is_read === 0 &&
                           tag?.state !== "For Approval" &&
                           tag?.state !== "For Preparation" &&
@@ -295,19 +296,7 @@ const GJTable = ({
                           tag?.state !== "Released" &&
                           handleRead(tag);
 
-                        (tag?.state === "Filed" ||
-                          tag?.state === "approved" ||
-                          tag?.state === "voided" ||
-                          tag?.state === "For Voiding" ||
-                          tag?.state === "Check Approval" ||
-                          tag?.state === "Released") &&
-                          dispatch(setViewMenu(true));
-                        //approved
-
-                        (tag?.state === "For Computation" ||
-                          tag?.state === "returned" ||
-                          tag?.state === "For Approval") &&
-                          dispatch(setUpdateMenu(true));
+                        dispatch(setUpdateMenu(true));
                       }}
                     >
                       {(params?.state === "approved" ||
@@ -346,65 +335,55 @@ const GJTable = ({
                         </TableCell>
                       )}
                       <TableCell>
-                        {`${tag?.transactions?.tag_no} - ${moment(
+                        {`${tag?.gj_items[0]?.tag_no} - ${moment(
                           tagMonthYear
                         ).get("year")}`}
                       </TableCell>
                       <TableCell>
                         <Typography className="tag-transaction-company-name">
-                          {tag?.transactions?.supplier?.name === null ? (
+                          {tag?.gj_items[0]?.supplier?.company_name === null ? (
                             <>&mdash;</>
                           ) : (
-                            tag?.transactions?.supplier?.name
+                            tag?.gj_items[0]?.supplier?.company_name
                           )}
                         </Typography>
                         <Typography className="tag-transaction-company-tin">
-                          {tag?.transactions?.supplier === null ? (
+                          {tag?.gj_items[0]?.supplier === null ? (
                             <>&mdash;</>
                           ) : (
-                            tag?.transactions?.supplier?.tin
-                          )}
-                        </Typography>
-                        <Typography className="tag-transaction-company-name">
-                          {tag?.amount === null ? (
-                            <>&mdash;</>
-                          ) : (
-                            convertToPeso(tag?.amount)
+                            tag?.gj_items[0]?.supplier?.tin
                           )}
                         </Typography>
                       </TableCell>
 
                       <TableCell>
-                        {tag?.voucher_number ? (
+                        {tag?.gj_items[0]?.voucher_no ? (
                           <Typography className="tag-transaction-company-name">
-                            {tag?.voucher_number}
+                            {tag?.gj_items[0]?.voucher_no}
                           </Typography>
                         ) : (
                           <Typography className="tag-transaction-company-name">
-                            {`${tag?.transactions?.ap_tagging} - ${
-                              tag?.transactions?.gtag_no
+                            {`${tag?.apTagging?.code} - ${
+                              tag?.gj_series
                             } - ${moment(tagMonthYear).get("year")}`}
                           </Typography>
                         )}
 
-                        <Typography className="tag-transaction-company-type">
-                          {document === null ? <>&mdash;</> : document?.name}
-                        </Typography>
                         <Typography className="tag-transaction-company-name">
-                          {`${tag?.transactions?.invoice_no || ""}`}
+                          {`${tag?.gj_items[0]?.invoice_no || ""}`}
                         </Typography>
                       </TableCell>
                       <TableCell align="center">
-                        {tag?.state === "For Computation" && (
+                        {tag?.state === "Saved" && (
                           <StatusIndicator
-                            status="Pending"
+                            status="Saved"
                             className="computation-indicator"
                           />
                         )}
 
-                        {tag?.state === "For Approval" && (
+                        {tag?.state === "Posted" && (
                           <StatusIndicator
-                            status="For Approval"
+                            status="Posted"
                             className="approval-indicator"
                           />
                         )}
@@ -635,44 +614,11 @@ const GJTable = ({
         open={updateMenu}
         className="transaction-modal-dialog"
         onClose={() => {
-          dispatch(setUpdateMenu(false));
+          dispatch(resetMenu());
           dispatch(resetOption());
         }}
       >
-        <TransactionModalAp />
-      </Dialog>
-
-      <Dialog
-        open={viewMenu}
-        className="transaction-modal-dialog"
-        onClose={() => {
-          dispatch(setViewMenu(false));
-          dispatch(resetOption());
-        }}
-      >
-        <TransactionModalApprover transactionData={menuData} approved ap />
-      </Dialog>
-
-      <Dialog
-        open={viewAccountingEntries}
-        className="transaction-modal-dialog"
-        onClose={() => {
-          dispatch(setViewAccountingEntries(false));
-          dispatch(resetOption());
-        }}
-      >
-        <TransactionModalApprover />
-      </Dialog>
-
-      <Dialog
-        open={preparation}
-        className="transaction-modal-dialog"
-        onClose={() => {
-          dispatch(setPreparation(false));
-          dispatch(resetOption());
-        }}
-      >
-        <TransactionModalApprover approved ap preparation />
+        <GeneralJournalModal />
       </Dialog>
     </Box>
   );

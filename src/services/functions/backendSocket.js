@@ -5,7 +5,7 @@ window.Pusher = Pusher;
 
 const baseUrl = process.env.REACT_APP_WEBSOCKET_URL;
 
-Pusher.logToConsole = true;
+// Pusher.logToConsole = true;
 
 const EchoInstance = new Echo({
   broadcaster: "pusher",

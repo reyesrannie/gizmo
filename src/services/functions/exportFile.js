@@ -288,19 +288,18 @@ const generateExcelReport = async (report, menuData, sheet) => {
     row.push(
       `${item?.transactions?.documentType?.code} ${item?.transactions?.invoice_no}`
     );
-    row.push(moment(item?.transactions?.date_invoice)?.format("MMMM DD, YYYY"));
+    row.push(
+      moment(item?.transactions?.date_invoicee)?.format("MMMM DD, YYYY")
+    );
     row.push(item?.location?.name);
     row.push(`${item?.transactions?.tag_year} - ${item?.transactions?.tag_no}`);
-    row.push(
-      item?.voucher === "check"
-        ? item?.transactions?.transactionChecks?.voucher_number
-        : item?.transactions?.transactionJournals?.voucher_number
-    );
+    row.push(item?.transactions?.transactionChecks?.voucher_number);
     //atc
     row.push(item?.atc?.code);
     row.push(item?.amount);
     row.push(vatValue[taxBased] || 0);
     row.push(item?.wtax_payable_cr);
+    row.push(item?.vat_input_tax);
     row.push(item?.supplierType?.wtax);
     row.push(vatValue[taxBased] || 0);
     row.push(item?.wtax_payable_cr);
@@ -312,7 +311,7 @@ const generateExcelReport = async (report, menuData, sheet) => {
       bold: false,
     };
 
-    const columnsToAlign = [8, 10, 11, 12, 13, 14, 15, 16, 17, 18];
+    const columnsToAlign = [8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19];
     columnsToAlign.forEach((col) => {
       try {
         const cell = worksheet.getCell(index + 7, col);
@@ -321,7 +320,7 @@ const generateExcelReport = async (report, menuData, sheet) => {
           cell.value = cellValue;
           cell.numFmt = "#,##0.00";
         }
-        if (!isNaN(cellValue) && col === 16) {
+        if (!isNaN(cellValue) && col === 17) {
           cell.value = cellValue / 100;
           cell.numFmt = "0%";
         }
@@ -335,11 +334,11 @@ const generateExcelReport = async (report, menuData, sheet) => {
     });
   });
 
-  worksheet.mergeCells("Q4:R5");
-  worksheet.getCell("Q4").value = "GRAND TOTAL";
+  worksheet.mergeCells("R4:S5");
+  worksheet.getCell("R4").value = "GRAND TOTAL";
 
   for (let row = 1; row <= 3; row++) {
-    for (let col = 1; col <= 18; col++) {
+    for (let col = 1; col <= 19; col++) {
       const cell = worksheet.getCell(row, col);
       cell.fill = {
         type: "pattern",
@@ -355,7 +354,7 @@ const generateExcelReport = async (report, menuData, sheet) => {
   }
 
   for (let row = 4; row <= 6; row++) {
-    for (let col = 1; col <= 16; col++) {
+    for (let col = 1; col <= 17; col++) {
       const cell = worksheet.getCell(row, col);
 
       cell.font = {
@@ -394,7 +393,7 @@ const generateExcelReport = async (report, menuData, sheet) => {
       }
 
       for (let row = 4; row <= 6; row++) {
-        for (let col = 17; col <= 18; col++) {
+        for (let col = 18; col <= 19; col++) {
           const cell = worksheet.getCell(row, col);
           if (row === 4) {
             cell.border = {

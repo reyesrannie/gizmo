@@ -57,15 +57,16 @@ import {
   setMenuData,
   setUpdateMenu,
 } from "../../../services/slice/menuSlice";
-import {
-  useArchiveLocationMutation,
-  useImportLocationMutation,
-  useLocationQuery,
-} from "../../../services/store/request";
+
 import LocationModal from "../../../components/customs/modal/LocationModal";
 import { singleError } from "../../../services/functions/errorResponse";
 import { generateExcel } from "../../../services/functions/exportFile";
 import ImportModal from "../../../components/customs/modal/ImportModal";
+import {
+  useArchiveLocationMutation,
+  useImportLocationMutation,
+  useLocationQuery,
+} from "../../../services/api/locationApi";
 
 const Location = () => {
   const excelItems = ["ID", "CODE", "NAME", "CREATED AT", "DATE MODIFIED"];

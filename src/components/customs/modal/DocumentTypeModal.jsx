@@ -20,16 +20,17 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useDispatch } from "react-redux";
 import { resetMenu } from "../../../services/slice/menuSlice";
-import {
-  useCreateDocumentTypeMutation,
-  useUpdateDocumentTypeMutation,
-} from "../../../services/store/request";
+
 import { useSnackbar } from "notistack";
 import { objectError } from "../../../services/functions/errorResponse";
 
 import documentTypeSchema from "../../../schemas/documentTypeSchema";
 import Autocomplete from "../AutoComplete";
 import { requiredFields } from "../../../services/constants/requiredFields";
+import {
+  useCreateDocumentTypeMutation,
+  useUpdateDocumentTypeMutation,
+} from "../../../services/api/documentTypeApi";
 
 const DocumentTypeModal = ({ dtypeData, view, update }) => {
   const dispatch = useDispatch();

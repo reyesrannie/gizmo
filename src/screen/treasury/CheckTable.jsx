@@ -49,13 +49,6 @@ import {
   setViewMenu,
 } from "../../services/slice/menuSlice";
 
-import {
-  useApQuery,
-  useDocumentTypeQuery,
-  useReadTransactionCheckMutation,
-  useReleaseCVoucherMutation,
-  useReleasedCVoucherMutation,
-} from "../../services/store/request";
 import { setVoucher } from "../../services/slice/optionsSlice";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -68,8 +61,15 @@ import TreasuryModal from "../../components/customs/modal/TreasuryModal";
 import { enqueueSnackbar } from "notistack";
 import { resetPrompt } from "../../services/slice/promptSlice";
 import { singleError } from "../../services/functions/errorResponse";
-import TreasuryMultiple from "../../components/customs/modal/TreasuryMultiple";
 import { setClearChecks } from "../../services/slice/syncSlice";
+import dayjs from "dayjs";
+import { useApQuery } from "../../services/api/apApi";
+import { useDocumentTypeQuery } from "../../services/api/documentTypeApi";
+import {
+  useReadTransactionCheckMutation,
+  useReleaseCVoucherMutation,
+  useReleasedCVoucherMutation,
+} from "../../services/api/checkVoucherApi";
 
 const CheckTable = ({
   params,
@@ -296,12 +296,26 @@ const CheckTable = ({
                     tag?.state === "Check Approval" &&
                     hasAccess("check_approval");
 
+                  const tagMonthYear = dayjs(tag?.tag_year, "YYMM").toDate();
+
                   return (
                     <TableRow
                       className="table-body-tag-transaction"
                       key={tag?.id}
                       onClick={() => {
-                        dispatch(setMenuData(tag));
+                        dispatch(
+                          setMenuDataMultiple(
+                            tag?.treasuryChecks[0]?.checkNo?.batch?.length ===
+                              1 || tag?.treasuryChecks.length === 0
+                              ? [tag] || []
+                              : tag?.treasuryChecks[0]?.checkNo?.batch?.map(
+                                  (item) => ({
+                                    ...item?.transactionCheck,
+                                    treasuryChecks: tag?.treasuryChecks,
+                                  })
+                                )
+                          )
+                        );
 
                         dispatch(setVoucher("check"));
                         params?.state !== "Check Approval" &&
@@ -311,14 +325,15 @@ const CheckTable = ({
 
                         isPreparedBy && handleRead(tag);
 
-                        params?.state === "For Preparation" &&
-                          watch("check_ids")?.length === 0 &&
-                          dispatch(setViewMenu(true));
+                        dispatch(setViewMenu(true));
 
-                        (params?.state === "For Releasing" ||
-                          params?.state === "Released") &&
-                          watch("check_ids")?.length === 0 &&
-                          dispatch(setUpdateMenu(true));
+                        // params?.state === "For Preparation" &&
+                        //   watch("check_ids")?.length === 0 &&
+
+                        // (params?.state === "For Releasing" ||
+                        //   params?.state === "Released") &&
+                        //   watch("check_ids")?.length === 0 &&
+                        //   dispatch(setUpdateMenu(true));
                       }}
                     >
                       {params?.state === "For Preparation" && (
@@ -362,7 +377,9 @@ const CheckTable = ({
                       )}
 
                       <TableCell>
-                        {`${tag?.transactions?.tag_no} - ${tag?.transactions?.tag_year}`}
+                        {`${tag?.transactions?.tag_no} - ${moment(
+                          tagMonthYear
+                        ).get("year")}`}
                       </TableCell>
                       <TableCell>
                         <Typography className="tag-transaction-company-name">
@@ -693,14 +710,6 @@ const CheckTable = ({
 
       <Dialog open={viewMenu} className="transaction-modal-dialog">
         <TreasuryModal />
-      </Dialog>
-
-      <Dialog
-        open={updateMenu}
-        className="transaction-modal-dialog"
-        onClose={() => dispatch(resetMenu())}
-      >
-        <TreasuryMultiple />
       </Dialog>
     </Box>
   );

@@ -87,3 +87,36 @@ export const totalAmountCheckForm = (item) => {
 
   return totalAmount;
 };
+
+export const compute2307 = (data) => {
+  const calculateAmount = (field) =>
+    data?.reduce(
+      (acc, curr) =>
+        curr?.credit !== 0
+          ? acc - parseFloat(curr[field] || 0)
+          : acc + parseFloat(curr[field] || 0),
+      0
+    );
+
+  const calculateWTax = (field) =>
+    data?.reduce(
+      (acc, curr) =>
+        parseFloat(curr[field]) !== 0
+          ? curr.credit === 0
+            ? acc + parseFloat(curr.wtax_payable_cr || 0)
+            : acc - parseFloat(curr.wtax_payable_cr || 0)
+          : acc,
+      0
+    );
+
+  return {
+    vpl: calculateAmount("vat_local"),
+    npl: calculateAmount("nvat_local"),
+    vps: calculateAmount("vat_service"),
+    nps: calculateAmount("nvat_service"),
+    wTaxL: calculateWTax("vat_local"),
+    wTaxS: calculateWTax("vat_service"),
+    wNTaxL: calculateWTax("nvat_local"),
+    wNTaxS: calculateWTax("nvat_service"),
+  };
+};

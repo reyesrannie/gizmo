@@ -5,12 +5,10 @@ import SearchText from "../../components/customs/SearchText";
 
 import { Box, Typography } from "@mui/material";
 
-import { useCheckNumberQuery } from "../../services/store/request";
-
 import "../../components/styles/TagTransaction.scss";
 
-import CheckNumberTable from "./CheckNumberTable";
 import useTreasuryCheckHook from "../../services/hooks/useTreasuryCheckHook";
+import { useCheckNumberQuery } from "../../services/api/bankApi";
 
 const Offset = () => {
   const {
@@ -46,19 +44,6 @@ const Offset = () => {
           <SearchText onSearchData={onSearchData} />
         </Box>
       </Box>
-      <CheckNumberTable
-        params={params}
-        onSortTable={onSortTable}
-        isError={isError}
-        isFetching={isFetching}
-        isLoading={isLoading}
-        onPageChange={onPageChange}
-        onRowChange={onRowChange}
-        status={status}
-        tagTransaction={tagTransaction}
-        onOrderBy={onOrderBy}
-        onShowAll={onShowAll}
-      />
     </Box>
   );
 };

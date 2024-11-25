@@ -14,14 +14,6 @@ import {
 } from "@mui/material";
 
 import { useDispatch, useSelector } from "react-redux";
-import {
-  useAccountTitlesQuery,
-  useCTitlesQuery,
-  useGcTitlesQuery,
-  useGgpTitlesQuery,
-  useGpTitlesQuery,
-  usePTitlesQuery,
-} from "../../../services/store/request";
 
 import AddToPhotosOutlinedIcon from "@mui/icons-material/AddToPhotosOutlined";
 
@@ -35,6 +27,14 @@ import { coaHeader } from "../../../services/constants/headers";
 import ArrowDropDownCircleOutlinedIcon from "@mui/icons-material/ArrowDropDownCircleOutlined";
 import TitleTable from "./TitleTable";
 import { setHeader } from "../../../services/slice/headerSlice";
+import {
+  useAccountTitlesQuery,
+  useCTitlesQuery,
+  useGcTitlesQuery,
+  useGgpTitlesQuery,
+  useGpTitlesQuery,
+  usePTitlesQuery,
+} from "../../../services/api/coaApi";
 
 const AccountTitles = () => {
   const dispatch = useDispatch();

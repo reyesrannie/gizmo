@@ -27,18 +27,15 @@ import Autocomplete from "./AutoComplete";
 import loadingLight from "../../assets/lottie/Loading.json";
 
 import AppTextBox from "./AppTextBox";
-import {
-  useCheckTransactionQuery,
-  useCreateCheckEntriesMutation,
-  useCreateJournalEntriesMutation,
-  useJournalTransactionQuery,
-  useReceiveTransactionMutation,
-  useUpdateCheckEntriesMutation,
-  useUpdateJournalEntriesMutation,
-} from "../../services/store/request";
 import Lottie from "lottie-react";
 import { enqueueSnackbar } from "notistack";
 import { singleError } from "../../services/functions/errorResponse";
+import { useReceiveTransactionMutation } from "../../services/api/transactionApi";
+import {
+  useCheckTransactionQuery,
+  useCreateCheckEntriesMutation,
+  useUpdateCheckEntriesMutation,
+} from "../../services/api/vouchersPayableApi";
 
 const ReceiveEntry = ({ check = false }) => {
   const dispatch = useDispatch();
@@ -52,21 +49,11 @@ const ReceiveEntry = ({ check = false }) => {
       transaction_id: transactionData?.id,
     });
 
-  const { data: journalTransaction, isSuccess: journalSuccess } =
-    useJournalTransactionQuery({
-      status: "active",
-      pagination: "none",
-      transaction_id: transactionData?.id,
-    });
-
   const [createCheckEntry, { isLoading: loadingCheck }] =
     useCreateCheckEntriesMutation();
   const [updateCheckEntry, { isLoading: loadingCheckUpdate }] =
     useUpdateCheckEntriesMutation();
-  const [createJournalEntry, { isLoading: loadingJournal }] =
-    useCreateJournalEntriesMutation();
-  const [updateJournalEntry, { isLoading: loadingJournalUpdate }] =
-    useUpdateJournalEntriesMutation();
+
   const [receiveTransaction, { isLoading: updateLoading }] =
     useReceiveTransactionMutation();
 
@@ -82,16 +69,14 @@ const ReceiveEntry = ({ check = false }) => {
       voucher: check ? "Check Voucher" : "Journal Voucher",
       amount:
         parseFloat(transactionData?.purchase_amount).toFixed(2) -
-        parseFloat(checkTransaction?.result?.amount || 0).toFixed(2) -
-        parseFloat(journalTransaction?.result?.amount || 0).toFixed(2),
+        parseFloat(checkTransaction?.result?.amount || 0).toFixed(2),
     },
   });
 
   const validateRemaining = (amount) => {
     const balance =
       parseFloat(transactionData?.purchase_amount).toFixed(2) -
-      parseFloat(checkTransaction?.result?.amount || 0).toFixed(2) -
-      parseFloat(journalTransaction?.result?.amount || 0).toFixed(2);
+      parseFloat(checkTransaction?.result?.amount || 0).toFixed(2);
 
     if (parseFloat(amount).toFixed(2) > balance) {
       setError("amount", {
@@ -117,9 +102,7 @@ const ReceiveEntry = ({ check = false }) => {
         id: !singleSuccess ? null : checkTransaction?.result?.id,
       };
       const isZero =
-        parseFloat(transactionData?.purchase_amount) ===
-        parseFloat(obj.amount) +
-          parseFloat(journalTransaction?.result?.amount || 0);
+        parseFloat(transactionData?.purchase_amount) === parseFloat(obj.amount);
 
       try {
         const res = singleSuccess
@@ -128,26 +111,6 @@ const ReceiveEntry = ({ check = false }) => {
         enqueueSnackbar(res?.message, { variant: "success" });
         isZero && (await receiveTransactionHandler("/ap/check"));
         !isZero && dispatch(resetPrompt());
-      } catch (error) {
-        singleError(error, enqueueSnackbar);
-      }
-    } else {
-      const obj = {
-        tag_year: transactionData?.tag_year,
-        transaction_id: transactionData?.transactions?.id,
-        ap_tagging_id: transactionData?.apTagging?.id || null,
-        amount:
-          parseFloat(journalTransaction?.result?.amount || 0) +
-          parseFloat(submitData?.amount?.replace(/,/g, "") || "0"),
-        id: !journalSuccess ? null : journalTransaction?.result?.id,
-      };
-
-      try {
-        const res = journalSuccess
-          ? await updateJournalEntry(obj).unwrap()
-          : await createJournalEntry(obj).unwrap();
-        enqueueSnackbar(res?.message, { variant: "success" });
-        dispatch(resetPrompt());
       } catch (error) {
         singleError(error, enqueueSnackbar);
       }
@@ -245,13 +208,7 @@ const ReceiveEntry = ({ check = false }) => {
       </form>
 
       <Dialog
-        open={
-          loadingCheck ||
-          loadingCheckUpdate ||
-          loadingJournal ||
-          loadingJournalUpdate ||
-          updateLoading
-        }
+        open={loadingCheck || loadingCheckUpdate || updateLoading}
         className="loading-role-create"
       >
         <Lottie animationData={loadingLight} loop />

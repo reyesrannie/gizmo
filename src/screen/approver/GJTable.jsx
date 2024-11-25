@@ -48,11 +48,6 @@ import {
   setViewMenu,
 } from "../../services/slice/menuSlice";
 
-import {
-  useDocumentTypeQuery,
-  useFileCVoucherMutation,
-  usePrepareCVoucherMutation,
-} from "../../services/store/request";
 import TransactionModalAp from "../../components/customs/modal/TransactionModalAp";
 import { resetOption, setVoucher } from "../../services/slice/optionsSlice";
 import TransactionModalApprover from "../../components/customs/modal/TransactionModalApprover";
@@ -66,7 +61,12 @@ import { enqueueSnackbar } from "notistack";
 import { resetPrompt } from "../../services/slice/promptSlice";
 import { singleError } from "../../services/functions/errorResponse";
 import dayjs from "dayjs";
-import { useReadTransactionGJMutation } from "../../services/store/seconAPIRequest";
+import { useDocumentTypeQuery } from "../../services/api/documentTypeApi";
+import {
+  useFileCVoucherMutation,
+  usePrepareCVoucherMutation,
+} from "../../services/api/checkVoucherApi";
+import { useReadTransactionGJMutation } from "../../services/api/generalJournalApi";
 
 const GJTable = ({
   params,

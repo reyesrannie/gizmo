@@ -23,7 +23,6 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useDispatch, useSelector } from "react-redux";
 import { resetMenu } from "../../../services/slice/menuSlice";
 import {
-  useAccountTitlesQuery,
   useCreateATCMutation,
   useCreateCheckNumberMutation,
   useUpdateATCMutation,
@@ -33,6 +32,7 @@ import { useSnackbar } from "notistack";
 import { objectError } from "../../../services/functions/errorResponse";
 import checkNumberSchema from "../../../schemas/checkNumberSchema";
 import Autocomplete from "../AutoComplete";
+import { useAccountTitlesQuery } from "../../../services/api/coaApi";
 
 const CheckNumberModal = ({ view }) => {
   const menuData = useSelector((state) => state.menu.menuData);

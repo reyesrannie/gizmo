@@ -8,6 +8,24 @@
   }
 }
 
+.table-container-for-print-multiple {
+  @media print {
+    &.MuiTableContainer-root {
+      width: 94.7%;
+      padding: 2.8%;
+      overflow: hidden;
+
+      .disclaimer-voucher-signature {
+        page-break-after: always;
+      }
+      .MuiTable-root:not(:first-of-type)::before {
+        display: block;
+        height: 100mm;
+      }
+    }
+  }
+}
+
 .table-container-for-print-treasury {
   &.MuiTableContainer-root {
     margin-bottom: 10px;
@@ -47,16 +65,11 @@
 }
 
 .disclaimer-voucher-signature {
-  display: none;
+  display: flex;
   font-style: italic;
-  @media print {
-    &.MuiTypography-root {
-      display: flex;
-      font-family: Roboto-Light;
-      font-size: 12px;
-      justify-content: center;
-    }
-  }
+  justify-content: center;
+  font-family: Roboto-Light;
+  font-size: 12px;
 }
 
 .accordion-check-details {

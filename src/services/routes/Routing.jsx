@@ -72,7 +72,7 @@ const TransactionReport = lazy(() =>
 );
 const Treasury = lazy(() => import("../../screen/treasury/Treasury"));
 const Check = lazy(() => import("../../screen/treasury/Check"));
-const CheckNumber = lazy(() => import("../../screen/treasury/CheckNumber"));
+const Bank = lazy(() => import("../../screen/treasury/Bank"));
 const DebitMemo = lazy(() => import("../../screen/treasury/DebitMemo"));
 const Offset = lazy(() => import("../../screen/treasury/Offset"));
 const Balance = lazy(() => import("../../screen/treasury/Balance"));
@@ -382,9 +382,9 @@ const Routing = () => {
           ),
         },
         {
-          path: "checknumber",
-          element: hasAccess(["preparation", "releasing", "clearing"]) ? (
-            <CheckNumber />
+          path: "bank",
+          element: hasAccess(["bank_registry"]) ? (
+            <Bank />
           ) : (
             <Navigate to={"/"} />
           ),

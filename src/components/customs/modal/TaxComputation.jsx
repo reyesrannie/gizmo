@@ -22,16 +22,7 @@ import {
   setTaxData,
   setUpdateTax,
 } from "../../../services/slice/menuSlice";
-import {
-  useAccountTitlesQuery,
-  useArchiveTaxComputationMutation,
-  useAtcQuery,
-  useCreateTaxComputationMutation,
-  useLocationQuery,
-  useSupplierQuery,
-  useSupplierTypeQuery,
-  useUpdateTaxComputationMutation,
-} from "../../../services/store/request";
+
 import Lottie from "lottie-react";
 import loadingLight from "../../../assets/lottie/Loading.json";
 import taxComputationSchema from "../../../schemas/taxComputationSchema";
@@ -46,6 +37,16 @@ import { objectError } from "../../../services/functions/errorResponse";
 import { totalAmount } from "../../../services/functions/compute";
 
 import "../../styles/RolesModal.scss";
+import { useLocationQuery } from "../../../services/api/locationApi";
+import { useAtcQuery } from "../../../services/api/atcApi";
+import { useSupplierTypeQuery } from "../../../services/api/supplierTypeApi";
+import { useSupplierQuery } from "../../../services/api/supplierApi";
+import { useAccountTitlesQuery } from "../../../services/api/coaApi";
+import {
+  useArchiveTaxComputationMutation,
+  useCreateTaxComputationMutation,
+  useUpdateTaxComputationMutation,
+} from "../../../services/api/taxComputationApi";
 
 const TaxComputation = ({ create, update, taxComputation, schedule }) => {
   const dispatch = useDispatch();
@@ -356,7 +357,6 @@ const TaxComputation = ({ create, update, taxComputation, schedule }) => {
     setRequiredFieldsValue(watch("amount"));
   };
 
-  console.log(transactionData);
   const submitHandler = async (submitData) => {
     const obj = {
       ...submitData,

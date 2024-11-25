@@ -6,6 +6,7 @@
       z-index: 3;
       display: flex;
       align-items: center;
+      justify-content: space-between;
       width: 70px;
       transition: all 0.2s ease;
       overflow-y: auto;
@@ -166,8 +167,8 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    position: absolute;
-    bottom: 1px;
+    // position: absolute;
+    // bottom: 1px;
     text-align: center;
   }
 }

@@ -28,10 +28,6 @@ import "../../components/styles/RolesModal.scss";
 import "../../components/styles/TransactionModal.scss";
 import "../../components/styles/TagTransaction.scss";
 
-import {
-  useCutOffQuery,
-  useTagYearMonthQuery,
-} from "../../services/store/request";
 import Breadcrums from "../../components/customs/Breadcrums";
 import SearchText from "../../components/customs/SearchText";
 import useReportHook from "../../services/hooks/useReportHook";
@@ -40,6 +36,8 @@ import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import { useDispatch, useSelector } from "react-redux";
 import ReportModal from "../../components/customs/modal/ReportModal";
 import { setMenuData, setViewMenu } from "../../services/slice/menuSlice";
+import { useTagYearMonthQuery } from "../../services/api/transactionApi";
+import { useCutOffQuery } from "../../services/api/cutOffApi";
 
 const TransactionReport = () => {
   const dispatch = useDispatch();
@@ -127,11 +125,9 @@ const TransactionReport = () => {
                   >
                     <TableRow
                       onClick={() => {
-                        // checkIfAvailable(tag?.tag_year)
-                        //   ? displayReport(tag)
-                        //   : null;
-
-                        displayReport(tag);
+                        if (checkIfAvailable(tag?.tag_year)) {
+                          displayReport(tag);
+                        }
                       }}
                       className={
                         checkIfAvailable(tag?.tag_year)

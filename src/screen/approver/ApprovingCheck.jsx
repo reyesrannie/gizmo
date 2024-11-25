@@ -13,7 +13,6 @@ import {
 } from "@mui/material";
 
 import { useDispatch, useSelector } from "react-redux";
-import { useCheckEntriesQuery } from "../../services/store/request";
 
 import ArrowDropDownCircleOutlinedIcon from "@mui/icons-material/ArrowDropDownCircleOutlined";
 
@@ -29,6 +28,7 @@ import CheckTable from "./CheckTable";
 import useApproverHook from "../../services/hooks/useApproverHook";
 import CountDistribute from "../../services/functions/CountDistribute";
 import { setHeader } from "../../services/slice/headerSlice";
+import { useCheckEntriesQuery } from "../../services/api/vouchersPayableApi";
 
 const ApprovingCheck = () => {
   const dispatch = useDispatch();

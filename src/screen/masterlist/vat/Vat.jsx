@@ -31,11 +31,6 @@ import moment from "moment";
 import Lottie from "lottie-react";
 
 import { useDispatch, useSelector } from "react-redux";
-import {
-  useArchiveVATMutation,
-  useImportVATMutation,
-  useVatQuery,
-} from "../../../services/store/request";
 
 import AddToPhotosOutlinedIcon from "@mui/icons-material/AddToPhotosOutlined";
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
@@ -69,6 +64,11 @@ import {
 import { generateExcel } from "../../../services/functions/exportFile";
 import VatModal from "../../../components/customs/modal/VatModal";
 import ImportModal from "../../../components/customs/modal/ImportModal";
+import {
+  useArchiveVATMutation,
+  useImportVATMutation,
+  useVatQuery,
+} from "../../../services/api/vatApi";
 
 const Vat = () => {
   const excelItems = ["ID", "CODE", "NAME", "CREATED AT", "DATE MODIFIED"];

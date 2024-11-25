@@ -1,18 +1,14 @@
-import React, { useEffect, useRef } from "react";
+import React from "react";
 
 import Breadcrums from "../../components/customs/Breadcrums";
 import SearchText from "../../components/customs/SearchText";
 
 import { Box, Typography } from "@mui/material";
 
-import {
-  useCheckNumberQuery,
-  useDebitMemoQuery,
-} from "../../services/store/request";
+import { useDebitMemoQuery } from "../../services/store/request";
 
 import "../../components/styles/TagTransaction.scss";
 
-import useTreasuryCheckHook from "../../services/hooks/useTreasuryCheckHook";
 import DebitMemoTable from "./DebitMemoTable";
 import useDebitMemoHook from "../../services/hooks/useDebitMemoHook";
 

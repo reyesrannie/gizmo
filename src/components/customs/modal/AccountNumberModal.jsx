@@ -20,16 +20,17 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useDispatch } from "react-redux";
 import { resetMenu } from "../../../services/slice/menuSlice";
-import {
-  useCreateAccountNumberMutation,
-  useLocationQuery,
-  useSupplierQuery,
-  useUpdateAccountNumberMutation,
-} from "../../../services/store/request";
+
 import { useSnackbar } from "notistack";
 import { objectError } from "../../../services/functions/errorResponse";
 import accountNumberSchema from "../../../schemas/accountNumberSchema";
 import Autocomplete from "../AutoComplete";
+import { useLocationQuery } from "../../../services/api/locationApi";
+import { useSupplierQuery } from "../../../services/api/supplierApi";
+import {
+  useCreateAccountNumberMutation,
+  useUpdateAccountNumberMutation,
+} from "../../../services/api/accountNumberApi";
 
 const AccountNumberModal = ({ accountNumberData, view, update }) => {
   const dispatch = useDispatch();

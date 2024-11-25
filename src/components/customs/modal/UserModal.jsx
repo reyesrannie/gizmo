@@ -24,15 +24,15 @@ import Lottie from "lottie-react";
 import loading from "../../../assets/lottie/Loading.json";
 
 import ClearIcon from "@mui/icons-material/Clear";
-import {
-  useApQuery,
-  useCreateUserMutation,
-  useRoleQuery,
-  useUpdateUserMutation,
-} from "../../../services/store/request";
 import { useEffect } from "react";
 import { objectError } from "../../../services/functions/errorResponse";
 import { enqueueSnackbar } from "notistack";
+import {
+  useCreateUserMutation,
+  useUpdateUserMutation,
+} from "../../../services/api/authApi";
+import { useRoleQuery } from "../../../services/api/roleApi";
+import { useApQuery } from "../../../services/api/apApi";
 
 const UserModal = ({ menuData, view, update }) => {
   const dispatch = useDispatch();
@@ -92,7 +92,6 @@ const UserModal = ({ menuData, view, update }) => {
     },
   });
 
-  console.log(menuData);
   useEffect(() => {
     if (successSedar && successAP && successRole) {
       const valuesItem = {

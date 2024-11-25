@@ -21,16 +21,16 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useDispatch } from "react-redux";
 import { resetMenu } from "../../../services/slice/menuSlice";
-import {
-  useCreateDepartmentMutation,
-  useLocationQuery,
-  useUpdateDepartmentMutation,
-} from "../../../services/store/request";
 import { useSnackbar } from "notistack";
 import { objectError } from "../../../services/functions/errorResponse";
 import departmentSchema from "../../../schemas/departmentSchema";
 import Autocomplete from "../AutoComplete";
 import { useEffect } from "react";
+import {
+  useCreateDepartmentMutation,
+  useUpdateDepartmentMutation,
+} from "../../../services/api/departmentApi";
+import { useLocationQuery } from "../../../services/api/locationApi";
 
 const DepartmentModal = ({ departmentData, view, update }) => {
   const dispatch = useDispatch();

@@ -38,10 +38,6 @@ import {
   setReceiveMenu,
 } from "../../services/slice/menuSlice";
 
-import {
-  useDocumentTypeQuery,
-  useReadTransactionMutation,
-} from "../../services/store/request";
 import TransactionModal from "../../components/customs/modal/TransactionModal";
 import { AdditionalFunction } from "../../services/functions/AdditionalFunction";
 import { useForm } from "react-hook-form";
@@ -51,6 +47,8 @@ import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
 import ClearIcon from "@mui/icons-material/Clear";
 import Autocomplete from "../../components/customs/AutoComplete";
 import dayjs from "dayjs";
+import { useDocumentTypeQuery } from "../../services/api/documentTypeApi";
+import { useReadTransactionMutation } from "../../services/api/transactionApi";
 
 const TransactionTable = ({
   params,

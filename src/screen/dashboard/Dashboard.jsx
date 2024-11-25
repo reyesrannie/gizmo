@@ -4,6 +4,7 @@ import {
   Stack,
   Typography,
   TextField as MuiTextField,
+  Button,
 } from "@mui/material";
 
 import "../../components/styles/Dashboard.scss";
@@ -14,18 +15,7 @@ import Breadcrums from "../../components/customs/Breadcrums";
 import CardHistory from "../../components/customs/CardHistory";
 import { hasAccess } from "../../services/functions/access";
 import { apDash, approverDash } from "../../services/constants/headers";
-import {
-  useAccountTitlesQuery,
-  useCheckCountQuery,
-  useCountScheduleQuery,
-  useJournalCountQuery,
-  useTransactCountQuery,
-  useTreasuryCountQuery,
-} from "../../services/store/request";
-import {
-  useDashboardBalanceQuery,
-  useGjCountQuery,
-} from "../../services/store/seconAPIRequest";
+
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { setHeader } from "../../services/slice/headerSlice";
@@ -35,6 +25,17 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { MobileDatePicker } from "@mui/x-date-pickers";
 import Autocomplete from "../../components/customs/AutoComplete";
 import dashboardSchema from "../../schemas/dashboardSchema";
+import SortIcon from "@mui/icons-material/Sort";
+import moment from "moment";
+import { useAccountTitlesQuery } from "../../services/api/coaApi";
+import {
+  useCheckCountQuery,
+  useCountScheduleQuery,
+  useGjCountQuery,
+  useTransactCountQuery,
+  useTreasuryCountQuery,
+} from "../../services/api/countApi";
+import { useDashboardBalanceQuery } from "../../services/api/dashboardApi";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -50,12 +51,11 @@ const Dashboard = () => {
     max: isAP || apCodes?.length !== 0 ? "" : max_amount,
   };
 
-  const { params } = useParamsHook();
+  const { params, onFilterChange, onReset } = useParamsHook();
   const { params: coaParams, onSearchData: searchCoa } = useParamsHook();
 
   const { data: badgeTagging } = useTransactCountQuery({ ap: apCodes });
   const { data: badgeCheck } = useCheckCountQuery(queryParams);
-  const { data: badgeJournal } = useJournalCountQuery(queryParams);
   const { data: scheduleTransaction } = useCountScheduleQuery(queryParams);
   const { data: badgeGj } = useGjCountQuery(queryParams);
   const { data: treasuryCount } = useTreasuryCountQuery();
@@ -65,26 +65,21 @@ const Dashboard = () => {
     data: coa,
     isLoading: loadingCoa,
     isFetching: fetchingCoa,
+    isError: errorCoa,
   } = useAccountTitlesQuery(coaParams);
 
   const debounceTimer = useRef(null);
 
-  console.log(coa);
-
   const {
     control,
-    handleSubmit,
     setValue,
     watch,
-    clearErrors,
+    reset,
     formState: { errors },
-    getValues,
   } = useForm({
     resolver: yupResolver(dashboardSchema),
     defaultValues: {
-      year: null,
-      type: null,
-      date: null,
+      bank_id: null,
     },
   });
 
@@ -95,12 +90,12 @@ const Dashboard = () => {
       header: "",
     },
     {
-      name: "Outstanding Payable",
+      name: "Accounts Payable",
       path: "/",
       header: "",
     },
     {
-      name: "Outstanding",
+      name: "Outstanding Payable",
       path: "/treasury/check",
       header: "For Releasing",
     },
@@ -122,10 +117,16 @@ const Dashboard = () => {
     }
 
     debounceTimer.current = setTimeout(() => {
-      searchCoa(data); // Call the function after 0.5 seconds
-    }, 1000);
+      searchCoa(data);
+    }, 500);
   };
 
+  const handleFilter = () => {
+    const obj = {
+      bank_id: watch("bank_id")?.id,
+    };
+    onFilterChange(obj);
+  };
   return (
     <Box>
       <Box>
@@ -151,71 +152,49 @@ const Dashboard = () => {
         </Box>
       </Box>
       {hasAccess(["preparation", "releasing", "clearing"]) && (
-        <Stack flexDirection={"row"}>
-          <Controller
-            name="year"
-            control={control}
-            render={({ field: { onChange, value, ...restField } }) => (
-              <MobileDatePicker
-                className="transaction-form-date history"
-                format="YYYY"
-                value={value}
-                views={["year"]}
-                onChange={(e) => {
-                  onChange(e);
-                  setValue("type", null);
-                  setValue("date", null);
-                }}
-                closeOnSelect
-              />
-            )}
-          />
+        <Stack
+          flexDirection={"row"}
+          marginInlineStart={8}
+          alignItems={"center"}
+        >
           <Autocomplete
-            disabled={!watch("year")}
             control={control}
             onInputChange={handleInputChange}
-            name={"type"}
+            name={"bank_id"}
             options={
               coa?.result?.data?.filter((coa) =>
                 coa?.name?.startsWith("CIB")
               ) || []
             }
+            noOptionsText={errorCoa ? "Not found" : "Please enter a bank name"}
             getOptionLabel={(option) => option?.name}
             isOptionEqualToValue={(option, value) =>
               option?.status === value?.status
             }
+            onClose={() => watch("bank_id") !== null && handleFilter()}
             renderInput={(params) => (
               <MuiTextField
                 name="ap_tagging"
                 {...params}
-                placeholder="Select Type"
+                placeholder="Select Bank"
                 size="small"
                 variant="outlined"
-                error={Boolean(errors.ap)}
-                helperText={errors.ap?.message}
+                error={Boolean(errors.bank_id)}
+                helperText={errors.bank_id?.message}
                 className="transaction-form-date history"
               />
             )}
+            disableClearable
           />
-          {watch("type") !== null && (
-            <Autocomplete
-              control={control}
-              name={"date"}
-              options={[]}
-              isOptionEqualToValue={(option, value) => option === value}
-              renderInput={(params) => (
-                <MuiTextField
-                  name="ap_tagging"
-                  {...params}
-                  placeholder="Select Date"
-                  size="small"
-                  variant="outlined"
-                  error={Boolean(errors.ap)}
-                  helperText={errors.ap?.message}
-                  className="transaction-form-date history"
-                />
-              )}
-            />
+          {watch("bank_id") && (
+            <Button
+              onClick={() => {
+                reset();
+                onReset();
+              }}
+            >
+              Clear
+            </Button>
           )}
         </Stack>
       )}

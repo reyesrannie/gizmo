@@ -25,14 +25,8 @@ import "../../styles/TransactionModalApprover.scss";
 
 import { useDispatch, useSelector } from "react-redux";
 import {
-  useAccountTitlesQuery,
-  useClearCVoucherMutation,
   useClearDebitMemoMutation,
-  useReleasedCVoucherMutation,
-  useReturnCheckEntriesMutation,
   useReturnDebitMemoMutation,
-  useTaxComputationQuery,
-  useUpdateCheckDateMutation,
   useVoidCheckNumberMutation,
 } from "../../../services/store/request";
 import Lottie from "lottie-react";
@@ -75,7 +69,6 @@ const DebitMemoModal = () => {
   const dispatch = useDispatch();
   const menuData = useSelector((state) => state.menu.menuData);
   const isReturn = useSelector((state) => state.prompt.return);
-
   const { convertToPeso } = AdditionalFunction();
 
   const [clearDebitMemo, { isLoading: releasedLoading }] =
@@ -144,20 +137,23 @@ const DebitMemoModal = () => {
                   className="voucher-treasury name"
                 >
                   <Typography className="name-supplier-typo-treasury supplier">
-                    SUPPLIERSs
+                    SUPPLIERS
                   </Typography>
                   <Typography
                     className="name-supplier-typo-treasury name"
                     align="center"
                     sx={{
                       fontSize: `${
-                        menuData?.transaction?.supplier?.name?.length <= 40
+                        menuData?.transaction?.supplier?.name?.length <= 40 ||
+                        menuData?.generalJournal?.supplier?.name?.length <= 40
                           ? 14
                           : 12
                       }px`,
                     }}
                   >
-                    {menuData?.transaction?.supplier?.name}
+                    {menuData?.transaction
+                      ? menuData?.transaction?.supplier?.name
+                      : menuData?.generalJournal?.supplier?.name}
                   </Typography>
                 </TableCell>
               </TableRow>
@@ -191,9 +187,11 @@ const DebitMemoModal = () => {
               <TableRow>
                 <TableCell align="center" className="voucher-treasury left">
                   <Typography>
-                    {moment(menuData?.transaction?.date_invoice).format(
-                      "MM/DD/YYYY"
-                    )}
+                    {moment(
+                      menuData?.transaction
+                        ? menuData?.transaction?.date_invoice
+                        : menuData?.generalJournal?.date_invoice
+                    ).format("MM/DD/YYYY")}
                   </Typography>
                 </TableCell>
                 <TableCell
@@ -202,12 +200,22 @@ const DebitMemoModal = () => {
                   className="voucher-treasury details"
                 >
                   <Typography>
-                    {menuData?.transaction?.description?.length > 200
-                      ? `${menuData?.transaction?.description?.substring(
-                          0,
-                          150
-                        )}...`
-                      : menuData?.transaction?.description}
+                    {menuData?.transaction?.description?.length > 200 ||
+                    menuData?.generalJournal?.description?.length > 200
+                      ? `${
+                          menuData?.transaction
+                            ? menuData?.transaction?.description?.substring(
+                                0,
+                                150
+                              )
+                            : menuData?.generalJournal?.description?.substring(
+                                0,
+                                150
+                              )
+                        }...`
+                      : menuData?.transaction
+                      ? menuData?.transaction?.description
+                      : menuData?.generalJournal?.description}
                   </Typography>
                 </TableCell>
                 <TableCell align="center" className="voucher-treasury right">
@@ -349,7 +357,7 @@ const DebitMemoModal = () => {
                   align="left"
                   className="voucher-treasury content"
                 >
-                  <Typography>{`Type: ${menuData?.dm_type.toUpperCase()}`}</Typography>
+                  <Typography>{`Bank Ref#: ${menuData?.reference_no?.toUpperCase()}`}</Typography>
                 </TableCell>
                 <TableCell
                   colSpan={5}
@@ -399,7 +407,9 @@ const DebitMemoModal = () => {
                     <Typography>Tag #:</Typography>
                     <Typography>
                       {`${moment(menuData?.tagYear).get("year")} - ${
-                        menuData?.transaction?.tag_no
+                        menuData?.transaction
+                          ? menuData?.transaction?.tag_no
+                          : menuData?.generalJournal?.tag_no
                       }`}
                     </Typography>
                   </Stack>
@@ -412,7 +422,15 @@ const DebitMemoModal = () => {
                   <Stack flexDirection={"row"} gap={1}>
                     <Typography>Ref #:</Typography>
                     <Typography>
-                      {`${menuData?.transaction?.documentType?.code} - ${menuData?.transaction?.invoice_no}`}
+                      {`${
+                        menuData?.transaction
+                          ? menuData?.transaction?.documentType?.code
+                          : menuData?.generalJournal?.documentType?.code
+                      } - ${
+                        menuData?.transaction
+                          ? menuData?.transaction?.invoice_no
+                          : menuData?.generalJournal?.invoice_no
+                      }`}
                     </Typography>
                   </Stack>
                 </TableCell>
@@ -440,7 +458,7 @@ const DebitMemoModal = () => {
                 className="add-transaction-button"
                 // startIcon={<DeleteForeverOutlinedIcon />}
               >
-                Print Voucher
+                Print
               </Button>
             )}
             content={() => componentRef.current}
@@ -502,7 +520,13 @@ const DebitMemoModal = () => {
         />
       </Dialog>
 
-      <TransactionDrawer transactionData={menuData?.transactions} />
+      <TransactionDrawer
+        transactionData={
+          menuData?.transactions
+            ? menuData?.transactions
+            : menuData?.generalJournal
+        }
+      />
     </Paper>
   );
 };

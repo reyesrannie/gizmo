@@ -13,7 +13,6 @@ import {
 } from "@mui/material";
 
 import { useDispatch, useSelector } from "react-redux";
-import { useCheckEntriesQuery } from "../../services/store/request";
 
 import ArrowDropDownCircleOutlinedIcon from "@mui/icons-material/ArrowDropDownCircleOutlined";
 
@@ -28,6 +27,8 @@ import CheckTable from "./CheckTable";
 import useApHook from "../../services/hooks/useApHook";
 import CountDistribute from "../../services/functions/CountDistribute";
 import { setHeader } from "../../services/slice/headerSlice";
+import { hasAccess } from "../../services/functions/access";
+import { useCheckEntriesQuery } from "../../services/api/vouchersPayableApi";
 
 const CheckVoucher = () => {
   const dispatch = useDispatch();
@@ -98,7 +99,8 @@ const CheckVoucher = () => {
             </AccordionSummary>
             {apHeader?.map(
               (head, index) =>
-                header !== head?.name && (
+                header !== head?.name &&
+                hasAccess(head?.permission) && (
                   <AccordionSummary
                     key={index}
                     onClick={() => {

@@ -27,20 +27,6 @@ import moment from "moment";
 import Lottie from "lottie-react";
 
 import { useDispatch, useSelector } from "react-redux";
-import {
-  useArchiveAccountTitlesMutation,
-  useArchivecTitlesMutation,
-  useArchivegcTitlesMutation,
-  useArchiveggpTitlesMutation,
-  useArchivegpTitlesMutation,
-  useArchivepTitlesMutation,
-  useImportAccountTitlesMutation,
-  useImportcTitlesMutation,
-  useImportgcTitlesMutation,
-  useImportggpTitlesMutation,
-  useImportgpTitlesMutation,
-  useImportpTitlesMutation,
-} from "../../../services/store/request";
 
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
 import ModeEditOutlineOutlinedIcon from "@mui/icons-material/ModeEditOutlineOutlined";
@@ -73,6 +59,20 @@ import {
 import { generateExcel } from "../../../services/functions/exportFile";
 import ImportModal from "../../../components/customs/modal/ImportModal";
 import AccountTitlesModal from "../../../components/customs/modal/AccountTitlesModal";
+import {
+  useArchiveAccountTitlesMutation,
+  useArchivecTitlesMutation,
+  useArchivegcTitlesMutation,
+  useArchiveggpTitlesMutation,
+  useArchivegpTitlesMutation,
+  useArchivepTitlesMutation,
+  useImportAccountTitlesMutation,
+  useImportcTitlesMutation,
+  useImportgcTitlesMutation,
+  useImportggpTitlesMutation,
+  useImportgpTitlesMutation,
+  useImportpTitlesMutation,
+} from "../../../services/api/coaApi";
 
 const TitleTable = ({
   params,

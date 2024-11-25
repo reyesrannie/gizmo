@@ -19,14 +19,6 @@ import {
 } from "@mui/material";
 
 import { useDispatch, useSelector } from "react-redux";
-import {
-  useApQuery,
-  useAtcQuery,
-  useDocumentTypeQuery,
-  useLocationQuery,
-  useSupplierQuery,
-  useTaxComputationQuery,
-} from "../../../services/store/request";
 import { setComputationMenu } from "../../../services/slice/menuSlice";
 import loading from "../../../assets/lottie/Loading-2.json";
 import noData from "../../../assets/lottie/NoData.json";
@@ -39,6 +31,12 @@ import {
   totalVat,
 } from "../../../services/functions/compute";
 import moment from "moment";
+import { useLocationQuery } from "../../../services/api/locationApi";
+import { useApQuery } from "../../../services/api/apApi";
+import { useAtcQuery } from "../../../services/api/atcApi";
+import { useSupplierQuery } from "../../../services/api/supplierApi";
+import { useDocumentTypeQuery } from "../../../services/api/documentTypeApi";
+import { useTaxComputationQuery } from "../../../services/api/taxComputationApi";
 
 const ComputationMenu = ({ details, schedule }) => {
   const dispatch = useDispatch();
@@ -167,7 +165,7 @@ const ComputationMenu = ({ details, schedule }) => {
                   <TableCell>Supplier</TableCell>
                   <TableCell align="center">Invoice</TableCell>
                   <TableCell align="center">Description</TableCell>
-                  <TableCell align="center">Allocation</TableCell>
+                  <TableCell>Charging Deparment</TableCell>
                 </TableRow>
               </TableHead>
 
@@ -277,7 +275,7 @@ const ComputationMenu = ({ details, schedule }) => {
               <TableCell align="center">Amount</TableCell>
               <TableCell align="center">Input Tax</TableCell>
               <TableCell align="center">Debit</TableCell>
-              <TableCell align="center">WTax Payable Expanded</TableCell>
+              <TableCell align="center">W/Tax Payable Expanded</TableCell>
               <TableCell align="center">Credit</TableCell>
 
               <TableCell align="center">

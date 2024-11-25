@@ -12,15 +12,16 @@ import { apHistoryHeader } from "../../services/constants/headers";
 import { useDispatch, useSelector } from "react-redux";
 import { setHeader } from "../../services/slice/headerSlice";
 import HistoryTable from "./HistoryTable";
-import {
-  useLazyGetMonthGJQuery,
-  useLazyGetMonthVPQuery,
-} from "../../services/store/seconAPIRequest";
+
 import { useHistoryContext } from "../../services/context/HistoryContext";
 import TransactionModal from "../../components/customs/modal/TransactionModal";
 import TransactionModalApprover from "../../components/customs/modal/TransactionModalApprover";
 import { resetSync, setShownTable } from "../../services/slice/syncSlice";
 import { setVoucher } from "../../services/slice/optionsSlice";
+import {
+  useLazyGetMonthGJQuery,
+  useLazyGetMonthVPQuery,
+} from "../../services/api/historyApi";
 
 const Voucher = () => {
   const isShownTable = useSelector((state) => state.sync.isShownTable);

@@ -47,11 +47,6 @@ import UserModal from "../../../components/customs/modal/UserModal";
 import { singleError } from "../../../services/functions/errorResponse";
 
 import {
-  useArchiveUserMutation,
-  usePasswordResetMutation,
-  useUsersQuery,
-} from "../../../services/store/request";
-import {
   resetMenu,
   setCreateMenu,
   setMenuData,
@@ -64,6 +59,11 @@ import {
 } from "../../../services/slice/promptSlice";
 
 import "../../../components/styles/UserAccounts.scss";
+import {
+  useArchiveUserMutation,
+  usePasswordResetMutation,
+  useUsersQuery,
+} from "../../../services/api/authApi";
 
 const UserAccounts = () => {
   const createMenuOpen = useSelector((state) => state.menu.createMenu);

@@ -13,7 +13,6 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { LoadingButton } from "@mui/lab";
 import { useDispatch, useSelector } from "react-redux";
 import { resetAuth, setChangePass } from "../../../services/slice/authSlice";
-import { usePasswordChangeMutation } from "../../../services/store/request";
 import { useSnackbar } from "notistack";
 import { objectError } from "../../../services/functions/errorResponse";
 
@@ -21,6 +20,7 @@ import { loginUser } from "../../../services/functions/loginServices";
 import { useNavigate } from "react-router-dom";
 
 import "../../styles/ChangePassword.scss";
+import { usePasswordChangeMutation } from "../../../services/api/authApi";
 
 const ChangePassword = ({ logged = false }) => {
   const { enqueueSnackbar } = useSnackbar();

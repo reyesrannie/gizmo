@@ -14,7 +14,6 @@ import {
 } from "@mui/material";
 
 import { useDispatch, useSelector } from "react-redux";
-import { useSchedTransactionQuery } from "../../services/store/request";
 
 import ArrowDropDownCircleOutlinedIcon from "@mui/icons-material/ArrowDropDownCircleOutlined";
 
@@ -33,6 +32,7 @@ import { resetMenu } from "../../services/slice/menuSlice";
 import ScheduleTable from "./ScheduleTable";
 import useApHook from "../../services/hooks/useApHook";
 import { setHeader } from "../../services/slice/headerSlice";
+import { useSchedTransactionQuery } from "../../services/api/scheduledTransactionApi";
 
 const APSchedule = () => {
   const dispatch = useDispatch();

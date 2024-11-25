@@ -13,11 +13,7 @@ import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useDispatch, useSelector } from "react-redux";
 import { resetMenu } from "../../../services/slice/menuSlice";
-import {
-  useApproveCutOffMutation,
-  useCreateCutOffMutation,
-  useUpdateCutOffMutation,
-} from "../../../services/store/request";
+
 import { useSnackbar } from "notistack";
 import { objectError } from "../../../services/functions/errorResponse";
 import { DatePicker } from "@mui/x-date-pickers";
@@ -30,6 +26,11 @@ import ReasonInput from "../ReasonInput";
 import { resetPrompt, setWarning } from "../../../services/slice/promptSlice";
 import { hasAccess } from "../../../services/functions/access";
 import TransactionDrawer from "../TransactionDrawer";
+import {
+  useApproveCutOffMutation,
+  useCreateCutOffMutation,
+  useUpdateCutOffMutation,
+} from "../../../services/api/cutOffApi";
 
 const CutoffModal = ({ view, update }) => {
   const dispatch = useDispatch();

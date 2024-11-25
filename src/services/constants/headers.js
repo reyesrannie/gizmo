@@ -15,11 +15,11 @@ const apHeader = [
 ];
 
 const apGJheader = [
-  { name: "Pending", status: "For Computation", permission: "ap_tag" },
-  { name: "For Approval", status: "For Approval", permission: "ap_tag" },
-  { name: "Returned", status: "returned", permission: "ap_tag" },
-  { name: "Approved", status: "approved", permission: "ap_tag" },
-  { name: "Void", status: "voided", permission: "ap_tag" },
+  { name: "Pending", status: "Saved", permission: "ap_tag" },
+  { name: "Posted", status: "Posted", permission: "ap_tag" },
+  // { name: "Returned", status: "returned", permission: "ap_tag" },
+  // { name: "Approved", status: "approved", permission: "ap_tag" },
+  // { name: "Void", status: "voided", permission: "ap_tag" },
 ];
 
 const apHistoryHeader = [
@@ -32,7 +32,6 @@ const approverHeader = [
   { name: "Returned", status: "returned", permission: "approver" },
   { name: "Void", status: "voided", permission: "approver" },
   { name: "Pending Void", status: "For Voiding", permission: "approver" },
-  { name: "History", status: "", permission: "approver" },
 ];
 
 const approverGJHeader = [
@@ -44,11 +43,11 @@ const approverGJHeader = [
 
 const treasuryHeader = [
   { name: "Preparation", status: "For Preparation", permission: "preparation" },
-  // {
-  //   name: "For Approval",
-  //   status: "Check Approval",
-  //   permission: ["releasing", "check_approval"],
-  // },
+  {
+    name: "For Approval",
+    status: "Check Approval",
+    permission: ["releasing", "check_approval"],
+  },
   { name: "For Releasing", status: "For Releasing", permission: "releasing" },
   { name: "Clearing", status: "Released", permission: "clearing" },
 ];
@@ -89,7 +88,7 @@ const approverScheduleHeader = [
   { name: "History", status: "" },
 ];
 
-const columnTotal = ["M", "N", "O", "Q", "R"];
+const columnTotal = ["M", "N", "O", "P", "R", "S"];
 const titleFirstHeader = [
   "",
   "expanded",
@@ -165,6 +164,10 @@ const titleHeader = [
   {
     min: 20,
     name: "EXPANDED W/TAX",
+  },
+  {
+    min: 20,
+    name: "INPUT TAX",
   },
   {
     min: 20,

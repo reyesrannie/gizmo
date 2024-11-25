@@ -1,14 +1,14 @@
 import React from "react";
+
+import { useSelector } from "react-redux";
+import { hasAccess } from "./access";
 import {
   useCheckCountQuery,
   useCountScheduleQuery,
-  useJournalCountQuery,
+  useGjCountQuery,
   useTransactCountQuery,
   useTreasuryCountQuery,
-} from "../store/request";
-import { useSelector } from "react-redux";
-import { hasAccess } from "./access";
-import { useGjCountQuery } from "../store/seconAPIRequest";
+} from "../api/countApi";
 
 const CountDistribute = () => {
   const userData = useSelector((state) => state.auth.userData);
@@ -24,7 +24,6 @@ const CountDistribute = () => {
 
   const { data: badgeTagging } = useTransactCountQuery({ ap: apCodes });
   const { data: badgeCheck } = useCheckCountQuery(queryParams);
-  const { data: badgeJournal } = useJournalCountQuery(queryParams);
   const { data: scheduleTransaction } = useCountScheduleQuery(queryParams);
   const { data: badgeGj } = useGjCountQuery(queryParams);
   const { data: treasuryCount } = useTreasuryCountQuery();
@@ -37,7 +36,6 @@ const CountDistribute = () => {
     "Voucher's Payable": badgeCheck?.result,
     "General Journal": badgeGj?.result,
     "Voucher Approval": badgeCheck?.result,
-    "Journal Approval": badgeJournal?.result,
     "AP Schedule": scheduleTransaction?.result,
     "Approve Schedule": scheduleTransaction?.result,
     "Check Voucher": treasuryCount?.result,
@@ -77,22 +75,13 @@ const CountDistribute = () => {
           ])
         );
       case "Approver":
-        return (
-          sumResult(badgeCheck?.result, [
-            "For Approval",
-            "For Voiding",
-            "returned",
-            "For Voiding",
-            "voided",
-          ]) +
-          sumResult(badgeJournal?.result, [
-            "For Approval",
-            "For Voiding",
-            "returned",
-            "For Voiding",
-            "voided",
-          ])
-        );
+        return sumResult(badgeCheck?.result, [
+          "For Approval",
+          "For Voiding",
+          "returned",
+          "For Voiding",
+          "voided",
+        ]);
       case "Scheduled":
         return sumResult(scheduleTransaction?.result, [
           "For Computation",
@@ -140,13 +129,6 @@ const CountDistribute = () => {
         );
       case "Voucher Approval":
         return sumResult(badgeCheck?.result, [
-          "For Approval",
-          "For Voiding",
-          "returned",
-          "voided",
-        ]);
-      case "Journal Approval":
-        return sumResult(badgeJournal?.result, [
           "For Approval",
           "For Voiding",
           "returned",

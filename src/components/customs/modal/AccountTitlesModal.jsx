@@ -20,14 +20,19 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useDispatch, useSelector } from "react-redux";
 import { resetMenu } from "../../../services/slice/menuSlice";
+
+import { useSnackbar } from "notistack";
+import { objectError } from "../../../services/functions/errorResponse";
+import accountTitlesSchema from "../../../schemas/accountTitlesSchema";
+import Autocomplete from "../AutoComplete";
 import {
-  useCTitlesQuery,
   useCreateAccountTitlesMutation,
   useCreatecTitlesMutation,
   useCreategcTitlesMutation,
   useCreateggpTitlesMutation,
   useCreategpTitlesMutation,
   useCreatepTitlesMutation,
+  useCTitlesQuery,
   useGcTitlesQuery,
   useGgpTitlesQuery,
   useGpTitlesQuery,
@@ -38,11 +43,7 @@ import {
   useUpdateggpTitlesMutation,
   useUpdategpTitlesMutation,
   useUpdatepTitlesMutation,
-} from "../../../services/store/request";
-import { useSnackbar } from "notistack";
-import { objectError } from "../../../services/functions/errorResponse";
-import accountTitlesSchema from "../../../schemas/accountTitlesSchema";
-import Autocomplete from "../AutoComplete";
+} from "../../../services/api/coaApi";
 
 const AccountTitlesModal = ({ accountTitlesData, view, update, create }) => {
   const dispatch = useDispatch();

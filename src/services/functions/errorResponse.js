@@ -9,7 +9,7 @@ const errorResponses = () => {
       });
       setToast(error?.data?.message, { variant: "error" });
     } else if (error.status === "FETCH_ERROR") {
-      setToast("Connection failed please check your internet", {
+      setToast("Unable to connect to the server. Please try again.", {
         variant: "error",
       });
     } else {
@@ -21,7 +21,7 @@ const errorResponses = () => {
     if (error?.status === 422) {
       setToast(error?.data?.message, { variant: "error" });
     } else if (error?.status === "FETCH_ERROR") {
-      setToast("Connection failed please check your internet", {
+      setToast("Unable to connect to the server. Please try again.", {
         variant: "error",
       });
     } else {

@@ -36,9 +36,9 @@ import {
 } from "../../services/slice/menuSlice";
 
 import TransactionModal from "../../components/customs/modal/TransactionModal";
-import { useDocumentTypeQuery } from "../../services/store/request";
 import { AdditionalFunction } from "../../services/functions/AdditionalFunction";
 import dayjs from "dayjs";
+import { useDocumentTypeQuery } from "../../services/api/documentTypeApi";
 
 const TaggingTable = ({
   params,

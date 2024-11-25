@@ -28,9 +28,9 @@ import {
 } from "../../services/slice/transactionSlice";
 import { setHeader } from "../../services/slice/headerSlice";
 import { resetMenu, setCreateMenu } from "../../services/slice/menuSlice";
-import { useGeneralJournalQuery } from "../../services/store/seconAPIRequest";
 import GeneralJournalModal from "../../components/customs/modal/GeneralJournalModal";
 import useApproverHook from "../../services/hooks/useApproverHook";
+import { useGeneralJournalQuery } from "../../services/api/generalJournalApi";
 
 const ApproverGJ = () => {
   const dispatch = useDispatch();

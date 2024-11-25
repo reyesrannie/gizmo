@@ -13,12 +13,13 @@ import { LoadingButton } from "@mui/lab";
 import { useDispatch } from "react-redux";
 import { useSnackbar } from "notistack";
 import { resetMenu } from "../../../services/slice/menuSlice";
+
+import Lottie from "lottie-react";
+import { objectError } from "../../../services/functions/errorResponse";
 import {
   useCreateLocationMutation,
   useUpdateLocationMutation,
-} from "../../../services/store/request";
-import Lottie from "lottie-react";
-import { objectError } from "../../../services/functions/errorResponse";
+} from "../../../services/api/locationApi";
 
 const LocationModal = ({ locationData, view, update }) => {
   const dispatch = useDispatch();

@@ -56,6 +56,7 @@ function AppTextBox({
         const { ref, value, onChange } = field;
         const handleChange = (e) => {
           const formattedValue = formatValue(e.target.value);
+
           onChange(formattedValue);
         };
         const handleEditAuto = (e) => {
@@ -100,7 +101,7 @@ function AppTextBox({
                 helperText={helperText}
                 isAllowed={(values) => {
                   const { floatValue } = values;
-                  return floatValue >= 0;
+                  return floatValue >= 0 || floatValue === undefined; // Allow clearing the value
                 }}
               />
             ) : (

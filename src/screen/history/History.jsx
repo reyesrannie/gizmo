@@ -6,7 +6,6 @@ import SearchText from "../../components/customs/SearchText";
 import { Box, Dialog, Typography } from "@mui/material";
 
 import { useDispatch, useSelector } from "react-redux";
-import { useLazyCheckEntriesQuery } from "../../services/store/request";
 
 import "../../components/styles/TagTransaction.scss";
 
@@ -17,6 +16,7 @@ import Voucher from "./Voucher";
 import { HistoryContext } from "../../services/context/HistoryContext";
 import useApHistoryHook from "../../services/hooks/useApHistoryHook";
 import TransactionModal from "../../components/customs/modal/TransactionModal";
+import { useLazyCheckEntriesQuery } from "../../services/api/vouchersPayableApi";
 
 const History = () => {
   const dispatch = useDispatch();

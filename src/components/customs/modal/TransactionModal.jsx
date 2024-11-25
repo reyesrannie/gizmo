@@ -19,20 +19,6 @@ import {
   setMenuData,
   setUpdateCount,
 } from "../../../services/slice/menuSlice";
-import {
-  useAccountNumberQuery,
-  useApQuery,
-  useArchiveTransactionMutation,
-  useCheckTransactionQuery,
-  useCreateCheckEntriesMutation,
-  useCreateTransactionMutation,
-  useCutOffQuery,
-  useDocumentTypeQuery,
-  useLocationQuery,
-  useReceiveTransactionMutation,
-  useSupplierQuery,
-  useUpdateTransactionMutation,
-} from "../../../services/store/request";
 import { useSnackbar } from "notistack";
 import { singleError } from "../../../services/functions/errorResponse";
 import { DatePicker } from "@mui/x-date-pickers";
@@ -93,6 +79,22 @@ import DateChecker from "../../../services/functions/DateChecker";
 import { resetHeader } from "../../../services/slice/headerSlice";
 import { hasAccess, isAp } from "../../../services/functions/access";
 import moment from "moment";
+import { useLocationQuery } from "../../../services/api/locationApi";
+import { useApQuery } from "../../../services/api/apApi";
+import { useSupplierQuery } from "../../../services/api/supplierApi";
+import { useDocumentTypeQuery } from "../../../services/api/documentTypeApi";
+import { useAccountNumberQuery } from "../../../services/api/accountNumberApi";
+import {
+  useArchiveTransactionMutation,
+  useCreateTransactionMutation,
+  useReceiveTransactionMutation,
+  useUpdateTransactionMutation,
+} from "../../../services/api/transactionApi";
+import {
+  useCheckTransactionQuery,
+  useCreateCheckEntriesMutation,
+} from "../../../services/api/vouchersPayableApi";
+import { useCutOffQuery } from "../../../services/api/cutOffApi";
 
 const TransactionModal = () => {
   const dispatch = useDispatch();
@@ -432,28 +434,6 @@ const TransactionModal = () => {
     }
   };
 
-  const handleReceive = async () => {
-    const obj = {
-      tag_no: transactionData?.tag_no,
-      id: transactionData?.id,
-    };
-
-    try {
-      const res = await receiveTransaction(obj).unwrap();
-      enqueueSnackbar(res?.message, { variant: "success" });
-      dispatch(setIsContinue(true));
-    } catch (error) {
-      singleError(error, enqueueSnackbar);
-    }
-  };
-
-  const validateRoute = () => {
-    const isZero =
-      parseFloat(transactionData?.purchase_amount) ===
-      parseFloat(checkTransaction?.result?.amount || 0);
-    isZero ? handleReceive() : handleCreateCheck();
-  };
-
   const handleShortCut = () => {
     handleSubmit(submitHandler)();
   };
@@ -494,7 +474,8 @@ const TransactionModal = () => {
 
     try {
       const res = await createCheckEntry(obj).unwrap();
-      handleReceive();
+      enqueueSnackbar(res?.message, { variant: "success" });
+      dispatch(setIsContinue(true));
     } catch (error) {
       singleError(error, enqueueSnackbar);
     }
@@ -915,7 +896,7 @@ const TransactionModal = () => {
             <MuiTextField
               name="ap_tagging"
               {...params}
-              label="AP *"
+              label="Charging department *"
               size="small"
               variant="outlined"
               error={Boolean(errors.ap)}
@@ -937,6 +918,7 @@ const TransactionModal = () => {
                 value={value}
                 views={["month", "year"]}
                 minDate={minDate}
+                maxDate={dayjs().add(1, "month")}
                 onChange={(e) => {
                   onChange(e);
                 }}
@@ -1049,7 +1031,7 @@ const TransactionModal = () => {
           cancelOnClick={() => {
             dispatch(resetPrompt());
           }}
-          confirmOnClick={() => validateRoute()}
+          confirmOnClick={() => handleCreateCheck()}
         />
       </Dialog>
 

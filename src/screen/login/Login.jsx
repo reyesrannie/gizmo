@@ -10,7 +10,6 @@ import Lottie from "lottie-react";
 import loading from "../../assets/lottie/Loading.json";
 
 import { Box, Dialog, Stack, Typography } from "@mui/material";
-import { useLoginMutation } from "../../services/store/request";
 import { useSnackbar } from "notistack";
 import { objectError } from "../../services/functions/errorResponse";
 import { useForm } from "react-hook-form";
@@ -24,6 +23,7 @@ import {
 import { loginUser } from "../../services/functions/loginServices";
 import { useNavigate } from "react-router-dom";
 import ChangePassword from "../../components/customs/modal/ChangePassword";
+import { useLoginMutation } from "../../services/api/authApi";
 
 const Login = () => {
   const { enqueueSnackbar } = useSnackbar();

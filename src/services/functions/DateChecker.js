@@ -1,14 +1,12 @@
 import moment from "moment";
-import {
-  useCutOffQuery,
-  useGenerateTransactionMutation,
-} from "../store/request";
 import { useSnackbar } from "notistack";
 import { useSelector } from "react-redux";
 import { hasAccess } from "./access";
 import { singleError } from "./errorResponse";
 import { useMemo } from "react";
 import dayjs from "dayjs";
+import { useGenerateTransactionMutation } from "../api/scheduledTransactionApi";
+import { useCutOffLogsQuery } from "../api/logsApi";
 
 const DateChecker = () => {
   const { enqueueSnackbar } = useSnackbar();
@@ -17,7 +15,7 @@ const DateChecker = () => {
     data: cutOff,
     isLoading: loadingCutOff,
     isSuccess: cutOffSuccess,
-  } = useCutOffQuery({
+  } = useCutOffLogsQuery({
     status: "active",
     pagination: "none",
   });

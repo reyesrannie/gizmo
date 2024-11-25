@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import {
   Box,
@@ -9,127 +9,103 @@ import {
   Typography,
   TextField as MuiTextField,
   IconButton,
-  FormControl,
-  FormControlLabel,
-  RadioGroup,
-  Radio,
+  Stack,
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, set, useFieldArray, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useDispatch, useSelector } from "react-redux";
 import {
   resetMenu,
   setHasError,
-  setUpdateCount,
+  setMenuData,
 } from "../../../services/slice/menuSlice";
-import {
-  useAccountNumberQuery,
-  useApQuery,
-  useCutOffQuery,
-  useDocumentTypeQuery,
-  useLocationQuery,
-  useSupplierQuery,
-} from "../../../services/store/request";
 import { useSnackbar } from "notistack";
-import { DatePicker } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import {
-  resetPrompt,
-  setOpenReason,
-  setReceive,
-} from "../../../services/slice/promptSlice";
-import { mapViewTransactionGJ } from "../../../services/functions/mapObject";
+import { MobileDatePicker } from "@mui/x-date-pickers";
 
 import "../../styles/TransactionModal.scss";
 import "../../styles/UserModal.scss";
 import "../../styles/RolesModal.scss";
 import "../../styles/Modal.scss";
+import "../../styles/TagTransaction.scss";
 
 import transaction from "../../../assets/svg/transaction.svg";
 import AppTextBox from "../AppTextBox";
 import loading from "../../../assets/lottie/Loading-2.json";
 import Autocomplete from "../AutoComplete";
-import TransactionDrawer from "../TransactionDrawer";
 import noData from "../../../assets/lottie/NoData.json";
 
 import dayjs from "dayjs";
 import Lottie from "lottie-react";
-import ClearIcon from "@mui/icons-material/Clear";
-import AddIcon from "@mui/icons-material/Add";
+import DoNotDisturbOnOutlinedIcon from "@mui/icons-material/DoNotDisturbOnOutlined";
 
-import ReasonInput from "../ReasonInput";
-import {
-  clearValue,
-  transactionDefaultValue,
-} from "../../../services/constants/defaultValues";
-import ShortcutHandler from "../../../services/functions/ShortcutHandler";
-
-import {
-  resetTransaction,
-  setAddDocuments,
-  setDocuments,
-} from "../../../services/slice/transactionSlice";
+import { resetTransaction } from "../../../services/slice/transactionSlice";
 import { AdditionalFunction } from "../../../services/functions/AdditionalFunction";
-import { convertToArray } from "../../../services/functions/toArrayFn";
 import DateChecker from "../../../services/functions/DateChecker";
 import { hasAccess, isAp } from "../../../services/functions/access";
 import generalJournalSchema from "../../../schemas/generalJournalSchema";
-import TagNumberText from "../TagNumberText";
+import { objectError } from "../../../services/functions/errorResponse";
+import moment from "moment";
+import { useLocationQuery } from "../../../services/api/locationApi";
+import { useApQuery } from "../../../services/api/apApi";
+import { useSupplierQuery } from "../../../services/api/supplierApi";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import ReasonInput from "../ReasonInput";
+import { resetPrompt, setReturn } from "../../../services/slice/promptSlice";
+import { useAccountTitlesQuery } from "../../../services/api/coaApi";
 import {
+  useArchiveGJItemMutation,
+  useArchiveGJMutation,
   useCreateGJMutation,
   useLazySearchTagQuery,
-} from "../../../services/store/seconAPIRequest";
-import { singleError } from "../../../services/functions/errorResponse";
-import moment from "moment";
+  usePostGJMutation,
+  useUpdateGjMutation,
+} from "../../../services/api/generalJournalApi";
 
 const GeneralJournalModal = () => {
   const dispatch = useDispatch();
-  const [oldValues, setOldValues] = useState(null);
-  const openReason = useSelector((state) => state.prompt.openReason);
   const hasError = useSelector((state) => state.menu.hasError);
-  const updateCount = useSelector((state) => state.menu.updateCount);
-  const transactionData = useSelector((state) => state.menu.menuData);
-  const documents = useSelector((state) => state.transaction.documents);
+  const menuData = useSelector((state) => state.menu.menuData);
+  const isReturn = useSelector((state) => state.prompt.return);
 
-  const forViewing =
-    transactionData?.gas_status !== "pending" &&
-    transactionData?.gas_status !== "archived" &&
-    transactionData?.gas_status !== "returned" &&
-    transactionData !== null;
+  const debounceTimer = useRef(null);
 
-  const defaultValue = transactionDefaultValue();
   const { enqueueSnackbar } = useSnackbar();
   const { insertDocument, deepEqual } = AdditionalFunction();
   const { minDate } = DateChecker();
 
-  const { data: tin, isLoading: loadingTIN } = useSupplierQuery({
+  const {
+    data: tin,
+    isLoading: loadingTIN,
+    isSuccess: successTin,
+  } = useSupplierQuery({
     status: "active",
     pagination: "none",
   });
 
-  const { data: document, isLoading: loadingDocument } = useDocumentTypeQuery({
+  const {
+    data: coa,
+    isLoading: loadingCoa,
+    isSuccess: coaSuccess,
+  } = useAccountTitlesQuery({
     status: "active",
     pagination: "none",
   });
 
-  const { data: ap, isLoading: loadingAp } = useApQuery({
+  const {
+    data: ap,
+    isLoading: loadingAp,
+    isSuccess: successAP,
+  } = useApQuery({
     status: "active",
     pagination: "none",
   });
 
-  const { data: accountNumber, isLoading: loadingAccountNumber } =
-    useAccountNumberQuery({
-      status: "active",
-      pagination: "none",
-    });
-
-  const { data: location, isLoading: loadingLocation } = useLocationQuery({
-    status: "active",
-    pagination: "none",
-  });
-
-  const { data: cutOff } = useCutOffQuery({
+  const {
+    data: location,
+    isLoading: loadingLocation,
+    isSuccess: successLoc,
+  } = useLocationQuery({
     status: "active",
     pagination: "none",
   });
@@ -145,616 +121,299 @@ const GeneralJournalModal = () => {
   ] = useLazySearchTagQuery();
 
   const [createGJ, { isLoading: loadingCreate }] = useCreateGJMutation();
+  const [updateGj, { isLoading: loadingUpdate }] = useUpdateGjMutation();
+  const [postGj, { isLoading: loadingPost }] = usePostGJMutation();
+  const [archiveGj, { isLoading: loadingArchiveGj }] = useArchiveGJMutation();
+  const [archiveGjItem, { isLoading: loadingArchiveGjItem }] =
+    useArchiveGJItemMutation();
 
   const {
     control,
     handleSubmit,
     setValue,
     watch,
+    setError,
     clearErrors,
     formState: { errors },
     getValues,
   } = useForm({
     resolver: yupResolver(generalJournalSchema),
-    defaultValues: defaultValue,
+    defaultValues: {
+      gj_name: "",
+      gj_description: "",
+      ap_tagging_id: null,
+      boa: "",
+      tag_year: null,
+      debit: 0,
+      credit: 0,
+      variance: 0,
+
+      gj_items: [
+        {
+          item_id: "",
+          id: Date.now(),
+          coa_id: null,
+          debit_amount: 0,
+          credit_amount: 0,
+          tag_no: "",
+          invoice_no: "",
+          voucher_no: "",
+          supplier_id: null,
+          location_id: null,
+        },
+      ],
+    },
   });
 
-  const handleClear = (e) => {
-    clearErrors();
-    const defaultValue = clearValue();
-
-    Object.entries(defaultValue).forEach(([key, value]) => {
-      setValue(key, value);
-    });
-
-    if (!e) {
-      handleAutoFill();
-    } else {
-      setValue("tin", null);
-    }
-  };
-
-  const isLastMonthClosed = () => {
-    const lastMonthDate = dayjs().subtract(1, "month");
-    const lastMonthFormatted = lastMonthDate.format("YYYY-MM");
-
-    return cutOff?.result?.some(
-      (item) =>
-        item?.state === "closed" &&
-        dayjs(item?.date, "YYYY-MM-DD").format("YYYY-MM") === lastMonthFormatted
-    );
-  };
-
-  const handleAutoFill = () => {
-    const lastMonthClose = isLastMonthClosed();
-    const monthAgo = dayjs(new Date()).subtract(5, "day");
-    const items = {
-      supplier: watch("tin")?.company_name || "",
-      proprietor: watch("tin")?.proprietor || "",
-      company_address: watch("tin")?.company_address || "",
-      name_in_receipt: watch("tin")?.receipt_name || "",
-      supplier_type_id: watch("tin")?.supplier_types[0]?.type_id || "",
-      atc_id: watch("tin")?.supplier_atcs[0]?.atc_id || "",
-      document_type:
-        document?.result?.find(
-          (item) =>
-            item.code === watch("tin")?.supplier_documenttypes[0]?.document_code
-        ) || null,
-      account_number: accountNumber?.result?.find(
-        (item) => watch("tin")?.id === item?.supplier?.id || null
-      ),
-      tag_month_year: lastMonthClose
-        ? dayjs(new Date(), { locale: AdapterDayjs.locale })
-        : dayjs(monthAgo, { locale: AdapterDayjs.locale }),
-    };
-
-    Object.entries(items).forEach(([key, value]) => {
-      setValue(key, value);
-    });
-
-    setValue(
-      "store",
-      location?.result?.find(
-        (item) => watch("account_number")?.location?.id === item?.id || null
-      )
-    );
-  };
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "gj_items",
+  });
 
   useEffect(() => {
+    if (menuData && successAP && successTin && successLoc && coaSuccess) {
+      const tagMonthYear = dayjs(menuData?.tag_year, "YYMM").isValid()
+        ? dayjs(menuData?.tag_year, "YYMM").toDate()
+        : null;
+
+      const obj = {
+        ...menuData,
+        ap_tagging_id: ap?.result?.find(
+          (item) => menuData?.apTagging?.id === item?.id
+        ),
+        tag_year:
+          dayjs(new Date(tagMonthYear), {
+            locale: AdapterDayjs.locale,
+          }) || null,
+        gj_items: menuData?.gj_items?.map((item) => ({
+          item_id: item?.id,
+          id: item?.id,
+          coa_id: coa?.result?.find((coa) =>
+            item?.credit_amount !== 0
+              ? item?.credit_coa?.id === coa?.id
+              : item?.debit_coa?.id === coa?.id
+          ),
+          debit_amount: item?.debit_amount,
+          credit_amount: item?.credit_amount,
+          tag_no: item?.tag_no,
+          invoice_no: item?.invoice_no,
+          voucher_no: item?.voucher_no,
+          supplier_id: tin?.result?.find(
+            (sup) => item?.supplier?.id === sup?.id
+          ),
+          location_id: location?.result?.find(
+            (loc) => item?.location?.id === loc?.id
+          ),
+        })),
+      };
+
+      Object.entries(obj).forEach(([name, value]) => {
+        setValue(name, value);
+      });
+
+      computeTotal();
+    }
+
     if (errorSearch) {
       dispatch(setHasError(true));
     }
-  }, [errorSearch]);
-
-  useEffect(() => {
-    if (transactionData?.reference_no !== "") {
-      const docs = insertDocument(transactionData);
-      const toArrayItems = convertToArray(docs);
-      const addToDocs =
-        document?.result?.filter((item) =>
-          toArrayItems?.some((doc) => item?.code === doc?.code)
-        ) || [];
-
-      dispatch(setDocuments(addToDocs));
-    }
-  }, [transactionData, insertDocument, document, dispatch, setAddDocuments]);
+  }, [errorSearch, menuData, successAP, successTin, successLoc, coaSuccess]);
 
   useEffect(() => {
     if (successSearch) {
-      const tagMonthYear = dayjs(
-        searchedData?.result?.tag_year,
-        "YYMM"
-      ).toDate();
+      const { transactions, voucher_number } = searchedData?.result;
 
-      const docs = insertDocument(transactionData);
-      const mapData = mapViewTransactionGJ(
-        searchedData?.result?.transactions,
-        ap,
-        tin,
-        document,
-        accountNumber,
-        location,
-        docs
-      );
-
-      const values = {
-        ...mapData,
+      const obj = {
+        tag_no: transactions.tag_no,
+        invoice_no: transactions?.invoice_no,
+        voucher_no: voucher_number,
+        supplier_id: tin?.result?.find(
+          (item) => transactions?.supplier?.id === item?.id
+        ),
+        location_id: location?.result?.find(
+          (item) => transactions?.transactionTaxes[0]?.location?.id === item?.id
+        ),
       };
 
-      Object.entries(values).forEach(([key, value]) => {
-        setValue(key, value);
+      fields?.map((item, index) => {
+        Object.entries(obj).forEach(([key, value]) => {
+          setValue(`gj_items.${index}.${key}`, value);
+        });
       });
-      setOldValues(values);
+
+      clearErrors();
     }
-  }, [successSearch, searchedData]);
+  }, [successSearch, fields]);
 
-  const checkField = (field) => {
-    return watch("document_type")?.required_fields?.includes(field);
-  };
-
-  const submitHandler = () => {
-    dispatch(setOpenReason(true));
-  };
-
-  const submitHandlerReason = async (submitData) => {
+  const submitHandler = async (submitData) => {
     const obj = {
-      check_id: searchedData?.result?.id,
-      amount: watch("amount"),
-      type: watch("type"),
-      reason: submitData?.reason,
-      category: submitData?.category,
-      tag_year: moment(new Date(watch("tag_month_year"))).format("YYMM"),
+      ...submitData,
+      id: menuData ? menuData?.id : "",
+      ap_tagging_id: submitData?.ap_tagging_id?.id,
+      tag_year: moment(new Date(submitData?.tag_year)).format("YYMM"),
+      gj_items: submitData?.gj_items?.map((items) => ({
+        ...items,
+        debit_coa_id: items?.debit_amount !== 0 ? items?.coa_id?.id : "",
+        credit_coa_id: items?.credit_amount !== 0 ? items?.coa_id?.id : "",
+        supplier_id: items?.supplier_id?.id,
+        location_id: items?.location_id?.id,
+        item_id: menuData ? items?.id : "",
+      })),
+    };
+
+    try {
+      const res = menuData
+        ? await updateGj(obj).unwrap()
+        : await createGJ(obj).unwrap();
+      enqueueSnackbar(res?.message, { variant: "success" });
+      dispatch(resetMenu());
+    } catch (error) {
+      objectError(error, setError, enqueueSnackbar);
+    }
+  };
+
+  const handlePostGj = async () => {
+    const submitData = getValues();
+    const obj = {
+      ...submitData,
+      id: menuData ? menuData?.id : "",
+      ap_tagging_id: submitData?.ap_tagging_id?.id,
+      tag_year: moment(new Date(submitData?.tag_year)).format("YYMM"),
+      gj_items: submitData?.gj_items?.map((items) => ({
+        ...items,
+        debit_coa_id: items?.debit_amount !== 0 ? items?.coa_id?.id : "",
+        credit_coa_id: items?.credit_amount !== 0 ? items?.coa_id?.id : "",
+        supplier_id: items?.supplier_id?.id,
+        location_id: items?.location_id?.id,
+        item_id: menuData ? items?.id : "",
+      })),
+    };
+
+    try {
+      const res = await postGj(obj).unwrap();
+      enqueueSnackbar(res?.message, { variant: "success" });
+      dispatch(resetMenu());
+    } catch (error) {
+      objectError(error, setError, enqueueSnackbar);
+    }
+  };
+
+  const handelArchiveGj = async (e) => {
+    const obj = {
+      reason: e?.reason,
+      id: menuData?.id,
     };
     try {
-      const res = await createGJ(obj).unwrap();
+      const res = await archiveGj(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
       dispatch(resetMenu());
       dispatch(resetPrompt());
     } catch (error) {
-      singleError(error, enqueueSnackbar);
+      objectError(error, setError, enqueueSnackbar);
     }
   };
 
-  const handleShortCut = () => {
-    handleSubmit(submitHandler)();
+  const searchHandler = (data) => {
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
+
+    debounceTimer.current = setTimeout(async () => {
+      const obj = {
+        tag: data?.target?.value,
+      };
+
+      try {
+        const res = await triggerSearchTag(obj).unwrap();
+      } catch (error) {}
+    }, 500);
   };
 
-  const handleRemove = (item) => {
-    const docs = documents?.filter((doc) => doc?.code !== item?.code);
-    setValue(item?.code, "");
-    dispatch(setDocuments(docs));
+  const computeTotal = () => {
+    const items = watch("gj_items") || [];
+
+    const totalDebit = items.reduce((acc, curr) => {
+      return acc + parseFloat(curr?.debit_amount || 0);
+    }, 0);
+
+    const totalCredit = items.reduce((acc, curr) => {
+      return acc + parseFloat(curr?.credit_amount || 0);
+    }, 0);
+
+    const variance = Math.abs(totalDebit - totalCredit);
+
+    variance !== 0 &&
+      setError("variance", {
+        message: "Variance should be 0",
+        type: "validate",
+      });
+
+    const obj = {
+      debit: totalDebit,
+      credit: totalCredit,
+      variance: Math.abs(totalDebit - totalCredit),
+    };
+
+    Object.entries(obj).forEach(([name, value]) => {
+      setValue(name, value);
+    });
   };
 
-  const checkChanges = () => {
-    const currentValues = getValues();
-    const propertiesToCheck = [
-      "tin",
-      "invoice_no",
-      "documentType",
-      "date_invoice",
-      "amount",
-      "description",
-      "ap",
-    ];
-
-    const hasChanges = !propertiesToCheck.every((prop) =>
-      deepEqual(currentValues?.[prop], oldValues?.[prop])
-    );
-
-    return hasChanges;
+  const handleRemoveItem = async (data) => {
+    const obj = {
+      id: data?.item_id,
+    };
+    try {
+      const res = await archiveGjItem(obj).unwrap();
+      dispatch(
+        setMenuData({
+          ...menuData,
+          gj_items: menuData?.gj_items?.filter((item) => obj?.id !== item?.id),
+        })
+      );
+      remove(data?.id);
+    } catch (error) {}
   };
+
+  const boa = ["Adjustment", "Accrual"];
 
   return (
-    <Paper className="transaction-modal-container">
-      <ShortcutHandler
-        onUpdate={() =>
-          updateCount === 1 ? dispatch(setUpdateCount(1)) : handleShortCut()
-        }
-        onEsc={() => dispatch(resetMenu())}
-        onReceive={() => dispatch(setReceive(!checkChanges()))}
-      />
-      <img
-        src={transaction}
-        alt="transaction"
-        className="transaction-image"
-        draggable="false"
-      />
-
-      <Typography className="transaction-text">Add Transaction</Typography>
-      <Divider orientation="horizontal" className="transaction-devider" />
-
-      <Box className="form-title-transaction">
-        <Typography className="form-title-text-transaction">
-          Journal Type
-        </Typography>
-      </Box>
-
-      <Box className="form-title-transaction">
-        <FormControl className="form-control-radio general">
-          <Controller
-            name="type"
-            control={control}
-            defaultValue=""
-            render={({ field }) => (
-              <RadioGroup {...field}>
-                <FormControlLabel
-                  value="Adjustment"
-                  control={<Radio color="secondary" size="small" />}
-                  label="Adjustment"
-                />
-                <FormControlLabel
-                  value="Reversal"
-                  control={<Radio color="secondary" size="small" />}
-                  label="Reversal"
-                />
-              </RadioGroup>
-            )}
-          />
-        </FormControl>
-      </Box>
-
-      <Divider orientation="horizontal" className="transaction-devider" />
-      <Box className="form-title-transaction">
-        <Typography className="form-title-text-transaction">
-          Search Tag Number
-        </Typography>
-      </Box>
-
-      <Box className="form-title-transaction">
-        <TagNumberText
-          control={control}
-          name={"tagNumber"}
-          className="transaction-form-textBox"
-          searchTag={triggerSearchTag}
+    <Paper className="transaction-modal-container gj">
+      <Box className="gj-title-container">
+        <img
+          src={transaction}
+          alt="transaction"
+          className="transaction-image"
+          draggable="false"
         />
+
+        <Typography className="transaction-text">Adjusting Entry</Typography>
       </Box>
+      <Divider orientation="horizontal" className="transaction-devider" />
       <form
         className="form-container-transaction"
         onSubmit={handleSubmit(submitHandler)}
       >
-        <Divider orientation="horizontal" className="transaction-devider" />
         <Box className="form-title-transaction">
           <Typography className="form-title-text-transaction">
-            Supplier Details
+            Journal Details
           </Typography>
         </Box>
-
         <AppTextBox
-          disabled
+          disabled={menuData?.state === "Posted"}
           control={control}
-          name={"tag_no"}
-          label={"Tag Number *"}
+          name={"gj_name"}
+          label={"Journal *"}
           color="primary"
           className="transaction-form-textBox"
-          error={Boolean(errors?.tag_no)}
-          helperText={errors?.tag_no?.message}
+          error={Boolean(errors?.gj_name)}
+          helperText={errors?.gj_name?.message}
         />
+
         <Autocomplete
+          disabled={menuData?.state === "Posted"}
           control={control}
-          name={"tin"}
-          options={tin?.result || []}
-          getOptionLabel={(option) => `${option.tin} - ${option?.company_name}`}
-          isOptionEqualToValue={(option, value) => option?.id === value?.id}
-          onClose={() => {
-            handleClear(false);
-          }}
-          renderInput={(params) => (
-            <MuiTextField
-              name="tin"
-              {...params}
-              label="TIN *"
-              size="small"
-              variant="outlined"
-              error={Boolean(errors.tin)}
-              helperText={errors.tin?.message}
-              className="transaction-form-textBox"
-              InputProps={{
-                ...params.InputProps,
-                endAdornment: (
-                  <>
-                    {params.InputProps.endAdornment}
-                    {watch("tin") && (
-                      <IconButton
-                        onClick={() => {
-                          handleClear(true);
-                        }}
-                        className="icon-clear-user"
-                      >
-                        <ClearIcon />
-                      </IconButton>
-                    )}
-                  </>
-                ),
-              }}
-            />
-          )}
-          disableClearable
-        />
-        <AppTextBox
-          disabled
-          control={control}
-          name={"supplier"}
-          label={"Supplier *"}
-          color="primary"
-          className="transaction-form-textBox"
-          error={Boolean(errors?.supplier)}
-          helperText={errors?.supplier?.message}
-        />
-        <AppTextBox
-          disabled
-          control={control}
-          name={"proprietor"}
-          label={"Proprietor"}
-          color="primary"
-          className="transaction-form-textBox"
-          error={Boolean(errors?.proprietor)}
-          helperText={errors?.proprietor?.message}
-        />
-        <AppTextBox
-          disabled
-          multiline
-          minRows={1}
-          control={control}
-          name={"company_address"}
-          className="transaction-form-field-textBox "
-          label="Address"
-          error={Boolean(errors.company_address)}
-          helperText={errors.company_address?.message}
-        />
-        <Box className="form-title-transaction">
-          <Divider orientation="horizontal" className="transaction-devider" />
-
-          <Typography className="form-title-text-transaction">
-            Receipt Details
-          </Typography>
-
-          <Button
-            endIcon={<AddIcon />}
-            color="secondary"
-            variant="contained"
-            size="small"
-            className="add-tax-document"
-            onClick={() => dispatch(setAddDocuments(true))}
-          >
-            Add Document
-          </Button>
-        </Box>
-        {watch("tin") && (
-          <Autocomplete
-            control={control}
-            name={"document_type"}
-            options={document?.result || []}
-            getOptionLabel={(option) => `${option.name}`}
-            isOptionEqualToValue={(option, value) =>
-              option?.code === value?.code
-            }
-            renderInput={(params) => (
-              <MuiTextField
-                name="document_type"
-                {...params}
-                label="Document type *"
-                size="small"
-                variant="outlined"
-                error={Boolean(errors.document_type)}
-                helperText={errors.document_type?.message}
-                className="transaction-form-textBox"
-              />
-            )}
-          />
-        )}
-        <Controller
-          name="date_invoice"
-          control={control}
-          render={({ field: { onChange, value, ...restField } }) => (
-            <Box className="date-picker-container-transaction">
-              <DatePicker
-                className="transaction-form-date"
-                label="Date Invoice *"
-                format="MMMM DD, YYYY"
-                value={value}
-                onChange={(e) => {
-                  onChange(e);
-                }}
-              />
-              {errors.date_invoice && (
-                <Typography variant="caption" color="error">
-                  {errors.date_invoice?.message}
-                </Typography>
-              )}
-            </Box>
-          )}
-        />
-        {false && (
-          <AppTextBox
-            control={control}
-            name={"name_in_receipt"}
-            label={"Name in receipt *"}
-            color="primary"
-            className="transaction-form-textBox"
-            error={Boolean(errors?.name_in_receipt)}
-            helperText={errors?.name_in_receipt?.message}
-          />
-        )}
-        {checkField("invoice_no") && (
-          <AppTextBox
-            control={control}
-            name={"invoice_no"}
-            label={"Invoice No. *"}
-            color="primary"
-            className="transaction-form-textBox"
-            error={Boolean(errors?.invoice_no)}
-            helperText={errors?.invoice_no?.message}
-          />
-        )}
-        {checkField("ref_no") && (
-          <AppTextBox
-            control={control}
-            name={"ref_no"}
-            label={"Ref No. *"}
-            color="primary"
-            className="transaction-form-textBox"
-            error={Boolean(errors?.ref_no)}
-            helperText={errors?.ref_no?.message}
-          />
-        )}
-        <AppTextBox
-          money
-          control={control}
-          name={"amount"}
-          label={"Amount *"}
-          color="primary"
-          className="transaction-form-textBox"
-          error={Boolean(errors?.amount)}
-          helperText={errors?.amount?.message}
-        />
-        {checkField("amount_withheld") && (
-          <AppTextBox
-            money
-            control={control}
-            name={"amount_withheld"}
-            label={"Amount withheld *"}
-            color="primary"
-            className="transaction-form-textBox"
-            error={Boolean(errors?.amount_withheld)}
-            helperText={errors?.amount_withheld?.message}
-          />
-        )}
-        {checkField("amount_check") && (
-          <AppTextBox
-            money
-            control={control}
-            name={"amount_check"}
-            label={"Amount of check *"}
-            color="primary"
-            className="transaction-form-textBox"
-            error={Boolean(errors?.amount_check)}
-            helperText={errors?.amount_check?.message}
-          />
-        )}
-        {checkField("vat") && (
-          <AppTextBox
-            money
-            control={control}
-            name={"vat"}
-            label={"Vat *"}
-            color="primary"
-            className="transaction-form-textBox"
-            error={Boolean(errors?.vat)}
-            helperText={errors?.vat?.message}
-          />
-        )}
-        {checkField("cost") && (
-          <AppTextBox
-            money
-            control={control}
-            name={"cost"}
-            label={"Cost *"}
-            color="primary"
-            className="transaction-form-textBox"
-            error={Boolean(errors?.cost)}
-            helperText={errors?.cost?.message}
-          />
-        )}
-        {documents?.length !== 0 &&
-          documents?.map((item, index) => {
-            return (
-              <AppTextBox
-                key={index}
-                control={control}
-                name={`${item?.code}`}
-                label={`${item?.code}`}
-                color="primary"
-                className="transaction-form-textBox"
-                handleRemove={() => handleRemove(item)}
-                secure
-                remove
-              />
-            );
-          })}
-        {hasAccess(["ap_tag"]) && (
-          <AppTextBox
-            multiline
-            minRows={1}
-            control={control}
-            name={"description"}
-            className="transaction-form-field-textBox "
-            label="Description (Optional)"
-            error={Boolean(errors.description)}
-            helperText={errors.description?.message}
-          />
-        )}
-        {checkField("coverage") && (
-          <>
-            <Box className="form-title-transaction">
-              <Divider
-                orientation="horizontal"
-                className="transaction-devider"
-              />
-
-              <Typography className="form-title-text-transaction">
-                Coverage
-              </Typography>
-            </Box>
-            <Controller
-              name="coverage_from"
-              control={control}
-              render={({ field: { onChange, value, ...restField } }) => (
-                <Box className="date-picker-container-transaction">
-                  <DatePicker
-                    className="transaction-form-date"
-                    label="From (If Applicable)"
-                    format="MMMM DD, YYYY"
-                    value={value}
-                    maxDate={watch("coverage_to")}
-                    onChange={(e) => {
-                      onChange(e);
-                    }}
-                  />
-                  {errors.coverage_from && (
-                    <Typography variant="caption" color="error">
-                      {errors.coverage_from.message}
-                    </Typography>
-                  )}
-                </Box>
-              )}
-            />
-            <Controller
-              name="coverage_to"
-              control={control}
-              render={({ field: { onChange, value, ...restField } }) => (
-                <Box className="date-picker-container-transaction">
-                  <DatePicker
-                    className="transaction-form-date"
-                    label="To (If Applicable)"
-                    minDate={watch("coverage_from")}
-                    format="MMMM DD, YYYY"
-                    value={value}
-                    onChange={(e) => {
-                      onChange(e);
-                    }}
-                  />
-                </Box>
-              )}
-            />
-
-            {checkField("account_number") && (
-              <Autocomplete
-                control={control}
-                name={"account_number"}
-                options={
-                  accountNumber?.result?.filter(
-                    (account) => account?.supplier?.id === watch("tin")?.id
-                  ) || []
-                }
-                getOptionLabel={(option) => `${option.account_no}`}
-                isOptionEqualToValue={(option, value) =>
-                  option?.code === value?.code
-                }
-                renderInput={(params) => (
-                  <MuiTextField
-                    name="account_number"
-                    {...params}
-                    label="Account Number (If Applicable)"
-                    size="small"
-                    variant="outlined"
-                    error={Boolean(errors.account_number)}
-                    helperText={errors.account_number?.message}
-                    className="transaction-form-textBox"
-                  />
-                )}
-              />
-            )}
-          </>
-        )}
-        <Box className="form-title-transaction">
-          <Divider orientation="horizontal" className="transaction-devider" />
-          <Typography className="form-title-text-transaction">
-            Allocation
-          </Typography>
-        </Box>
-        <Autocomplete
-          control={control}
-          name={"ap"}
+          name={"ap_tagging_id"}
           options={ap?.result || []}
           getOptionLabel={(option) =>
             `${option.company_code} - ${option.description}`
@@ -764,34 +423,57 @@ const GeneralJournalModal = () => {
             <MuiTextField
               name="ap_tagging"
               {...params}
-              label="AP *"
+              label="Charge of account *"
               size="small"
               variant="outlined"
-              error={Boolean(errors.ap)}
-              helperText={errors.ap?.message}
+              error={Boolean(errors.ap_tagging_id)}
+              helperText={errors.ap_tagging_id?.message}
               className="transaction-form-textBox"
             />
           )}
         />
+        <Autocomplete
+          disabled={menuData?.state === "Posted"}
+          control={control}
+          name={"boa"}
+          options={boa || []}
+          getOptionLabel={(option) => `${option}`}
+          isOptionEqualToValue={(option, value) => option === value}
+          renderInput={(params) => (
+            <MuiTextField
+              name="boa"
+              {...params}
+              label="Book of accounts *"
+              size="small"
+              variant="outlined"
+              error={Boolean(errors.boa)}
+              helperText={errors.boa?.message}
+              className="transaction-form-textBox"
+            />
+          )}
+        />
+
         <Controller
-          name="tag_month_year"
+          name="tag_year"
           control={control}
           render={({ field: { onChange, value, ...restField } }) => (
             <Box className="date-picker-container-transaction">
-              <DatePicker
+              <MobileDatePicker
+                disabled={menuData?.state === "Posted"}
                 className="transaction-form-date"
                 label="Tag year month *"
                 format="MMMM YYYY"
                 value={value}
                 views={["month", "year"]}
                 minDate={minDate}
+                maxDate={dayjs().endOf("month")}
                 onChange={(e) => {
                   onChange(e);
                 }}
                 slotProps={{
                   textField: {
-                    error: Boolean(errors?.tag_month_year),
-                    helperText: errors?.tag_month_year?.message,
+                    error: Boolean(errors?.tag_year),
+                    helperText: errors?.tag_year?.message,
                   },
                 }}
               />
@@ -799,18 +481,291 @@ const GeneralJournalModal = () => {
           )}
         />
 
+        {hasAccess(["ap_tag"]) && (
+          <AppTextBox
+            disabled={menuData?.state === "Posted"}
+            multiline
+            minRows={1}
+            control={control}
+            name={"gj_description"}
+            className="transaction-form-field-textBox "
+            label="Description (Optional)"
+            error={Boolean(errors.gj_description)}
+            helperText={errors.gj_description?.message}
+          />
+        )}
+        <Divider orientation="horizontal" className="transaction-devider" />
+        <Box className="form-title-transaction">
+          <Typography className="form-title-text-transaction">
+            Entries
+          </Typography>
+        </Box>
+        <Paper className="gj-paper-container details" elevation={0}>
+          {fields?.map((item, index) => {
+            return (
+              <Paper
+                key={item?.id}
+                className="gj-paper-container scrollable"
+                elevation={0}
+              >
+                <Typography>{`${index + 1}.`}</Typography>
+                <AppTextBox
+                  disabled={menuData?.state === "Posted"}
+                  control={control}
+                  name={`gj_items.${index}.tag_no`}
+                  label={"Tag Number *"}
+                  color="primary"
+                  className="transaction-form-textBox"
+                  error={Boolean(errors?.gj_items?.[index]?.tag_no)}
+                  helperText={errors?.gj_items?.[index]?.tag_no?.message}
+                  onKeyDown={(key) => searchHandler(key)}
+                />
+                <Autocomplete
+                  disabled={menuData?.state === "Posted"}
+                  control={control}
+                  name={`gj_items.${index}.coa_id`}
+                  options={coa?.result || []}
+                  getOptionLabel={(option) => `${option.name}`}
+                  isOptionEqualToValue={(option, value) =>
+                    option?.code === value?.code
+                  }
+                  renderInput={(params) => (
+                    <MuiTextField
+                      name="coa_id"
+                      {...params}
+                      label="Account Title *"
+                      size="small"
+                      variant="outlined"
+                      error={Boolean(errors?.gj_items?.[index]?.coa_id)}
+                      helperText={errors?.gj_items?.[index]?.coa_id?.message}
+                      className="transaction-form-textBox"
+                    />
+                  )}
+                />
+                <AppTextBox
+                  money
+                  showDecimal
+                  disabled={
+                    watch(`gj_items.${index}.credit_amount`) !== 0 ||
+                    menuData?.state === "Posted"
+                  }
+                  control={control}
+                  name={`gj_items.${index}.debit_amount`}
+                  label={"Debit *"}
+                  color="primary"
+                  className="transaction-form-textBox"
+                  error={Boolean(errors?.gj_items?.[index]?.debit_amount)}
+                  helperText={errors?.gj_items?.[index]?.debit_amount?.message}
+                  onKeyUp={() => computeTotal()}
+                />
+                <AppTextBox
+                  money
+                  showDecimal
+                  disabled={
+                    watch(`gj_items.${index}.debit_amount`) !== 0 ||
+                    menuData?.state === "Posted"
+                  }
+                  control={control}
+                  name={`gj_items.${index}.credit_amount`}
+                  label={"Credit *"}
+                  color="primary"
+                  className="transaction-form-textBox"
+                  error={Boolean(errors?.gj_items?.[index]?.credit_amount)}
+                  helperText={errors?.gj_items?.[index]?.credit_amount?.message}
+                  onKeyUp={() => computeTotal()}
+                />
+                <AppTextBox
+                  disabled={menuData?.state === "Posted"}
+                  control={control}
+                  name={`gj_items.${index}.invoice_no`}
+                  label={"Invoice Number *"}
+                  color="primary"
+                  className="transaction-form-textBox"
+                  error={Boolean(errors?.gj_items?.[index]?.invoice_no)}
+                  helperText={errors?.gj_items?.[index]?.invoice_no?.message}
+                />
+                <AppTextBox
+                  disabled={menuData?.state === "Posted"}
+                  control={control}
+                  name={`gj_items.${index}.voucher_no`}
+                  label={"Voucher Number *"}
+                  color="primary"
+                  className="transaction-form-textBox"
+                  error={Boolean(errors?.gj_items?.[index]?.voucher_no)}
+                  helperText={errors?.gj_items?.[index]?.voucher_no?.message}
+                />
+                <Autocomplete
+                  disabled={menuData?.state === "Posted"}
+                  control={control}
+                  name={`gj_items.${index}.supplier_id`}
+                  options={tin?.result || []}
+                  getOptionLabel={(option) =>
+                    `${option.company_name} - ${option.tin}`
+                  }
+                  isOptionEqualToValue={(option, value) =>
+                    option?.code === value?.code
+                  }
+                  renderInput={(params) => (
+                    <MuiTextField
+                      name="supplier_id"
+                      {...params}
+                      label="Supplier *"
+                      size="small"
+                      variant="outlined"
+                      error={Boolean(errors?.gj_items?.[index]?.supplier_id)}
+                      helperText={
+                        errors?.gj_items?.[index]?.supplier_id?.message
+                      }
+                      className="transaction-form-textBox"
+                    />
+                  )}
+                />
+                <Autocomplete
+                  disabled={menuData?.state === "Posted"}
+                  control={control}
+                  name={`gj_items.${index}.location_id`}
+                  options={location?.result || []}
+                  getOptionLabel={(option) => `${option.name}`}
+                  isOptionEqualToValue={(option, value) =>
+                    option?.code === value?.code
+                  }
+                  renderInput={(params) => (
+                    <MuiTextField
+                      name="location_id"
+                      {...params}
+                      label="Location *"
+                      size="small"
+                      variant="outlined"
+                      error={Boolean(errors?.gj_items?.[index]?.location_id)}
+                      helperText={
+                        errors?.gj_items?.[index]?.location_id?.message
+                      }
+                      className="transaction-form-textBox"
+                    />
+                  )}
+                />
+                <IconButton
+                  className="icon-button-gj"
+                  disabled={
+                    fields?.length === 1 || menuData?.state === "Posted"
+                  }
+                  onClick={() => {
+                    menuData ? handleRemoveItem(item) : remove(index);
+                  }}
+                >
+                  <DoNotDisturbOnOutlinedIcon
+                    color={`${
+                      fields?.length === 1 || menuData?.state === "Posted"
+                        ? "disabled"
+                        : "error"
+                    }`}
+                  />
+                </IconButton>
+              </Paper>
+            );
+          })}
+        </Paper>
+        <Divider orientation="horizontal" className="transaction-devider" />
+
+        {menuData?.state !== "Posted" && (
+          <LoadingButton
+            variant="contained"
+            color="secondary"
+            className="add-transaction-button"
+            onClick={() => {
+              append({
+                id: Date.now(),
+                debit_coa_id: null,
+                debit_coa_id: null,
+                debit_amount: 0,
+                credit_amount: 0,
+                tag_no: "",
+                invoice_no: "",
+                voucher_no: "",
+                supplier: "",
+                location: "",
+                supplier_id: null,
+                location_id: null,
+              });
+            }}
+          >
+            Add New Entry
+          </LoadingButton>
+        )}
+        <Divider orientation="horizontal" className="transaction-devider" />
+
         <Box className="add-transaction-button-container">
-          .
+          <Stack flexDirection={"row"} gap={1}>
+            <AppTextBox
+              disabled
+              money
+              showDecimal
+              control={control}
+              name={"debit"}
+              label={"Total Debit"}
+              color="primary"
+              className="transaction-form-textBox gj-balancing"
+              error={Boolean(errors?.debit)}
+              helperText={errors?.debit?.message}
+            />
+            <AppTextBox
+              disabled
+              money
+              showDecimal
+              control={control}
+              name={"credit"}
+              label={"Total Credit"}
+              color="primary"
+              className="transaction-form-textBox gj-balancing"
+              error={Boolean(errors?.debit)}
+              helperText={errors?.debit?.message}
+            />
+            <AppTextBox
+              disabled
+              money
+              showDecimal
+              control={control}
+              name={"variance"}
+              label={"Variance"}
+              color="primary"
+              className="transaction-form-textBox gj-balancing"
+              error={Boolean(errors?.debit)}
+              helperText={errors?.debit?.message}
+            />
+          </Stack>
+
           <Box className="archive-transaction-button-container">
-            {!forViewing && (
+            {menuData && menuData?.state !== "Posted" && (
               <LoadingButton
+                disabled={watch("variance") !== 0}
                 variant="contained"
-                color="warning"
+                color="secondary"
                 className="add-transaction-button"
-                disabled={!watch("tin") || watch("type") === ""}
+                onClick={() => handlePostGj()}
+              >
+                Post
+              </LoadingButton>
+            )}
+            {menuData && menuData?.state === "Posted" && (
+              <LoadingButton
+                disabled={watch("variance") !== 0}
+                variant="contained"
+                color="error"
+                className="add-transaction-button"
+                onClick={() => dispatch(setReturn(true))}
+              >
+                Archive
+              </LoadingButton>
+            )}
+            {menuData?.state !== "Posted" && (
+              <LoadingButton
+                disabled={watch("variance") !== 0}
+                variant="contained"
+                color="success"
+                className="add-transaction-button"
                 type="submit"
               >
-                Add
+                Save
               </LoadingButton>
             )}
 
@@ -823,7 +778,7 @@ const GeneralJournalModal = () => {
               }}
               className="add-transaction-button"
             >
-              {forViewing ? "Close" : "Cancel"}
+              Cancel
             </Button>
           </Box>
         </Box>
@@ -832,29 +787,19 @@ const GeneralJournalModal = () => {
       <Dialog
         open={
           loadingTIN ||
-          loadingDocument ||
-          loadingAccountNumber ||
           loadingAp ||
           loadingLocation ||
           loadingSearch ||
-          loadingCreate
+          loadingCreate ||
+          loadingCoa ||
+          loadingUpdate ||
+          loadingPost ||
+          loadingArchiveGj ||
+          loadingArchiveGjItem
         }
         className="loading-transaction-create"
       >
         <Lottie animationData={loading} loop />
-      </Dialog>
-
-      <Dialog open={openReason} onClose={() => dispatch(setOpenReason(false))}>
-        <ReasonInput
-          title={`Reason for ${watch("type")}`}
-          reasonDesc={`Please enter the reason for the ${watch("type")}`}
-          confirmButton={"Confirm"}
-          cancelButton={"Cancel"}
-          cancelOnClick={() => {
-            dispatch(resetPrompt());
-          }}
-          confirmOnClick={submitHandlerReason}
-        />
       </Dialog>
 
       <Dialog
@@ -865,7 +810,21 @@ const GeneralJournalModal = () => {
         <Lottie animationData={noData} className="no-data-found" />
       </Dialog>
 
-      <TransactionDrawer transactionData={transactionData} />
+      <Dialog open={isReturn}>
+        <ReasonInput
+          title={"Reason for archive"}
+          reasonDesc={"Please enter the reason for archive this entry"}
+          warning={
+            "Please note that this entry will be archived and can no longer return. Kindly provide a reason for this action."
+          }
+          confirmButton={"Confirm"}
+          cancelButton={"Cancel"}
+          cancelOnClick={() => {
+            dispatch(resetPrompt());
+          }}
+          confirmOnClick={(e) => handelArchiveGj(e)}
+        />
+      </Dialog>
     </Paper>
   );
 };

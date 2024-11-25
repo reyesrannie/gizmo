@@ -25,23 +25,20 @@ import { decodeUser } from "../../services/functions/saveUser";
 import AccountMenu from "./AccountMenu";
 import ChangePassword from "./modal/ChangePassword";
 import { useSnackbar } from "notistack";
-import {
-  jsonServerAPI,
-  useAccountNumberQuery,
-  useApQuery,
-  useCutOffQuery,
-  useDocumentTypeQuery,
-  useLocationQuery,
-  useSchedTransactionQuery,
-  useSupplierQuery,
-} from "../../services/store/request";
+import { jsonServerAPI } from "../../services/store/request";
 import NotificationSchedule from "./NotificationSchedule";
 import { setOpenNotification } from "../../services/slice/promptSlice";
 import DateChecker from "../../services/functions/DateChecker";
 import { hasAccess } from "../../services/functions/access";
 import EchoInstance from "../../services/functions/backendSocket";
 import { socketEvents } from "../../services/constants/socketEvents";
-import { seconAPIRequest } from "../../services/store/seconAPIRequest";
+import { useLocationQuery } from "../../services/api/locationApi";
+import { useApQuery } from "../../services/api/apApi";
+import { useSupplierQuery } from "../../services/api/supplierApi";
+import { useDocumentTypeQuery } from "../../services/api/documentTypeApi";
+import { useAccountNumberQuery } from "../../services/api/accountNumberApi";
+import { useCutOffQuery } from "../../services/api/cutOffApi";
+import { useSchedTransactionQuery } from "../../services/api/scheduledTransactionApi";
 
 const AppBar = () => {
   const { enqueueSnackbar } = useSnackbar();
@@ -131,7 +128,6 @@ const AppBar = () => {
         .listen(event, (data) => {
           if (action?.some((act) => act === "dispatch")) {
             dispatch(jsonServerAPI?.util?.invalidateTags(tags));
-            dispatch(seconAPIRequest?.util?.invalidateTags(tags));
           } else if (action?.some((act) => act === "AP")) {
             if (
               data?.gas_status === "pending" ||
@@ -140,17 +136,14 @@ const AppBar = () => {
               )
             ) {
               dispatch(jsonServerAPI?.util?.invalidateTags(tags));
-              dispatch(seconAPIRequest?.util?.invalidateTags(tags));
             }
 
             if (data?.state === "For Computation" && hasAccess(["tagging"])) {
               dispatch(jsonServerAPI?.util?.invalidateTags(tags));
-              dispatch(seconAPIRequest?.util?.invalidateTags(tags));
             }
 
             if (data?.state === "For Approval" && hasAccess(["approver"])) {
               dispatch(jsonServerAPI?.util?.invalidateTags(tags));
-              dispatch(seconAPIRequest?.util?.invalidateTags(tags));
             }
             if (
               data?.state === "approved" &&
@@ -159,7 +152,6 @@ const AppBar = () => {
               )
             ) {
               dispatch(jsonServerAPI?.util?.invalidateTags(tags));
-              dispatch(seconAPIRequest?.util?.invalidateTags(tags));
             }
           } else if (action?.some((act) => act === "Treasury")) {
             if (
@@ -169,7 +161,6 @@ const AppBar = () => {
               )
             ) {
               dispatch(jsonServerAPI?.util?.invalidateTags(tags));
-              dispatch(seconAPIRequest?.util?.invalidateTags(tags));
             }
           } else {
             enqueueSnackbar(data?.message, { variant: "success" });

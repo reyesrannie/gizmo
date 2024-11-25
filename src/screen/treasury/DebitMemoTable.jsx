@@ -46,8 +46,6 @@ import {
   setUpdateMenu,
 } from "../../services/slice/menuSlice";
 
-import { useApQuery } from "../../services/store/request";
-
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import orderBySchema from "../../schemas/orderBySchema";
@@ -56,6 +54,8 @@ import ClearIcon from "@mui/icons-material/Clear";
 import { AdditionalFunction } from "../../services/functions/AdditionalFunction";
 
 import DebitMemoModal from "../../components/customs/modal/DebitMemoModal";
+import { setVoucher } from "../../services/slice/optionsSlice";
+import { useApQuery } from "../../services/api/apApi";
 
 const DebitMemoTable = ({
   params,
@@ -72,7 +72,6 @@ const DebitMemoTable = ({
   const [anchorE1, setAnchorE1] = useState(null);
   const dispatch = useDispatch();
   const updateMenu = useSelector((state) => state.menu.updateMenu);
-  const createMenu = useSelector((state) => state.menu.createMenu);
 
   const { convertToPeso } = AdditionalFunction();
 
@@ -135,6 +134,7 @@ const DebitMemoTable = ({
                     className="table-body-tag-transaction"
                     key={tag?.id}
                     onClick={() => {
+                      dispatch(setVoucher("dm"));
                       dispatch(setMenuData(tag));
                       dispatch(setUpdateMenu(true));
                     }}
@@ -142,18 +142,14 @@ const DebitMemoTable = ({
                     <TableCell>{tag?.id}</TableCell>
                     <TableCell>
                       <Typography className="tag-transaction-company-name">
-                        {tag?.transaction?.supplier?.name ? (
-                          tag?.transaction?.supplier.name
-                        ) : (
-                          <>&mdash;</>
-                        )}
+                        {tag?.transaction?.supplier?.name
+                          ? tag?.transaction?.supplier.name
+                          : tag?.generalJournal?.supplier.name}
                       </Typography>
                       <Typography className="tag-transaction-company-tin">
-                        {tag?.transaction?.supplier === null ? (
-                          <>&mdash;</>
-                        ) : (
-                          tag?.transaction?.supplier?.tin
-                        )}
+                        {tag?.transaction?.supplier
+                          ? tag?.transaction?.supplier?.tin
+                          : tag?.generalJournal?.supplier?.tin}
                       </Typography>
                     </TableCell>
 
@@ -292,7 +288,7 @@ const DebitMemoTable = ({
       </Menu>
 
       <Dialog
-        open={createMenu || updateMenu}
+        open={updateMenu}
         onClose={() => dispatch(resetMenu())}
         className="transaction-modal-dialog"
       >

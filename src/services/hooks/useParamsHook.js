@@ -48,6 +48,13 @@ const useParamsHook = () => {
     }));
   };
 
+  const onFilterChange = (data) => {
+    setParams((currentValue) => ({
+      ...currentValue,
+      ...data,
+    }));
+  };
+
   const onReset = () => {
     setParams(() => ({
       status: "active",
@@ -65,6 +72,7 @@ const useParamsHook = () => {
     onSearchData,
     onStatusChange,
     onSortTable,
+    onFilterChange,
     onReset,
   };
 };

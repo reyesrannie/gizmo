@@ -342,7 +342,19 @@
   }
 }
 
+.transaction-modal-dialog.gj {
+  .MuiPaper-root {
+    max-width: 50vw;
+  }
+}
+
 .transaction-modal-dialog-tax {
+  .MuiPaper-root {
+    max-width: none;
+  }
+}
+
+.transaction-modal-dialog-bank {
   .MuiPaper-root {
     max-width: none;
   }

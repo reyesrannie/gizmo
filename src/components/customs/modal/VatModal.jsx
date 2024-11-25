@@ -12,13 +12,14 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useDispatch } from "react-redux";
 import { resetMenu } from "../../../services/slice/menuSlice";
-import {
-  useCreateVATMutation,
-  useUpdateVATMutation,
-} from "../../../services/store/request";
+
 import { useSnackbar } from "notistack";
 import { objectError } from "../../../services/functions/errorResponse";
 import vatSchema from "../../../schemas/vatSchema";
+import {
+  useCreateVATMutation,
+  useUpdateVATMutation,
+} from "../../../services/api/vatApi";
 
 const VatModal = ({ vatData, view, update }) => {
   const dispatch = useDispatch();

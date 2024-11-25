@@ -52,11 +52,6 @@ import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import "../../../components/styles/Department.scss";
 import "../../../components/styles/RolesModal.scss";
 
-import {
-  useArchiveDepartmentMutation,
-  useDepartmentQuery,
-  useImportDepartmentMutation,
-} from "../../../services/store/request";
 import Lottie from "lottie-react";
 import moment from "moment";
 import { useState } from "react";
@@ -67,6 +62,11 @@ import { useSnackbar } from "notistack";
 import { singleError } from "../../../services/functions/errorResponse";
 import { generateExcelwTag } from "../../../services/functions/exportFile";
 import ImportModal from "../../../components/customs/modal/ImportModal";
+import {
+  useArchiveDepartmentMutation,
+  useDepartmentQuery,
+  useImportDepartmentMutation,
+} from "../../../services/api/departmentApi";
 
 const Department = () => {
   const excelItems = ["ID", "CODE", "NAME", "CREATED AT", "DATE MODIFIED"];

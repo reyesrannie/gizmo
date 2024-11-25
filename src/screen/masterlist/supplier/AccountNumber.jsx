@@ -31,11 +31,6 @@ import moment from "moment";
 import Lottie from "lottie-react";
 
 import { useDispatch, useSelector } from "react-redux";
-import {
-  useAccountNumberQuery,
-  useArchiveAccountNumberMutation,
-  useImportAccountNumberMutation,
-} from "../../../services/store/request";
 
 import AddToPhotosOutlinedIcon from "@mui/icons-material/AddToPhotosOutlined";
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
@@ -69,6 +64,11 @@ import {
 import { generateExcelAccount } from "../../../services/functions/exportFile";
 import ImportModal from "../../../components/customs/modal/ImportModal";
 import AccountNumberModal from "../../../components/customs/modal/AccountNumberModal";
+import {
+  useAccountNumberQuery,
+  useArchiveAccountNumberMutation,
+  useImportAccountNumberMutation,
+} from "../../../services/api/accountNumberApi";
 
 const AccountNumber = () => {
   const excelItems = [

@@ -22,15 +22,16 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useDispatch } from "react-redux";
 import { resetMenu } from "../../../services/slice/menuSlice";
-import {
-  useCreateSupplierTypeMutation,
-  useUpdateSupplierTypeMutation,
-} from "../../../services/store/request";
+
 import { useSnackbar } from "notistack";
 import { objectError } from "../../../services/functions/errorResponse";
 import supplierTypeSchema from "../../../schemas/supplierTypeSchema";
 import Autocomplete from "../AutoComplete";
 import { supplierTypeReqFields } from "../../../services/constants/requiredFields";
+import {
+  useCreateSupplierTypeMutation,
+  useUpdateSupplierTypeMutation,
+} from "../../../services/api/supplierTypeApi";
 
 const SupplierTypeModal = ({ stypeData, view, update }) => {
   const dispatch = useDispatch();

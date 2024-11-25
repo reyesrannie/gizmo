@@ -28,12 +28,13 @@ import {
   setRolesUpdate,
   setRolesView,
 } from "../../../services/slice/menuSlice";
+
+import { objectError } from "../../../services/functions/errorResponse";
+import { useSnackbar } from "notistack";
 import {
   useCreateRoleMutation,
   useUpdateRoleMutation,
-} from "../../../services/store/request";
-import { objectError } from "../../../services/functions/errorResponse";
-import { useSnackbar } from "notistack";
+} from "../../../services/api/roleApi";
 
 const RolesModal = ({ roleData, view, update }) => {
   const { enqueueSnackbar } = useSnackbar();

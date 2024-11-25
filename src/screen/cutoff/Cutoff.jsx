@@ -42,7 +42,6 @@ import { generateExcel } from "../../services/functions/exportFile";
 
 import "../../components/styles/AccountsPayable.scss";
 import CutoffModal from "../../components/customs/modal/CutoffModal";
-import { useCutOffQuery } from "../../services/store/request";
 import loading from "../../assets/lottie/Loading-2.json";
 import noData from "../../assets/lottie/NoData.json";
 import StatusIndicator from "../../components/customs/StatusIndicator";
@@ -52,6 +51,7 @@ import Lottie from "lottie-react";
 import moment from "moment";
 import { hasAccess } from "../../services/functions/access";
 import TransactionDrawer from "../../components/customs/TransactionDrawer";
+import { useCutOffQuery } from "../../services/api/cutOffApi";
 
 const Cutoff = () => {
   const excelItems = ["ID", "CODE", "NAME", "CREATED AT", "DATE MODIFIED"];

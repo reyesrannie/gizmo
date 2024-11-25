@@ -85,6 +85,14 @@ const accessPermission = [
         access_permission: "balance",
         label: "Beginning Balance",
       },
+      {
+        access_permission: "bank_registry",
+        label: "Bank Registration",
+      },
+      {
+        access_permission: "check_registry",
+        label: "Check Registration",
+      },
     ],
   },
   {

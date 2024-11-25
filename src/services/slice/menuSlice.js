@@ -15,12 +15,14 @@ const initialState = {
   checkID: "",
   receiveMenu: false,
   importMenu: false,
+  updateImport: false,
   importHasData: false,
   importTitle: "",
   importLoading: false,
   importError: null,
   viewMenu: false,
   menuData: null,
+  bankData: null,
   menuDataMultiple: [],
   createTax: false,
   updateTax: false,
@@ -120,6 +122,9 @@ const menutSlice = createSlice({
     setImportError: (state, action) => {
       state.importError = action.payload;
     },
+    setUpdateImport: (state, action) => {
+      state.updateImport = action.payload;
+    },
     setMenuData: (state, action) => {
       state.menuData = action.payload;
     },
@@ -173,6 +178,9 @@ const menutSlice = createSlice({
     setSched: (state, action) => {
       state.isSched = action.payload;
     },
+    setBankData: (state, action) => {
+      state.bankData = action.payload;
+    },
 
     resetMenu: () => {
       return initialState;
@@ -219,6 +227,8 @@ export const {
   setMenuDataMultiple,
   setHasError,
   setSched,
+  setBankData,
+  setUpdateImport,
 } = menutSlice.actions;
 
 export default menutSlice.reducer;

@@ -12,13 +12,14 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useDispatch } from "react-redux";
 import { resetMenu } from "../../../services/slice/menuSlice";
-import {
-  useCreateATCMutation,
-  useUpdateATCMutation,
-} from "../../../services/store/request";
+
 import { useSnackbar } from "notistack";
 import { objectError } from "../../../services/functions/errorResponse";
 import atcSchema from "../../../schemas/atcSchema";
+import {
+  useCreateATCMutation,
+  useUpdateATCMutation,
+} from "../../../services/api/atcApi";
 
 const AtcModal = ({ atcData, view, update }) => {
   const dispatch = useDispatch();

@@ -8,6 +8,67 @@
     gap: 10px;
   }
 }
+
+.print-2307 {
+  display: none;
+  position: relative;
+  width: 100%;
+  height: auto;
+
+  &.MuiBox-root {
+    width: 100%;
+    height: auto;
+  }
+
+  @media print {
+    display: contents;
+    width: 8.5in;
+    height: 14in;
+    margin: 0 auto;
+    background-color: white;
+    .page {
+      page-break-after: always;
+    }
+  }
+}
+
+@media print {
+  .print-page-break {
+    page-break-before: always;
+  }
+}
+
+.pdf-text-font {
+  &.MuiTypography-root {
+    font-family: "Arial";
+    font-size: 11px;
+    letter-spacing: 6px;
+  }
+}
+.pdf-text-font.year {
+  &.MuiTypography-root {
+    letter-spacing: 8px;
+  }
+}
+
+.pdf-text-font.tin {
+  &.MuiTypography-root {
+    letter-spacing: 10px;
+  }
+}
+.pdf-text-font.address {
+  &.MuiTypography-root {
+    letter-spacing: 1px;
+  }
+}
+
+.pdf-text-font.long-address {
+  &.MuiTypography-root {
+    font-size: 8px;
+    letter-spacing: 1px;
+  }
+}
+
 // .table-container-for-print {
 //   @media print {
 //     &.MuiTableContainer-root {
@@ -24,6 +85,29 @@
     min-width: 240px;
     max-width: 240px;
     min-height: 63px;
+
+    .MuiInputBase-root {
+      border-radius: 10px;
+      font-family: Roboto-Medium;
+      letter-spacing: 1px;
+    }
+    .MuiFormLabel-root {
+      font-family: Roboto-Medium;
+      letter-spacing: 1px;
+    }
+    .MuiFormHelperText-root {
+      font-family: Roboto-Light;
+      letter-spacing: 1px;
+    }
+  }
+}
+
+.transaction-form-textBox.gj-balancing {
+  &.MuiFormControl-root {
+    border-radius: 10px;
+    min-width: 200px;
+    max-width: 200px;
+    min-height: unset;
 
     .MuiInputBase-root {
       border-radius: 10px;
@@ -321,6 +405,58 @@
   }
 }
 
+.voucher-treasury.wrap {
+  &.MuiTableCell-root {
+    .MuiTypography-root {
+      font-family: Roboto-Light;
+      font-size: 12px;
+    }
+  }
+}
+
+.voucher-treasury.is-mutilple {
+  &.MuiTableCell-root {
+    .MuiTypography-root {
+      font-family: Roboto-Light;
+      font-size: 12px;
+    }
+  }
+  @media print {
+    &.MuiTableCell-root {
+      .MuiTypography-root {
+        display: none;
+      }
+    }
+  }
+}
+
+.voucher-treasury.associated-checks {
+  &.MuiTableCell-root {
+    display: none;
+  }
+  @media print {
+    &.MuiTableCell-root {
+      display: table-cell;
+      border: none;
+      .MuiTypography-root {
+        font-family: Roboto-Light;
+        font-size: 12px;
+      }
+    }
+  }
+}
+
+.additional-checks {
+  &.MuiTableCell-root {
+    display: table-cell;
+    border: none;
+    padding: 2px;
+    .MuiTypography-root {
+      font-family: Roboto-Light;
+      font-size: 10px;
+    }
+  }
+}
 .voucher-treasury.left {
   &.MuiTableCell-root {
     border-right: none;
@@ -473,7 +609,7 @@
     align-self: flex-start;
     border: 1px solid #bbbbbb;
     border-radius: 10px;
-    max-width: 180px;
+    min-width: 180px;
   }
 }
 

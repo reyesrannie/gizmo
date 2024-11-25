@@ -13,7 +13,6 @@ import {
 } from "@mui/material";
 
 import { useDispatch, useSelector } from "react-redux";
-import { useTransactionQuery } from "../../services/store/request";
 
 import AddToPhotosOutlinedIcon from "@mui/icons-material/AddToPhotosOutlined";
 import ArrowDropDownCircleOutlinedIcon from "@mui/icons-material/ArrowDropDownCircleOutlined";
@@ -29,6 +28,7 @@ import {
 } from "../../services/slice/transactionSlice";
 import { setHeader } from "../../services/slice/headerSlice";
 import { setViewMenu } from "../../services/slice/menuSlice";
+import { useTransactionQuery } from "../../services/api/transactionApi";
 
 const TagTransaction = () => {
   const dispatch = useDispatch();

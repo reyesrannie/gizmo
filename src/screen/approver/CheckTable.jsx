@@ -49,11 +49,6 @@ import {
   setVoidMenu,
 } from "../../services/slice/menuSlice";
 
-import {
-  useApQuery,
-  useDocumentTypeQuery,
-  useReadTransactionCheckMutation,
-} from "../../services/store/request";
 import TransactionModalAp from "../../components/customs/modal/TransactionModalAp";
 import { setVoucher } from "../../services/slice/optionsSlice";
 import TransactionModalApprover from "../../components/customs/modal/TransactionModalApprover";
@@ -65,6 +60,9 @@ import ClearIcon from "@mui/icons-material/Clear";
 import { AdditionalFunction } from "../../services/functions/AdditionalFunction";
 import { hasAccess } from "../../services/functions/access";
 import dayjs from "dayjs";
+import { useApQuery } from "../../services/api/apApi";
+import { useDocumentTypeQuery } from "../../services/api/documentTypeApi";
+import { useReadTransactionCheckMutation } from "../../services/api/checkVoucherApi";
 
 const CheckTable = ({
   params,

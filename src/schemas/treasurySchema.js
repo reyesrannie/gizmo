@@ -9,11 +9,11 @@ const treasurySchema = Yup.object({
     .required("This entry is required")
     .typeError("This entry is required"),
 
-  bank: Yup.object().when("multiple", {
+  bank: Yup.string().when("multiple", {
     is: (multiple) => multiple === false,
     then: () =>
-      Yup.object().required("Bank is required").typeError("Bank is required"),
-    otherwise: () => Yup.object().nullable("Bank is required"),
+      Yup.string().required("Bank is required").typeError("Bank is required"),
+    otherwise: () => Yup.string().nullable("Bank is required"),
   }),
   type: Yup.string().required("Type is required"),
 
@@ -25,10 +25,10 @@ const treasurySchema = Yup.object({
     otherwise: () => Yup.object().nullable(),
   }),
 
-  debit_type: Yup.object().when(["multiple", "type"], {
+  reference_no: Yup.string().when(["multiple", "type"], {
     is: (multiple, type) => multiple === false && type === "DEBIT MEMO",
-    then: () => Yup.object().required("Debit type is required"),
-    otherwise: () => Yup.object().nullable(),
+    then: () => Yup.string().required("Reference is required"),
+    otherwise: () => Yup.string().nullable(),
   }),
 
   check_date: Yup.date().nullable(),
@@ -50,6 +50,7 @@ const treasurySchema = Yup.object({
             .required("Amount is required")
             .moreThan(0, "Amount must be greater than 0"),
           check_date: Yup.date().nullable(),
+          bank: Yup.string().required(),
         })
       ),
   }),

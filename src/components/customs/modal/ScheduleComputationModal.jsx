@@ -21,20 +21,7 @@ import {
   setUpdateTax,
   setViewAccountingEntries,
 } from "../../../services/slice/menuSlice";
-import {
-  useAccountNumberQuery,
-  useAccountTitlesQuery,
-  useAtcQuery,
-  useCheckedScheduleTransactionMutation,
-  useCompleteSchedTransactionMutation,
-  useDocumentTypeQuery,
-  useGenerateTransactionMutation,
-  useLocationQuery,
-  useResetSchedTransactionMutation,
-  useSupplierQuery,
-  useSupplierTypeQuery,
-  useTaxComputationQuery,
-} from "../../../services/store/request";
+
 import { useSnackbar } from "notistack";
 import { singleError } from "../../../services/functions/errorResponse";
 import { resetPrompt, setWarning } from "../../../services/slice/promptSlice";
@@ -74,6 +61,19 @@ import DateChecker from "../../../services/functions/DateChecker";
 import { useNavigate } from "react-router-dom";
 import AppPrompt from "../AppPrompt";
 import { setHeader } from "../../../services/slice/headerSlice";
+import { useLocationQuery } from "../../../services/api/locationApi";
+import { useSupplierTypeQuery } from "../../../services/api/supplierTypeApi";
+import { useSupplierQuery } from "../../../services/api/supplierApi";
+import { useDocumentTypeQuery } from "../../../services/api/documentTypeApi";
+import { useAccountNumberQuery } from "../../../services/api/accountNumberApi";
+import { useAccountTitlesQuery } from "../../../services/api/coaApi";
+import { useTaxComputationQuery } from "../../../services/api/taxComputationApi";
+import {
+  useCheckedScheduleTransactionMutation,
+  useCompleteSchedTransactionMutation,
+  useGenerateTransactionMutation,
+  useResetSchedTransactionMutation,
+} from "../../../services/api/scheduledTransactionApi";
 
 const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
   const navigate = useNavigate();

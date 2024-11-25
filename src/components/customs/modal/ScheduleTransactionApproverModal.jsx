@@ -30,17 +30,6 @@ import {
 import { resetOption } from "../../../services/slice/optionsSlice";
 import { resetPrompt, setReturn } from "../../../services/slice/promptSlice";
 
-import {
-  useAccountTitlesQuery,
-  useApproveSchedTransactionMutation,
-  useDocumentTypeQuery,
-  useReturnSchedTransactionMutation,
-  useStatusScheduleLogsQuery,
-  useSupplierQuery,
-  useSupplierTypeQuery,
-  useTaxComputationQuery,
-  useUsersQuery,
-} from "../../../services/store/request";
 import { setVoucherData } from "../../../services/slice/transactionSlice";
 import moment from "moment";
 import {
@@ -54,6 +43,17 @@ import ReasonInput from "../ReasonInput";
 import { enqueueSnackbar } from "notistack";
 import { singleError } from "../../../services/functions/errorResponse";
 import ComputationMenu from "./ComputationMenu";
+import { useUsersQuery } from "../../../services/api/authApi";
+import { useSupplierTypeQuery } from "../../../services/api/supplierTypeApi";
+import { useSupplierQuery } from "../../../services/api/supplierApi";
+import { useDocumentTypeQuery } from "../../../services/api/documentTypeApi";
+import { useAccountTitlesQuery } from "../../../services/api/coaApi";
+import { useTaxComputationQuery } from "../../../services/api/taxComputationApi";
+import {
+  useApproveSchedTransactionMutation,
+  useReturnSchedTransactionMutation,
+} from "../../../services/api/scheduledTransactionApi";
+import { useStatusScheduleLogsQuery } from "../../../services/api/logsApi";
 
 const ScheduleTransactionApproverModal = ({
   view,

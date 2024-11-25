@@ -17,12 +17,11 @@ import { useDispatch } from "react-redux";
 import { resetAuth, setChangePass } from "../../services/slice/authSlice";
 import { decodeUser } from "../../services/functions/saveUser";
 import { useNavigate } from "react-router-dom";
-import { useLogoutMutation } from "../../services/store/request";
 import { resetLogs } from "../../services/slice/logSlice";
 import { resetOption } from "../../services/slice/optionsSlice";
 import { resetTransaction } from "../../services/slice/transactionSlice";
 import { resetPrompt } from "../../services/slice/promptSlice";
-import { seconAPIRequest } from "../../services/store/seconAPIRequest";
+import { useLogoutMutation } from "../../services/api/authApi";
 
 const AccountMenu = ({ onClose }) => {
   const userData = decodeUser();
@@ -32,9 +31,6 @@ const AccountMenu = ({ onClose }) => {
 
   const handleLogout = async () => {
     logout();
-    dispatch(
-      seconAPIRequest?.util?.invalidateTags(["GeneralJournal", "CountGJ"])
-    );
     sessionStorage.removeItem("GIZMO");
     sessionStorage.removeItem("GIZMO_token");
     dispatch(resetAuth());

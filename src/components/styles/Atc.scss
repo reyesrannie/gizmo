@@ -40,8 +40,18 @@
   height: 500px;
 }
 
+.loading-atc-bank {
+  height: 200px;
+}
+
 .no-data-atc {
   height: 500px;
+  opacity: 0.7;
+  filter: grayscale(0.3);
+}
+
+.no-data-atc.bank {
+  height: 200px;
   opacity: 0.7;
   filter: grayscale(0.3);
 }
@@ -72,6 +82,12 @@
   }
 }
 
+.atc-table-container.bank {
+  &.MuiTableContainer-root {
+    max-height: 300px;
+  }
+}
+
 .table-header1-atc {
   &.MuiTableRow-root {
     .MuiTableCell-root {
@@ -79,6 +95,18 @@
       font-family: Roboto-Bold;
       letter-spacing: 1px;
       padding: 10px;
+    }
+  }
+}
+
+.table-header1-bank {
+  &.MuiTableRow-root {
+    .MuiTableCell-root {
+      border: none;
+      font-family: Roboto-Bold;
+      letter-spacing: 1px;
+      padding: 10px;
+      min-width: 50vw;
     }
   }
 }

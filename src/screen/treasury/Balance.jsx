@@ -39,7 +39,6 @@ import moment from "moment";
 import Breadcrums from "../../components/customs/Breadcrums";
 import SearchText from "../../components/customs/SearchText";
 import loading from "../../assets/lottie/Loading-2.json";
-import loadingLight from "../../assets/lottie/Loading.json";
 import noData from "../../assets/lottie/NoData.json";
 import StatusIndicator from "../../components/customs/StatusIndicator";
 
@@ -48,25 +47,13 @@ import "../../components/styles/RolesModal.scss";
 
 import AddToPhotosOutlinedIcon from "@mui/icons-material/AddToPhotosOutlined";
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
-import ModeEditOutlineOutlinedIcon from "@mui/icons-material/ModeEditOutlineOutlined";
-import SettingsBackupRestoreOutlinedIcon from "@mui/icons-material/SettingsBackupRestoreOutlined";
-import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
-import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
-import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 
 import useParamsHook from "../../services/hooks/useParamsHook";
-import {
-  useApQuery,
-  useArchiveAPMutation,
-  useImportAPMutation,
-} from "../../services/store/request";
-import AccountsPayableModal from "../../components/customs/modal/AccountsPayableModal";
-import { generateExcel } from "../../services/functions/exportFile";
-import ImportModal from "../../components/customs/modal/ImportModal";
-import { useBBalanceQuery } from "../../services/store/seconAPIRequest";
+
 import { AdditionalFunction } from "../../services/functions/AdditionalFunction";
 import BalanceModal from "../../components/customs/modal/BalanceModal";
 import { useParams } from "react-router-dom";
+import { useBBalanceQuery } from "../../services/api/bankBalance";
 
 const Balance = () => {
   const excelItems = ["ID", "CODE", "NAME", "CREATED AT", "DATE MODIFIED"];

@@ -35,24 +35,6 @@ import {
   setReturn,
 } from "../../../services/slice/promptSlice";
 
-import {
-  useAccountTitlesQuery,
-  useApproveCheckEntriesMutation,
-  useAtcQuery,
-  useDocumentTypeQuery,
-  usePrepareCVoucherMutation,
-  useReturnCheckEntriesMutation,
-  useStatusLogsQuery,
-  useSupplierQuery,
-  useSupplierTypeQuery,
-  useTaxComputationQuery,
-  useUsersQuery,
-  useVoidCVoucherMutation,
-  useVoidedCVoucherMutation,
-  useVoidedJVoucherMutation,
-  useVpCheckNumberQuery,
-  useVpJournalNumberQuery,
-} from "../../../services/store/request";
 import { setVoucherData } from "../../../services/slice/transactionSlice";
 import moment from "moment";
 import {
@@ -67,7 +49,6 @@ import ReasonInput from "../ReasonInput";
 import { enqueueSnackbar } from "notistack";
 import { singleError } from "../../../services/functions/errorResponse";
 import ComputationMenu from "./ComputationMenu";
-import { printPDF } from "../../../services/functions/pdfProcess";
 
 import {
   totalAccount,
@@ -75,13 +56,32 @@ import {
 } from "../../../services/functions/compute";
 import DateChecker from "../../../services/functions/DateChecker";
 import { hasAccess } from "../../../services/functions/access";
+
+import ClearCheck from "../ClearCheck";
+import { setDisplayed } from "../../../services/slice/syncSlice";
+import Print2307 from "../Print2307";
+import { useUsersQuery } from "../../../services/api/authApi";
+import { useAtcQuery } from "../../../services/api/atcApi";
+import { useSupplierTypeQuery } from "../../../services/api/supplierTypeApi";
+import { useSupplierQuery } from "../../../services/api/supplierApi";
+import { useDocumentTypeQuery } from "../../../services/api/documentTypeApi";
+import { useAccountTitlesQuery } from "../../../services/api/coaApi";
 import {
+  useApproveCheckEntriesMutation,
+  useReturnCheckEntriesMutation,
+  useStatusLogsQuery,
+  useVoidCVoucherMutation,
+  useVoidedCVoucherMutation,
+  useVpCheckNumberQuery,
+} from "../../../services/api/vouchersPayableApi";
+import { usePrepareCVoucherMutation } from "../../../services/api/checkVoucherApi";
+import { useTaxComputationQuery } from "../../../services/api/taxComputationApi";
+import {
+  useApproveGJDMMutation,
   useApproveGJMutation,
   useReturnGJMutation,
   useVoidGJMutation,
-} from "../../../services/store/seconAPIRequest";
-import ClearCheck from "../ClearCheck";
-import { setDisplayed } from "../../../services/slice/syncSlice";
+} from "../../../services/api/generalJournalApi";
 
 const TransactionModalApprover = () => {
   const dispatch = useDispatch();
@@ -178,16 +178,6 @@ const TransactionModalApprover = () => {
     pagination: "none",
   });
 
-  const { data: vpJournalNumber, isLoading: loadingJournalVP } =
-    useVpJournalNumberQuery(
-      {
-        yearMonth: menuData?.tag_year,
-      },
-      {
-        skip: voucher === "check" || voucher === null || menuData === null,
-      }
-    );
-
   const [returnCheckEntry, { isLoading: loadingReturn }] =
     useReturnCheckEntriesMutation();
 
@@ -197,6 +187,8 @@ const TransactionModalApprover = () => {
     useApproveCheckEntriesMutation();
 
   const [approveGJ, { isLoading: loadingGJApprove }] = useApproveGJMutation();
+  const [approveGJDM, { isLoading: loadingGJDMApprove }] =
+    useApproveGJDMMutation();
 
   const [voidCVoucher, { isLoading: loadingVoidCV }] =
     useVoidCVoucherMutation();
@@ -205,9 +197,6 @@ const TransactionModalApprover = () => {
 
   const [voidedCVoucher, { isLoading: loadingVoidedCV }] =
     useVoidedCVoucherMutation();
-
-  const [voidedJVoucher, { isLoading: loadingVoidedJV }] =
-    useVoidedJVoucherMutation();
 
   const [prepareCheck, { isLoading: loadingPrep }] =
     usePrepareCVoucherMutation();
@@ -355,13 +344,12 @@ const TransactionModalApprover = () => {
       ap_tagging_id: menuData?.apTagging?.id,
     };
 
-    const transactId = {
-      id: menuData?.transactions?.id,
-    };
     try {
       const res =
         voucher === "check"
           ? await approveCheckEntry(obj).unwrap()
+          : menuData?.coa?.name?.startsWith("CIB")
+          ? await approveGJDM(obj).unwrap()
           : await approveGJ(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
       dispatch(resetMenu());
@@ -377,10 +365,7 @@ const TransactionModalApprover = () => {
     };
 
     try {
-      const res =
-        voucher === "check"
-          ? await voidedCVoucher(obj).unwrap()
-          : await voidedJVoucher(obj).unwrap();
+      const res = await voidedCVoucher(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
       dispatch(resetMenu());
       dispatch(resetPrompt());
@@ -390,9 +375,9 @@ const TransactionModalApprover = () => {
   };
 
   const componentRef = useRef();
+  const print2307Ref = useRef();
 
   const vpCheck = parseInt(vpCheckNumber?.result) + 1;
-  const vpJournal = parseInt(vpJournalNumber?.result) + 1;
 
   const year = Math.floor(menuData?.transactions?.tag_year / 100);
   const month = menuData?.transactions?.tag_year % 100;
@@ -409,47 +394,12 @@ const TransactionModalApprover = () => {
     0
   );
 
-  const printPdf = () => {
-    const month =
-      new Date(menuData?.transactions?.date_received).getMonth() + 1;
-    const quarter = Math.ceil(month / 3);
-    const quarterStartMonth = 3 * (quarter - 1) + 1; // Calculate the starting month of the quarter
-    const monthInQuarter = month - quarterStartMonth + 1;
-
-    const supplier = tin?.result?.find(
-      (item) => menuData?.transactions?.supplier?.id === item?.id
-    );
-
-    const atc_tax = taxComputation?.result?.find((item) => item?.credit === 0);
-    const atc_name = atc?.result?.find((item) => atc_tax?.atc_id === item.id);
-    const code = supplier?.company_address;
-
-    const parts = code?.split(",");
-
-    const zipCode = parts[parts?.length - 1].trim();
-    const hasValidZipCodeFormat = /^\d{4}$/.test(zipCode);
-
-    const obj = {
-      quarter,
-      code: hasValidZipCodeFormat ? zipCode : "",
-      supplier,
-      month: monthInQuarter,
-      atc: atc_name?.code,
-      tax: taxComputation?.result,
-    };
-
-    printPDF(obj);
-  };
-
   const handlePrepareCheck = async () => {
     const obj = {
       check_ids: [menuData?.id],
     };
     try {
-      const res =
-        voucher === "check"
-          ? await prepareCheck(obj).unwrap()
-          : await voidedJVoucher(obj).unwrap();
+      const res = await prepareCheck(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
       dispatch(resetMenu());
       dispatch(resetPrompt());
@@ -474,9 +424,7 @@ const TransactionModalApprover = () => {
                     (voucher === "check" ? "VPRL" : "GJRL") +
                       formattedDate +
                       "-" +
-                      (voucher === "check"
-                        ? vpCheck.toString().padStart(4, "0")
-                        : vpJournal.toString().padStart(4, "0"))}
+                      vpCheck.toString().padStart(4, "0")}
                   {menuData?.voucher_number !== null &&
                     menuData?.voucher_number}
                 </Typography>
@@ -495,11 +443,7 @@ const TransactionModalApprover = () => {
                 align="center"
                 className="voucher-type-header"
               >
-                <Typography>
-                  {voucher === "check"
-                    ? "VOUCHER'S PAYABLE"
-                    : "GENERAL JOURNAL"}
-                </Typography>
+                <Typography>VOUCHER'S PAYABLE</Typography>
               </TableCell>
               <TableCell
                 colSpan={2}
@@ -879,11 +823,7 @@ const TransactionModalApprover = () => {
                 colSpan={2}
                 rowSpan={3}
                 className="voucher-payment-footer-sign"
-              >
-                <Typography>
-                  Payment Received (Signature Over Printed Name, Date)
-                </Typography>
-              </TableCell>
+              ></TableCell>
             </TableRow>
             <TableRow>
               <TableCell
@@ -922,9 +862,7 @@ const TransactionModalApprover = () => {
                     (voucher === "check" ? "VPRL" : "GJRL") +
                       formattedDate +
                       "-" +
-                      (voucher === "check"
-                        ? vpCheck.toString().padStart(4, "0")
-                        : vpJournal.toString().padStart(4, "0"))}
+                      vpCheck.toString().padStart(4, "0")}
                   {menuData?.voucher_number !== null &&
                     menuData?.voucher_number}
                 </Typography>
@@ -943,7 +881,8 @@ const TransactionModalApprover = () => {
           </TableBody>
         </Table>
         <Typography className="disclaimer-voucher-signature">
-          **This voucher is system-generated and does not require a signature.**
+          **This document is computer-generated and does not require a
+          signature.**
         </Typography>
       </TableContainer>
 
@@ -999,14 +938,18 @@ const TransactionModalApprover = () => {
           {checkAtc() &&
             menuData?.state === "approved" &&
             hasAccess("ap_tag") && (
-              <Button
-                variant="contained"
-                color="success"
-                className="add-transaction-button"
-                onClick={() => printPdf()}
-              >
-                Print 2307
-              </Button>
+              <ReactToPrint
+                trigger={() => (
+                  <Button
+                    variant="contained"
+                    color="success"
+                    className="add-transaction-button"
+                  >
+                    Print 2307
+                  </Button>
+                )}
+                content={() => print2307Ref.current}
+              />
             )}
         </Box>
         <Box className="archive-transaction-button-container">
@@ -1091,12 +1034,11 @@ const TransactionModalApprover = () => {
           loadingReturnGJ ||
           loadingGJApprove ||
           loadingVp ||
-          loadingJournalVP ||
           loadingVoidCV ||
           loadingVoidGJ ||
           loadingVoidedCV ||
-          loadingVoidedJV ||
-          loadingPrep
+          loadingPrep ||
+          loadingGJDMApprove
         }
         className="loading-transaction-create"
       >
@@ -1147,6 +1089,8 @@ const TransactionModalApprover = () => {
       >
         <ClearCheck />
       </Dialog>
+
+      <Print2307 ref={print2307Ref} />
     </Paper>
   );
 };

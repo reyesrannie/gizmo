@@ -28,10 +28,10 @@ import {
 } from "../../services/slice/transactionSlice";
 import { setHeader } from "../../services/slice/headerSlice";
 import { resetMenu, setCreateMenu } from "../../services/slice/menuSlice";
-import { useGeneralJournalQuery } from "../../services/store/seconAPIRequest";
 import useApHook from "../../services/hooks/useApHook";
 import GeneralJournalModal from "../../components/customs/modal/GeneralJournalModal";
 import { setVoucher } from "../../services/slice/optionsSlice";
+import { useGeneralJournalQuery } from "../../services/api/generalJournalApi";
 
 const GeneralJournal = () => {
   const dispatch = useDispatch();

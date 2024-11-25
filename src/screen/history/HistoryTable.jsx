@@ -46,10 +46,6 @@ import {
   setViewMenu,
 } from "../../services/slice/menuSlice";
 
-import {
-  useDocumentTypeQuery,
-  usePrepareCVoucherMutation,
-} from "../../services/store/request";
 import { AdditionalFunction } from "../../services/functions/AdditionalFunction";
 import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
 import { Controller, useForm } from "react-hook-form";
@@ -63,6 +59,8 @@ import { LoadingButton } from "@mui/lab";
 import { useHistoryContext } from "../../services/context/HistoryContext";
 import { setVoucher } from "../../services/slice/optionsSlice";
 import { setDisplayed } from "../../services/slice/syncSlice";
+import { useDocumentTypeQuery } from "../../services/api/documentTypeApi";
+import { usePrepareCVoucherMutation } from "../../services/api/checkVoucherApi";
 
 const HistoryTable = ({ onOrderBy }) => {
   const [anchorE1, setAnchorE1] = useState(null);
@@ -323,6 +321,13 @@ const HistoryTable = ({ onOrderBy }) => {
                       <StatusIndicator
                         status="For Voiding"
                         className="voiding-indicator"
+                      />
+                    )}
+
+                    {tag?.state === "Completed" && (
+                      <StatusIndicator
+                        status="Completed"
+                        className="approved-indicator"
                       />
                     )}
 

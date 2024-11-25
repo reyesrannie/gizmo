@@ -35,10 +35,6 @@ import noData from "../../../assets/lottie/NoData.json";
 import RolesModal from "../../../components/customs/modal/RolesModal";
 import warning from "../../../assets/svg/warning.svg";
 
-import {
-  useArchiveRoleMutation,
-  useRoleQuery,
-} from "../../../services/store/request";
 import { useDispatch, useSelector } from "react-redux";
 import {
   setRolesData,
@@ -59,6 +55,10 @@ import AppPrompt from "../../../components/customs/AppPrompt";
 import { resetPrompt, setWarning } from "../../../services/slice/promptSlice";
 import { enqueueSnackbar } from "notistack";
 import { singleError } from "../../../services/functions/errorResponse";
+import {
+  useArchiveRoleMutation,
+  useRoleQuery,
+} from "../../../services/api/roleApi";
 
 const RoleManagement = () => {
   const roleOpen = useSelector((state) => state.menu.roles);
