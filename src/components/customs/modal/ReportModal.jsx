@@ -22,11 +22,14 @@ import loadingLight from "../../../assets/lottie/Loading.json";
 import Lottie from "lottie-react";
 
 import reportSchema from "../../../schemas/reportSchema";
-import { reportOptions } from "../../../services/constants/reports";
+import { reportOptions, reports } from "../../../services/constants/reports";
 import Autocomplete from "../AutoComplete";
 import { useReportQuery } from "../../../services/store/request";
 import useReportHook from "../../../services/hooks/useReportHook";
 import { setMenuData, setViewMenu } from "../../../services/slice/menuSlice";
+import { useLazyReportExcelQuery } from "../../../services/api/reportsApi";
+import { singleError } from "../../../services/functions/errorResponse";
+import { enqueueSnackbar } from "notistack";
 
 const ReportModal = () => {
   const dispatch = useDispatch();
@@ -40,29 +43,37 @@ const ReportModal = () => {
   } = useForm({
     resolver: yupResolver(reportSchema),
     defaultValues: {
-      report: null,
+      report_type: null,
     },
   });
 
   const { params } = useReportHook();
 
-  const {
-    data: reportData,
-    isError,
-    isLoading,
-  } = useReportQuery(
-    { ...params, tag_year: menuData?.tag_year },
-    {
-      skip: watch("report") === null || menuData?.tag_year === undefined,
-    }
-  );
+  // const {
+  //   data: reportData,
+  //   isError,
+  //   isLoading,
+  // } = useReportQuery(
+  //   { ...params, tag_year: menuData?.tag_year },
+  //   {
+  //     skip: watch("report") === null || menuData?.tag_year === undefined,
+  //   }
+  // );
+
+  const [generateReport, { data: reportData, isError, isLoading, isFetching }] =
+    useLazyReportExcelQuery();
 
   const submitHandler = async (submitData) => {
-    const generate = submitData?.report?.function;
+    const obj = {
+      report_type: submitData?.report_type?.value,
+      name: submitData?.report_type?.name,
+      ...menuData,
+    };
+
     try {
-      await generate(reportData, menuData, submitData?.report?.name);
+      const res = await generateReport(obj).unwrap();
     } catch (error) {
-      console.log(error);
+      singleError(error, enqueueSnackbar);
     }
   };
 
@@ -85,8 +96,8 @@ const ReportModal = () => {
       >
         <Autocomplete
           control={control}
-          name={"report"}
-          options={reportOptions || []}
+          name={"report_type"}
+          options={reports || []}
           getOptionLabel={(option) => `${option?.name}`}
           isOptionEqualToValue={(option, value) => option?.name === value?.name}
           renderInput={(params) => (
@@ -96,15 +107,15 @@ const ReportModal = () => {
               label="Report *"
               size="small"
               variant="outlined"
-              error={Boolean(errors?.report)}
-              helperText={errors?.report?.message}
+              error={Boolean(errors?.report_type)}
+              helperText={errors?.report_type?.message}
               className="transaction-form-textBox receive"
             />
           )}
         />
         <Box className="app-prompt-button-container">
           <LoadingButton
-            disabled={reportData === undefined || isError}
+            // disabled={reportData === undefined || isError}
             variant="contained"
             color="warning"
             className="change-password-button"
@@ -126,7 +137,7 @@ const ReportModal = () => {
         </Box>
       </form>
 
-      <Dialog open={isLoading} className="loading-role-create">
+      <Dialog open={isLoading || isFetching} className="loading-role-create">
         <Lottie animationData={loadingLight} loop />
       </Dialog>
     </Paper>

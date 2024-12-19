@@ -45,6 +45,7 @@ import {
   approverHeader,
   approverScheduleHeader,
   checkHeader,
+  clearingHeader,
   schedAPHeader,
   schedTaggingHeader,
   taggingHeader,
@@ -248,6 +249,18 @@ const tagging = [
       <NavigationOutlinedIcon className="icon-last" color="secondary" />
     ),
   },
+  {
+    path: "/tagging/history",
+    desc: "History of transaction by year and month",
+    name: "History",
+    permission: ["tagging_history"],
+    firstIcon: (
+      <FolderOpenOutlinedIcon color="secondary" className="icon-card-details" />
+    ),
+    lastIcon: (
+      <NavigationOutlinedIcon className="icon-last" color="secondary" />
+    ),
+  },
 ];
 
 const apTransaction = [
@@ -281,18 +294,6 @@ const apTransaction = [
       <NavigationOutlinedIcon className="icon-last" color="secondary" />
     ),
   },
-  // {
-  //   path: "/ap/journal",
-  //   desc: "Journal Voucher transaction",
-  //   name: "Journal Voucher",
-  //   permission: ["ap_tag"],
-  //   firstIcon: (
-  //     <NewspaperOutlinedIcon color="secondary" className="icon-card-details" />
-  //   ),
-  //   lastIcon: (
-  //     <NavigationOutlinedIcon className="icon-last" color="secondary" />
-  //   ),
-  // },
   {
     path: "/ap/general-journal",
     desc: "General Journal transaction",
@@ -338,7 +339,7 @@ const approver = [
     path: "/approver/general-journal",
     desc: "General Journal transaction",
     name: "General Journal",
-    permission: ["approver"],
+    permission: ["gj_approver"],
     firstIcon: (
       <NewspaperOutlinedIcon color="secondary" className="icon-card-details" />
     ),
@@ -346,28 +347,43 @@ const approver = [
       <NavigationOutlinedIcon className="icon-last" color="secondary" />
     ),
   },
-  // {
-  //   path: "/approver/approvejournal",
-  //   desc: "Approving of journal entries to appropriate Approver.",
-  //   name: "Journal Approval",
-  //   permission: ["approver"],
-  //   firstIcon: (
-  //     <TaskOutlinedIcon color="secondary" className="icon-card-details" />
-  //   ),
-  //   lastIcon: (
-  //     <NavigationOutlinedIcon className="icon-last" color="secondary" />
-  //   ),
-  // },
+  {
+    path: "/approver/history",
+    desc: "Voucher's Payable history.",
+    name: "History",
+    permission: ["history_approver"],
+    firstIcon: (
+      <FolderOpenOutlinedIcon color="secondary" className="icon-card-details" />
+    ),
+    lastIcon: (
+      <NavigationOutlinedIcon className="icon-last" color="secondary" />
+    ),
+  },
 ];
 
 const treasury = [
   {
     path: "/treasury/check",
-    desc: "Preparation of Check to clearing of check process",
+    desc: "Preparation of Check process",
     name: "Check Voucher",
-    permission: ["preparation", "releasing", "clearing", "check_approval"],
+    permission: ["preparation", "releasing", "check_approval"],
     firstIcon: (
       <PlaylistAddCheckOutlinedIcon
+        color="secondary"
+        className="icon-card-details"
+      />
+    ),
+    lastIcon: (
+      <NavigationOutlinedIcon className="icon-last" color="secondary" />
+    ),
+  },
+  {
+    path: "/treasury/clearing",
+    desc: "Clearing of Check process",
+    name: "Check Clearing",
+    permission: ["clearing"],
+    firstIcon: (
+      <CreditScoreOutlinedIcon
         color="secondary"
         className="icon-card-details"
       />
@@ -380,7 +396,7 @@ const treasury = [
     path: "/treasury/checknumber",
     desc: "Checks status",
     name: "Check Number",
-    permission: ["preparation", "releasing", "clearing"],
+    permission: ["check_status"],
     firstIcon: (
       <CreditScoreRoundedIcon color="secondary" className="icon-card-details" />
     ),
@@ -392,7 +408,7 @@ const treasury = [
     path: "/treasury/debit-memo",
     desc: "Debit memo list",
     name: "Debit Memo",
-    permission: ["preparation", "releasing", "clearing"],
+    permission: ["debit_memo"],
     firstIcon: (
       <SummarizeOutlinedIcon color="secondary" className="icon-card-details" />
     ),
@@ -404,7 +420,19 @@ const treasury = [
     path: "/treasury/offset",
     desc: "Masterlist of Checks available",
     name: "Offset list",
-    permission: ["preparation", "releasing", "clearing"],
+    permission: ["offset"],
+    firstIcon: (
+      <LocalOfferOutlinedIcon color="secondary" className="icon-card-details" />
+    ),
+    lastIcon: (
+      <NavigationOutlinedIcon className="icon-last" color="secondary" />
+    ),
+  },
+  {
+    path: "/treasury/balance",
+    desc: "Setup Beginning Balance",
+    name: "Beginning Balance",
+    permission: ["balance"],
     firstIcon: (
       <LocalOfferOutlinedIcon color="secondary" className="icon-card-details" />
     ),
@@ -662,6 +690,13 @@ const menu = [
           };
         }),
       },
+      {
+        desc: "History",
+        icon: <FolderOpenOutlinedIcon />,
+        path: "/tagging/history",
+        permission: ["tagging_history"],
+        child: [],
+      },
     ],
   },
   {
@@ -689,19 +724,7 @@ const menu = [
           };
         }),
       },
-      // {
-      //   desc: "Journal Voucher",
-      //   icon: <NewspaperOutlinedIcon />,
-      //   path: "/ap/journal",
-      //   permission: ["ap_tag"],
-      //   child: apHeader?.map((item) => {
-      //     return {
-      //       permission: item?.permission,
-      //       desc: item?.name,
-      //       icon: <MediationOutlinedIcon />,
-      //     };
-      //   }),
-      // },
+
       {
         desc: "General Journal",
         icon: <NewspaperOutlinedIcon />,
@@ -734,7 +757,7 @@ const menu = [
     desc: "Approver",
     icon: <FactCheckOutlinedIcon />,
     path: "/approver",
-    permission: ["approver"],
+    permission: ["approver", "gj_approver", "history_approver"],
     children: [
       {
         desc: "Voucher Approval",
@@ -753,7 +776,7 @@ const menu = [
         desc: "General Journal",
         icon: <NewspaperOutlinedIcon />,
         path: "/approver/general-journal",
-        permission: ["approver"],
+        permission: ["gj_approver"],
         child: approverGJHeader?.map((item) => {
           return {
             permission: item?.permission,
@@ -766,7 +789,7 @@ const menu = [
         desc: "History",
         icon: <FolderOpenOutlinedIcon />,
         path: "/approver/history",
-        permission: ["approver"],
+        permission: ["history_approver"],
         child: apHistoryHeader?.map((item) => {
           return {
             permission: item?.permission,
@@ -775,19 +798,6 @@ const menu = [
           };
         }),
       },
-      // {
-      //   desc: "Journal Approval",
-      //   icon: <TaskOutlinedIcon />,
-      //   path: "/approver/approvejournal",
-      //   permission: ["approver"],
-      //   child: approverHeader?.map((item) => {
-      //     return {
-      //       permission: item?.permission,
-      //       desc: item?.name,
-      //       icon: <MediationOutlinedIcon />,
-      //     };
-      //   }),
-      // },
     ],
   },
   {
@@ -810,22 +820,35 @@ const menu = [
         }),
       },
       {
+        desc: "Check Clearing",
+        icon: <CreditScoreOutlinedIcon />,
+        path: "/treasury/clearing",
+        permission: ["clearing"],
+        child: clearingHeader?.map((item) => {
+          return {
+            permission: item?.permission,
+            desc: item?.name,
+            icon: <MediationOutlinedIcon />,
+          };
+        }),
+      },
+      {
         desc: "Bank",
         icon: <CreditScoreRoundedIcon />,
         path: "/treasury/bank",
-        permission: ["bank_registry"],
+        permission: ["bank_registry", "check_registry"],
       },
       {
         desc: "Debit Memo",
         icon: <SummarizeOutlinedIcon />,
         path: "/treasury/debit-memo",
-        permission: ["preparation", "releasing", "clearing"],
+        permission: ["debit_memo"],
       },
       {
         desc: "Offset",
         icon: <LocalOfferOutlinedIcon />,
         path: "/treasury/offset",
-        permission: ["preparation", "releasing", "clearing"],
+        permission: ["offset"],
       },
       {
         desc: "Balance",
@@ -975,6 +998,10 @@ const routes = [
         path: "/tagging/tagtransact",
         name: "Tag Transaction",
       },
+      {
+        path: "/tagging/history",
+        name: "History",
+      },
     ],
   },
   {
@@ -1062,6 +1089,10 @@ const routes = [
       {
         path: "/treasury/check",
         name: "Check Voucher",
+      },
+      {
+        path: "/treasury/clearing",
+        name: "Check Clearing",
       },
       {
         path: "/treasury/bank",

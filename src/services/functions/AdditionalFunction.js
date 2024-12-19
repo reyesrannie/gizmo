@@ -51,5 +51,14 @@ export const AdditionalFunction = () => {
     return value?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
-  return { insertDocument, deepEqual, convertToPeso };
+  const totalValue = (item, props) => {
+    const totalAmount = item?.reduce((acc, curr) => {
+      const value = parseFloat(curr?.[props] || 0);
+      return acc + value;
+    }, 0);
+
+    return totalAmount;
+  };
+
+  return { insertDocument, deepEqual, convertToPeso, totalValue };
 };

@@ -45,6 +45,8 @@ import {
   setMenuData,
   setMenuDataMultiple,
   setPreparation,
+  setTreasuryMenu,
+  setUpdateData,
   setUpdateMenu,
   setViewAccountingEntries,
   setViewMenu,
@@ -67,9 +69,11 @@ import { LoadingButton } from "@mui/lab";
 import MultipleVoucherPrinting from "../../components/customs/MultipleVoucherPrinting";
 import { useDocumentTypeQuery } from "../../services/api/documentTypeApi";
 import {
+  useFileCVoucherMutation,
   usePrepareCVoucherMutation,
   useReadTransactionCheckMutation,
 } from "../../services/api/checkVoucherApi";
+import TreasuryModal from "../../components/customs/modal/TreasuryModal";
 
 const CheckTable = ({
   params,
@@ -89,16 +93,15 @@ const CheckTable = ({
 
   const createMenu = useSelector((state) => state.menu.createMenu);
   const updateMenu = useSelector((state) => state.menu.updateMenu);
+  const treasuryMenu = useSelector((state) => state.menu.treasuryMenu);
   const viewMenu = useSelector((state) => state.menu.viewMenu);
   const preparation = useSelector((state) => state.menu.preparation);
-
-  const userData = useSelector((state) => state.auth.userData);
-
-  const { convertToPeso } = AdditionalFunction();
-
   const viewAccountingEntries = useSelector(
     (state) => state.menu.viewAccountingEntries
   );
+  const userData = useSelector((state) => state.auth.userData);
+
+  const { convertToPeso } = AdditionalFunction();
 
   const { data: documentType, isLoading: loadingDocument } =
     useDocumentTypeQuery({
@@ -110,6 +113,8 @@ const CheckTable = ({
 
   const [prepareCheck, { isLoading: loadingPrep }] =
     usePrepareCVoucherMutation();
+
+  const [fileVoucher, { isLoading: loadingFiling }] = useFileCVoucherMutation();
 
   const handleRead = async (data) => {
     const obj = {
@@ -145,9 +150,27 @@ const CheckTable = ({
     }
   };
 
-  const submitHandler = async (submitData) => {
+  const submitHandler = async () => {
+    const obj = {
+      check_ids: watch("check_ids"),
+    };
     try {
-      const res = await prepareCheck(submitData).unwrap();
+      const res = await prepareCheck(obj).unwrap();
+      enqueueSnackbar(res?.message, { variant: "success" });
+      setValue("check_ids", []);
+      dispatch(resetMenu());
+      dispatch(resetPrompt());
+    } catch (error) {
+      singleError(error, enqueueSnackbar);
+    }
+  };
+
+  const filingHandler = async () => {
+    const obj = {
+      check_ids: watch("check_ids"),
+    };
+    try {
+      const res = await fileVoucher(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
       setValue("check_ids", []);
       dispatch(resetMenu());
@@ -176,7 +199,8 @@ const CheckTable = ({
           <Table stickyHeader>
             <TableHead>
               <TableRow className="table-header1-import-tag-transaction">
-                {params?.state === "approved" && (
+                {(params?.state === "approved" ||
+                  params?.state === "Cleared") && (
                   <TableCell align="center">
                     <FormControlLabel
                       className="check-box-archive-ap"
@@ -254,10 +278,15 @@ const CheckTable = ({
             </TableHead>
 
             <TableBody>
-              {loadingPrep || loadingDocument || isLoading ? (
+              {loadingFiling || loadingPrep || loadingDocument || isLoading ? (
                 <TableRow>
                   <TableCell
-                    colSpan={params?.state === "approved" ? 7 : 6}
+                    colSpan={
+                      params?.state === "approved" ||
+                      params?.state === "Cleared"
+                        ? 7
+                        : 6
+                    }
                     align="center"
                   >
                     <Lottie
@@ -269,7 +298,12 @@ const CheckTable = ({
               ) : isError ? (
                 <TableRow>
                   <TableCell
-                    colSpan={params?.state === "approved" ? 7 : 6}
+                    colSpan={
+                      params?.state === "approved" ||
+                      params?.state === "Cleared"
+                        ? 7
+                        : 6
+                    }
                     align="center"
                   >
                     <Lottie
@@ -291,7 +325,22 @@ const CheckTable = ({
                       className="table-body-tag-transaction"
                       key={tag?.id}
                       onClick={() => {
-                        dispatch(setMenuData(tag));
+                        tag?.state !== "Cleared" && dispatch(setMenuData(tag));
+                        tag?.state === "Cleared" &&
+                          dispatch(
+                            setMenuDataMultiple(
+                              tag?.treasuryChecks[0]?.batch?.length === 1 ||
+                                tag?.treasuryChecks.length === 0
+                                ? [tag] || []
+                                : tag?.treasuryChecks[0]?.batch?.map(
+                                    (item) => ({
+                                      ...item,
+                                      treasuryChecks: tag?.treasuryChecks,
+                                    })
+                                  )
+                            )
+                          );
+
                         dispatch(setVoucher("check"));
                         tag?.is_read === 0 &&
                           tag?.state !== "For Approval" &&
@@ -300,8 +349,7 @@ const CheckTable = ({
                           tag?.state !== "Released" &&
                           handleRead(tag);
 
-                        (tag?.state === "Filed" ||
-                          tag?.state === "approved" ||
+                        (tag?.state === "approved" ||
                           tag?.state === "voided" ||
                           tag?.state === "For Voiding" ||
                           tag?.state === "Check Approval") &&
@@ -316,9 +364,13 @@ const CheckTable = ({
                         (tag?.state === "For Preparation" ||
                           tag?.state === "Released") &&
                           dispatch(setPreparation(true));
+
+                        tag?.state === "Cleared" &&
+                          dispatch(setTreasuryMenu(true));
                       }}
                     >
-                      {params?.state === "approved" && (
+                      {(params?.state === "approved" ||
+                        params?.state === "Cleared") && (
                         <TableCell align="center">
                           <FormControlLabel
                             className="check-box-archive-ap"
@@ -469,22 +521,10 @@ const CheckTable = ({
                           />
                         )}
 
-                        {tag?.state === "Released" && (
+                        {tag?.state === "Cleared" && (
                           <StatusIndicator
-                            status={
-                              tag?.is_filed !== null
-                                ? "Filed"
-                                : tag?.is_cleared !== null
-                                ? "Cleared"
-                                : "Released"
-                            }
-                            className={
-                              tag?.is_filed !== null
-                                ? "clearing-indicator"
-                                : tag?.is_cleared !== null
-                                ? "clearing-indicator"
-                                : "approved-indicator"
-                            }
+                            status="For Filing"
+                            className="release-indicator"
                           />
                         )}
 
@@ -561,33 +601,45 @@ const CheckTable = ({
                   {watch("check_ids").length !== 0 && (
                     <TableCell align="center">
                       <LoadingButton
-                        loading={loadingPrep}
+                        loading={loadingPrep || loadingFiling}
                         variant="contained"
                         color="warning"
                         className="add-transaction-button treasury"
-                        type="submit"
+                        onClick={() =>
+                          params?.state === "approved"
+                            ? submitHandler()
+                            : filingHandler()
+                        }
                       >
                         {params?.state === "approved" ? "Prepare" : "File"}
                       </LoadingButton>
                     </TableCell>
                   )}
-                  {watch("check_ids").length !== 0 && (
-                    <TableCell align="left">
-                      <LoadingButton
-                        loading={loadingPrep}
-                        variant="contained"
-                        color="success"
-                        className="add-transaction-button treasury"
-                        onClick={() => {
-                          dispatch(setVoucher("check"));
-                          dispatch(setCreateMenu(true));
-                        }}
-                      >
-                        Print
-                      </LoadingButton>
-                    </TableCell>
-                  )}
-                  <TableCell colSpan={params?.state === "approved" ? 7 : 6}>
+                  {watch("check_ids").length !== 0 &&
+                    params?.state === "approved" && (
+                      <TableCell align="left">
+                        <LoadingButton
+                          loading={loadingPrep}
+                          variant="contained"
+                          color="success"
+                          className="add-transaction-button treasury"
+                          onClick={() => {
+                            dispatch(setVoucher("check"));
+                            dispatch(setCreateMenu(true));
+                          }}
+                        >
+                          Print
+                        </LoadingButton>
+                      </TableCell>
+                    )}
+                  <TableCell
+                    colSpan={
+                      params?.state === "approved" ||
+                      params?.state === "Cleared"
+                        ? 7
+                        : 6
+                    }
+                  >
                     <TablePagination
                       rowsPerPageOptions={[
                         5,
@@ -725,6 +777,17 @@ const CheckTable = ({
         }}
       >
         <MultipleVoucherPrinting afterPrint={handleAfterPrint} />
+      </Dialog>
+
+      <Dialog
+        open={treasuryMenu}
+        className="transaction-modal-dialog"
+        onClose={() => {
+          dispatch(setCreateMenu(false));
+          dispatch(resetOption());
+        }}
+      >
+        <TreasuryModal />
       </Dialog>
     </Box>
   );

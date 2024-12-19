@@ -229,8 +229,9 @@ export const socketEvents = [
       "TagYear",
       "CountTreasury",
       "DashboardBalance",
+      "CheckDetails",
     ],
-    action: ["Treasury"],
+    action: ["dispatch"],
   },
   {
     channel: "schedule.created",
@@ -276,15 +277,38 @@ export const socketEvents = [
 
   {
     channel: "general-journal.created",
-    event: "generalJournalCreated",
+    event: ".generalJournalCreated",
     tags: ["GeneralJournal", "CountGJ"],
     action: ["dispatch"],
   },
 
   {
     channel: "general-journal.updated",
-    event: "generalJournalUpdated",
+    event: ".generalJournalUpdated",
     tags: ["GeneralJournal", "CountGJ"],
+    action: ["dispatch"],
+  },
+  {
+    channel: "is-print.updated",
+    event: ".isPrintUpdated",
+    tags: ["CheckEntries", "Logs", "CountCheck", "CountTreasury"],
+    action: ["dispatch"],
+  },
+
+  {
+    channel: "check-number.updated",
+    event: ".checkNumberUpdated",
+    tags: [
+      "SchedTransact",
+      "Transaction",
+      "CountTransaction",
+      "CountCheck",
+      "CountVoucher",
+      "CheckEntries",
+      "CountSchedule",
+      "CountTreasury",
+      "CheckDetails",
+    ],
     action: ["dispatch"],
   },
 ];

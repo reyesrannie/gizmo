@@ -16,7 +16,9 @@ const bankSelectSchema = Yup.object({
   title: Yup.object().when("type", {
     is: (type) => type === "CHECK VOUCHER",
     then: () =>
-      Yup.object().required("Title is required").typeError("Title is required"),
+      Yup.object()
+        .required("Check series name is required")
+        .typeError("Check series name is required"),
     otherwise: () => Yup.string().nullable(),
   }),
 }).required();

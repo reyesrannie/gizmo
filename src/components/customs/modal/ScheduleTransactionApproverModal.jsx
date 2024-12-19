@@ -54,6 +54,7 @@ import {
   useReturnSchedTransactionMutation,
 } from "../../../services/api/scheduledTransactionApi";
 import { useStatusScheduleLogsQuery } from "../../../services/api/logsApi";
+import { AdditionalFunction } from "../../../services/functions/AdditionalFunction";
 
 const ScheduleTransactionApproverModal = ({
   view,
@@ -64,10 +65,10 @@ const ScheduleTransactionApproverModal = ({
   voiding,
 }) => {
   const dispatch = useDispatch();
+  const { convertToPeso } = AdditionalFunction();
   const isReturn = useSelector((state) => state.prompt.return);
   const menuData = useSelector((state) => state.menu.menuData);
   const computationMenu = useSelector((state) => state.menu.computationMenu);
-
   const voucherData = useSelector((state) => state.transaction.voucherData);
 
   const {
@@ -79,11 +80,7 @@ const ScheduleTransactionApproverModal = ({
     pagination: "none",
   });
 
-  const {
-    data: document,
-    isLoading: loadingDocument,
-    isSuccess: documentSuccess,
-  } = useDocumentTypeQuery({
+  const { data: document, isSuccess: documentSuccess } = useDocumentTypeQuery({
     status: "active",
     pagination: "none",
   });
@@ -222,10 +219,6 @@ const ScheduleTransactionApproverModal = ({
     documentSuccess,
     document,
   ]);
-
-  const convertToPeso = (value) => {
-    return value?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  };
 
   const returnHandler = async (submitData) => {
     const obj = {

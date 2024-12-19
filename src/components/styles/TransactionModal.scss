@@ -207,6 +207,9 @@
   align-items: center;
   justify-content: center;
   margin-bottom: 20px;
+  border: 1px solid #c4c4c4;
+  border-radius: 10px;
+  padding: 10px;
 }
 
 .form-container-transaction.width {
@@ -599,6 +602,13 @@
 .add-transaction-button.treasury {
   &.MuiButtonBase-root {
     width: 70%;
+  }
+}
+
+.add-transaction-button.clearing {
+  &.MuiButtonBase-root {
+    width: 50%;
+    color: #f4ce92;
   }
 }
 

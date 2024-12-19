@@ -6,6 +6,20 @@
   }
 }
 
+.dashboard-paper {
+  &.MuiPaper-root {
+    display: flex;
+    flex-direction: column;
+    border-radius: 10px;
+    justify-self: center;
+    width: 92%;
+    height: fit-content;
+    padding: 10px;
+    margin-left: 60px;
+    margin-right: 60px;
+  }
+}
+
 .welcome-message {
   &.MuiBox-root {
     display: flex;
@@ -21,6 +35,23 @@
   }
 }
 
+.filter-dashboard-graph {
+  &.MuiBox-root {
+    display: flex;
+    width: 0px;
+    overflow: hidden;
+    justify-content: flex-end;
+    transition: all 0.7s ease;
+  }
+}
+
+.filter-dashboard-graph.open {
+  &.MuiBox-root {
+    justify-content: flex-end;
+    width: 100%;
+  }
+}
+
 .welcome-details {
   &.MuiBox-root {
     display: flex;
@@ -30,6 +61,7 @@
     margin-left: 60px;
   }
 }
+
 .welcome-text {
   &.MuiTypography-root {
     font-family: "Roboto-bold";
@@ -54,8 +86,11 @@
 .dashboard-card-container {
   &.MuiBox-root {
     display: flex;
+    align-items: center;
+    justify-content: center;
     flex-direction: row;
     margin-left: 60px;
+    margin-right: 60px;
     flex-wrap: wrap;
   }
 }

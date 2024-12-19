@@ -21,47 +21,17 @@ import {
   setUpdateTax,
   setViewAccountingEntries,
 } from "../../../services/slice/menuSlice";
-
 import { useSnackbar } from "notistack";
 import { singleError } from "../../../services/functions/errorResponse";
 import { resetPrompt, setWarning } from "../../../services/slice/promptSlice";
-import {
-  mapAPScheduleTransaction,
-  mapScheduleTransactionData,
-} from "../../../services/functions/mapObject";
-
-import "../../styles/TransactionModal.scss";
-import warningImg from "../../../assets/svg/warning.svg";
-
-import transaction from "../../../assets/svg/transaction.svg";
-import AppTextBox from "../AppTextBox";
-import loading from "../../../assets/lottie/Loading-2.json";
-import Autocomplete from "../AutoComplete";
-import TransactionDrawer from "../TransactionDrawer";
-
-import Lottie from "lottie-react";
-
-import AddIcon from "@mui/icons-material/Add";
-
-import LocalOfferOutlinedIcon from "@mui/icons-material/LocalOfferOutlined";
-import ViewQuiltOutlinedIcon from "@mui/icons-material/ViewQuiltOutlined";
-
-import TaxComputation from "./TaxComputation";
+import { mapAPScheduleTransaction } from "../../../services/functions/mapObject";
 import {
   resetOption,
   setDisableCheck,
 } from "../../../services/slice/optionsSlice";
-import ComputationMenu from "./ComputationMenu";
 import { totalAccount, totalAmount } from "../../../services/functions/compute";
-import TransactionModalApprover from "./TransactionModalApprover";
-
-import scheduleTransactionAPSchema from "../../../schemas/scheduleTransactionAPSchema";
 import { DatePicker } from "@mui/x-date-pickers";
-import DateChecker from "../../../services/functions/DateChecker";
-import { useNavigate } from "react-router-dom";
-import AppPrompt from "../AppPrompt";
 import { setHeader } from "../../../services/slice/headerSlice";
-import { useLocationQuery } from "../../../services/api/locationApi";
 import { useSupplierTypeQuery } from "../../../services/api/supplierTypeApi";
 import { useSupplierQuery } from "../../../services/api/supplierApi";
 import { useDocumentTypeQuery } from "../../../services/api/documentTypeApi";
@@ -74,27 +44,46 @@ import {
   useGenerateTransactionMutation,
   useResetSchedTransactionMutation,
 } from "../../../services/api/scheduledTransactionApi";
+import { AdditionalFunction } from "../../../services/functions/AdditionalFunction";
+
+import "../../styles/TransactionModal.scss";
+
+import warningImg from "../../../assets/svg/warning.svg";
+import transaction from "../../../assets/svg/transaction.svg";
+import AppTextBox from "../AppTextBox";
+import loading from "../../../assets/lottie/Loading-2.json";
+import Autocomplete from "../AutoComplete";
+import TransactionDrawer from "../TransactionDrawer";
+import Lottie from "lottie-react";
+import AddIcon from "@mui/icons-material/Add";
+import LocalOfferOutlinedIcon from "@mui/icons-material/LocalOfferOutlined";
+import ViewQuiltOutlinedIcon from "@mui/icons-material/ViewQuiltOutlined";
+import TaxComputation from "./TaxComputation";
+import ComputationMenu from "./ComputationMenu";
+import TransactionModalApprover from "./TransactionModalApprover";
+import scheduleTransactionAPSchema from "../../../schemas/scheduleTransactionAPSchema";
+
+import DateChecker from "../../../services/functions/DateChecker";
+import AppPrompt from "../AppPrompt";
 
 const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
-  const navigate = useNavigate();
   const dispatch = useDispatch();
-  const transactionData = useSelector((state) => state.menu.menuData);
-  const warning = useSelector((state) => state.prompt.warning);
+  const { convertToPeso } = AdditionalFunction();
+  const { isCoverageTodayTable } = DateChecker();
+  const { enqueueSnackbar } = useSnackbar();
 
+  const transactionData = useSelector((state) => state.menu.menuData);
   const createTax = useSelector((state) => state.menu.createTax);
   const updateTax = useSelector((state) => state.menu.updateTax);
+  const warning = useSelector((state) => state.prompt.warning);
   const computationMenu = useSelector((state) => state.menu.computationMenu);
   const viewAccountingEntries = useSelector(
     (state) => state.menu.viewAccountingEntries
   );
-  const { isCoverageTodayTable } = DateChecker();
-  const isToday = isCoverageTodayTable(transactionData);
-
   const disableButton = useSelector((state) => state.options.disableButton);
   const disableCheck = useSelector((state) => state.options.disableCheck);
   const voucher = useSelector((state) => state.options.voucher);
-
-  const { enqueueSnackbar } = useSnackbar();
+  const isToday = isCoverageTodayTable(transactionData);
 
   const {
     data: tin,
@@ -119,15 +108,6 @@ const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
     isLoading: loadingAccountNumber,
     isSuccess: accountSuccess,
   } = useAccountNumberQuery({
-    status: "active",
-    pagination: "none",
-  });
-
-  const {
-    data: location,
-    isLoading: loadingLocation,
-    isSuccess: locationSuccess,
-  } = useLocationQuery({
     status: "active",
     pagination: "none",
   });
@@ -219,7 +199,6 @@ const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
       supplySuccess &&
       documentSuccess &&
       accountSuccess &&
-      locationSuccess &&
       typeSuccess &&
       successTitles &&
       !hasRun?.current
@@ -249,7 +228,6 @@ const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
     supplySuccess,
     documentSuccess,
     accountSuccess,
-    locationSuccess,
     document,
     accountNumber,
     tin,
@@ -281,10 +259,6 @@ const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
     } catch (error) {
       singleError(error, enqueueSnackbar);
     }
-  };
-
-  const convertToPeso = (value) => {
-    return value?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
   const handleReset = async () => {
@@ -899,7 +873,6 @@ const ScheduleComputationModal = ({ view, update, receive, checked, ap }) => {
           loadingTIN ||
           loadingDocument ||
           loadingAccountNumber ||
-          loadingLocation ||
           loadingType ||
           loadingTitles ||
           loadingTax ||

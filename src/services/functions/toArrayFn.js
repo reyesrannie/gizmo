@@ -3,15 +3,11 @@ import { totalAccount } from "./compute";
 import dayjs from "dayjs";
 
 export const arrayFieldOne = (menuData, sumAmount, voucher, document) => {
-  const doc = document?.result?.find(
-    (item) => item?.id === menuData?.transactions?.documentType?.id
-  )?.code;
-
   const obj = [
     {
       date: moment(menuData?.transactions?.date_invoice).format("MM/DD/YY"),
       remarks: menuData?.remarks,
-      invoice: `${doc} ${menuData?.transactions?.invoice_no || ""} ${
+      invoice: `${menuData?.transactions?.invoice_no || ""} ${
         menuData?.transactions?.reference_no || ""
       }`,
       amount: sumAmount,
@@ -24,7 +20,7 @@ export const arrayFieldOne = (menuData, sumAmount, voucher, document) => {
     {
       date: moment(menuData?.transactions?.date_invoice).format("MM/DD/YY"),
       remarks: menuData?.remarks,
-      invoice: `${doc} ${menuData?.transactions?.invoice_no || ""} ${
+      invoice: `${menuData?.transactions?.invoice_no || ""} ${
         menuData?.transactions?.reference_no || ""
       }`,
       amount: sumAmount,

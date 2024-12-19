@@ -36,6 +36,36 @@ import {
   mapViewTransaction,
 } from "../../../services/functions/mapObject";
 import { resetLogs } from "../../../services/slice/logSlice";
+import {
+  clearValue,
+  transactionDefaultValue,
+} from "../../../services/constants/defaultValues";
+import { useNavigate } from "react-router-dom";
+import {
+  resetTransaction,
+  setAddDocuments,
+  setClearSearch,
+  setDocuments,
+} from "../../../services/slice/transactionSlice";
+import { AdditionalFunction } from "../../../services/functions/AdditionalFunction";
+import { convertToArray } from "../../../services/functions/toArrayFn";
+import { resetHeader } from "../../../services/slice/headerSlice";
+import { hasAccess, isAp } from "../../../services/functions/access";
+import { useLocationQuery } from "../../../services/api/locationApi";
+import { useApQuery } from "../../../services/api/apApi";
+import { useSupplierQuery } from "../../../services/api/supplierApi";
+import { useDocumentTypeQuery } from "../../../services/api/documentTypeApi";
+import { useAccountNumberQuery } from "../../../services/api/accountNumberApi";
+import {
+  useCreateTransactionMutation,
+  useReturnTransactionMutation,
+  useUpdateTransactionMutation,
+} from "../../../services/api/transactionApi";
+import {
+  useCheckTransactionQuery,
+  useCreateCheckEntriesMutation,
+} from "../../../services/api/vouchersPayableApi";
+import { useCutOffQuery } from "../../../services/api/cutOffApi";
 
 import "../../styles/TransactionModal.scss";
 import "../../styles/UserModal.scss";
@@ -51,50 +81,20 @@ import warningImg from "../../../assets/svg/warning.svg";
 import loadingLight from "../../../assets/lottie/Loading.json";
 import TransactionDrawer from "../TransactionDrawer";
 import receiveImg from "../../../assets/svg/receive.svg";
-
 import dayjs from "dayjs";
 import Lottie from "lottie-react";
 import ClearIcon from "@mui/icons-material/Clear";
-import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
 import HandshakeOutlinedIcon from "@mui/icons-material/HandshakeOutlined";
+import HighlightOffRoundedIcon from "@mui/icons-material/HighlightOffRounded";
+import RestoreIcon from "@mui/icons-material/Restore";
 import AddIcon from "@mui/icons-material/Add";
-
 import ReasonInput from "../ReasonInput";
-import {
-  clearValue,
-  transactionDefaultValue,
-} from "../../../services/constants/defaultValues";
-import { useNavigate } from "react-router-dom";
 import ShortcutHandler from "../../../services/functions/ShortcutHandler";
-
-import {
-  resetTransaction,
-  setAddDocuments,
-  setClearSearch,
-  setDocuments,
-} from "../../../services/slice/transactionSlice";
-import { AdditionalFunction } from "../../../services/functions/AdditionalFunction";
-import { convertToArray } from "../../../services/functions/toArrayFn";
 import DateChecker from "../../../services/functions/DateChecker";
-import { resetHeader } from "../../../services/slice/headerSlice";
-import { hasAccess, isAp } from "../../../services/functions/access";
+import ManageHistoryOutlinedIcon from "@mui/icons-material/ManageHistoryOutlined";
+import AddToPhotosOutlinedIcon from "@mui/icons-material/AddToPhotosOutlined";
+
 import moment from "moment";
-import { useLocationQuery } from "../../../services/api/locationApi";
-import { useApQuery } from "../../../services/api/apApi";
-import { useSupplierQuery } from "../../../services/api/supplierApi";
-import { useDocumentTypeQuery } from "../../../services/api/documentTypeApi";
-import { useAccountNumberQuery } from "../../../services/api/accountNumberApi";
-import {
-  useArchiveTransactionMutation,
-  useCreateTransactionMutation,
-  useReceiveTransactionMutation,
-  useUpdateTransactionMutation,
-} from "../../../services/api/transactionApi";
-import {
-  useCheckTransactionQuery,
-  useCreateCheckEntriesMutation,
-} from "../../../services/api/vouchersPayableApi";
-import { useCutOffQuery } from "../../../services/api/cutOffApi";
 
 const TransactionModal = () => {
   const dispatch = useDispatch();
@@ -107,7 +107,6 @@ const TransactionModal = () => {
   const updateCount = useSelector((state) => state.menu.updateCount);
   const transactionData = useSelector((state) => state.menu.menuData);
   const documents = useSelector((state) => state.transaction.documents);
-  const addDocuments = useSelector((state) => state.transaction.addDocuments);
 
   const forViewing =
     transactionData?.gas_status !== "pending" &&
@@ -124,8 +123,8 @@ const TransactionModal = () => {
   const [updateTransaction, { isLoading: updateLoading }] =
     useUpdateTransactionMutation();
 
-  const [archiveTransaction, { isLoading: archiveLoading }] =
-    useArchiveTransactionMutation();
+  const [returnTransaction, { isLoading: returnLoading }] =
+    useReturnTransactionMutation();
 
   const {
     data: tin,
@@ -191,9 +190,6 @@ const TransactionModal = () => {
       skip: transactionData === null,
     }
   );
-
-  const [receiveTransaction, { isLoading: receiveLoading }] =
-    useReceiveTransactionMutation();
 
   const [createCheckEntry, { isLoading: loadingCheck }] =
     useCreateCheckEntriesMutation();
@@ -387,12 +383,6 @@ const TransactionModal = () => {
       );
       setOldValues(resData);
 
-      transactionData !== null
-        ? Object.entries(resData).forEach(([key, value]) => {
-            setValue(key, value);
-          })
-        : dispatch(resetMenu());
-
       dispatch(
         setMenuData({
           ...resData,
@@ -409,7 +399,7 @@ const TransactionModal = () => {
           gas_status: res?.result?.gas_status,
         })
       );
-
+      dispatch(resetMenu());
       dispatch(resetLogs());
       dispatch(setUpdateCount(0));
     } catch (error) {
@@ -417,7 +407,7 @@ const TransactionModal = () => {
     }
   };
 
-  const handleArchive = async (submitData) => {
+  const handleReturn = async (submitData) => {
     const obj = {
       ...submitData,
       tag_no: transactionData?.tag_no,
@@ -425,7 +415,7 @@ const TransactionModal = () => {
     };
 
     try {
-      const res = await archiveTransaction(obj).unwrap();
+      const res = await returnTransaction(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
       dispatch(resetMenu());
       dispatch(resetPrompt());
@@ -497,11 +487,7 @@ const TransactionModal = () => {
         draggable="false"
       />
 
-      <Typography className="transaction-text">
-        {forViewing && "Transaction"}
-        {transactionData?.gas_status === "pending" && "Update Transaction"}
-        {transactionData === null && "Add Transaction"}
-      </Typography>
+      <Typography className="transaction-text">Transaction</Typography>
       <Divider orientation="horizontal" className="transaction-devider" />
       <Box className="form-title-transaction">
         <Typography className="form-title-text-transaction">
@@ -524,7 +510,7 @@ const TransactionModal = () => {
           helperText={errors?.tag_no?.message}
         />
         <Autocomplete
-          disabled={forViewing}
+          disabled={!hasAccess("tagging")}
           control={control}
           name={"tin"}
           options={tin?.result || []}
@@ -602,50 +588,15 @@ const TransactionModal = () => {
           <Typography className="form-title-text-transaction">
             Receipt Details
           </Typography>
-
-          <Button
-            disabled={forViewing}
-            endIcon={<AddIcon />}
-            color="secondary"
-            variant="contained"
-            size="small"
-            className="add-tax-document"
-            onClick={() => dispatch(setAddDocuments(true))}
-          >
-            Add Document
-          </Button>
         </Box>
-        {watch("tin") && (
-          <Autocomplete
-            disabled={forViewing}
-            control={control}
-            name={"document_type"}
-            options={document?.result || []}
-            getOptionLabel={(option) => `${option.name}`}
-            isOptionEqualToValue={(option, value) =>
-              option?.code === value?.code
-            }
-            renderInput={(params) => (
-              <MuiTextField
-                name="document_type"
-                {...params}
-                label="Document type *"
-                size="small"
-                variant="outlined"
-                error={Boolean(errors.document_type)}
-                helperText={errors.document_type?.message}
-                className="transaction-form-textBox"
-              />
-            )}
-          />
-        )}
+
         <Controller
           name="date_invoice"
           control={control}
           render={({ field: { onChange, value, ...restField } }) => (
             <Box className="date-picker-container-transaction">
               <DatePicker
-                disabled={forViewing}
+                disabled={!hasAccess("tagging")}
                 className="transaction-form-date"
                 label="Date Invoice *"
                 format="MMMM DD, YYYY"
@@ -664,7 +615,7 @@ const TransactionModal = () => {
         />
         {false && (
           <AppTextBox
-            disabled={forViewing}
+            disabled={!hasAccess("tagging")}
             control={control}
             name={"name_in_receipt"}
             label={"Name in receipt *"}
@@ -676,7 +627,7 @@ const TransactionModal = () => {
         )}
         {checkField("invoice_no") && (
           <AppTextBox
-            disabled={forViewing}
+            disabled={!hasAccess("tagging")}
             control={control}
             name={"invoice_no"}
             label={"Invoice No. *"}
@@ -688,7 +639,7 @@ const TransactionModal = () => {
         )}
         {checkField("ref_no") && (
           <AppTextBox
-            disabled={forViewing}
+            disabled={!hasAccess("tagging")}
             control={control}
             name={"ref_no"}
             label={"Ref No. *"}
@@ -700,7 +651,7 @@ const TransactionModal = () => {
         )}
         <AppTextBox
           money
-          disabled={singleSuccess || forViewing}
+          disabled={!hasAccess("tagging")}
           control={control}
           name={"amount"}
           label={"Amount *"}
@@ -712,7 +663,7 @@ const TransactionModal = () => {
         {checkField("amount_withheld") && (
           <AppTextBox
             money
-            disabled={forViewing}
+            disabled={!hasAccess("tagging")}
             control={control}
             name={"amount_withheld"}
             label={"Amount withheld *"}
@@ -725,7 +676,7 @@ const TransactionModal = () => {
         {checkField("amount_check") && (
           <AppTextBox
             money
-            disabled={forViewing}
+            disabled={!hasAccess("tagging")}
             control={control}
             name={"amount_check"}
             label={"Amount of check *"}
@@ -738,7 +689,7 @@ const TransactionModal = () => {
         {checkField("vat") && (
           <AppTextBox
             money
-            disabled={forViewing}
+            disabled={!hasAccess("tagging")}
             control={control}
             name={"vat"}
             label={"Vat *"}
@@ -751,7 +702,7 @@ const TransactionModal = () => {
         {checkField("cost") && (
           <AppTextBox
             money
-            disabled={forViewing}
+            disabled={!hasAccess("tagging")}
             control={control}
             name={"cost"}
             label={"Cost *"}
@@ -766,7 +717,7 @@ const TransactionModal = () => {
             return (
               <AppTextBox
                 key={index}
-                disabled={forViewing}
+                disabled={!hasAccess("tagging")}
                 control={control}
                 name={`${item?.code}`}
                 label={`${item?.code}`}
@@ -778,19 +729,19 @@ const TransactionModal = () => {
               />
             );
           })}
-        {hasAccess(["ap_tag"]) && (
-          <AppTextBox
-            disabled={forViewing}
-            multiline
-            minRows={1}
-            control={control}
-            name={"description"}
-            className="transaction-form-field-textBox "
-            label="Description (Optional)"
-            error={Boolean(errors.description)}
-            helperText={errors.description?.message}
-          />
-        )}
+
+        <AppTextBox
+          disabled={!hasAccess("tagging")}
+          multiline
+          minRows={1}
+          control={control}
+          name={"description"}
+          className="transaction-form-field-textBox "
+          label="Description (Optional)"
+          error={Boolean(errors.description)}
+          helperText={errors.description?.message}
+        />
+
         {checkField("coverage") && (
           <>
             <Box className="form-title-transaction">
@@ -809,7 +760,7 @@ const TransactionModal = () => {
               render={({ field: { onChange, value, ...restField } }) => (
                 <Box className="date-picker-container-transaction">
                   <DatePicker
-                    disabled={forViewing}
+                    disabled={!hasAccess("tagging")}
                     className="transaction-form-date"
                     label="From (If Applicable)"
                     format="MMMM DD, YYYY"
@@ -833,7 +784,7 @@ const TransactionModal = () => {
               render={({ field: { onChange, value, ...restField } }) => (
                 <Box className="date-picker-container-transaction">
                   <DatePicker
-                    disabled={forViewing}
+                    disabled={!hasAccess("tagging")}
                     className="transaction-form-date"
                     label="To (If Applicable)"
                     minDate={watch("coverage_from")}
@@ -849,7 +800,7 @@ const TransactionModal = () => {
 
             {checkField("account_number") && (
               <Autocomplete
-                disabled={forViewing}
+                disabled={!hasAccess("tagging")}
                 control={control}
                 name={"account_number"}
                 options={
@@ -884,7 +835,7 @@ const TransactionModal = () => {
           </Typography>
         </Box>
         <Autocomplete
-          disabled={forViewing || singleSuccess}
+          disabled={!hasAccess("tagging")}
           control={control}
           name={"ap"}
           options={ap?.result || []}
@@ -911,7 +862,7 @@ const TransactionModal = () => {
           render={({ field: { onChange, value, ...restField } }) => (
             <Box className="date-picker-container-transaction">
               <DatePicker
-                disabled={forViewing}
+                disabled={!hasAccess("tagging")}
                 className="transaction-form-date"
                 label="Tag year month *"
                 format="MMMM YYYY"
@@ -944,9 +895,9 @@ const TransactionModal = () => {
                   color="error"
                   className="add-transaction-button"
                   onClick={() => dispatch(setWarning(true))}
-                  startIcon={<DeleteForeverOutlinedIcon />}
+                  startIcon={<RestoreIcon />}
                 >
-                  Archive
+                  Return
                 </LoadingButton>
               )}
               {hasAccess(["ap_tag"]) && (
@@ -963,7 +914,6 @@ const TransactionModal = () => {
                     )
                   }
                   onClick={() => dispatch(setReceive(!checkChanges()))}
-                  // onClick={() => checkChanges()}
                   startIcon={<HandshakeOutlinedIcon />}
                 >
                   Receive
@@ -975,13 +925,20 @@ const TransactionModal = () => {
           )}
 
           <Box className="archive-transaction-button-container">
-            {!forViewing && (
+            {hasAccess("tagging") && (
               <LoadingButton
                 variant="contained"
                 color="warning"
                 type="submit"
                 className="add-transaction-button"
                 disabled={!watch("tin")}
+                startIcon={
+                  transactionData === null ? (
+                    <AddToPhotosOutlinedIcon />
+                  ) : (
+                    <ManageHistoryOutlinedIcon />
+                  )
+                }
               >
                 {transactionData === null ? "Add" : "Update"}
               </LoadingButton>
@@ -995,6 +952,7 @@ const TransactionModal = () => {
                 dispatch(resetTransaction());
               }}
               className="add-transaction-button"
+              startIcon={<HighlightOffRoundedIcon />}
             >
               {forViewing ? "Close" : "Cancel"}
             </Button>
@@ -1012,7 +970,6 @@ const TransactionModal = () => {
           loadingAp ||
           loadingLocation ||
           loadingSingle ||
-          receiveLoading ||
           loadingCheck
         }
         className="loading-transaction-create"
@@ -1038,10 +995,12 @@ const TransactionModal = () => {
       <Dialog open={warning} onClose={() => dispatch(setWarning(false))}>
         <AppPrompt
           image={warningImg}
-          title={"Archive Transaction?"}
-          message={"You are about to archive this Transaction"}
-          nextLineMessage={"Once archived it can never be restore"}
-          confirmButton={"Yes, Archive it!"}
+          title={"Return Transaction?"}
+          message={"You are about to return this transaction"}
+          nextLineMessage={
+            "This transaction will be reverted to the tagging stage for further processing."
+          }
+          confirmButton={"Yes, Return it!"}
           cancelButton={"Cancel"}
           cancelOnClick={() => {
             dispatch(resetPrompt());
@@ -1052,8 +1011,8 @@ const TransactionModal = () => {
 
       <Dialog open={openReason} onClose={() => dispatch(setOpenReason(false))}>
         <ReasonInput
-          title={"Reason for archive"}
-          reasonDesc={"Please enter the reason for archiving this transaction"}
+          title={"Reason for return"}
+          reasonDesc={"Please enter the reason for returning this transaction"}
           warning={
             "Note that this transaction will be permanently archived once confirmed."
           }
@@ -1062,68 +1021,12 @@ const TransactionModal = () => {
           cancelOnClick={() => {
             dispatch(resetPrompt());
           }}
-          confirmOnClick={handleArchive}
+          confirmOnClick={handleReturn}
         />
       </Dialog>
 
-      <Dialog open={openReason} onClose={() => dispatch(setOpenReason(false))}>
-        <ReasonInput
-          title={"Reason for archive"}
-          reasonDesc={"Please enter the reason for archiving this transaction"}
-          warning={
-            "Note that this transaction will be permanently archived once confirmed."
-          }
-          confirmButton={"Confirm"}
-          cancelButton={"Cancel"}
-          cancelOnClick={() => {
-            dispatch(resetPrompt());
-          }}
-          confirmOnClick={handleArchive}
-        />
-      </Dialog>
-
-      <Dialog
-        open={addDocuments}
-        className="additional-documents"
-        onClose={() => dispatch(setAddDocuments(false))}
-      >
-        <Autocomplete
-          disabled={forViewing}
-          control={control}
-          name={"addedDocuments"}
-          options={
-            document?.result.filter(
-              (item) => !documents?.some((doc) => item?.code === doc?.code)
-            ) || []
-          }
-          getOptionLabel={(option) => `${option.name}`}
-          isOptionEqualToValue={(option, value) => option?.code === value?.code}
-          onClose={() => {
-            if (watch("addedDocuments")) {
-              dispatch(setDocuments([...documents, watch("addedDocuments")]));
-              dispatch(setAddDocuments(false));
-              setValue("addedDocuments", null);
-            }
-            setValue("addedDocuments", null);
-            dispatch(setAddDocuments(false));
-          }}
-          renderInput={(params) => (
-            <MuiTextField
-              name="addedDocuments"
-              {...params}
-              label="Document type"
-              size="small"
-              variant="outlined"
-              error={Boolean(errors.addedDocuments)}
-              helperText={errors.addedDocuments?.message}
-              className="transaction-form-textBox"
-            />
-          )}
-        />
-      </Dialog>
-
-      <Dialog open={archiveLoading} className="loading-role-create">
-        <Lottie animationData={loadingLight} loop={archiveLoading} />
+      <Dialog open={returnLoading} className="loading-role-create">
+        <Lottie animationData={loadingLight} loop={returnLoading} />
       </Dialog>
 
       <TransactionDrawer transactionData={transactionData} />

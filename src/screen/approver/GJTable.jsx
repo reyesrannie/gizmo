@@ -67,6 +67,7 @@ import {
   usePrepareCVoucherMutation,
 } from "../../services/api/checkVoucherApi";
 import { useReadTransactionGJMutation } from "../../services/api/generalJournalApi";
+import GeneralJournalModal from "../../components/customs/modal/GeneralJournalModal";
 
 const GJTable = ({
   params,
@@ -186,8 +187,7 @@ const GJTable = ({
                     />
                   </TableCell>
                 )}
-                <TableCell>Tag #.</TableCell>
-                <TableCell>Supplier</TableCell>
+                <TableCell>Reference #.</TableCell>
                 <TableCell>
                   <TableSortLabel
                     active={params.allocation !== ""}
@@ -288,26 +288,8 @@ const GJTable = ({
                       onClick={() => {
                         dispatch(setMenuData(tag));
                         dispatch(setVoucher("gj"));
-                        tag?.is_read === 0 &&
-                          tag?.state !== "For Approval" &&
-                          tag?.state !== "For Preparation" &&
-                          tag?.state !== "Check Approval" &&
-                          tag?.state !== "Released" &&
-                          handleRead(tag);
-
-                        (tag?.state === "Filed" ||
-                          tag?.state === "approved" ||
-                          tag?.state === "voided" ||
-                          tag?.state === "For Voiding" ||
-                          tag?.state === "Check Approval" ||
-                          tag?.state === "Released" ||
-                          tag?.state === "For Approval") &&
-                          dispatch(setViewMenu(true));
-                        //approved
-
-                        (tag?.state === "For Computation" ||
-                          tag?.state === "returned") &&
-                          dispatch(setUpdateMenu(true));
+                        tag?.is_read === 0 && handleRead(tag);
+                        dispatch(setViewMenu(true));
                       }}
                     >
                       {(params?.state === "approved" ||
@@ -345,47 +327,14 @@ const GJTable = ({
                           />
                         </TableCell>
                       )}
-                      <TableCell>
-                        {`${tag?.transactions?.tag_no} - ${moment(
-                          tagMonthYear
-                        ).get("year")}`}
-                      </TableCell>
-                      <TableCell>
-                        <Typography className="tag-transaction-company-name">
-                          {tag?.transactions?.supplier?.name === null ? (
-                            <>&mdash;</>
-                          ) : (
-                            tag?.transactions?.supplier?.name
-                          )}
-                        </Typography>
-                        <Typography className="tag-transaction-company-tin">
-                          {tag?.transactions?.supplier === null ? (
-                            <>&mdash;</>
-                          ) : (
-                            tag?.transactions?.supplier?.tin
-                          )}
-                        </Typography>
-                        <Typography className="tag-transaction-company-name">
-                          {tag?.amount === null ? (
-                            <>&mdash;</>
-                          ) : (
-                            convertToPeso(tag?.amount)
-                          )}
-                        </Typography>
-                      </TableCell>
+                      <TableCell>{tag?.reference_no}</TableCell>
 
-                      <TableCell>
-                        {tag?.voucher_number ? (
-                          <Typography className="tag-transaction-company-name">
-                            {tag?.voucher_number}
-                          </Typography>
-                        ) : (
-                          <Typography className="tag-transaction-company-name">
-                            {`${tag?.transactions?.ap_tagging} - ${
-                              tag?.transactions?.gtag_no
-                            } - ${moment(tagMonthYear).get("year")}`}
-                          </Typography>
-                        )}
+                      <TableCell onClick={() => console.log(tag)}>
+                        <Typography className="tag-transaction-company-name">
+                          {`${tag?.apTagging?.code} - ${
+                            tag?.gj_series
+                          } - ${moment(tagMonthYear).get("year")}`}
+                        </Typography>
 
                         <Typography className="tag-transaction-company-type">
                           {document === null ? <>&mdash;</> : document?.name}
@@ -395,100 +344,17 @@ const GJTable = ({
                         </Typography>
                       </TableCell>
                       <TableCell align="center">
-                        {tag?.state === "For Computation" && (
+                        {tag?.state === "Saved" && (
                           <StatusIndicator
                             status="Pending"
                             className="computation-indicator"
                           />
                         )}
 
-                        {tag?.state === "For Approval" && (
+                        {tag?.state === "Posted" && (
                           <StatusIndicator
-                            status="For Approval"
-                            className="approval-indicator"
-                          />
-                        )}
-
-                        {tag?.state === "approved" && (
-                          <StatusIndicator
-                            status="Approved"
-                            className="approved-indicator"
-                          />
-                        )}
-
-                        {tag?.state === "returned" && (
-                          <StatusIndicator
-                            status="Returned"
-                            className="return-indicator"
-                          />
-                        )}
-
-                        {tag?.state === "For Voiding" && (
-                          <StatusIndicator
-                            status="For Voiding"
-                            className="voiding-indicator"
-                          />
-                        )}
-
-                        {tag?.state === "voided" && (
-                          <StatusIndicator
-                            status="Void"
-                            className="void-indicator"
-                          />
-                        )}
-
-                        {tag?.state === "For Preparation" && (
-                          <StatusIndicator
-                            status="Awaiting Prep"
-                            className="preparation-indicator"
-                          />
-                        )}
-
-                        {tag?.state === "For Releasing" && (
-                          <StatusIndicator
-                            status="Awaiting Release"
-                            className="release-indicator"
-                          />
-                        )}
-
-                        {tag?.state === "For Filing" && (
-                          <StatusIndicator
-                            status="For Filing"
-                            className="filing-indicator"
-                          />
-                        )}
-
-                        {tag?.state === "For Clearing" && (
-                          <StatusIndicator
-                            status="For Clearing"
-                            className="clearing-indicator"
-                          />
-                        )}
-
-                        {tag?.state === "Filed" && (
-                          <StatusIndicator
-                            status="Filed"
-                            className="filed-indicator"
-                          />
-                        )}
-
-                        {tag?.state === "Cancelled" && (
-                          <StatusIndicator
-                            status="Cancelled"
-                            className="inActive-indicator"
-                          />
-                        )}
-
-                        {tag?.state === "Check Approval" && (
-                          <StatusIndicator
-                            status="For Approval"
-                            className="approval-indicator"
-                          />
-                        )}
-                        {tag?.state === "Released" && (
-                          <StatusIndicator
-                            status="Released"
-                            className="approved-indicator"
+                            status="Posted"
+                            className="success-indicator"
                           />
                         )}
                       </TableCell>
@@ -650,29 +516,7 @@ const GJTable = ({
           dispatch(resetOption());
         }}
       >
-        <TransactionModalApprover transactionData={menuData} approved ap />
-      </Dialog>
-
-      <Dialog
-        open={viewAccountingEntries}
-        className="transaction-modal-dialog"
-        onClose={() => {
-          dispatch(setViewAccountingEntries(false));
-          dispatch(resetOption());
-        }}
-      >
-        <TransactionModalApprover />
-      </Dialog>
-
-      <Dialog
-        open={preparation}
-        className="transaction-modal-dialog"
-        onClose={() => {
-          dispatch(setPreparation(false));
-          dispatch(resetOption());
-        }}
-      >
-        <TransactionModalApprover approved ap preparation />
+        <GeneralJournalModal />
       </Dialog>
     </Box>
   );

@@ -1,7 +1,16 @@
 // import moment from "moment";
 import { useState } from "react";
+import { treasuryHeader } from "../constants/headers";
+import { hasAccess } from "../functions/access";
 
 const useTreasuryHook = () => {
+  const initialState =
+    treasuryHeader.find((item) =>
+      Array.isArray(item.permission)
+        ? item.permission.some(hasAccess)
+        : hasAccess(item.permission)
+    )?.name || "Preparation";
+
   const [params, setParams] = useState({
     status: "active",
     page: 1,
@@ -10,9 +19,10 @@ const useTreasuryHook = () => {
     sorts: null,
     allocation: "",
     is_cleared: true,
-    state: "For Preparation",
+    state: initialState,
     access: "treasury",
     complete: "",
+    is_print: hasAccess(["preparation", "check_approval"]) ? "" : "1",
   });
 
   const onPageChange = (_, page) => {

@@ -9,6 +9,15 @@ export const authApi = jsonServerAPI.injectEndpoints({
         method: "POST",
         body: payload,
       }),
+      invalidatesTags: [
+        "Users",
+        "Transaction",
+        "CheckEntries",
+        "Logs",
+        "CountCheck",
+        "CountTreasury",
+        "DashboardBalance",
+      ],
     }),
     logout: builder.mutation({
       transformResponse: (response) => response.result,
@@ -17,7 +26,14 @@ export const authApi = jsonServerAPI.injectEndpoints({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["Users"],
+      invalidatesTags: [
+        "Users",
+        "Transaction",
+        "CheckEntries",
+        "Logs",
+        "CountCheck",
+        "CountTreasury",
+      ],
     }),
     passwordChange: builder.mutation({
       transformResponse: (response) => response,
@@ -34,6 +50,7 @@ export const authApi = jsonServerAPI.injectEndpoints({
         method: "PATCH",
         body: payload,
       }),
+      invalidatesTags: ["Users"],
     }),
     users: builder.query({
       transformResponse: (response) => response,
@@ -51,6 +68,7 @@ export const authApi = jsonServerAPI.injectEndpoints({
         method: "POST",
         body: payload,
       }),
+      invalidatesTags: ["Users"],
     }),
     updateUser: builder.mutation({
       transformResponse: (response) => response,
@@ -59,6 +77,7 @@ export const authApi = jsonServerAPI.injectEndpoints({
         method: "PUT",
         body: payload,
       }),
+      invalidatesTags: ["Users"],
     }),
     archiveUser: builder.mutation({
       transformResponse: (response) => response,
@@ -67,6 +86,7 @@ export const authApi = jsonServerAPI.injectEndpoints({
         method: "PATCH",
         body: payload,
       }),
+      invalidatesTags: ["Users"],
     }),
   }),
 });

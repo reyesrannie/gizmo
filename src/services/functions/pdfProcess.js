@@ -1,9 +1,3 @@
-import { PDFDocument, rgb } from "pdf-lib";
-
-import pdfFileAsset from "../../assets/pdf/2307.pdf";
-import moment from "moment";
-import { formConst } from "../constants/formConst";
-
 export const getStartQuarter = (quarter, year) => {
   if (quarter === 1) {
     return new Date(`01-01-${year}`);
@@ -54,12 +48,6 @@ export const addDoubleSpaces = (text) => {
 
 export const addressCount = (text) => {
   return text?.split(" ");
-};
-
-const convertToPeso = (value) => {
-  return parseFloat(value)
-    .toFixed(2)
-    .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 };
 
 export const joinAddressParts = (addressParts, startIndex, endIndex) => {

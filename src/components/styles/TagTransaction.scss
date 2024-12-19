@@ -96,11 +96,60 @@
   }
 }
 
-.tag-transaction-body-container.history {
+.history-transaction-container {
   &.MuiBox-root {
-    padding: 10px;
+    display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    background-color: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    padding: 20px;
+  }
+}
+
+.history-navigation-folder {
+  &.MuiPaper-root {
+    padding: 2px;
+    width: 100%;
+    border-radius: 10px;
+  }
+}
+
+.folder-icons {
+  width: 100px;
+}
+
+.folder-structure-history {
+  &.MuiBox-root {
+    display: flex;
+    margin: 10px;
+  }
+}
+
+.folder-container {
+  width: fit-content;
+  cursor: pointer;
+  transition: background-color 0.1s ease-in-out;
+  border-radius: 10px;
+  &:hover {
+    background-color: #f0f0f0; // Highlight effect on hover
+  }
+}
+
+.error-no-data-history {
+  &.MuiBox-root {
+    display: flex;
+    width: 90vw;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.folder-name-history {
+  &.MuiTypography-root {
+    font-family: Roboto-Light;
+    text-transform: capitalize;
+    font-size: 14px;
   }
 }
 

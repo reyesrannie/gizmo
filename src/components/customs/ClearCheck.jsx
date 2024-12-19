@@ -13,11 +13,9 @@ import "../styles/TransactionModal.scss";
 import "../styles/RolesModal.scss";
 
 import DoNotDisturbOnOutlinedIcon from "@mui/icons-material/DoNotDisturbOnOutlined";
-import ControlPointRoundedIcon from "@mui/icons-material/ControlPointRounded";
 import { LoadingButton } from "@mui/lab";
 import receiveImg from "../../assets/svg/receive.svg";
 import { useDispatch, useSelector } from "react-redux";
-import { resetPrompt } from "../../services/slice/promptSlice";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 
@@ -29,25 +27,21 @@ import Lottie from "lottie-react";
 
 import clearingSchema from "../../schemas/clearingSchema";
 import Autocomplete from "./AutoComplete";
-import { DatePicker } from "@mui/x-date-pickers";
-import {
-  resetMenu,
-  setReceiveMenu,
-  setTaxData,
-} from "../../services/slice/menuSlice";
+import { MobileDatePicker } from "@mui/x-date-pickers";
+import { resetMenu, setViewMenu } from "../../services/slice/menuSlice";
 import moment from "moment";
 import dayjs from "dayjs";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { enqueueSnackbar } from "notistack";
 import { objectError } from "../../services/functions/errorResponse";
 import { useDocumentTypeQuery } from "../../services/api/documentTypeApi";
-import { useFileCVoucherMutation } from "../../services/api/checkVoucherApi";
+import { useClearingCheckDetailsMutation } from "../../services/api/checkApi";
 
 const ClearCheck = () => {
   const dispatch = useDispatch();
   const disableProceed = useSelector((state) => state.prompt.disableProceed);
   const taxData = useSelector((state) => state.menu.taxData);
-  const menuData = useSelector((state) => state.menu.menuData);
+  const menuDataMultiple = useSelector((state) => state.menu.menuDataMultiple);
 
   const {
     data: document,
@@ -58,7 +52,8 @@ const ClearCheck = () => {
     pagination: "none",
   });
 
-  const [fileVoucher, { isLoading: loadingFile }] = useFileCVoucherMutation();
+  const [clearCheck, { isLoading: loadingFile }] =
+    useClearingCheckDetailsMutation();
 
   const {
     control,
@@ -70,12 +65,13 @@ const ClearCheck = () => {
   } = useForm({
     resolver: yupResolver(clearingSchema),
     defaultValues: {
+      cleared_date: null,
       treasury_receipts: [
         {
           id: Date.now(),
-          or_document_id: null,
-          or_no: "",
-          or_date: null,
+          receipt_id: null,
+          receipt_no: "",
+          receipt_date: null,
         },
       ],
     },
@@ -102,15 +98,16 @@ const ClearCheck = () => {
 
   const submitHandler = async (submitData) => {
     const obj = {
-      id: menuData?.id,
+      check_ids: menuDataMultiple?.map((item) => item?.id),
+      cleared_date: moment(submitData?.cleared_date).format("YYYY-MM-DD"),
       treasury_receipts: submitData?.treasury_receipts?.map((item) => ({
-        receipt_id: item?.or_document_id?.id,
-        receipt_no: item?.or_no,
-        receipt_date: moment(item?.or_date).format("YYYY-MM-DD"),
+        receipt_id: item?.receipt_id?.id,
+        receipt_no: item?.receipt_no,
+        receipt_date: moment(item?.receipt_date).format("YYYY-MM-DD"),
       })),
     };
     try {
-      const res = await fileVoucher(obj).unwrap();
+      const res = await clearCheck(obj).unwrap();
       enqueueSnackbar(res?.message, { variant: "success" });
       dispatch(resetMenu());
     } catch (error) {
@@ -131,18 +128,42 @@ const ClearCheck = () => {
         className="app-prompt-image"
         draggable="false"
       />
-      <Typography className="app-prompt-title">Input OR</Typography>
+      <Typography className="app-prompt-title">Input Receipt</Typography>
       <Typography className="app-prompt-text" sx={{ marginBottom: 2 }}>
         Please fill out the following
       </Typography>
 
       <form onSubmit={handleSubmit(submitHandler)}>
+        <Box className="clearing-date-cleared">
+          <Controller
+            name={"cleared_date"}
+            control={control}
+            render={({ field: { onChange, value, ...restField } }) => (
+              <MobileDatePicker
+                className="transaction-form-date recieve"
+                label="Date cleared *"
+                format="MM/DD/YYYY"
+                value={value}
+                onChange={(e) => {
+                  onChange(e);
+                }}
+                slotProps={{
+                  textField: {
+                    error: Boolean(errors?.cleared_date),
+                    helperText: errors?.cleared_date?.message,
+                  },
+                }}
+              />
+            )}
+          />
+        </Box>
+
         {fields?.map((item, index) => {
           return (
             <Box className="form-container-transaction clearing" key={item?.id}>
               <Autocomplete
                 control={control}
-                name={`treasury_receipts.${index}.or_document_id`}
+                name={`treasury_receipts.${index}.receipt_id`}
                 options={document?.result || []}
                 getOptionLabel={(option) => `${option?.code} - ${option?.name}`}
                 isOptionEqualToValue={(option, value) =>
@@ -152,15 +173,16 @@ const ClearCheck = () => {
                   <MuiTextField
                     name="document_type"
                     {...params}
-                    label="OR Document Type *"
+                    label="Receipt Type *"
                     size="small"
                     variant="outlined"
                     error={Boolean(
-                      errors?.treasury_receipts?.[index]?.or_document_id
+                      errors?.treasury_receipts?.[index]?.receipt_id ||
+                        errors?.treasury_receipts?.root
                     )}
                     helperText={
-                      errors?.treasury_receipts?.[index]?.or_document_id
-                        ?.message
+                      errors?.treasury_receipts?.[index]?.receipt_id?.message ||
+                      errors?.treasury_receipts?.root?.message
                     }
                     className="transaction-form-textBox receive"
                   />
@@ -168,21 +190,27 @@ const ClearCheck = () => {
               />
               <AppTextBox
                 control={control}
-                name={`treasury_receipts.${index}.or_no`}
-                label={"OR NO. *"}
+                name={`treasury_receipts.${index}.receipt_no`}
+                label={"Reciept No. *"}
                 color="primary"
                 className="transaction-form-textBox receive"
-                error={Boolean(errors?.treasury_receipts?.[index]?.or_no)}
-                helperText={errors?.treasury_receipts?.[index]?.or_no?.message}
+                error={Boolean(
+                  errors?.treasury_receipts?.[index]?.receipt_no ||
+                    errors?.treasury_receipts?.root
+                )}
+                helperText={
+                  errors?.treasury_receipts?.[index]?.receipt_no?.message ||
+                  errors?.treasury_receipts?.root?.message
+                }
               />
 
               <Controller
-                name={`treasury_receipts.${index}.or_date`}
+                name={`treasury_receipts.${index}.receipt_date`}
                 control={control}
                 render={({ field: { onChange, value, ...restField } }) => (
-                  <DatePicker
+                  <MobileDatePicker
                     className="transaction-form-date recieve"
-                    label="OR Date *"
+                    label="Receipt Date *"
                     format="MM/DD/YYYY"
                     value={value}
                     onChange={(e) => {
@@ -191,10 +219,13 @@ const ClearCheck = () => {
                     slotProps={{
                       textField: {
                         error: Boolean(
-                          errors?.treasury_receipts?.[index]?.or_date
+                          errors?.treasury_receipts?.[index]?.receipt_date ||
+                            errors?.treasury_receipts?.root
                         ),
                         helperText:
-                          errors?.treasury_receipts?.[index]?.or_date?.message,
+                          errors?.treasury_receipts?.[index]?.receipt_date
+                            ?.message ||
+                          errors?.treasury_receipts?.root?.message,
                       },
                     }}
                   />
@@ -245,7 +276,7 @@ const ClearCheck = () => {
               variant="contained"
               color="primary"
               className="change-password-button"
-              onClick={() => dispatch(setReceiveMenu(false))}
+              onClick={() => dispatch(setViewMenu(false))}
             >
               Cancel
             </Button>

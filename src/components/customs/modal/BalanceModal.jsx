@@ -34,6 +34,7 @@ import {
   useCreateBalanceMutation,
   useUpdateBalanceMutation,
 } from "../../../services/api/bankBalance";
+import { useBankQuery } from "../../../services/api/bankApi";
 
 const BalanceModal = ({ view, params }) => {
   const menuData = useSelector((state) => state.menu.menuData);
@@ -47,10 +48,10 @@ const BalanceModal = ({ view, params }) => {
   const [archiveBal, { isLoading: archiveLoading }] = useArchiveBalMutation();
 
   const {
-    data: accountTitles,
+    data: bank,
     isLoading: loadingTitles,
     isSuccess: successTitles,
-  } = useAccountTitlesQuery({
+  } = useBankQuery({
     status: "active",
     pagination: "none",
   });
@@ -74,9 +75,7 @@ const BalanceModal = ({ view, params }) => {
     if (menuData && successTitles) {
       const obj = {
         amount: menuData?.amount,
-        bank_id: accountTitles?.result?.find(
-          (item) => menuData?.bank?.id === item.id
-        ),
+        bank_id: bank?.result?.find((item) => menuData?.bank?.id === item.id),
       };
 
       Object.entries(obj).forEach(([name, value]) => setValue(name, value));
@@ -143,11 +142,7 @@ const BalanceModal = ({ view, params }) => {
           disabled={menuData?.state === "Paid"}
           control={control}
           name={"bank_id"}
-          options={
-            accountTitles?.result?.filter((coa) =>
-              coa?.name?.startsWith("CIB")
-            ) || []
-          }
+          options={bank?.result || []}
           getOptionLabel={(option) => `${option.name}`}
           isOptionEqualToValue={(option, value) => option?.id === value?.id}
           renderInput={(params) => (

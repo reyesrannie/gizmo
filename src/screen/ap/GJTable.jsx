@@ -187,8 +187,9 @@ const GJTable = ({
                     />
                   </TableCell>
                 )}
-                <TableCell>Tag #.</TableCell>
-                <TableCell>Supplier</TableCell>
+
+                <TableCell>Reference #.</TableCell>
+
                 <TableCell>
                   <TableSortLabel
                     active={params.allocation !== ""}
@@ -334,27 +335,7 @@ const GJTable = ({
                           />
                         </TableCell>
                       )}
-                      <TableCell>
-                        {`${tag?.gj_items[0]?.tag_no} - ${moment(
-                          tagMonthYear
-                        ).get("year")}`}
-                      </TableCell>
-                      <TableCell>
-                        <Typography className="tag-transaction-company-name">
-                          {tag?.gj_items[0]?.supplier?.company_name === null ? (
-                            <>&mdash;</>
-                          ) : (
-                            tag?.gj_items[0]?.supplier?.company_name
-                          )}
-                        </Typography>
-                        <Typography className="tag-transaction-company-tin">
-                          {tag?.gj_items[0]?.supplier === null ? (
-                            <>&mdash;</>
-                          ) : (
-                            tag?.gj_items[0]?.supplier?.tin
-                          )}
-                        </Typography>
-                      </TableCell>
+                      <TableCell>{tag?.reference_no}</TableCell>
 
                       <TableCell>
                         {tag?.gj_items[0]?.voucher_no ? (
@@ -381,92 +362,9 @@ const GJTable = ({
                           />
                         )}
 
-                        {tag?.state === "Posted" && (
-                          <StatusIndicator
-                            status="Posted"
-                            className="approval-indicator"
-                          />
-                        )}
-
-                        {tag?.state === "approved" && (
+                        {tag?.state === "Approved" && (
                           <StatusIndicator
                             status="Approved"
-                            className="approved-indicator"
-                          />
-                        )}
-
-                        {tag?.state === "returned" && (
-                          <StatusIndicator
-                            status="Returned"
-                            className="return-indicator"
-                          />
-                        )}
-
-                        {tag?.state === "For Voiding" && (
-                          <StatusIndicator
-                            status="For Voiding"
-                            className="voiding-indicator"
-                          />
-                        )}
-
-                        {tag?.state === "voided" && (
-                          <StatusIndicator
-                            status="Void"
-                            className="void-indicator"
-                          />
-                        )}
-
-                        {tag?.state === "For Preparation" && (
-                          <StatusIndicator
-                            status="Awaiting Prep"
-                            className="preparation-indicator"
-                          />
-                        )}
-
-                        {tag?.state === "For Releasing" && (
-                          <StatusIndicator
-                            status="Awaiting Release"
-                            className="release-indicator"
-                          />
-                        )}
-
-                        {tag?.state === "For Filing" && (
-                          <StatusIndicator
-                            status="For Filing"
-                            className="filing-indicator"
-                          />
-                        )}
-
-                        {tag?.state === "For Clearing" && (
-                          <StatusIndicator
-                            status="For Clearing"
-                            className="clearing-indicator"
-                          />
-                        )}
-
-                        {tag?.state === "Filed" && (
-                          <StatusIndicator
-                            status="Filed"
-                            className="filed-indicator"
-                          />
-                        )}
-
-                        {tag?.state === "Cancelled" && (
-                          <StatusIndicator
-                            status="Cancelled"
-                            className="inActive-indicator"
-                          />
-                        )}
-
-                        {tag?.state === "Check Approval" && (
-                          <StatusIndicator
-                            status="For Approval"
-                            className="approval-indicator"
-                          />
-                        )}
-                        {tag?.state === "Released" && (
-                          <StatusIndicator
-                            status="Released"
                             className="approved-indicator"
                           />
                         )}

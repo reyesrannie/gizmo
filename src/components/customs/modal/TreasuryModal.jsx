@@ -67,6 +67,7 @@ import { resetOption } from "../../../services/slice/optionsSlice";
 import { enqueueSnackbar } from "notistack";
 import {
   resetPrompt,
+  setIsContinue,
   setOpenVoid,
   setReceive,
   setReturn,
@@ -75,13 +76,12 @@ import { singleError } from "../../../services/functions/errorResponse";
 import ClearCheck from "../ClearCheck";
 import dayjs from "dayjs";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ReasonInput from "../ReasonInput";
 import TransactionDrawer from "../TransactionDrawer";
-import { debitType } from "../../../services/constants/headers";
-import { setClearChecks } from "../../../services/slice/syncSlice";
-import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
+
 import EditIcon from "@mui/icons-material/Edit";
+import AddCircleOutlineRoundedIcon from "@mui/icons-material/AddCircleOutlineRounded";
+import DriveFileRenameOutlineOutlinedIcon from "@mui/icons-material/DriveFileRenameOutlineOutlined";
 import RemoveCircleOutlineOutlinedIcon from "@mui/icons-material/RemoveCircleOutlineOutlined";
 import SelectBankMenu from "../SelectBankMenu";
 import { useAccountTitlesQuery } from "../../../services/api/coaApi";
@@ -101,10 +101,9 @@ import AppPrompt from "../AppPrompt";
 
 import receiveImg from "../../../assets/svg/receive.svg";
 import { useTaxComputationQuery } from "../../../services/api/taxComputationApi";
-import {
-  useLazyCheckNumberQuery,
-  useVoidCheckNumberMutation,
-} from "../../../services/api/bankApi";
+import { useVoidCheckNumberMutation } from "../../../services/api/bankApi";
+import { hasAccess } from "../../../services/functions/access";
+import { setClearChecks } from "../../../services/slice/syncSlice";
 
 const TreasuryModal = () => {
   const componentRef = useRef();
@@ -116,16 +115,16 @@ const TreasuryModal = () => {
   const voucherData = useSelector((state) => state.transaction.voucherData);
   const receiveMenu = useSelector((state) => state.menu.receiveMenu);
   const taxData = useSelector((state) => state.menu.taxData);
-  const createMenu = useSelector((state) => state.menu.createMenu);
   const updateMenu = useSelector((state) => state.menu.updateMenu);
   const isReturn = useSelector((state) => state.prompt.return);
   const updateData = useSelector((state) => state.menu.updateData);
   const bankData = useSelector((state) => state.menu.bankData);
   const checkID = useSelector((state) => state.menu.checkID);
   const openVoid = useSelector((state) => state.prompt.openVoid);
+  const isContinue = useSelector((state) => state.prompt.isContinue);
 
   const hasCancelled = menuDataMultiple[0]?.treasuryChecks?.some(
-    (item) => item?.checkNo?.state === "Cancelled"
+    (item) => item?.state === "Cancelled"
   );
 
   const { convertToPeso } = AdditionalFunction();
@@ -138,16 +137,6 @@ const TreasuryModal = () => {
     status: "active",
     pagination: "none",
   });
-
-  const [
-    triggerSearchCheckNumber,
-    {
-      data: searchedData,
-      isFetching: loadingSearch,
-      isSuccess: successSearch,
-      isError: errorSearch,
-    },
-  ] = useLazyCheckNumberQuery();
 
   const {
     data: taxComputation,
@@ -174,15 +163,8 @@ const TreasuryModal = () => {
   } = useForm({
     resolver: yupResolver(treasurySchema),
     defaultValues: {
-      multiple: false,
       debit_coa_id: null,
       credit_coa_id: null,
-      reference_no: "",
-      bank: "",
-      check_no: null,
-      check_date: dayjs(new Date(), {
-        locale: AdapterDayjs.locale,
-      }),
       type: "CHECK VOUCHER",
       check: [
         {
@@ -235,7 +217,7 @@ const TreasuryModal = () => {
     if (
       fields?.length > 0 &&
       bankData?.length > 0 &&
-      watch("type") === "DEBIT MEMO"
+      watch("type") !== "CHECK VOUCHER"
     ) {
       fields.forEach((item, index) => {
         Object.entries(bankData[index] || []).forEach(([key, value]) => {
@@ -279,19 +261,24 @@ const TreasuryModal = () => {
         transactions,
         state,
         preparedBy,
+        check_approved_by,
+        check_approved_date,
         treasuryChecks,
         debitCoa,
         creditCoa,
         is_print,
       } = menuDataMultiple?.[0] || {};
+
       dispatch(
         setVoucherData({
           treasuryChecks: treasuryChecks || [],
           debitCoa: debitCoa,
           creditCoa: creditCoa,
           preparedBy: preparedBy,
+          approvedBy: check_approved_by,
           state: state,
           date_invoice: transactions?.date_invoice,
+          date_approved: check_approved_date || null,
           amount: amount,
           description: transactions?.description,
           supplier: transactions?.supplier?.name,
@@ -345,7 +332,7 @@ const TreasuryModal = () => {
         setValue(key, value);
       });
     }
-    if (!Array.isArray(bankData) && watch("type") === "DEBIT MEMO") {
+    if (Array.isArray(bankData) && watch("type") !== "CHECK VOUCHER") {
       const obj = {
         ...bankData,
       };
@@ -362,23 +349,15 @@ const TreasuryModal = () => {
       debit_coa_id: submitData?.debit_coa_id?.id,
       credit_coa_id: submitData?.credit_coa_id?.id,
       treasury_type: submitData?.type === "CHECK VOUCHER" ? "cv" : "dm",
-      treasury_checks: watch("multiple")
-        ? submitData?.check?.map((items) => {
-            return {
-              check_no_id: items.check_no?.id,
-              amount: items.amount,
-              check_date: items?.check_date
-                ? moment(items?.check_date).format("YYYY-MM-DD")
-                : null,
-            };
-          })
-        : [
-            {
-              check_no_id: submitData?.check_no?.id,
-              amount: voucherData?.amount,
-              check_date: moment(submitData?.check_date).format("YYYY-MM-DD"),
-            },
-          ],
+      treasury_checks: submitData?.check?.map((items) => {
+        return {
+          check_no_id: items.check_no?.id,
+          amount: items.amount,
+          check_date: items?.check_date
+            ? moment(items?.check_date).format("YYYY-MM-DD")
+            : null,
+        };
+      }),
     };
 
     try {
@@ -391,25 +370,16 @@ const TreasuryModal = () => {
         const dm = {
           ...obj,
           treasury_checks: [],
-          debit_memos: watch("multiple")
-            ? submitData?.check?.map((items) => {
-                return {
-                  bank_id: items?.bank_id,
-                  reference_no: items?.reference_no,
-                  amount: items.amount,
-                  dm_date: items?.check_date
-                    ? moment(items?.check_date).format("YYYY-MM-DD")
-                    : null,
-                };
-              })
-            : [
-                {
-                  bank_id: submitData?.bank_id,
-                  reference_no: submitData?.reference_no,
-                  amount: voucherData?.amount,
-                  dm_date: moment(submitData?.check_date).format("YYYY-MM-DD"),
-                },
-              ],
+          debit_memos: submitData?.check?.map((items) => {
+            return {
+              bank_id: items?.bank_id,
+              reference_no: items?.reference_no,
+              amount: items.amount,
+              dm_date: items?.check_date
+                ? moment(items?.check_date).format("YYYY-MM-DD")
+                : null,
+            };
+          }),
         };
 
         const res = await releaseVoucher(dm).unwrap();
@@ -504,12 +474,10 @@ const TreasuryModal = () => {
     const updatedDate = {
       ...menuDataMultiple[0],
       treasuryChecks: voucherData?.treasuryChecks?.map((check) => {
-        if (checkID === check?.checkNo?.id) {
+        if (checkID === check?.id) {
           return {
-            checkNo: {
-              ...check?.checkNo,
-              check_date: obj?.check_date,
-            },
+            ...check,
+            check_date: obj?.check_date,
           };
         } else return check;
       }),
@@ -562,6 +530,26 @@ const TreasuryModal = () => {
     }, 0); // Trigger the hidden ReactToPrint button
   };
 
+  const handleClearData = () => {
+    fields?.map((_, index) => {
+      setValue(`check.${index}.check_no`, null);
+      setValue(`check.${index}.bank`, "");
+      setValue(`check.${index}.reference_no`, "");
+    });
+    dispatch(setBankData([]));
+  };
+
+  const disableSubmit = () => {
+    const validate =
+      watch("check")?.some(
+        (items) =>
+          items?.bank === "" || items?.check_no === null || items?.amount === 0
+      ) ||
+      parseFloat(totalAmountCheckForm(watch("check"))).toFixed(2) !==
+        parseFloat(voucherData?.amount).toFixed(2);
+    return validate;
+  };
+
   return (
     <Paper className="transaction-modal-container">
       {menuDataMultiple?.map((menu, index) => (
@@ -597,11 +585,7 @@ const TreasuryModal = () => {
                     align="center"
                     className="voucher-treasury header"
                   >
-                    {voucherData?.state === "For Preparation" ? (
-                      <Typography>{watch("type")}</Typography>
-                    ) : (
-                      <Typography>CHECK VOUCHER</Typography>
-                    )}
+                    <Typography>PAYMENT VOUCHER</Typography>
                   </TableCell>
                   <TableCell
                     colSpan={2}
@@ -662,11 +646,10 @@ const TreasuryModal = () => {
                     align="center"
                     className="voucher-treasury details"
                   >
-                    <Typography>
-                      {voucherData?.description?.length > 200
-                        ? `${voucherData?.description?.substring(0, 150)}...`
-                        : voucherData?.description}
-                    </Typography>
+                    <Typography>{`${voucherData?.description?.slice(
+                      0,
+                      200
+                    )}...`}</Typography>
                   </TableCell>
                   <TableCell align="center" className="voucher-treasury right">
                     <Typography className="payee-typo-treasury">
@@ -676,112 +659,377 @@ const TreasuryModal = () => {
                     </Typography>
                   </TableCell>
                 </TableRow>
-                <TableRow>
-                  <TableCell
-                    colSpan={5}
-                    align="center"
-                    className="voucher-treasury highlight"
-                  >
-                    <Typography>Account Title</Typography>
-                  </TableCell>
-                  <TableCell
-                    align="center"
-                    className="voucher-treasury highlight"
-                  >
-                    <Typography>ACCT.CODE</Typography>
-                  </TableCell>
-                  <TableCell
-                    align="center"
-                    className="voucher-treasury highlight"
-                  >
-                    <Typography>DEBIT</Typography>
-                  </TableCell>
-                  <TableCell
-                    align="center"
-                    className="voucher-treasury highlight"
-                  >
-                    <Typography>CREDIT</Typography>
-                  </TableCell>
-                </TableRow>
+                {voucherData?.state !== "For Preparation" && (
+                  <TableRow>
+                    <TableCell
+                      colSpan={2}
+                      align="center"
+                      className="voucher-treasury highlight"
+                    >
+                      <Typography>Check Number</Typography>
+                    </TableCell>
+                    <TableCell
+                      colSpan={2}
+                      align="center"
+                      className="voucher-treasury highlight"
+                    >
+                      <Typography>Bank</Typography>
+                    </TableCell>
+                    <TableCell
+                      colSpan={2}
+                      align="center"
+                      className="voucher-treasury highlight"
+                    >
+                      <Typography>Amount</Typography>
+                    </TableCell>
+                    <TableCell
+                      colSpan={2}
+                      align="center"
+                      className="voucher-treasury highlight"
+                    >
+                      <Typography>Check Date</Typography>
+                    </TableCell>
+                  </TableRow>
+                )}
 
-                <TableRow>
-                  <TableCell
-                    colSpan={2}
-                    className="voucher-treasury left"
-                    align="right"
-                  >
-                    <Typography> {watch("debit_coa_id")?.name} </Typography>
-                  </TableCell>
-                  <TableCell
-                    colSpan={2}
-                    className="voucher-treasury center"
-                  ></TableCell>
-                  <TableCell className="voucher-treasury right"></TableCell>
+                {voucherData?.state === "For Preparation" && (
+                  <TableRow>
+                    <TableCell
+                      colSpan={8}
+                      align="center"
+                      className="voucher-treasury highlight"
+                    >
+                      <Typography>Check Details</Typography>
+                    </TableCell>
+                  </TableRow>
+                )}
 
-                  <TableCell className="voucher-treasury center" align="center">
-                    <Typography>
-                      {watch("debit_coa_id")
-                        ? watch("debit_coa_id")?.code
-                        : voucherData?.debitCoa
-                        ? voucherData?.debitCoa?.code
-                        : "-"}
-                    </Typography>
-                  </TableCell>
-                  <TableCell className="voucher-treasury content" align="right">
-                    <Typography>
-                      {convertToPeso(
-                        parseFloat(voucherData?.amount).toFixed(2)
-                      )}
-                    </Typography>
-                  </TableCell>
-                  <TableCell
-                    className="voucher-treasury"
-                    align="right"
-                  ></TableCell>
-                </TableRow>
+                {voucherData?.state === "For Preparation" &&
+                  fields?.map((item, index) => {
+                    return (
+                      <TableRow key={item?.id}>
+                        <TableCell
+                          colSpan={8}
+                          align="right"
+                          className="voucher-treasury content"
+                        >
+                          <Stack
+                            flexDirection={"row"}
+                            alignItems={"center"}
+                            justifyContent={"space-around"}
+                          >
+                            <AppTextBox
+                              control={control}
+                              name={`check.${index}.bank`}
+                              label={"Bank"}
+                              color="primary"
+                              className="transaction-tax-textBox treasury-array"
+                              error={Boolean(
+                                errors?.check?.[index]?.bank ||
+                                  errors?.check?.root
+                              )}
+                              helperText={
+                                errors?.check?.[index]?.bank?.message ||
+                                errors?.check?.root?.message
+                              }
+                              variant="filled"
+                              onClick={() => dispatch(setUpdateMenu(true))}
+                            />
 
-                <TableRow>
-                  <TableCell
-                    colSpan={2}
-                    className="voucher-treasury left"
-                  ></TableCell>
-                  <TableCell colSpan={2} className="voucher-treasury center">
-                    <Typography>{watch("credit_coa_id")?.name}</Typography>
-                  </TableCell>
+                            {watch("type") !== "CHECK VOUCHER" ? (
+                              <AppTextBox
+                                control={control}
+                                name={`check.${index}.reference_no`}
+                                label={"Bank Ref#"}
+                                color="primary"
+                                className="transaction-tax-textBox treasury-array"
+                                error={Boolean(
+                                  errors?.check?.[index]?.reference_no
+                                )}
+                                helperText={
+                                  errors?.check?.[index]?.reference_no?.message
+                                }
+                                variant="filled"
+                              />
+                            ) : (
+                              <Autocomplete
+                                disabled
+                                control={control}
+                                name={`check.${index}.check_no`}
+                                options={
+                                  bankData
+                                    ? bankData[index]?.check_no || []
+                                    : []
+                                }
+                                getOptionLabel={(option) =>
+                                  `${option.check_no}`
+                                }
+                                getOptionDisabled={(option) => {
+                                  return watch("check")?.some(
+                                    (checks) =>
+                                      checks.check_no?.id === option.id
+                                  );
+                                }}
+                                isOptionEqualToValue={(option, value) =>
+                                  option?.id === value?.id
+                                }
+                                renderInput={(params) => (
+                                  <MuiTextField
+                                    name="check_no"
+                                    {...params}
+                                    label="Check Number*"
+                                    size="small"
+                                    variant="filled"
+                                    error={Boolean(
+                                      errors?.check?.[index]?.check_no
+                                    )}
+                                    helperText={
+                                      errors?.check?.[index]?.check_no?.message
+                                    }
+                                    className="transaction-tax-textBox treasury-array"
+                                  />
+                                )}
+                                disableClearable
+                              />
+                            )}
 
-                  <TableCell className="voucher-treasury center"></TableCell>
-                  <TableCell
-                    className="voucher-treasury content"
-                    align="center"
-                  >
-                    <Typography>
-                      {watch("credit_coa_id")
-                        ? watch("credit_coa_id")?.code
-                        : voucherData?.creditCoa
-                        ? voucherData?.creditCoa?.code
-                        : "-"}
-                    </Typography>
-                  </TableCell>
-                  <TableCell className="voucher-treasury"></TableCell>
-                  <TableCell className="voucher-treasury content">
-                    <Typography align="right">
-                      {convertToPeso(
-                        parseFloat(voucherData?.amount).toFixed(2)
-                      )}
-                    </Typography>
-                  </TableCell>
-                </TableRow>
+                            <AppTextBox
+                              showDecimal
+                              money
+                              disabled={
+                                parseFloat(
+                                  totalAmountCheckForm(watch("check"))
+                                ).toFixed(2) ===
+                                  parseFloat(voucherData?.amount).toFixed(2) &&
+                                watch(`check.${index}.amount`) === 0
+                              }
+                              control={control}
+                              name={`check.${index}.amount`}
+                              label={"Amount"}
+                              color="primary"
+                              className="transaction-tax-textBox treasury-array"
+                              error={Boolean(errors?.check?.[index]?.amount)}
+                              helperText={
+                                errors?.check?.[index]?.amount?.message
+                              }
+                              variant="filled"
+                              onKeyUp={(e) => handleCheckAmount(e, index)}
+                            />
 
-                <TableRow>
-                  <TableCell className="voucher-treasury empty-left"></TableCell>
-                  <TableCell className="voucher-treasury empty"></TableCell>
-                  <TableCell className="voucher-treasury empty"></TableCell>
-                  <TableCell className="voucher-treasury empty"></TableCell>
-                  <TableCell className="voucher-treasury empty"></TableCell>
-                  <TableCell className="voucher-treasury empty"></TableCell>
-                  <TableCell className="voucher-treasury empty"></TableCell>
-                  <TableCell className="voucher-treasury empty-right"></TableCell>
-                </TableRow>
+                            <Controller
+                              name={`check.${index}.check_date`}
+                              control={control}
+                              render={({
+                                field: { onChange, value, ...restField },
+                              }) => (
+                                <Box className="date-picker-container treasury">
+                                  <DatePicker
+                                    className="transaction-form-date treasury-array"
+                                    label="Check Date *"
+                                    format="MM/DD/YYYY"
+                                    value={value}
+                                    onChange={(e) => {
+                                      onChange(e);
+                                    }}
+                                    slotProps={{
+                                      textField: {
+                                        variant: "filled",
+                                        error: Boolean(
+                                          errors?.check?.[index]?.check_date
+                                        ),
+                                        helperText:
+                                          errors?.check?.[index]?.check_date
+                                            ?.message,
+                                      },
+                                    }}
+                                  />
+                                </Box>
+                              )}
+                            />
+                            <IconButton
+                              disabled={fields?.length === 1}
+                              onClick={() => {
+                                remove(index);
+
+                                if (bankData?.length !== 0) {
+                                  const updatedBankData = [...bankData];
+                                  updatedBankData.splice(index, 1);
+                                  dispatch(setBankData(updatedBankData));
+                                }
+
+                                setTimeout(() => {
+                                  if (fields?.length === 1) {
+                                    dispatch(setCreateMenu(false));
+                                    setValue("multiple", false);
+                                  }
+                                }, 0);
+                              }}
+                            >
+                              <DoNotDisturbOnOutlinedIcon
+                                color={
+                                  fields?.length === 1 ? "disabled" : "error"
+                                }
+                              />
+                            </IconButton>
+                          </Stack>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+
+                {voucherData?.state !== "For Preparation" &&
+                  voucherData?.treasuryChecks?.map((item, index) => {
+                    return (
+                      <Tooltip
+                        key={index}
+                        title={
+                          <Typography className="form-title-text-note">
+                            The status of this check is{" "}
+                            {item?.state === "Cancelled" ? "Void" : "Available"}
+                          </Typography>
+                        }
+                        arrow
+                        color="secondary"
+                      >
+                        <TableRow>
+                          <TableCell
+                            colSpan={2}
+                            className="voucher-treasury content"
+                          >
+                            <Typography
+                              className="check-item-typography"
+                              color={
+                                item?.state === "Cancelled" ? "error" : "unset"
+                              }
+                            >
+                              {item?.check_no}
+                            </Typography>
+                          </TableCell>
+                          <TableCell
+                            colSpan={2}
+                            className="voucher-treasury content"
+                          >
+                            <Typography
+                              className="check-item-typography"
+                              color={
+                                item?.state === "Cancelled" ? "error" : "unset"
+                              }
+                            >
+                              {item?.bank_title?.bank_account?.bank?.name}
+                            </Typography>
+                          </TableCell>
+                          <TableCell
+                            colSpan={2}
+                            align="right"
+                            className="voucher-treasury content"
+                          >
+                            <Typography
+                              className="check-item-typography"
+                              color={
+                                item?.state === "Cancelled" ? "error" : "unset"
+                              }
+                            >
+                              {convertToPeso(
+                                parseFloat(item?.amount).toFixed(2)
+                              )}
+                            </Typography>
+                          </TableCell>
+
+                          <TableCell
+                            className="voucher-treasury content"
+                            align="center"
+                            colSpan={2}
+                          >
+                            <Stack
+                              flexDirection={"row"}
+                              justifyContent={"center"}
+                              alignItems={"center"}
+                            >
+                              <Typography
+                                className="check-item-typography"
+                                color={
+                                  item?.state === "Cancelled"
+                                    ? "error"
+                                    : "unset"
+                                }
+                              >
+                                {item?.check_date
+                                  ? moment(item?.check_date).format(
+                                      "MM/DD/YYYY"
+                                    )
+                                  : "-"}
+                              </Typography>
+
+                              {voucherData?.state !== "Check Approval" && (
+                                <IconButton
+                                  disabled={
+                                    item?.state === "Cancelled" ||
+                                    voucherData?.state === "Released" ||
+                                    voucherData?.is_print === 1
+                                  }
+                                  size="small"
+                                  onClick={(e) => {
+                                    dispatch(setCheckID(item?.id));
+                                    setAnchorE1(e.currentTarget);
+                                  }}
+                                >
+                                  <DriveFileRenameOutlineOutlinedIcon className="treasury-edit-icon" />
+                                </IconButton>
+                              )}
+                            </Stack>
+                          </TableCell>
+                        </TableRow>
+                      </Tooltip>
+                    );
+                  })}
+                {voucherData?.state !== "For Preparation" && (
+                  <TableRow>
+                    <TableCell className="voucher-treasury empty-left" />
+                    <TableCell className="voucher-treasury empty" />
+                    <TableCell className="voucher-treasury empty" />
+                    <TableCell className="voucher-treasury empty" />
+                    <TableCell className="voucher-treasury empty" />
+                    <TableCell className="voucher-treasury empty" />
+                    <TableCell className="voucher-treasury empty" />
+                    <TableCell className="voucher-treasury empty-right" />
+                  </TableRow>
+                )}
+                {voucherData?.state === "For Preparation" && (
+                  <TableRow>
+                    <TableCell className="voucher-treasury empty-left" />
+                    <TableCell className="voucher-treasury empty" />
+                    <TableCell
+                      align="center"
+                      colSpan={4}
+                      className="voucher-treasury empty"
+                    >
+                      <Button
+                        startIcon={<AddCircleOutlineRoundedIcon />}
+                        size="small"
+                        color="secondary"
+                        variant="contained"
+                        className="add-transaction-button"
+                        onClick={() =>
+                          append({
+                            id: Date.now(),
+                            check_no: "",
+                            bank: "",
+                            reference_no: "",
+                            amount: 0,
+                            check_no: null,
+                            check_date: dayjs(new Date(), {
+                              locale: AdapterDayjs.locale,
+                            }),
+                          })
+                        }
+                      >
+                        Add check
+                      </Button>
+                    </TableCell>
+                    <TableCell className="voucher-treasury empty" />
+                    <TableCell className="voucher-treasury empty-right" />
+                  </TableRow>
+                )}
 
                 <TableRow>
                   <TableCell
@@ -789,29 +1037,7 @@ const TreasuryModal = () => {
                     align="left"
                     className="voucher-treasury content"
                   >
-                    {createMenu || voucherData?.state !== "For Preparation" ? (
-                      <Typography>{`Bank: ${
-                        watch("bank") ||
-                        voucherData?.treasuryChecks[0]?.checkNo?.bank_title
-                          ?.bank_account?.bank?.name ||
-                        ""
-                      }`}</Typography>
-                    ) : (
-                      <AppTextBox
-                        control={control}
-                        name={`bank`}
-                        label={"Bank *"}
-                        color="primary"
-                        className="transaction-tax-textBox treasury"
-                        error={Boolean(errors?.bank)}
-                        helperText={errors?.bank?.message}
-                        variant="filled"
-                        onClick={() => {
-                          dispatch(setBankData(null));
-                          dispatch(setUpdateMenu(true));
-                        }}
-                      />
-                    )}
+                    <Typography>Approved By: </Typography>
                   </TableCell>
                   <TableCell
                     colSpan={2}
@@ -856,49 +1082,15 @@ const TreasuryModal = () => {
                     align="left"
                     className="voucher-treasury content"
                   >
-                    {createMenu || voucherData?.state !== "For Preparation" ? (
-                      <Typography>{`Check No: ${
-                        watch("check_no")?.check_no ||
-                        voucherData?.treasuryChecks[0]?.checkNo?.check_no ||
-                        ""
-                      }`}</Typography>
-                    ) : watch("type") === "DEBIT MEMO" ? (
-                      <AppTextBox
-                        control={control}
-                        name={`reference_no`}
-                        label={"Bank Ref# *"}
-                        color="primary"
-                        className="transaction-tax-textBox treasury"
-                        error={Boolean(errors?.reference_no)}
-                        helperText={errors?.reference_no?.message}
-                        variant="filled"
-                      />
-                    ) : (
-                      <Autocomplete
-                        disabled
-                        control={control}
-                        name={"check_no"}
-                        loading={loadingSearch}
-                        options={bankData ? [bankData?.check_no] || [] : []}
-                        getOptionLabel={(option) => `${option?.check_no}`}
-                        isOptionEqualToValue={(option, value) =>
-                          option.value === value.value
-                        }
-                        renderInput={(params) => (
-                          <MuiTextField
-                            name="bank"
-                            {...params}
-                            label="Check No*"
-                            size="small"
-                            variant="filled"
-                            error={Boolean(errors.check_no)}
-                            helperText={errors.check_no?.message}
-                            className="transaction-form-textBox treasury"
-                          />
-                        )}
-                        disableClearable
-                      />
-                    )}
+                    <Typography>{`${
+                      voucherData?.approvedBy?.first_name
+                        ? voucherData?.approvedBy?.first_name
+                        : ""
+                    } ${
+                      voucherData?.approvedBy?.last_name
+                        ? voucherData?.approvedBy?.last_name
+                        : ""
+                    }`}</Typography>
                   </TableCell>
                   <TableCell
                     colSpan={4}
@@ -922,46 +1114,15 @@ const TreasuryModal = () => {
                     align="left"
                     className="voucher-treasury content"
                   >
-                    {createMenu || voucherData?.state !== "For Preparation" ? (
-                      <Typography>
-                        {`Check Date : ${moment(
-                          voucherData?.treasuryChecks[0]?.checkNo?.check_date ||
-                            watch("check_date") ||
-                            new Date()
-                        ).format("MM/DD/YYYY")}`}
-                      </Typography>
-                    ) : (
-                      <Controller
-                        name="check_date"
-                        control={control}
-                        render={({
-                          field: { onChange, value, ...restField },
-                        }) => (
-                          <Box className="date-picker-container treasury">
-                            <DatePicker
-                              className="transaction-form-date treasury"
-                              label={
-                                watch("type") === "CHECK VOUCHER"
-                                  ? "Check Date *"
-                                  : "Dm Date *"
-                              }
-                              format="MM/DD/YYYY"
-                              value={value}
-                              onChange={(e) => {
-                                onChange(e);
-                              }}
-                              slotProps={{
-                                textField: {
-                                  variant: "filled",
-                                  error: Boolean(errors?.check_date),
-                                  helperText: errors?.check_date?.message,
-                                },
-                              }}
-                            />
-                          </Box>
-                        )}
-                      />
-                    )}
+                    <Typography>
+                      {`Date Approved : ${
+                        voucherData?.date_approved === null
+                          ? ""
+                          : moment(voucherData?.date_approved).format(
+                              "MM/DD/YYYY"
+                            )
+                      }`}
+                    </Typography>
                   </TableCell>
                   <TableCell
                     colSpan={6}
@@ -975,6 +1136,19 @@ const TreasuryModal = () => {
                           parseFloat(voucherData?.amount).toFixed(2)
                         )}
                       </Typography>
+                      {parseFloat(totalAmountCheckForm(watch("check"))).toFixed(
+                        2
+                      ) !== parseFloat(voucherData?.amount).toFixed(2) &&
+                        voucherData?.state === "For Preparation" && (
+                          <Typography color="error">
+                            {`(Variance: ${convertToPeso(
+                              parseFloat(
+                                voucherData?.amount -
+                                  totalAmountCheckForm(watch("check"))
+                              ).toFixed(2)
+                            )})`}
+                          </Typography>
+                        )}
                     </Stack>
                   </TableCell>
                 </TableRow>
@@ -1040,30 +1214,27 @@ const TreasuryModal = () => {
                                   control={
                                     <Radio color="secondary" size="small" />
                                   }
-                                  label="Check Voucher"
-                                  onChange={() => {
-                                    setValue("check_no", null);
-                                    setValue("reference_no", "");
-                                  }}
+                                  label="Regular Voucher"
+                                  onChange={handleClearData}
                                 />
+
+                                <FormControlLabel
+                                  value="MANAGER'S CHECK"
+                                  control={
+                                    <Radio color="secondary" size="small" />
+                                  }
+                                  label="Manager's Check"
+                                  onChange={handleClearData}
+                                />
+
                                 <FormControlLabel
                                   value="DEBIT MEMO"
                                   control={
                                     <Radio color="secondary" size="small" />
                                   }
                                   label="Debit Memo"
-                                  onChange={() => {
-                                    setValue("check_no", null);
-                                    setValue("reference_no", "");
-                                  }}
+                                  onChange={handleClearData}
                                 />
-                                {/* <FormControlLabel
-                                  value="OFFSET EXPENSE MEMO"
-                                  control={
-                                    <Radio color="secondary" size="small" />
-                                  }
-                                  label="Offset"
-                                /> */}
                               </RadioGroup>
                             )}
                           />
@@ -1077,462 +1248,10 @@ const TreasuryModal = () => {
                     </TableCell>
                   </TableRow>
                 )}
-
-                {voucherData?.state === "For Preparation" &&
-                  menuDataMultiple?.length === 1 && (
-                    <TableRow>
-                      <TableCell
-                        colSpan={8}
-                        align="left"
-                        className="voucher-treasury content"
-                      >
-                        {!watch("multiple") ? (
-                          <Button
-                            variant="contained"
-                            color="warning"
-                            className="add-transaction-button"
-                            onClick={() => {
-                              setValue("bank", "");
-                              setValue("check_date", null);
-                              setValue("check_no", null);
-                              setValue("multiple", true);
-                              dispatch(setCreateMenu(true));
-                              dispatch(setBankData(bankData ? [bankData] : []));
-                              fields?.length === 0 &&
-                                append({
-                                  id: Date.now(),
-                                  check_no: "",
-                                  bank: "",
-                                  amount: 0,
-                                  reference_no: "",
-                                  check_no: null,
-                                  check_date: dayjs(new Date(), {
-                                    locale: AdapterDayjs.locale,
-                                  }),
-                                });
-                            }}
-                          >
-                            {watch("type") === "CHECK VOUCHER"
-                              ? "Multiple Checks"
-                              : "Multiple Debit"}
-                          </Button>
-                        ) : (
-                          <Button
-                            variant="contained"
-                            color="error"
-                            className="add-transaction-button"
-                            onClick={() => {
-                              remove(fields?.map((_, index) => index));
-                              setValue("multiple", false);
-                              dispatch(setCreateMenu(false));
-                              dispatch(setBankData(bankData[0]));
-                            }}
-                          >
-                            {watch("type") === "CHECK VOUCHER"
-                              ? "Clear Checks"
-                              : "Clear Debit"}
-                          </Button>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  )}
-
-                {voucherData?.treasuryChecks?.length >= 2 && (
-                  <TableRow>
-                    <TableCell
-                      colSpan={8}
-                      className={
-                        voucherData?.state !== "Check Approval"
-                          ? "voucher-treasury associated-checks"
-                          : "additional-checks"
-                      }
-                    >
-                      <Typography>Associated Checks: </Typography>
-                    </TableCell>
-                  </TableRow>
-                )}
-
-                {voucherData?.treasuryChecks?.length >= 2 &&
-                  voucherData?.treasuryChecks?.map((check, ind) => {
-                    return (
-                      <TableRow key={ind}>
-                        <TableCell
-                          className={
-                            voucherData?.state !== "Check Approval"
-                              ? "voucher-treasury associated-checks"
-                              : "additional-checks"
-                          }
-                        >
-                          <Typography>{`Bank: ${check?.checkNo?.bank_title?.bank_account?.bank?.name}`}</Typography>
-                        </TableCell>
-                        <TableCell
-                          colSpan={2}
-                          className={
-                            voucherData?.state !== "Check Approval"
-                              ? "voucher-treasury associated-checks"
-                              : "additional-checks"
-                          }
-                        >
-                          <Typography>{`Check Number: ${check?.checkNo?.check_no}`}</Typography>
-                        </TableCell>
-                        <TableCell
-                          colSpan={1}
-                          className={
-                            voucherData?.state !== "Check Approval"
-                              ? "voucher-treasury associated-checks"
-                              : "additional-checks"
-                          }
-                        >
-                          <Typography>{`Amount: ${convertToPeso(
-                            check?.checkNo?.amount
-                          )}`}</Typography>
-                        </TableCell>
-                        <TableCell
-                          colSpan={2}
-                          className={
-                            voucherData?.state !== "Check Approval"
-                              ? "voucher-treasury associated-checks"
-                              : "additional-checks"
-                          }
-                        >
-                          <Typography>{`Check Date: ${moment(
-                            new Date(check?.checkNo?.check_date)
-                          ).format("MM/DD/YYYY")}`}</Typography>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
               </TableBody>
             </Table>
           </TableContainer>
         </Box>
-        {createMenu && (
-          <Accordion elevation={1} expanded={true}>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <Stack display={"flex"} flexDirection={"row"} gap={76}>
-                <Typography
-                  className="name-supplier-typo-treasury name"
-                  align="center"
-                >
-                  Check Details
-                </Typography>
-
-                <Typography
-                  className="name-supplier-typo-treasury name"
-                  align="center"
-                  color={
-                    parseFloat(totalAmountCheckForm(watch("check"))).toFixed(
-                      2
-                    ) !== parseFloat(voucherData?.amount).toFixed(2)
-                      ? "error"
-                      : ""
-                  }
-                >
-                  {`Total Amount: ₱ ${convertToPeso(
-                    parseFloat(totalAmountCheckForm(watch("check"))).toFixed(2)
-                  )}`}
-                </Typography>
-              </Stack>
-            </AccordionSummary>
-
-            {fields?.map((item, index) => {
-              return (
-                <AccordionDetails key={item.id}>
-                  <Stack
-                    flexDirection={"row"}
-                    gap={2}
-                    alignItems={"center"}
-                    justifyContent={"center"}
-                  >
-                    <AppTextBox
-                      control={control}
-                      name={`check.${index}.bank`}
-                      label={"Bank"}
-                      color="primary"
-                      className="transaction-tax-textBox treasury-array"
-                      error={Boolean(errors?.check?.[index]?.bank)}
-                      helperText={errors?.check?.[index]?.bank?.message}
-                      variant="filled"
-                      onClick={() => dispatch(setUpdateMenu(true))}
-                    />
-
-                    {watch("type") === "DEBIT MEMO" ? (
-                      <AppTextBox
-                        control={control}
-                        name={`check.${index}.reference_no`}
-                        label={"Bank Ref#"}
-                        color="primary"
-                        className="transaction-tax-textBox treasury-array"
-                        error={Boolean(errors?.check?.[index]?.reference_no)}
-                        helperText={
-                          errors?.check?.[index]?.reference_no?.message
-                        }
-                        variant="filled"
-                      />
-                    ) : (
-                      <Autocomplete
-                        control={control}
-                        name={`check.${index}.check_no`}
-                        options={
-                          bankData ? bankData[index]?.check_no || [] : []
-                        }
-                        getOptionLabel={(option) => `${option.check_no}`}
-                        getOptionDisabled={(option) => {
-                          return watch("check")?.some(
-                            (checks) => checks.check_no?.id === option.id
-                          );
-                        }}
-                        isOptionEqualToValue={(option, value) =>
-                          option?.id === value?.id
-                        }
-                        renderInput={(params) => (
-                          <MuiTextField
-                            name="check_no"
-                            {...params}
-                            label="Check Number*"
-                            size="small"
-                            variant="filled"
-                            error={Boolean(errors?.check?.[index]?.check_no)}
-                            helperText={
-                              errors?.check?.[index]?.check_no?.message
-                            }
-                            className="transaction-tax-textBox treasury-array"
-                          />
-                        )}
-                        disableClearable
-                      />
-                    )}
-                    <AppTextBox
-                      showDecimal
-                      money
-                      control={control}
-                      name={`check.${index}.amount`}
-                      label={"Amount"}
-                      color="primary"
-                      className="transaction-tax-textBox treasury-array"
-                      error={Boolean(errors?.check?.[index]?.amount)}
-                      helperText={errors?.check?.[index]?.amount?.message}
-                      variant="filled"
-                      onKeyUp={(e) => handleCheckAmount(e, index)}
-                    />
-
-                    <Controller
-                      name={`check.${index}.check_date`}
-                      control={control}
-                      render={({
-                        field: { onChange, value, ...restField },
-                      }) => (
-                        <Box className="date-picker-container treasury">
-                          <DatePicker
-                            className="transaction-form-date treasury-array"
-                            label="Check Date *"
-                            format="MM/DD/YYYY"
-                            value={value}
-                            onChange={(e) => {
-                              onChange(e);
-                            }}
-                            slotProps={{
-                              textField: {
-                                variant: "filled",
-                                error: Boolean(
-                                  errors?.check?.[index]?.check_date
-                                ),
-                                helperText:
-                                  errors?.check?.[index]?.check_date?.message,
-                              },
-                            }}
-                          />
-                        </Box>
-                      )}
-                    />
-                    <IconButton
-                      onClick={() => {
-                        remove(index);
-
-                        if (bankData?.length !== 0) {
-                          const updatedBankData = [...bankData];
-                          updatedBankData.splice(index, 1);
-                          dispatch(setBankData(updatedBankData));
-                        }
-
-                        setTimeout(() => {
-                          if (fields?.length === 1) {
-                            dispatch(setCreateMenu(false));
-                            setValue("multiple", false);
-                          }
-                        }, 0);
-                      }}
-                    >
-                      <DoNotDisturbOnOutlinedIcon color="error" />
-                    </IconButton>
-                  </Stack>
-                </AccordionDetails>
-              );
-            })}
-
-            <AccordionDetails className="accordion-check-details">
-              <Button
-                variant="contained"
-                color="success"
-                className="add-transaction-button"
-                onClick={() =>
-                  append({
-                    id: Date.now(),
-                    check_no: "",
-                    bank: "",
-                    amount: 0,
-                    reference_no: "",
-                    check_no: null,
-                    check_date: dayjs(new Date(), {
-                      locale: AdapterDayjs.locale,
-                    }),
-                  })
-                }
-              >
-                Add
-              </Button>
-            </AccordionDetails>
-          </Accordion>
-        )}
-
-        {voucherData?.state === "For Releasing" && (
-          <Accordion elevation={1}>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <Stack display={"flex"} flexDirection={"row"} gap={76}>
-                <Typography
-                  className="name-supplier-typo-treasury name"
-                  align="center"
-                >
-                  Check Details
-                </Typography>
-
-                <Typography
-                  className="name-supplier-typo-treasury name"
-                  align="center"
-                >
-                  {`Total Amount: ₱ ${convertToPeso(
-                    parseFloat(
-                      totalAmountCheck(voucherData?.treasuryChecks)
-                    ).toFixed(2)
-                  )}`}
-                </Typography>
-              </Stack>
-            </AccordionSummary>
-
-            <AccordionDetails className="treasury-check-details-summary">
-              <TableContainer className="tag-transaction-table-container">
-                <Table stickyHeader>
-                  <TableHead>
-                    <TableRow className="table-header1-import-tag-transaction">
-                      <TableCell align="center">Bank</TableCell>
-                      <TableCell align="center">Check Number</TableCell>
-                      <TableCell align="center">Amount</TableCell>
-                      <TableCell align="center">Check Date</TableCell>
-                      <TableCell align="center">Action</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {voucherData?.treasuryChecks?.map((item, index) => {
-                      return (
-                        <Tooltip
-                          key={index}
-                          title={
-                            <Typography className="form-title-text-note">
-                              The status of this check is{" "}
-                              {item?.checkNo?.state === "Cancelled"
-                                ? "Void"
-                                : "Available"}
-                            </Typography>
-                          }
-                          arrow
-                          color="secondary"
-                        >
-                          <TableRow className="table-body-tag-transaction">
-                            <TableCell>
-                              <Typography
-                                align="center"
-                                className="check-item-typography"
-                                color={
-                                  item?.checkNo?.state === "Cancelled"
-                                    ? "error"
-                                    : "unset"
-                                }
-                              >
-                                {
-                                  item?.checkNo?.bank_title?.bank_account?.bank
-                                    ?.name
-                                }
-                              </Typography>
-                            </TableCell>
-                            <TableCell>
-                              <Typography
-                                align="center"
-                                className="check-item-typography"
-                                color={
-                                  item?.checkNo?.state === "Cancelled"
-                                    ? "error"
-                                    : "unset"
-                                }
-                              >
-                                {item?.checkNo?.check_no}
-                              </Typography>
-                            </TableCell>
-                            <TableCell align="center">
-                              <Typography
-                                className="check-item-typography"
-                                color={
-                                  item?.checkNo?.state === "Cancelled"
-                                    ? "error"
-                                    : "unset"
-                                }
-                              >
-                                {convertToPeso(
-                                  parseFloat(item?.checkNo?.amount).toFixed(2)
-                                )}
-                              </Typography>
-                            </TableCell>
-
-                            <TableCell align="center">
-                              <Typography
-                                className="check-item-typography"
-                                color={
-                                  item?.checkNo?.state === "Cancelled"
-                                    ? "error"
-                                    : "unset"
-                                }
-                              >
-                                {item?.checkNo?.check_date
-                                  ? moment(item?.checkNo?.check_date).format(
-                                      "MM/DD/YYYY"
-                                    )
-                                  : "-"}
-                              </Typography>
-                            </TableCell>
-                            <TableCell align="center">
-                              <IconButton
-                                disabled={
-                                  item?.checkNo?.state === "Cancelled" ||
-                                  voucherData?.state === "Released" ||
-                                  voucherData?.is_print === 1
-                                }
-                                onClick={(e) => {
-                                  dispatch(setCheckID(item?.checkNo?.id));
-                                  setAnchorE1(e.currentTarget);
-                                }}
-                              >
-                                <MoreVertOutlinedIcon className="supplier-icon-actions" />
-                              </IconButton>
-                            </TableCell>
-                          </TableRow>
-                        </Tooltip>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </AccordionDetails>
-          </Accordion>
-        )}
 
         <Menu
           anchorEl={anchorE1}
@@ -1569,20 +1288,22 @@ const TreasuryModal = () => {
 
         <Box className="add-transaction-button-container">
           <Box className="return-receive-container">
-            {!hasCancelled && voucherData?.state === "For Releasing" && (
-              <Button
-                variant="contained"
-                color="warning"
-                className="add-transaction-button"
-                onClick={() => dispatch(setReceive(true))}
-              >
-                Print Voucher
-              </Button>
-            )}
+            {!hasCancelled &&
+              voucherData?.state === "For Releasing" &&
+              !hasAccess("tagging") && (
+                <Button
+                  variant="contained"
+                  color="warning"
+                  className="add-transaction-button"
+                  onClick={() => dispatch(setIsContinue(true))}
+                >
+                  Print Voucher
+                </Button>
+              )}
 
             {!hasCancelled &&
               voucherData?.state === "For Releasing" &&
-              voucherData?.is_print === 1 && (
+              hasAccess("tagging") && (
                 <Button
                   variant="contained"
                   color="success"
@@ -1620,12 +1341,7 @@ const TreasuryModal = () => {
               (voucherData?.state === "For Preparation" ||
                 voucherData?.state === "For Clearing") && (
                 <Button
-                  disabled={
-                    watch("multiple") === true &&
-                    parseFloat(totalAmountCheckForm(watch("check"))).toFixed(
-                      2
-                    ) !== parseFloat(voucherData?.amount).toFixed(2)
-                  }
+                  disabled={disableSubmit()}
                   variant="contained"
                   color="success"
                   type="submit"
@@ -1637,18 +1353,12 @@ const TreasuryModal = () => {
 
             {!hasCancelled && voucherData?.state === "Check Approval" && (
               <Button
-                disabled={
-                  watch("multiple") === true &&
-                  parseFloat(totalAmountCheckForm(watch("check"))).toFixed(
-                    2
-                  ) !== parseFloat(voucherData?.amount).toFixed(2)
-                }
                 variant="contained"
                 color="success"
                 className="add-transaction-button"
                 onClick={() => handleApproveVoucher()}
               >
-                Approved
+                Approve
               </Button>
             )}
 
@@ -1683,7 +1393,6 @@ const TreasuryModal = () => {
           clearLoading ||
           releasedLoading ||
           loadingReturn ||
-          loadingSearch ||
           loadingPrint ||
           checkDateLoading ||
           loadingVoid ||
@@ -1775,6 +1484,23 @@ const TreasuryModal = () => {
             dispatch(resetPrompt());
           }}
           confirmOnClick={() => handleConfirmPrint()}
+        />
+      </Dialog>
+
+      <Dialog open={isContinue} onClose={() => dispatch(setIsContinue(false))}>
+        <AppPrompt
+          image={receiveImg}
+          title={"Confirm correct details?"}
+          nextLineMessage={"Please confirm if all details are correct"}
+          confirmButton={"Yes, Confirmed!"}
+          cancelButton={"Cancel"}
+          cancelOnClick={() => {
+            dispatch(resetPrompt());
+          }}
+          confirmOnClick={() => {
+            dispatch(setReceive(true));
+            dispatch(setIsContinue(false));
+          }}
         />
       </Dialog>
 

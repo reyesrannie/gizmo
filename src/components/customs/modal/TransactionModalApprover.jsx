@@ -16,11 +16,6 @@ import {
 } from "@mui/material";
 
 import { useDispatch, useSelector } from "react-redux";
-import Lottie from "lottie-react";
-import loading from "../../../assets/lottie/Loading-2.json";
-
-import "../../styles/TransactionModal.scss";
-import "../../styles/TransactionModalApprover.scss";
 import { LoadingButton } from "@mui/lab";
 import {
   resetMenu,
@@ -34,7 +29,6 @@ import {
   setOpenVoid,
   setReturn,
 } from "../../../services/slice/promptSlice";
-
 import { setVoucherData } from "../../../services/slice/transactionSlice";
 import moment from "moment";
 import {
@@ -42,22 +36,13 @@ import {
   arrayFieldThree,
   coaArrays,
 } from "../../../services/functions/toArrayFn";
-import ReactToPrint from "react-to-print";
-
-import TransactionDrawer from "../TransactionDrawer";
-import ReasonInput from "../ReasonInput";
 import { enqueueSnackbar } from "notistack";
 import { singleError } from "../../../services/functions/errorResponse";
-import ComputationMenu from "./ComputationMenu";
-
 import {
   totalAccount,
   totalVatNonPaginate,
 } from "../../../services/functions/compute";
-import DateChecker from "../../../services/functions/DateChecker";
 import { hasAccess } from "../../../services/functions/access";
-
-import ClearCheck from "../ClearCheck";
 import { setDisplayed } from "../../../services/slice/syncSlice";
 import Print2307 from "../Print2307";
 import { useUsersQuery } from "../../../services/api/authApi";
@@ -82,9 +67,22 @@ import {
   useReturnGJMutation,
   useVoidGJMutation,
 } from "../../../services/api/generalJournalApi";
+import { AdditionalFunction } from "../../../services/functions/AdditionalFunction";
+
+import ClearCheck from "../ClearCheck";
+import ComputationMenu from "./ComputationMenu";
+import TransactionDrawer from "../TransactionDrawer";
+import ReasonInput from "../ReasonInput";
+import ReactToPrint from "react-to-print";
+import Lottie from "lottie-react";
+import loading from "../../../assets/lottie/Loading-2.json";
+
+import "../../styles/TransactionModal.scss";
+import "../../styles/TransactionModalApprover.scss";
 
 const TransactionModalApprover = () => {
   const dispatch = useDispatch();
+  const { convertToPeso } = AdditionalFunction();
   const isReturn = useSelector((state) => state.prompt.return);
   const menuData = useSelector((state) => state.menu.menuData);
   const computationMenu = useSelector((state) => state.menu.computationMenu);
@@ -92,8 +90,6 @@ const TransactionModalApprover = () => {
   const voucherData = useSelector((state) => state.transaction.voucherData);
   const openVoid = useSelector((state) => state.prompt.openVoid);
   const receiveMenu = useSelector((state) => state.menu.receiveMenu);
-
-  const { isDateNotCutOff } = DateChecker();
 
   const {
     data: tin,
@@ -104,11 +100,7 @@ const TransactionModalApprover = () => {
     pagination: "none",
   });
 
-  const {
-    data: document,
-    isLoading: loadingDocument,
-    isSuccess: documentSuccess,
-  } = useDocumentTypeQuery({
+  const { data: document, isSuccess: documentSuccess } = useDocumentTypeQuery({
     status: "active",
     pagination: "none",
   });
@@ -276,10 +268,6 @@ const TransactionModalApprover = () => {
     document,
   ]);
 
-  const convertToPeso = (value) => {
-    return value?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  };
-
   const checkAtc = () => {
     const hasAtc = atc?.result?.find((item) => item?.id === menuData?.atc);
     const wtax = totalVatNonPaginate(taxComputation, "wtax_payable_cr");
@@ -420,11 +408,6 @@ const TransactionModalApprover = () => {
                 className="voucher-number-header"
               >
                 <Typography>
-                  {menuData?.voucher_number === null &&
-                    (voucher === "check" ? "VPRL" : "GJRL") +
-                      formattedDate +
-                      "-" +
-                      vpCheck.toString().padStart(4, "0")}
                   {menuData?.voucher_number !== null &&
                     menuData?.voucher_number}
                 </Typography>
@@ -858,11 +841,6 @@ const TransactionModalApprover = () => {
               </TableCell>
               <TableCell align="center" className="voucher-payment-footer">
                 <Typography>
-                  {menuData?.voucher_number === null &&
-                    (voucher === "check" ? "VPRL" : "GJRL") +
-                      formattedDate +
-                      "-" +
-                      vpCheck.toString().padStart(4, "0")}
                   {menuData?.voucher_number !== null &&
                     menuData?.voucher_number}
                 </Typography>

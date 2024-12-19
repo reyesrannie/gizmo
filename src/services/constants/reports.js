@@ -9,3 +9,11 @@ export const reportOptions = [
   { name: "Atc", function: generateExcelReportPerATC },
   { name: "Supplier", function: generateExcelReportPerSup },
 ];
+
+export const reports = [
+  { name: "Transaction", value: "expanded" },
+  { name: "Atc", value: "expanded-atc" },
+  { name: "Supplier", value: "expanded-supplier" },
+  { name: "Vat", value: "vat" },
+  { name: "Disbursement", value: "disbursement" },
+];

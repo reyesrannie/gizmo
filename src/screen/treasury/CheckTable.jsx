@@ -305,15 +305,13 @@ const CheckTable = ({
                       onClick={() => {
                         dispatch(
                           setMenuDataMultiple(
-                            tag?.treasuryChecks[0]?.checkNo?.batch?.length ===
-                              1 || tag?.treasuryChecks.length === 0
+                            tag?.treasuryChecks[0]?.batch?.length === 1 ||
+                              tag?.treasuryChecks.length === 0
                               ? [tag] || []
-                              : tag?.treasuryChecks[0]?.checkNo?.batch?.map(
-                                  (item) => ({
-                                    ...item?.transactionCheck,
-                                    treasuryChecks: tag?.treasuryChecks,
-                                  })
-                                )
+                              : tag?.treasuryChecks[0]?.batch?.map((item) => ({
+                                  ...item,
+                                  treasuryChecks: tag?.treasuryChecks,
+                                }))
                           )
                         );
 
@@ -400,7 +398,7 @@ const CheckTable = ({
                           {tag?.amount === null ? (
                             <>&mdash;</>
                           ) : (
-                            convertToPeso(tag?.amount)
+                            convertToPeso(parseFloat(tag?.amount).toFixed(2))
                           )}
                         </Typography>
                       </TableCell>
@@ -480,25 +478,6 @@ const CheckTable = ({
                           />
                         )}
 
-                        {tag?.state === "Released" && (
-                          <StatusIndicator
-                            status={
-                              tag?.is_filed !== null
-                                ? "Filed"
-                                : tag?.is_cleared !== null
-                                ? "Cleared"
-                                : "Released"
-                            }
-                            className={
-                              tag?.is_filed !== null
-                                ? "clearing-indicator"
-                                : tag?.is_cleared !== null
-                                ? "clearing-indicator"
-                                : "approved-indicator"
-                            }
-                          />
-                        )}
-
                         {tag?.state === "For Filing" && (
                           <StatusIndicator
                             status="Awaiting File"
@@ -534,7 +513,11 @@ const CheckTable = ({
                         <IconButton>
                           <Badge
                             variant="dot"
-                            invisible={tag?.is_read !== 0}
+                            invisible={
+                              tag?.state === "For Releasing"
+                                ? tag?.is_print !== 0
+                                : tag?.is_read !== 0
+                            }
                             color="error"
                             className="tag-transaction-badge"
                           >

@@ -11,6 +11,7 @@ const initialState = {
   checkMenu: false,
   computationMenu: false,
   updateMenu: false,
+  treasuryMenu: false,
   updateData: false,
   checkID: "",
   receiveMenu: false,
@@ -181,6 +182,9 @@ const menutSlice = createSlice({
     setBankData: (state, action) => {
       state.bankData = action.payload;
     },
+    setTreasuryMenu: (state, action) => {
+      state.treasuryMenu = action.payload;
+    },
 
     resetMenu: () => {
       return initialState;
@@ -229,6 +233,7 @@ export const {
   setSched,
   setBankData,
   setUpdateImport,
+  setTreasuryMenu,
 } = menutSlice.actions;
 
 export default menutSlice.reducer;

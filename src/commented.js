@@ -172,3 +172,84 @@
 //       parseFloat(checkTransaction?.result?.amount || 0);
 //     isZero ? handleReceive() : handleCreateCheck();
 //   };
+
+// {watch("tin") && (
+//     <Autocomplete
+//       disabled={!hasAccess("tagging")}
+//       control={control}
+//       name={"document_type"}
+//       options={document?.result || []}
+//       getOptionLabel={(option) => `${option.name}`}
+//       isOptionEqualToValue={(option, value) =>
+//         option?.code === value?.code
+//       }
+//       renderInput={(params) => (
+//         <MuiTextField
+//           name="document_type"
+//           {...params}
+//           label="Document type *"
+//           size="small"
+//           variant="outlined"
+//           error={Boolean(errors.document_type)}
+//           helperText={errors.document_type?.message}
+//           className="transaction-form-textBox"
+//         />
+//       )}
+//     />
+//   )}
+
+{
+  /* <Button
+disabled={!hasAccess("tagging")}
+endIcon={<AddIcon />}
+color="secondary"
+variant="contained"
+size="small"
+className="add-tax-document"
+onClick={() => dispatch(setAddDocuments(true))}
+>
+Add Document
+</Button> */
+}
+
+{
+  /* <Dialog
+        open={addDocuments}
+        className="additional-documents"
+        onClose={() => dispatch(setAddDocuments(false))}
+      >
+        <Autocomplete
+          disabled={!hasAccess("tagging")}
+          control={control}
+          name={"addedDocuments"}
+          options={
+            document?.result.filter(
+              (item) => !documents?.some((doc) => item?.code === doc?.code)
+            ) || []
+          }
+          getOptionLabel={(option) => `${option.name}`}
+          isOptionEqualToValue={(option, value) => option?.code === value?.code}
+          onClose={() => {
+            if (watch("addedDocuments")) {
+              dispatch(setDocuments([...documents, watch("addedDocuments")]));
+              dispatch(setAddDocuments(false));
+              setValue("addedDocuments", null);
+            }
+            setValue("addedDocuments", null);
+            dispatch(setAddDocuments(false));
+          }}
+          renderInput={(params) => (
+            <MuiTextField
+              name="addedDocuments"
+              {...params}
+              label="Document type"
+              size="small"
+              variant="outlined"
+              error={Boolean(errors.addedDocuments)}
+              helperText={errors.addedDocuments?.message}
+              className="transaction-form-textBox"
+            />
+          )}
+        />
+      </Dialog> */
+}

@@ -22,19 +22,20 @@ const useApHistoryHook = () => {
         : matchingPermissions[0];
     }
 
-    return null;
+    return "";
   };
 
   const [params, setParams] = useState({
-    status: "active",
-    page: 10,
+    page: 1,
     per_page: 10,
-    pagination: null,
-    sorts: null,
+    pagination: "",
+    sorts: "",
     tagYear: "",
-    state: null,
+    state: "",
     allocation: "",
     access: getAccess(),
+    year: "",
+    month: "",
   });
 
   const onPageChange = (_, page) => {
@@ -49,15 +50,6 @@ const useApHistoryHook = () => {
       ...currentValue,
       page: 1,
       per_page: rows.target.value,
-    }));
-  };
-
-  const onStatusChange = (status) => {
-    setParams((currentValue) => ({
-      ...currentValue,
-      status: status,
-      state: "",
-      page: 1,
     }));
   };
 
@@ -79,8 +71,7 @@ const useApHistoryHook = () => {
   const onStateChange = (state) => {
     setParams((currentValue) => ({
       ...currentValue,
-      state: state,
-      page: 1,
+      ...state,
     }));
   };
 
@@ -99,16 +90,52 @@ const useApHistoryHook = () => {
     }));
   };
 
+  const onYearChange = (year) => {
+    setParams((currentValue) => ({
+      ...currentValue,
+      year: year,
+    }));
+  };
+
+  const onMonthChange = (month) => {
+    setParams((currentValue) => ({
+      ...currentValue,
+      month: month,
+    }));
+  };
+
+  const onBackProcess = () => {
+    if (params?.state !== "") {
+      setParams((prev) => ({
+        ...prev,
+        state: "",
+        access: "",
+      }));
+    } else if (params?.month !== "") {
+      setParams((prev) => ({
+        ...prev,
+        month: "",
+      }));
+    } else if (params?.year !== "") {
+      setParams((prev) => ({
+        ...prev,
+        year: "",
+      }));
+    }
+  };
+
   return {
     params,
     onPageChange,
     onRowChange,
     onSearchData,
-    onStatusChange,
     onSortTable,
     onStateChange,
     onOrderBy,
     onTagYearChange,
+    onYearChange,
+    onMonthChange,
+    onBackProcess,
   };
 };
 

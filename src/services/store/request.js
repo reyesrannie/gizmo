@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-const baseURL = process.env.REACT_APP_API_KEY;
-// const baseURL = "http://10.10.12.10:8000/api/";
+// const baseURL = process.env.REACT_APP_API_KEY;
+const baseURL = "http://10.10.12.10:8000/api/";
 
 export const jsonServerAPI = createApi({
   reducerPath: "jsonServerAPI",
@@ -57,6 +57,7 @@ export const jsonServerAPI = createApi({
     "Bank",
     "BankAccountNumber",
     "BankAccountTitle",
+    "CheckDetails",
   ],
   endpoints: (builder) => ({
     // report
@@ -68,41 +69,7 @@ export const jsonServerAPI = createApi({
         params: payload,
       }),
     }),
-
-    debitMemo: builder.query({
-      transformResponse: (response) => response,
-      query: (payload) => ({
-        url: `/debit-memo`,
-        method: "GET",
-        params: payload,
-      }),
-      providesTags: ["DebitMemo"],
-    }),
-    clearDebitMemo: builder.mutation({
-      transformResponse: (response) => response,
-      query: (payload) => ({
-        url: `/cleared/debit-memo`,
-        method: "POST",
-        body: payload,
-      }),
-      invalidatesTags: ["DebitMemo"],
-    }),
-    returnDebitMemo: builder.mutation({
-      transformResponse: (response) => response,
-      query: (payload) => ({
-        url: `/cancelled/debit-memo/${payload.id}`,
-        method: "POST",
-        body: payload,
-      }),
-      invalidatesTags: ["DebitMemo"],
-    }),
   }),
 });
 
-export const {
-  useReportQuery,
-
-  useDebitMemoQuery,
-  useClearDebitMemoMutation,
-  useReturnDebitMemoMutation,
-} = jsonServerAPI;
+export const { useReportQuery } = jsonServerAPI;

@@ -155,7 +155,7 @@ const AppBar = () => {
             }
           } else if (action?.some((act) => act === "Treasury")) {
             if (
-              hasAccess(["preparation", "releasing", "clearing"]) ||
+              hasAccess(["preparation", "releasing", "clearing", "tagging"]) ||
               userData?.scope_tagging?.some((tag) =>
                 data?.ap_tagging_id?.includes(tag?.ap_id)
               )

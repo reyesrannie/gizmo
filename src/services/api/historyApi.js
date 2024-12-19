@@ -2,10 +2,10 @@ import { jsonServerAPI } from "../store/request";
 
 export const accountNumberApi = jsonServerAPI.injectEndpoints({
   endpoints: (builder) => ({
-    getMonthVP: builder.query({
+    getHistory: builder.query({
       transformResponse: (response) => response,
       query: (payload) => ({
-        url: `/month-list/transaction`,
+        url: `/history/vp`,
         method: "GET",
         params: payload,
       }),
@@ -21,5 +21,4 @@ export const accountNumberApi = jsonServerAPI.injectEndpoints({
   }),
 });
 
-export const { useLazyGetMonthVPQuery, useLazyGetMonthGJQuery } =
-  accountNumberApi;
+export const { useGetHistoryQuery } = accountNumberApi;

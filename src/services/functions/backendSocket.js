@@ -3,7 +3,8 @@ import Echo from "laravel-echo";
 
 window.Pusher = Pusher;
 
-const baseUrl = process.env.REACT_APP_WEBSOCKET_URL;
+// const baseUrl = process.env.REACT_APP_WEBSOCKET_URL;
+const baseUrl = "10.10.12.10";
 
 // Pusher.logToConsole = true;
 

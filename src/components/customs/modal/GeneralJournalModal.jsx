@@ -10,6 +10,7 @@ import {
   TextField as MuiTextField,
   IconButton,
   Stack,
+  Tooltip,
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { Controller, set, useFieldArray, useForm } from "react-hook-form";
@@ -61,17 +62,19 @@ import {
   usePostGJMutation,
   useUpdateGjMutation,
 } from "../../../services/api/generalJournalApi";
+import ReactToPrint from "react-to-print";
+import GJPrinting from "../GJPrinting";
 
 const GeneralJournalModal = () => {
   const dispatch = useDispatch();
   const hasError = useSelector((state) => state.menu.hasError);
   const menuData = useSelector((state) => state.menu.menuData);
   const isReturn = useSelector((state) => state.prompt.return);
+  const userData = useSelector((state) => state.auth.userData);
 
-  const debounceTimer = useRef(null);
+  const componentRef = useRef();
 
   const { enqueueSnackbar } = useSnackbar();
-  const { insertDocument, deepEqual } = AdditionalFunction();
   const { minDate } = DateChecker();
 
   const {
@@ -140,10 +143,12 @@ const GeneralJournalModal = () => {
     resolver: yupResolver(generalJournalSchema),
     defaultValues: {
       gj_name: "",
+      gj_series: "",
       gj_description: "",
       ap_tagging_id: null,
-      boa: "",
+      gj_type: null,
       tag_year: null,
+      reference_no: "",
       debit: 0,
       credit: 0,
       variance: 0,
@@ -153,13 +158,8 @@ const GeneralJournalModal = () => {
           item_id: "",
           id: Date.now(),
           coa_id: null,
-          debit_amount: 0,
-          credit_amount: 0,
-          tag_no: "",
-          invoice_no: "",
-          voucher_no: "",
-          supplier_id: null,
-          location_id: null,
+          debit_amount: "",
+          credit_amount: "",
         },
       ],
     },
@@ -172,6 +172,7 @@ const GeneralJournalModal = () => {
 
   useEffect(() => {
     if (menuData && successAP && successTin && successLoc && coaSuccess) {
+      console.log(menuData);
       const tagMonthYear = dayjs(menuData?.tag_year, "YYMM").isValid()
         ? dayjs(menuData?.tag_year, "YYMM").toDate()
         : null;
@@ -188,22 +189,9 @@ const GeneralJournalModal = () => {
         gj_items: menuData?.gj_items?.map((item) => ({
           item_id: item?.id,
           id: item?.id,
-          coa_id: coa?.result?.find((coa) =>
-            item?.credit_amount !== 0
-              ? item?.credit_coa?.id === coa?.id
-              : item?.debit_coa?.id === coa?.id
-          ),
+          coa_id: coa?.result?.find((coa) => item?.coa?.id === coa?.id),
           debit_amount: item?.debit_amount,
           credit_amount: item?.credit_amount,
-          tag_no: item?.tag_no,
-          invoice_no: item?.invoice_no,
-          voucher_no: item?.voucher_no,
-          supplier_id: tin?.result?.find(
-            (sup) => item?.supplier?.id === sup?.id
-          ),
-          location_id: location?.result?.find(
-            (loc) => item?.location?.id === loc?.id
-          ),
         })),
       };
 
@@ -253,10 +241,8 @@ const GeneralJournalModal = () => {
       tag_year: moment(new Date(submitData?.tag_year)).format("YYMM"),
       gj_items: submitData?.gj_items?.map((items) => ({
         ...items,
-        debit_coa_id: items?.debit_amount !== 0 ? items?.coa_id?.id : "",
-        credit_coa_id: items?.credit_amount !== 0 ? items?.coa_id?.id : "",
-        supplier_id: items?.supplier_id?.id,
-        location_id: items?.location_id?.id,
+        coa_id: items?.coa_id?.id,
+
         item_id: menuData ? items?.id : "",
       })),
     };
@@ -281,10 +267,7 @@ const GeneralJournalModal = () => {
       tag_year: moment(new Date(submitData?.tag_year)).format("YYMM"),
       gj_items: submitData?.gj_items?.map((items) => ({
         ...items,
-        debit_coa_id: items?.debit_amount !== 0 ? items?.coa_id?.id : "",
-        credit_coa_id: items?.credit_amount !== 0 ? items?.coa_id?.id : "",
-        supplier_id: items?.supplier_id?.id,
-        location_id: items?.location_id?.id,
+        coa_id: items?.coa_id?.id,
         item_id: menuData ? items?.id : "",
       })),
     };
@@ -313,20 +296,14 @@ const GeneralJournalModal = () => {
     }
   };
 
-  const searchHandler = (data) => {
-    if (debounceTimer.current) {
-      clearTimeout(debounceTimer.current);
-    }
+  const searchHandler = async (data) => {
+    const obj = {
+      tag: data?.target?.value,
+    };
 
-    debounceTimer.current = setTimeout(async () => {
-      const obj = {
-        tag: data?.target?.value,
-      };
-
-      try {
-        const res = await triggerSearchTag(obj).unwrap();
-      } catch (error) {}
-    }, 500);
+    try {
+      const res = await triggerSearchTag(obj).unwrap();
+    } catch (error) {}
   };
 
   const computeTotal = () => {
@@ -375,7 +352,7 @@ const GeneralJournalModal = () => {
     } catch (error) {}
   };
 
-  const boa = ["Adjustment", "Accrual"];
+  const gj_type = ["Adjustment", "Accrual"];
 
   return (
     <Paper className="transaction-modal-container gj">
@@ -387,7 +364,7 @@ const GeneralJournalModal = () => {
           draggable="false"
         />
 
-        <Typography className="transaction-text">Adjusting Entry</Typography>
+        <Typography className="transaction-text">Journal Entries</Typography>
       </Box>
       <Divider orientation="horizontal" className="transaction-devider" />
       <form
@@ -400,7 +377,17 @@ const GeneralJournalModal = () => {
           </Typography>
         </Box>
         <AppTextBox
-          disabled={menuData?.state === "Posted"}
+          disabled
+          control={control}
+          name={"gj_series"}
+          label={"Series *"}
+          color="primary"
+          className="transaction-form-textBox"
+          error={Boolean(errors?.gj_series)}
+          helperText={errors?.gj_series?.message}
+        />
+        <AppTextBox
+          disabled={menuData?.state === "Approved"}
           control={control}
           name={"gj_name"}
           label={"Journal *"}
@@ -411,10 +398,14 @@ const GeneralJournalModal = () => {
         />
 
         <Autocomplete
-          disabled={menuData?.state === "Posted"}
+          disabled={menuData?.state === "Approved"}
           control={control}
           name={"ap_tagging_id"}
-          options={ap?.result || []}
+          options={
+            userData?.scope_tagging?.map((value) =>
+              ap?.result?.find((item) => value?.ap_code === item?.company_code)
+            ) || []
+          }
           getOptionLabel={(option) =>
             `${option.company_code} - ${option.description}`
           }
@@ -433,21 +424,21 @@ const GeneralJournalModal = () => {
           )}
         />
         <Autocomplete
-          disabled={menuData?.state === "Posted"}
+          disabled={menuData?.state === "Approved"}
           control={control}
-          name={"boa"}
-          options={boa || []}
+          name={"gj_type"}
+          options={gj_type || []}
           getOptionLabel={(option) => `${option}`}
           isOptionEqualToValue={(option, value) => option === value}
           renderInput={(params) => (
             <MuiTextField
-              name="boa"
+              name="gj_type"
               {...params}
-              label="Book of accounts *"
+              label="Type *"
               size="small"
               variant="outlined"
-              error={Boolean(errors.boa)}
-              helperText={errors.boa?.message}
+              error={Boolean(errors.gj_type)}
+              helperText={errors.gj_type?.message}
               className="transaction-form-textBox"
             />
           )}
@@ -459,7 +450,7 @@ const GeneralJournalModal = () => {
           render={({ field: { onChange, value, ...restField } }) => (
             <Box className="date-picker-container-transaction">
               <MobileDatePicker
-                disabled={menuData?.state === "Posted"}
+                disabled={menuData?.state === "Approved"}
                 className="transaction-form-date"
                 label="Tag year month *"
                 format="MMMM YYYY"
@@ -480,10 +471,20 @@ const GeneralJournalModal = () => {
             </Box>
           )}
         />
+        <AppTextBox
+          disabled={menuData?.state === "Approved"}
+          control={control}
+          name={"reference_no"}
+          label={"Reference No *"}
+          color="primary"
+          className="transaction-form-textBox"
+          error={Boolean(errors?.reference_no)}
+          helperText={errors?.reference_no?.message}
+        />
 
         {hasAccess(["ap_tag"]) && (
           <AppTextBox
-            disabled={menuData?.state === "Posted"}
+            disabled={menuData?.state === "Approved"}
             multiline
             minRows={1}
             control={control}
@@ -509,19 +510,9 @@ const GeneralJournalModal = () => {
                 elevation={0}
               >
                 <Typography>{`${index + 1}.`}</Typography>
-                <AppTextBox
-                  disabled={menuData?.state === "Posted"}
-                  control={control}
-                  name={`gj_items.${index}.tag_no`}
-                  label={"Tag Number *"}
-                  color="primary"
-                  className="transaction-form-textBox"
-                  error={Boolean(errors?.gj_items?.[index]?.tag_no)}
-                  helperText={errors?.gj_items?.[index]?.tag_no?.message}
-                  onKeyDown={(key) => searchHandler(key)}
-                />
+
                 <Autocomplete
-                  disabled={menuData?.state === "Posted"}
+                  disabled={menuData?.state === "Approved"}
                   control={control}
                   name={`gj_items.${index}.coa_id`}
                   options={coa?.result || []}
@@ -543,12 +534,13 @@ const GeneralJournalModal = () => {
                   )}
                 />
                 <AppTextBox
+                  disabled={
+                    (watch(`gj_items.${index}.credit_amount`) !== 0 &&
+                      watch(`gj_items.${index}.credit_amount`) !== "") ||
+                    menuData?.state === "Approved"
+                  }
                   money
                   showDecimal
-                  disabled={
-                    watch(`gj_items.${index}.credit_amount`) !== 0 ||
-                    menuData?.state === "Posted"
-                  }
                   control={control}
                   name={`gj_items.${index}.debit_amount`}
                   label={"Debit *"}
@@ -559,12 +551,13 @@ const GeneralJournalModal = () => {
                   onKeyUp={() => computeTotal()}
                 />
                 <AppTextBox
+                  disabled={
+                    (watch(`gj_items.${index}.debit_amount`) !== 0 &&
+                      watch(`gj_items.${index}.debit_amount`) !== "") ||
+                    menuData?.state === "Approved"
+                  }
                   money
                   showDecimal
-                  disabled={
-                    watch(`gj_items.${index}.debit_amount`) !== 0 ||
-                    menuData?.state === "Posted"
-                  }
                   control={control}
                   name={`gj_items.${index}.credit_amount`}
                   label={"Credit *"}
@@ -574,80 +567,11 @@ const GeneralJournalModal = () => {
                   helperText={errors?.gj_items?.[index]?.credit_amount?.message}
                   onKeyUp={() => computeTotal()}
                 />
-                <AppTextBox
-                  disabled={menuData?.state === "Posted"}
-                  control={control}
-                  name={`gj_items.${index}.invoice_no`}
-                  label={"Invoice Number *"}
-                  color="primary"
-                  className="transaction-form-textBox"
-                  error={Boolean(errors?.gj_items?.[index]?.invoice_no)}
-                  helperText={errors?.gj_items?.[index]?.invoice_no?.message}
-                />
-                <AppTextBox
-                  disabled={menuData?.state === "Posted"}
-                  control={control}
-                  name={`gj_items.${index}.voucher_no`}
-                  label={"Voucher Number *"}
-                  color="primary"
-                  className="transaction-form-textBox"
-                  error={Boolean(errors?.gj_items?.[index]?.voucher_no)}
-                  helperText={errors?.gj_items?.[index]?.voucher_no?.message}
-                />
-                <Autocomplete
-                  disabled={menuData?.state === "Posted"}
-                  control={control}
-                  name={`gj_items.${index}.supplier_id`}
-                  options={tin?.result || []}
-                  getOptionLabel={(option) =>
-                    `${option.company_name} - ${option.tin}`
-                  }
-                  isOptionEqualToValue={(option, value) =>
-                    option?.code === value?.code
-                  }
-                  renderInput={(params) => (
-                    <MuiTextField
-                      name="supplier_id"
-                      {...params}
-                      label="Supplier *"
-                      size="small"
-                      variant="outlined"
-                      error={Boolean(errors?.gj_items?.[index]?.supplier_id)}
-                      helperText={
-                        errors?.gj_items?.[index]?.supplier_id?.message
-                      }
-                      className="transaction-form-textBox"
-                    />
-                  )}
-                />
-                <Autocomplete
-                  disabled={menuData?.state === "Posted"}
-                  control={control}
-                  name={`gj_items.${index}.location_id`}
-                  options={location?.result || []}
-                  getOptionLabel={(option) => `${option.name}`}
-                  isOptionEqualToValue={(option, value) =>
-                    option?.code === value?.code
-                  }
-                  renderInput={(params) => (
-                    <MuiTextField
-                      name="location_id"
-                      {...params}
-                      label="Location *"
-                      size="small"
-                      variant="outlined"
-                      error={Boolean(errors?.gj_items?.[index]?.location_id)}
-                      helperText={
-                        errors?.gj_items?.[index]?.location_id?.message
-                      }
-                      className="transaction-form-textBox"
-                    />
-                  )}
-                />
+
                 <IconButton
                   className="icon-button-gj"
                   disabled={
-                    fields?.length === 1 || menuData?.state === "Posted"
+                    fields?.length === 1 || menuData?.state === "Approved"
                   }
                   onClick={() => {
                     menuData ? handleRemoveItem(item) : remove(index);
@@ -655,7 +579,7 @@ const GeneralJournalModal = () => {
                 >
                   <DoNotDisturbOnOutlinedIcon
                     color={`${
-                      fields?.length === 1 || menuData?.state === "Posted"
+                      fields?.length === 1 || menuData?.state === "Approved"
                         ? "disabled"
                         : "error"
                     }`}
@@ -667,7 +591,7 @@ const GeneralJournalModal = () => {
         </Paper>
         <Divider orientation="horizontal" className="transaction-devider" />
 
-        {menuData?.state !== "Posted" && (
+        {menuData?.state !== "Approved" && (
           <LoadingButton
             variant="contained"
             color="secondary"
@@ -735,18 +659,18 @@ const GeneralJournalModal = () => {
           </Stack>
 
           <Box className="archive-transaction-button-container">
-            {menuData && menuData?.state !== "Posted" && (
+            {menuData && hasAccess("gj_approver") && (
               <LoadingButton
                 disabled={watch("variance") !== 0}
                 variant="contained"
-                color="secondary"
+                color="success"
                 className="add-transaction-button"
                 onClick={() => handlePostGj()}
               >
-                Post
+                Approved
               </LoadingButton>
             )}
-            {menuData && menuData?.state === "Posted" && (
+            {menuData && menuData?.state !== "Approved" && (
               <LoadingButton
                 disabled={watch("variance") !== 0}
                 variant="contained"
@@ -754,10 +678,25 @@ const GeneralJournalModal = () => {
                 className="add-transaction-button"
                 onClick={() => dispatch(setReturn(true))}
               >
-                Archive
+                {!hasAccess("gj_approver") ? "Archive" : "Reject"}
               </LoadingButton>
             )}
-            {menuData?.state !== "Posted" && (
+
+            {menuData && menuData?.state === "Approved" && (
+              <ReactToPrint
+                trigger={() => (
+                  <LoadingButton
+                    variant="contained"
+                    color="success"
+                    className="add-transaction-button"
+                  >
+                    Print
+                  </LoadingButton>
+                )}
+                content={() => componentRef.current}
+              />
+            )}
+            {menuData?.state !== "Approved" && !hasAccess("gj_approver") && (
               <LoadingButton
                 disabled={watch("variance") !== 0}
                 variant="contained"
@@ -825,6 +764,8 @@ const GeneralJournalModal = () => {
           confirmOnClick={(e) => handelArchiveGj(e)}
         />
       </Dialog>
+
+      <GJPrinting ref={componentRef} />
     </Paper>
   );
 };

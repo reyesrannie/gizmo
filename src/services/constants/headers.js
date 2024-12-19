@@ -2,7 +2,6 @@ const taggingHeader = [
   { name: "Pending", status: "pending", permission: "tagging" },
   { name: "Returned", status: "returned", permission: "tagging" },
   { name: "Archived", status: "archived", permission: "tagging" },
-  { name: "History", status: "", permission: "tagging" },
 ];
 
 const apHeader = [
@@ -11,12 +10,12 @@ const apHeader = [
   { name: "Returned", status: "returned", permission: "ap_tag" },
   { name: "Approved", status: "approved", permission: "ap_tag" },
   { name: "Void", status: "voided", permission: "ap_tag" },
-  { name: "Filing", status: "Released", permission: "filing" },
+  { name: "Filing", status: "Cleared", permission: "filing" },
 ];
 
 const apGJheader = [
   { name: "Pending", status: "Saved", permission: "ap_tag" },
-  { name: "Posted", status: "Posted", permission: "ap_tag" },
+  { name: "Approved", status: "Approved", permission: "ap_tag" },
   // { name: "Returned", status: "returned", permission: "ap_tag" },
   // { name: "Approved", status: "approved", permission: "ap_tag" },
   // { name: "Void", status: "voided", permission: "ap_tag" },
@@ -35,21 +34,39 @@ const approverHeader = [
 ];
 
 const approverGJHeader = [
-  { name: "Approval", status: "For Approval", permission: "approver" },
-  { name: "Returned", status: "returned", permission: "approver" },
-  { name: "Void", status: "voided", permission: "approver" },
-  { name: "Pending Void", status: "For Voiding", permission: "approver" },
+  { name: "Approval", status: "Saved", permission: "gj_approval" },
 ];
 
 const treasuryHeader = [
-  { name: "Preparation", status: "For Preparation", permission: "preparation" },
+  {
+    name: "For Preparation",
+    status: "For Preparation",
+    permission: "preparation",
+  },
   {
     name: "For Approval",
     status: "Check Approval",
-    permission: ["releasing", "check_approval"],
+    permission: ["check_approval"],
   },
   { name: "For Releasing", status: "For Releasing", permission: "releasing" },
-  { name: "Clearing", status: "Released", permission: "clearing" },
+];
+
+const clearingHeader = [
+  {
+    name: "Due for Clearing",
+    status: "Due",
+    permission: "clearing",
+  },
+  {
+    name: "Overdue",
+    status: "over",
+    permission: "clearing",
+  },
+  {
+    name: "Post Dated",
+    status: "Post Dated",
+    permission: "clearing",
+  },
 ];
 
 const checkHeader = [
@@ -308,4 +325,5 @@ export {
   debitType,
   apDash,
   approverDash,
+  clearingHeader,
 };

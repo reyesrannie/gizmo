@@ -5,12 +5,11 @@ import SearchText from "../../components/customs/SearchText";
 
 import { Box, Typography } from "@mui/material";
 
-import { useDebitMemoQuery } from "../../services/store/request";
-
 import "../../components/styles/TagTransaction.scss";
 
 import DebitMemoTable from "./DebitMemoTable";
 import useDebitMemoHook from "../../services/hooks/useDebitMemoHook";
+import { useDebitMemoQuery } from "../../services/api/debitMemoApi";
 
 const DebitMemo = () => {
   const {

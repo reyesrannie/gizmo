@@ -42,6 +42,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useDispatch, useSelector } from "react-redux";
 import {
   resetMenu,
+  setCheckMenu,
   setImportMenu,
   setUpdateData,
   setUpdateImport,
@@ -66,6 +67,7 @@ import {
   useCreateBankAccountNumberMutation,
   useCreateBankAccountTitleMutation,
   useCreateBankMutation,
+  useCreateCheckNumberMutation,
   useUpdateBankAccountNumberMutation,
   useUpdateBankAccountTitleMutation,
   useUpdateBankMutation,
@@ -78,6 +80,7 @@ const BankAccountModal = () => {
   const updateData = useSelector((state) => state.menu.updateData);
   const importMenu = useSelector((state) => state.menu.importMenu);
   const updateImport = useSelector((state) => state.menu.updateImport);
+  const checkMenu = useSelector((state) => state.menu.checkMenu);
 
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
@@ -89,6 +92,9 @@ const BankAccountModal = () => {
 
   const [createAccountNumber, { isLoading: createAccountNumberLoading }] =
     useCreateBankAccountNumberMutation();
+
+  const [createCheckNumber, { isLoading: createCheckNumberLoading }] =
+    useCreateCheckNumberMutation();
 
   const [updateAccountNumber, { isLoading: updateBankAccountLoading }] =
     useUpdateBankAccountNumberMutation();
@@ -108,12 +114,7 @@ const BankAccountModal = () => {
     pagination: "none",
   });
 
-  const {
-    data: bankAccountNumber,
-    isLoading: loadingBankAccountNumber,
-    isError: errorBankAccountNumber,
-    isSuccess: successBankAccountNumber,
-  } = useBankAccountNumberQuery(
+  const { data: bankAccountNumber } = useBankAccountNumberQuery(
     {
       status: "active",
       pagination: "none",
@@ -187,20 +188,6 @@ const BankAccountModal = () => {
     }
   };
 
-  const handelArchive = async () => {
-    const obj = {
-      id: updateMenu ? menuData?.id : null,
-    };
-
-    try {
-      const res = await archiveBal(obj).unwrap();
-      enqueueSnackbar(res?.message, { variant: "success" });
-      dispatch(resetMenu());
-    } catch (error) {
-      objectError(error, setError, enqueueSnackbar);
-    }
-  };
-
   const handleAddAccountNumber = async () => {
     const obj = {
       bank_id: menuData?.id,
@@ -259,16 +246,39 @@ const BankAccountModal = () => {
       check_no: watch("check_no"),
     };
 
+    const prenumberedCheck = {
+      bank_title_id: watch("title")?.id,
+      type: watch("type"),
+      check_no_from: watch("check_no_from"),
+      check_no_to: watch("check_no_to"),
+    };
+    const blankCheck = {
+      bank_title_id: watch("title")?.id,
+      type: watch("type"),
+      check_no: watch("check_no"),
+    };
+
     try {
-      const res =
-        watch("type") === "prenumbered"
-          ? await createBankTitle(prenumbered).unwrap()
-          : await createBankTitle(blank).unwrap();
-      enqueueSnackbar(res?.message, { variant: "success" });
-      setValue("title", null);
-      dispatch(setImportMenu(false));
+      if (checkMenu) {
+        const res =
+          watch("type") === "prenumbered"
+            ? await createCheckNumber(prenumberedCheck).unwrap()
+            : await createCheckNumber(blankCheck).unwrap();
+        enqueueSnackbar(res?.message, { variant: "success" });
+        setValue("title", null);
+        dispatch(setImportMenu(false));
+        dispatch(setCheckMenu(false));
+      } else {
+        const res =
+          watch("type") === "prenumbered"
+            ? await createBankTitle(prenumbered).unwrap()
+            : await createBankTitle(blank).unwrap();
+        enqueueSnackbar(res?.message, { variant: "success" });
+        setValue("title", null);
+        dispatch(setImportMenu(false));
+      }
     } catch (error) {
-      objectError(error, setError, enqueueSnackbar);
+      singleError(error, enqueueSnackbar);
     }
   };
 
@@ -278,6 +288,7 @@ const BankAccountModal = () => {
     } else {
       setValue("title", null);
       dispatch(setUpdateData(false));
+      dispatch(setImportMenu(false));
     }
   };
 
@@ -285,6 +296,7 @@ const BankAccountModal = () => {
     dispatch(setUpdateData(false));
     dispatch(setUpdateImport(false));
     dispatch(setImportMenu(false));
+    dispatch(setCheckMenu(false));
     setValue("account_number", null);
     setValue("account_no", "");
     setValue("title", null);
@@ -337,21 +349,22 @@ const BankAccountModal = () => {
             disableClearable
           />
           {(watch("coa_id")?.id !== menuData?.coa?.id ||
-            watch("name") !== menuData?.name) && (
-            <LoadingButton
-              variant="contained"
-              color="warning"
-              type="submit"
-              className="add-atc-button"
-              disabled={
-                watch("name") === "" ||
-                watch("coa_id") === null ||
-                menuData?.state === "Paid"
-              }
-            >
-              {updateMenu ? "Update" : "Add"}
-            </LoadingButton>
-          )}
+            watch("name") !== menuData?.name) &&
+            updateMenu && (
+              <LoadingButton
+                variant="contained"
+                color="warning"
+                type="submit"
+                className="add-atc-button"
+                disabled={
+                  watch("name") === "" ||
+                  watch("coa_id") === null ||
+                  menuData?.state === "Paid"
+                }
+              >
+                {updateMenu ? "Update" : "Add"}
+              </LoadingButton>
+            )}
         </Box>
 
         {updateMenu && (
@@ -426,40 +439,45 @@ const BankAccountModal = () => {
 
         {updateMenu && (
           <Box className="add-bank-form-container">
-            <Autocomplete
-              control={control}
-              name={"title"}
-              options={
-                isError
-                  ? [{ id: "add-new", bank_title: "Add new title" }]
-                  : [
-                      { id: "add-new", bank_title: "Add new title" },
-                      ...(bankAccountTitle?.result?.data || []),
-                    ]
-              }
-              getOptionLabel={(option) => `${option.bank_title}`}
-              isOptionEqualToValue={(option, value) => option?.id === value?.id}
-              onClose={() => {
-                if (watch("title")?.id === "add-new") {
-                  dispatch(setImportMenu(true));
-                } else {
-                  dispatch(setImportMenu(false));
+            {watch("account_number")?.id !== "add-new" && (
+              <Autocomplete
+                control={control}
+                name={"title"}
+                options={
+                  isError
+                    ? [{ id: "add-new", bank_title: "Add new name" }]
+                    : [
+                        { id: "add-new", bank_title: "Add new name" },
+                        ...(bankAccountTitle?.result?.data || []),
+                      ]
                 }
-              }}
-              renderInput={(params) => (
-                <MuiTextField
-                  name="title"
-                  {...params}
-                  label="Title*"
-                  size="small"
-                  variant="outlined"
-                  error={Boolean(errors.title)}
-                  helperText={errors.title?.message}
-                  className="add-atc-textbox autocomplete"
-                />
-              )}
-              disableClearable
-            />
+                getOptionLabel={(option) => `${option.bank_title}`}
+                isOptionEqualToValue={(option, value) =>
+                  option?.id === value?.id
+                }
+                onClose={() => {
+                  if (watch("title")?.id === "add-new") {
+                    dispatch(setImportMenu(true));
+                  } else {
+                    dispatch(setImportMenu(false));
+                    dispatch(setUpdateImport(false));
+                  }
+                }}
+                renderInput={(params) => (
+                  <MuiTextField
+                    name="title"
+                    {...params}
+                    label="Check series name*"
+                    size="small"
+                    variant="outlined"
+                    error={Boolean(errors.title)}
+                    helperText={errors.title?.message}
+                    className="add-atc-textbox autocomplete"
+                  />
+                )}
+                disableClearable
+              />
+            )}
             {watch("title") !== null &&
               watch("title")?.id !== "add-new" &&
               !updateImport && (
@@ -496,7 +514,7 @@ const BankAccountModal = () => {
           </Box>
         )}
 
-        {importMenu && (
+        {importMenu && watch("account_number")?.id !== "add-new" && (
           <Stack flexDirection={"row"} gap={1}>
             <FormControl className="form-control-radio treasury">
               <Controller
@@ -510,28 +528,32 @@ const BankAccountModal = () => {
                       control={<Radio color="secondary" size="small" />}
                       label="Pre-numbered"
                     />
-                    <FormControlLabel
-                      value="blank"
-                      control={<Radio color="secondary" size="small" />}
-                      label="Blank Stock"
-                    />
+                    {false && (
+                      <FormControlLabel
+                        value="blank"
+                        control={<Radio color="secondary" size="small" />}
+                        label="Blank Stock"
+                      />
+                    )}
                   </RadioGroup>
                 )}
               />
             </FormControl>
           </Stack>
         )}
-        {importMenu && (
+        {importMenu && watch("account_number")?.id !== "add-new" && (
           <Box className="add-bank-form-container">
-            <AppTextBox
-              control={control}
-              name={"bank_title"}
-              label={"New Title"}
-              color="primary"
-              className="add-atc-textbox bank"
-              error={Boolean(errors?.bank_title)}
-              helperText={errors?.bank_title?.message}
-            />
+            {!checkMenu && (
+              <AppTextBox
+                control={control}
+                name={"bank_title"}
+                label={"New Title"}
+                color="primary"
+                className="add-atc-textbox bank"
+                error={Boolean(errors?.bank_title)}
+                helperText={errors?.bank_title?.message}
+              />
+            )}
             {watch("type") === "prenumbered" && (
               <AppTextBox
                 control={control}
@@ -584,9 +606,29 @@ const BankAccountModal = () => {
               <TableHead>
                 <TableRow className="table-header1-bank">
                   <TableCell colSpan={6}>
-                    <Stack flexDirection={"row"}>
-                      <Box></Box>
-                    </Stack>
+                    {watch("account_number")?.id !== "add-new" &&
+                      watch("title") &&
+                      watch("title")?.id !== "add-new" &&
+                      !importMenu && (
+                        <Stack
+                          flexDirection={"row"}
+                          justifyContent={"flex-end"}
+                        >
+                          <Box>
+                            <LoadingButton
+                              variant="contained"
+                              color="warning"
+                              className="add-atc-button"
+                              onClick={() => {
+                                dispatch(setImportMenu(true));
+                                dispatch(setCheckMenu(true));
+                              }}
+                            >
+                              Add check
+                            </LoadingButton>
+                          </Box>
+                        </Stack>
+                      )}
                   </TableCell>
                 </TableRow>
                 {watch("title") && watch("title")?.id !== "add-new" && (
@@ -692,11 +734,13 @@ const BankAccountModal = () => {
                     variant="contained"
                     color="primary"
                     onClick={() => {
-                      updateData ? handleCancelUpdate() : dispatch(resetMenu());
+                      checkMenu || updateData
+                        ? handleCancelUpdate()
+                        : dispatch(resetMenu());
                     }}
                     className="add-atc-button"
                   >
-                    {updateData ? "Cancel" : "Close"}
+                    {checkMenu || updateData ? "Cancel" : "Close"}
                   </Button>
                 </Stack>
               </Box>
@@ -713,7 +757,8 @@ const BankAccountModal = () => {
           archiveLoading ||
           createAccountNumberLoading ||
           updateBankAccountLoading ||
-          createBankTitleLoading
+          createBankTitleLoading ||
+          createCheckNumberLoading
         }
         className="loading-atc-create"
       >

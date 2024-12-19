@@ -6,7 +6,10 @@ const generalJournalSchema = Yup.object({
   ap_tagging_id: Yup.object()
     .required("This field is required")
     .typeError("This field is required"),
-  boa: Yup.string().required("This field is required"),
+  gj_type: Yup.string().required("This field is required"),
+  gj_series: Yup.string().nullable(),
+  reference_no: Yup.string().nullable(),
+
   tag_year: Yup.date()
     .required("This field is required")
     .typeError("This field is required"),
@@ -21,21 +24,12 @@ const generalJournalSchema = Yup.object({
         coa_id: Yup.object()
           .required("This field is required")
           .typeError("This field is required"),
-        debit_amount: Yup.number().nullable(),
-        credit_amount: Yup.number().nullable(),
-        invoice_no: Yup.string().required("This field is required"),
-        tag_no: Yup.string().required("This field is required"),
+        debit_amount: Yup.string().nullable(),
+        credit_amount: Yup.string().nullable(),
         item_id: Yup.string().nullable(),
-        voucher_no: Yup.string().required("This field is required"),
-        supplier_id: Yup.object()
-          .required("This field is required")
-          .typeError("This field is required"),
-        location_id: Yup.object()
-          .required("This field is required")
-          .typeError("This field is required"),
       })
     )
-    .compact((value) => value.gj_items === null && value.tag_no === "")
+    .compact((value) => value.gj_items === null)
     .min(1)
     .required()
     .label("gj_items")

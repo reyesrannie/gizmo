@@ -21,6 +21,7 @@ const History = lazy(() => import("../../screen/history/History"));
 const GeneralJournal = lazy(() => import("../../screen/ap/GeneralJournal"));
 const Approver = lazy(() => import("../../screen/approver/Approver"));
 const ApproverGJ = lazy(() => import("../../screen/approver/ApproverGJ"));
+const Clearing = lazy(() => import("../../screen/treasury/Clearing"));
 
 const ApprovingCheck = lazy(() =>
   import("../../screen/approver/ApprovingCheck")
@@ -261,6 +262,14 @@ const Routing = () => {
             <Navigate to={"/"} />
           ),
         },
+        {
+          path: "history",
+          element: hasAccess(["tagging_history"]) ? (
+            <History />
+          ) : (
+            <Navigate to={"/"} />
+          ),
+        },
       ],
     },
     {
@@ -349,12 +358,7 @@ const Routing = () => {
       children: [
         {
           path: "",
-          element: hasAccess([
-            "preparation",
-            "releasing",
-            "clearing",
-            "check_approval",
-          ]) ? (
+          element: hasAccess(["preparation", "releasing", "check_approval"]) ? (
             <Treasury />
           ) : (
             <Navigate to={"/"} />
@@ -362,13 +366,17 @@ const Routing = () => {
         },
         {
           path: "check",
-          element: hasAccess([
-            "preparation",
-            "releasing",
-            "clearing",
-            "check_approval",
-          ]) ? (
+          element: hasAccess(["preparation", "releasing", "check_approval"]) ? (
             <Check />
+          ) : (
+            <Navigate to={"/"} />
+          ),
+        },
+
+        {
+          path: "clearing",
+          element: hasAccess(["preparation", "releasing", "check_approval"]) ? (
+            <Clearing />
           ) : (
             <Navigate to={"/"} />
           ),

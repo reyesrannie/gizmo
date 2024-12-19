@@ -1,6 +1,7 @@
 import React from "react";
 
 import {
+  Badge,
   Box,
   Dialog,
   IconButton,
@@ -225,7 +226,14 @@ const TaggingTable = ({
                     </TableCell>
                     <TableCell align="center">
                       <IconButton>
-                        <RemoveRedEyeOutlinedIcon className="tag-transaction-icon-actions" />
+                        <Badge
+                          variant="dot"
+                          invisible={tag?.is_read !== 0}
+                          color="error"
+                          className="tag-transaction-badge"
+                        >
+                          <RemoveRedEyeOutlinedIcon className="tag-transaction-icon-actions" />
+                        </Badge>
                       </IconButton>
                     </TableCell>
                   </TableRow>

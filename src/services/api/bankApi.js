@@ -147,7 +147,7 @@ export const bankApi = jsonServerAPI.injectEndpoints({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["CheckNumber"],
+      invalidatesTags: ["CheckNumber", "BankAccountTitle", "BankAccountNumber"],
     }),
     updateCheckNumber: builder.mutation({
       transformResponse: (response) => response,

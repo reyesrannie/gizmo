@@ -142,7 +142,7 @@ const SelectBankMenu = ({ type = "" }) => {
           credit_coa_id: submitData?.bank?.coa,
         };
         dispatch(
-          setBankData(Array.isArray(bankData) ? [...bankData, obj] : obj)
+          setBankData(Array.isArray(bankData) ? [...bankData, obj] : [obj])
         );
         dispatch(setUpdateMenu(false));
       } else {
@@ -155,7 +155,7 @@ const SelectBankMenu = ({ type = "" }) => {
           check_no: submitData?.title?.check_numbers,
         };
         dispatch(
-          setBankData(Array.isArray(bankData) ? [...bankData, obj] : obj)
+          setBankData(Array.isArray(bankData) ? [...bankData, obj] : [obj])
         );
         dispatch(setUpdateMenu(false));
       }
@@ -239,7 +239,7 @@ const SelectBankMenu = ({ type = "" }) => {
                 <MuiTextField
                   name="title"
                   {...params}
-                  label="Title*"
+                  label="Check series name*"
                   size="small"
                   variant="outlined"
                   error={Boolean(errors.title)}

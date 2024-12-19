@@ -35,9 +35,12 @@ const Check = () => {
   const isExpanded = useSelector((state) => state.transaction.isExpanded);
   const header =
     useSelector((state) => state.headers.header) ||
-    (hasAccess("check_approval") && !hasAccess("preparation")
-      ? "For Approval"
-      : "Preparation");
+    treasuryHeader.find((item) =>
+      Array.isArray(item.permission)
+        ? item.permission.some(hasAccess)
+        : hasAccess(item.permission)
+    )?.name ||
+    "Preparation";
 
   const {
     params,
@@ -105,6 +108,7 @@ const Check = () => {
             </AccordionSummary>
             {treasuryHeader?.map(
               (head, index) =>
+                hasAccess(head?.permission) &&
                 header !== head?.name && (
                   <AccordionSummary
                     key={index}
@@ -139,7 +143,7 @@ const Check = () => {
           <SearchText onSearchData={onSearchData} />
         </Box>
       </Box>
-      {header === "Preparation" && (
+      {header === "For Preparation" && (
         <CheckTable
           params={params}
           onSortTable={onSortTable}
@@ -151,7 +155,7 @@ const Check = () => {
           status={status}
           tagTransaction={tagTransaction}
           onOrderBy={onOrderBy}
-          state={"Preparation"}
+          state={"For Preparation"}
           onShowAll={onShowAll}
         />
       )}

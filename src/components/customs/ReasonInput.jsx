@@ -42,7 +42,6 @@ const ReasonInput = ({
     resolver: yupResolver(reasonSchema),
     defaultValues: {
       reason: "",
-      category: "",
     },
   });
 
@@ -66,37 +65,11 @@ const ReasonInput = ({
         error={Boolean(errors?.reason)}
         helperText={errors?.reason?.message}
       />
-      {voucher === "gj" && (
-        <Stack flexDirection={"row"} gap={1}>
-          <FormControl className="form-control-radio treasury">
-            <Controller
-              name="category"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <RadioGroup {...field}>
-                  <FormControlLabel
-                    value="short"
-                    control={<Radio color="secondary" size="small" />}
-                    label="Short Payment"
-                  />
-                  <FormControlLabel
-                    value="over"
-                    control={<Radio color="secondary" size="small" />}
-                    label="Over Payment"
-                  />
-                </RadioGroup>
-              )}
-            />
-          </FormControl>
-        </Stack>
-      )}
+
       <form onSubmit={handleSubmit(confirmOnClick)}>
         <Box className="reason-prompt-button-container">
           <LoadingButton
-            disabled={
-              !watch("reason") || (voucher === "gj" && !watch("category"))
-            }
+            disabled={!watch("reason")}
             variant="contained"
             color="warning"
             className="change-password-button"

@@ -50,7 +50,7 @@ export const checkVoucherApi = jsonServerAPI.injectEndpoints({
     fileCVoucher: builder.mutation({
       transformResponse: (response) => response,
       query: (payload) => ({
-        url: `/filing/transaction-check/${payload?.id}`,
+        url: `/filing/transaction-check`,
         method: "POST",
         body: payload,
       }),

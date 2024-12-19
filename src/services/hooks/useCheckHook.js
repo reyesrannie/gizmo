@@ -1,13 +1,12 @@
 // import moment from "moment";
 import { useState } from "react";
 
-const useParamsHook = () => {
+const useCheckHook = () => {
   const [params, setParams] = useState({
-    status: "active",
+    state: "Clearing",
     page: 1,
     per_page: 10,
-    pagination: null,
-    sorts: null,
+    check_date: "Due",
   });
 
   const onPageChange = (_, page) => {
@@ -28,7 +27,7 @@ const useParamsHook = () => {
   const onStatusChange = (status) => {
     setParams((currentValue) => ({
       ...currentValue,
-      status: status,
+      state: status,
       page: 1,
     }));
   };
@@ -68,9 +67,16 @@ const useParamsHook = () => {
     }));
   };
 
+  const onCheckDateChange = (data) => {
+    setParams((currentValue) => ({
+      ...currentValue,
+      check_date: data,
+    }));
+  };
+
   const onReset = () => {
     setParams(() => ({
-      status: "active",
+      state: "Paid",
       page: 1,
       per_page: 10,
       pagination: null,
@@ -88,8 +94,9 @@ const useParamsHook = () => {
     onFilterChange,
     onFromChange,
     onToChange,
+    onCheckDateChange,
     onReset,
   };
 };
 
-export default useParamsHook;
+export default useCheckHook;

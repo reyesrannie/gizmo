@@ -26,13 +26,16 @@ const CountDistribute = () => {
   const { data: badgeCheck } = useCheckCountQuery(queryParams);
   const { data: scheduleTransaction } = useCountScheduleQuery(queryParams);
   const { data: badgeGj } = useGjCountQuery(queryParams);
-  const { data: treasuryCount } = useTreasuryCountQuery();
+  const { data: treasuryCount } = useTreasuryCountQuery({
+    count: hasAccess("tagging") ? "tagging" : "treasury",
+  });
 
   const sumResult = (result, keys) => {
     return keys?.reduce((sum, key) => sum + (result?.[key] || 0), 0);
   };
 
   const resultMap = {
+    "Tag Transaction": badgeCheck?.result,
     "Voucher's Payable": badgeCheck?.result,
     "General Journal": badgeGj?.result,
     "Voucher Approval": badgeCheck?.result,
@@ -50,13 +53,15 @@ const CountDistribute = () => {
     Pending: "pending",
     Filing: "For Filing",
     Approval: "For Approval",
-    Preparation: "For Preparation",
+    "For Preparation": "For Preparation",
     "For Releasing": "For Releasing",
     Clearing: "For Clearing",
   };
 
   const menuCount = (path) => {
     switch (path) {
+      case "Tagging":
+        return sumResult(badgeTagging?.result, ["returned"]);
       case "Accounts Payable":
         return (
           sumResult(badgeTagging?.result, ["pending"]) +
@@ -101,6 +106,8 @@ const CountDistribute = () => {
               ]
             : !hasAccess("check_approval") && hasAccess("preparation")
             ? ["For Preparation", "For Releasing", "For Clearing"]
+            : hasAccess("tagging")
+            ? ["For Releasing"]
             : ["Check Approval"]
         );
       default:
@@ -110,6 +117,8 @@ const CountDistribute = () => {
 
   const childMenuCount = (path) => {
     switch (path) {
+      case "Tag Transaction":
+        return sumResult(badgeTagging?.result, ["returned"]);
       case "Pending":
         return sumResult(badgeTagging?.result, ["pending"]);
       case "Voucher's Payable":
@@ -156,6 +165,7 @@ const CountDistribute = () => {
   const countGrandChildcheck = (path, child) => {
     const result = resultMap[child];
     const key = pathMap[path];
+
     return result?.[key] || 0;
   };
 

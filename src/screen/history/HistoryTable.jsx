@@ -75,9 +75,6 @@ const HistoryTable = ({ onOrderBy }) => {
       pagination: "none",
     });
 
-  const [prepareCheck, { isLoading: loadingPrep }] =
-    usePrepareCVoucherMutation();
-
   const {
     control,
     watch,
@@ -96,7 +93,7 @@ const HistoryTable = ({ onOrderBy }) => {
     onSortTable,
     isLoading,
     isError,
-    tagTransaction,
+    historyData,
     isFetching,
     onPageChange,
     onRowChange,
@@ -187,84 +184,29 @@ const HistoryTable = ({ onOrderBy }) => {
               </TableCell>
             </TableRow>
           ) : (
-            tagTransaction?.result?.data?.map((tag) => {
+            historyData?.result?.data?.map((tag) => {
               const document = documentType?.result?.find(
                 (doc) => tag?.transactions?.document_type_id === doc?.id || null
               );
               const tagMonthYear = dayjs(tag?.tag_year, "YYMM").toDate();
-
+              console.log(tag);
               return (
-                <TableRow
-                  className="table-body-tag-transaction"
-                  key={tag?.id}
-                  onClick={() => {
-                    dispatch(
-                      setVoucher(
-                        header === "Voucher's Payable" ? "check" : "gj"
-                      )
-                    );
-
-                    dispatch(setMenuData(tag));
-                    dispatch(setDisplayed(true));
-                  }}
-                >
-                  {params?.state === "approved" && (
-                    <TableCell align="center">
-                      <FormControlLabel
-                        className="check-box-archive-ap"
-                        control={
-                          <Controller
-                            name="check_ids"
-                            control={control}
-                            render={({ field }) => (
-                              <Checkbox
-                                color="secondary"
-                                sx={{ zIndex: 0 }}
-                                checked={watch("check_ids")?.includes(tag?.id)}
-                                onClick={(event) => event.stopPropagation()}
-                                onChange={(event) => {
-                                  const checked = event.target.checked;
-                                  const currentValue = watch("check_ids") || [];
-                                  const newValue = checked
-                                    ? [...currentValue, tag.id]
-                                    : currentValue.filter(
-                                        (id) => id !== tag.id
-                                      );
-                                  field.onChange(newValue);
-                                }}
-                              />
-                            )}
-                          />
-                        }
-                      />
-                    </TableCell>
-                  )}
+                <TableRow className="table-body-tag-transaction" key={tag?.id}>
                   <TableCell>
-                    {`${tag?.transactions?.tag_no} - ${moment(tagMonthYear).get(
-                      "year"
-                    )}`}
+                    {`${tag?.transactions?.tag_no || tag?.tag_no} - ${moment(
+                      tagMonthYear
+                    ).get("year")}`}
                   </TableCell>
                   <TableCell>
                     <Typography className="tag-transaction-company-name">
-                      {tag?.transactions?.supplier?.name === null ? (
-                        <>&mdash;</>
-                      ) : (
-                        tag?.transactions?.supplier?.name
-                      )}
+                      {tag?.transactions?.supplier?.name ||
+                        tag?.supplier?.company_name}
                     </Typography>
                     <Typography className="tag-transaction-company-tin">
-                      {tag?.transactions?.supplier === null ? (
-                        <>&mdash;</>
-                      ) : (
-                        tag?.transactions?.supplier?.tin
-                      )}
+                      {tag?.transactions?.supplier?.tin || tag?.supplier?.tin}
                     </Typography>
                     <Typography className="tag-transaction-company-name">
-                      {tag?.amount === null ? (
-                        <>&mdash;</>
-                      ) : (
-                        convertToPeso(tag?.amount)
-                      )}
+                      {convertToPeso(tag?.amount || tag?.purchase_amount)}
                     </Typography>
                   </TableCell>
 
@@ -275,8 +217,11 @@ const HistoryTable = ({ onOrderBy }) => {
                       </Typography>
                     ) : (
                       <Typography className="tag-transaction-company-name">
-                        {`${tag?.transactions?.ap_tagging} - ${
-                          tag?.transactions?.gtag_no
+                        {`${
+                          tag?.transactions?.ap_tagging ||
+                          tag?.ap_tagging?.company_code
+                        } - ${
+                          tag?.transactions?.gtag_no || tag?.gtag_no
                         } - ${moment(tagMonthYear).get("year")}`}
                       </Typography>
                     )}
@@ -289,117 +234,117 @@ const HistoryTable = ({ onOrderBy }) => {
                     </Typography>
                   </TableCell>
                   <TableCell align="center">
-                    {tag?.state === "For Computation" && (
+                    {params?.state === "pending" && (
+                      <StatusIndicator
+                        status="Pending"
+                        className="computation-indicator"
+                      />
+                    )}
+                    {params?.state === "received" && (
+                      <StatusIndicator
+                        status="Received"
+                        className="clearing-indicator"
+                      />
+                    )}
+                    {params?.state === "For Computation" && (
                       <StatusIndicator
                         status="For Computation"
                         className="computation-indicator"
                       />
                     )}
 
-                    {tag?.state === "For Approval" && (
+                    {params?.state === "For Approval" && (
                       <StatusIndicator
                         status="For Approval"
                         className="approval-indicator"
                       />
                     )}
 
-                    {tag?.state === "approved" && (
+                    {params?.state === "approved" && (
                       <StatusIndicator
                         status="Approved"
                         className="approved-indicator"
                       />
                     )}
 
-                    {tag?.state === "returned" && (
+                    {params?.state === "returned" && (
                       <StatusIndicator
                         status="Returned"
                         className="return-indicator"
                       />
                     )}
 
-                    {tag?.state === "For Voiding" && (
+                    {params?.state === "For Voiding" && (
                       <StatusIndicator
                         status="For Voiding"
                         className="voiding-indicator"
                       />
                     )}
 
-                    {tag?.state === "Completed" && (
+                    {params?.state === "Completed" && (
                       <StatusIndicator
                         status="Completed"
                         className="approved-indicator"
                       />
                     )}
 
-                    {tag?.state === "voided" && (
+                    {params?.state === "voided" && (
                       <StatusIndicator
                         status="Void"
                         className="void-indicator"
                       />
                     )}
 
-                    {tag?.state === "For Preparation" && (
+                    {params?.state === "For Preparation" && (
                       <StatusIndicator
                         status="Awaiting Prep"
                         className="preparation-indicator"
                       />
                     )}
 
-                    {tag?.state === "For Releasing" && (
+                    {params?.state === "For Releasing" && (
                       <StatusIndicator
                         status="Awaiting Release"
                         className="release-indicator"
                       />
                     )}
 
-                    {tag?.state === "Released" && (
-                      <StatusIndicator
-                        status={
-                          tag?.is_filed !== null
-                            ? "Filed"
-                            : tag?.is_cleared !== null
-                            ? "Cleared"
-                            : "Released"
-                        }
-                        className={
-                          tag?.is_filed !== null
-                            ? "clearing-indicator"
-                            : tag?.is_cleared !== null
-                            ? "clearing-indicator"
-                            : "approved-indicator"
-                        }
-                      />
-                    )}
-
-                    {tag?.state === "For Filing" && (
+                    {params?.state === "Released" && (
                       <StatusIndicator
                         status="For Filing"
                         className="filing-indicator"
                       />
                     )}
 
-                    {tag?.state === "For Clearing" && (
+                    {params?.state === "For Filing" && (
+                      <StatusIndicator
+                        status="For Filing"
+                        className="filing-indicator"
+                      />
+                    )}
+
+                    {params?.state === "For Clearing" && (
                       <StatusIndicator
                         status="For Clearing"
                         className="clearing-indicator"
                       />
                     )}
 
-                    {tag?.state === "Filed" && (
+                    {params?.state === "Filed" && (
                       <StatusIndicator
                         status="Filed"
                         className="filed-indicator"
                       />
                     )}
 
-                    {tag?.state === "Cancelled" && (
+                    {params?.state === "Cancelled" && (
                       <StatusIndicator
                         status="Cancelled"
                         className="inActive-indicator"
                       />
                     )}
 
-                    {tag?.state === "Check Approval" && (
+                    {params?.state === "Check Approval" && (
                       <StatusIndicator
                         status="For Approval"
                         className="approval-indicator"
@@ -449,14 +394,14 @@ const HistoryTable = ({ onOrderBy }) => {
                     {
                       label: "All",
                       value:
-                        tagTransaction?.result?.total > 100
-                          ? tagTransaction?.result?.total
+                        historyData?.result?.total > 100
+                          ? historyData?.result?.total
                           : 100,
                     },
                   ]}
-                  count={tagTransaction?.result?.total || 0}
-                  rowsPerPage={tagTransaction?.result?.per_page || 10}
-                  page={tagTransaction?.result?.current_page - 1 || 0}
+                  count={historyData?.result?.total || 0}
+                  rowsPerPage={historyData?.result?.per_page || 10}
+                  page={historyData?.result?.current_page - 1 || 0}
                   onPageChange={onPageChange}
                   onRowsPerPageChange={onRowChange}
                   component="div"

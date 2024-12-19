@@ -1,8 +1,7 @@
 import React from "react";
-import "../../styles/TransactionModal.scss";
-import "../../styles/TagTransaction.scss";
-import "../../styles/Supplier.scss";
 
+import { useDispatch, useSelector } from "react-redux";
+import { setComputationMenu } from "../../../services/slice/menuSlice";
 import {
   Paper,
   Typography,
@@ -18,30 +17,31 @@ import {
   Divider,
 } from "@mui/material";
 
-import { useDispatch, useSelector } from "react-redux";
-import { setComputationMenu } from "../../../services/slice/menuSlice";
+import "../../styles/TransactionModal.scss";
+import "../../styles/TagTransaction.scss";
+import "../../styles/Supplier.scss";
 import loading from "../../../assets/lottie/Loading-2.json";
 import noData from "../../../assets/lottie/NoData.json";
-
 import vat from "../../../assets/svg/vat.svg";
 import Lottie from "lottie-react";
+import moment from "moment";
+
 import {
   totalAccountPaginated,
   totalCredit,
   totalVat,
 } from "../../../services/functions/compute";
-import moment from "moment";
 import { useLocationQuery } from "../../../services/api/locationApi";
 import { useApQuery } from "../../../services/api/apApi";
 import { useAtcQuery } from "../../../services/api/atcApi";
-import { useSupplierQuery } from "../../../services/api/supplierApi";
 import { useDocumentTypeQuery } from "../../../services/api/documentTypeApi";
 import { useTaxComputationQuery } from "../../../services/api/taxComputationApi";
+import { AdditionalFunction } from "../../../services/functions/AdditionalFunction";
 
 const ComputationMenu = ({ details, schedule }) => {
   const dispatch = useDispatch();
+  const { convertToPeso } = AdditionalFunction();
   const menuData = useSelector((state) => state.menu.menuData);
-
   const voucher = useSelector((state) => state.options.voucher);
 
   const {
@@ -61,15 +61,6 @@ const ComputationMenu = ({ details, schedule }) => {
     },
     { skip: menuData === null }
   );
-
-  const {
-    data: supplier,
-    isLoading: loadingSupplier,
-    isSuccess: successSupplier,
-  } = useSupplierQuery({
-    status: "active",
-    pagination: "none",
-  });
 
   const {
     data: ap,
@@ -104,20 +95,10 @@ const ComputationMenu = ({ details, schedule }) => {
     pagination: "none",
   });
 
-  const convertToPeso = (value) => {
-    return parseFloat(value)
-      .toFixed(2)
-      .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  };
-
   const debit = totalVat(taxComputation, "debit");
   const credit = totalCredit(taxComputation, "credit");
   const wtax = totalCredit(taxComputation, "wtax_payable_cr");
   const vatInput = totalVat(taxComputation, "vat_input_tax");
-
-  const supplierDetails = schedule
-    ? supplier?.result?.find((item) => menuData?.supplier?.id === item?.id)
-    : supplier?.result?.find((item) => menuData?.supplier?.id === item?.id);
 
   const documentDetails = schedule
     ? document?.result?.find((item) => menuData?.document_type_id === item?.id)
@@ -130,10 +111,6 @@ const ComputationMenu = ({ details, schedule }) => {
     : ap?.result?.find(
         (item) => menuData?.transactions?.ap_tagging === item?.company_code
       );
-
-  const locationDetails = schedule
-    ? location?.result?.find((item) => menuData?.location_id === item?.id)
-    : location?.result?.find((item) => menuData?.location === item?.id);
 
   const atcDetails = schedule
     ? atc?.result?.find((item) => menuData?.atc_id === item?.id)
@@ -153,7 +130,6 @@ const ComputationMenu = ({ details, schedule }) => {
       {details &&
         successAP &&
         successTax &&
-        successSupplier &&
         locationSuccess &&
         documentSuccess &&
         atcSuccess && (
@@ -287,7 +263,6 @@ const ComputationMenu = ({ details, schedule }) => {
           <TableBody>
             {loadingDocument ||
             loadingAP ||
-            loadingSupplier ||
             loadingTax ||
             loadingLocation ||
             loadingAtc ||

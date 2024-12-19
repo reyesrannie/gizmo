@@ -3,7 +3,16 @@ import React, { useEffect, useRef } from "react";
 import Breadcrums from "../../components/customs/Breadcrums";
 import SearchText from "../../components/customs/SearchText";
 
-import { Box, Dialog, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Dialog,
+  Divider,
+  Paper,
+  Stack,
+  Typography,
+  TextField as MuiTextField,
+} from "@mui/material";
 
 import { useDispatch, useSelector } from "react-redux";
 
@@ -15,13 +24,15 @@ import Voucher from "./Voucher";
 
 import { HistoryContext } from "../../services/context/HistoryContext";
 import useApHistoryHook from "../../services/hooks/useApHistoryHook";
-import TransactionModal from "../../components/customs/modal/TransactionModal";
 import { useLazyCheckEntriesQuery } from "../../services/api/vouchersPayableApi";
+import KeyboardBackspaceOutlinedIcon from "@mui/icons-material/KeyboardBackspaceOutlined";
+import { useGetHistoryQuery } from "../../services/api/historyApi";
 
 const History = () => {
   const dispatch = useDispatch();
 
   const isExpanded = useSelector((state) => state.transaction.isExpanded);
+
   const header =
     useSelector((state) => state.headers.header) || "Voucher's Payable";
 
@@ -34,7 +45,18 @@ const History = () => {
     onOrderBy,
     onStateChange,
     onTagYearChange,
+    onYearChange,
+    onMonthChange,
+    onBackProcess,
   } = useApHistoryHook();
+
+  const {
+    data: historyData,
+    isLoading: loadingHistory,
+    isSuccess,
+    isFetching: fetchingHistory,
+    isError: errorHistory,
+  } = useGetHistoryQuery(params);
 
   const [
     getChecks,
@@ -80,7 +102,13 @@ const History = () => {
         onStateChange,
         getChecks,
         onTagYearChange,
-        tagTransaction,
+        onYearChange,
+        onMonthChange,
+        historyData,
+        loadingHistory,
+        isSuccess,
+        fetchingHistory,
+        errorHistory,
       }}
     >
       <Box>
@@ -90,14 +118,41 @@ const History = () => {
         <Box className="tag-transaction-head-container">
           <Box className="tag-transaction-navigation-container">
             <Typography className="page-text-indicator-tag-transaction">
-              {header}
+              History
             </Typography>
           </Box>
-          <Box className="tag-transaction-button-container">
-            <SearchText onSearchData={onSearchData} />
-          </Box>
         </Box>
-        <Voucher />
+        <Box className="history-transaction-container">
+          <Paper className="history-navigation-folder">
+            <Stack
+              display={"flex"}
+              flexDirection={"row"}
+              justifyContent={"space-between"}
+            >
+              <Stack justifyContent={"center"} flexDirection={"row"}>
+                {params?.year !== "" && (
+                  <Button
+                    variant="text"
+                    color="primary"
+                    className="add-transaction-button"
+                    size="small"
+                    onClick={() => {
+                      onBackProcess();
+                    }}
+                    startIcon={<KeyboardBackspaceOutlinedIcon />}
+                  />
+                )}
+                <Divider orientation="vertical" />
+              </Stack>
+
+              <Stack flexDirection={"row"}>
+                <SearchText onSearchData={onSearchData} />
+              </Stack>
+            </Stack>
+          </Paper>
+
+          {header === "Voucher's Payable" && <Voucher />}
+        </Box>
       </Box>
     </HistoryContext.Provider>
   );

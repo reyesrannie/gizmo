@@ -1,4 +1,18 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { AdditionalFunction } from "../../../services/functions/AdditionalFunction";
+import {
+  resetMenu,
+  setViewAccountingEntries,
+} from "../../../services/slice/menuSlice";
+import { enqueueSnackbar } from "notistack";
+import { resetPrompt, setReturn } from "../../../services/slice/promptSlice";
+import { singleError } from "../../../services/functions/errorResponse";
+import { resetOption } from "../../../services/slice/optionsSlice";
+import {
+  useClearDebitMemoMutation,
+  useReturnDebitMemoMutation,
+} from "../../../services/api/debitMemoApi";
 import {
   Dialog,
   Paper,
@@ -10,59 +24,20 @@ import {
   TableHead,
   TableRow,
   Typography,
-  TextField as MuiTextField,
   Button,
   Box,
-  Menu,
-  MenuItem,
-  ListItemIcon,
-  Tooltip,
 } from "@mui/material";
 
 import "../../styles/Modal.scss";
 import "../../styles/TransactionModal.scss";
 import "../../styles/TransactionModalApprover.scss";
 
-import { useDispatch, useSelector } from "react-redux";
-import {
-  useClearDebitMemoMutation,
-  useReturnDebitMemoMutation,
-  useVoidCheckNumberMutation,
-} from "../../../services/store/request";
 import Lottie from "lottie-react";
 import loading from "../../../assets/lottie/Loading-2.json";
-
-import { AdditionalFunction } from "../../../services/functions/AdditionalFunction";
-import { Controller, useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import treasurySchema from "../../../schemas/treasurySchema";
 import moment from "moment";
-import { MobileDatePicker } from "@mui/x-date-pickers";
 import ReactToPrint from "react-to-print";
-import {
-  resetMenu,
-  setCheckID,
-  setMenuData,
-  setUpdateData,
-  setViewAccountingEntries,
-} from "../../../services/slice/menuSlice";
-import { resetOption } from "../../../services/slice/optionsSlice";
-
-import { enqueueSnackbar } from "notistack";
-import {
-  resetPrompt,
-  setOpenVoid,
-  setReturn,
-} from "../../../services/slice/promptSlice";
-import { singleError } from "../../../services/functions/errorResponse";
-import dayjs from "dayjs";
-
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import EditIcon from "@mui/icons-material/Edit";
 import ReasonInput from "../ReasonInput";
 import TransactionDrawer from "../TransactionDrawer";
-import RemoveCircleOutlineOutlinedIcon from "@mui/icons-material/RemoveCircleOutlineOutlined";
-import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
 
 const DebitMemoModal = () => {
   const componentRef = useRef();

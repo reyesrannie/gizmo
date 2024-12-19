@@ -19,6 +19,7 @@ export const roleApi = jsonServerAPI.injectEndpoints({
         method: "POST",
         body: payload,
       }),
+      invalidatesTags: ["Role"],
     }),
     updateRole: builder.mutation({
       transformResponse: (response) => response,
@@ -27,6 +28,7 @@ export const roleApi = jsonServerAPI.injectEndpoints({
         method: "PUT",
         body: payload,
       }),
+      invalidatesTags: ["Role"],
     }),
     archiveRole: builder.mutation({
       transformResponse: (response) => response,
@@ -35,6 +37,7 @@ export const roleApi = jsonServerAPI.injectEndpoints({
         method: "PATCH",
         body: payload,
       }),
+      invalidatesTags: ["Role"],
     }),
   }),
 });

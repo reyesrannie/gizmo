@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 
 import {
   Box,
@@ -15,7 +15,7 @@ import {
   Typography,
 } from "@mui/material";
 
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 
 import loading from "../../assets/lottie/Loading-2.json";
 import moment from "moment";
@@ -28,7 +28,6 @@ import ReactToPrint from "react-to-print";
 
 import { totalAccount } from "../../services/functions/compute";
 import Lottie from "lottie-react";
-import { setMenuDataMultiple } from "../../services/slice/menuSlice";
 import { useUsersQuery } from "../../services/api/authApi";
 import { useSupplierTypeQuery } from "../../services/api/supplierTypeApi";
 import { useSupplierQuery } from "../../services/api/supplierApi";
@@ -39,70 +38,49 @@ import {
   useVpCheckNumberQuery,
 } from "../../services/api/vouchersPayableApi";
 import { useTaxComputationQuery } from "../../services/api/taxComputationApi";
+import { AdditionalFunction } from "../../services/functions/AdditionalFunction";
 
 const MultipleVoucherPrinting = ({ afterPrint }) => {
-  const dispatch = useDispatch();
   const menuData = useSelector((state) => state.menu.menuData);
   const menuDataMultiple = useSelector((state) => state.menu.menuDataMultiple);
+  const { convertToPeso } = AdditionalFunction();
 
   const voucher = useSelector((state) => state.options.voucher);
 
-  const {
-    data: tin,
-    isLoading: loadingTIN,
-    isSuccess: supplySuccess,
-  } = useSupplierQuery({
+  const { data: tin, isLoading: loadingTIN } = useSupplierQuery({
     status: "active",
     pagination: "none",
   });
 
-  const {
-    data: document,
-    isLoading: loadingDocument,
-    isSuccess: documentSuccess,
-  } = useDocumentTypeQuery({
+  const { data: document } = useDocumentTypeQuery({
     status: "active",
     pagination: "none",
   });
 
-  const {
-    data: taxComputation,
-    isLoading: loadingTax,
-    isSuccess: taxSuccess,
-  } = useTaxComputationQuery({
-    status: "active",
-    transaction_id:
-      voucher === "gj"
-        ? []
-        : menuDataMultiple?.map((item) => item?.transactions?.id),
-    gj_id: voucher !== "gj" ? "" : menuData?.id,
-    voucher: voucher,
-    pagination: "none",
-  });
+  const { data: taxComputation, isLoading: loadingTax } =
+    useTaxComputationQuery({
+      status: "active",
+      transaction_id:
+        voucher === "gj"
+          ? []
+          : menuDataMultiple?.map((item) => item?.transactions?.id),
+      gj_id: voucher !== "gj" ? "" : menuData?.id,
+      voucher: voucher,
+      pagination: "none",
+    });
 
-  const {
-    data: accountTitles,
-    isLoading: loadingTitles,
-    isSuccess: successTitles,
-  } = useAccountTitlesQuery({
-    status: "active",
-    pagination: "none",
-  });
+  const { data: accountTitles, isLoading: loadingTitles } =
+    useAccountTitlesQuery({
+      status: "active",
+      pagination: "none",
+    });
 
-  const {
-    data: supplierType,
-    isLoading: loadingType,
-    isSuccess: typeSuccess,
-  } = useSupplierTypeQuery({
+  const { data: supplierType, isLoading: loadingType } = useSupplierTypeQuery({
     status: "active",
     pagination: "none",
   });
 
-  const {
-    data: logs,
-    isLoading: loadingLogs,
-    isSuccess: successLogs,
-  } = useStatusLogsQuery(
+  const { data: logs, isLoading: loadingLogs } = useStatusLogsQuery(
     {
       transaction_id: menuDataMultiple?.map((item) => item?.transactions?.id),
       sorts: "created_at",
@@ -111,7 +89,7 @@ const MultipleVoucherPrinting = ({ afterPrint }) => {
     { skip: menuDataMultiple?.length === 0 }
   );
 
-  const { data: user, isSuccess: successUser } = useUsersQuery({
+  const { data: user } = useUsersQuery({
     status: "active",
     pagination: "none",
   });
@@ -124,10 +102,6 @@ const MultipleVoucherPrinting = ({ afterPrint }) => {
       skip: voucher === "journal" || voucher === null || menuData === null,
     }
   );
-
-  const convertToPeso = (value) => {
-    return value?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  };
 
   const componentRef = useRef();
 

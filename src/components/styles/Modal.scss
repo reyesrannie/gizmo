@@ -9,6 +9,29 @@
   }
 }
 
+.gj-printing {
+  &.MuiPaper-root {
+    display: none;
+  }
+  @media print {
+    &.MuiPaper-root {
+      display: contents;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      .MuiTypography-root {
+        font-family: Roboto-Light;
+      }
+
+      .MuiTableContainer-root {
+        padding: 0px;
+        overflow: hidden;
+      }
+    }
+  }
+}
+
 .print-2307 {
   display: none;
   position: relative;
@@ -163,6 +186,14 @@
       margin-left: 15px;
       bottom: 0;
     }
+  }
+}
+
+.clearing-date-cleared {
+  &.MuiBox-root {
+    display: flex;
+    flex-direction: column;
+    min-height: 50px;
   }
 }
 
@@ -359,6 +390,17 @@
     .MuiTypography-root {
       font-family: Roboto-Black;
       font-size: 12px;
+    }
+  }
+}
+
+.treasury-edit-icon {
+  &.MuiSvgIcon-root {
+    font-size: 15px;
+  }
+  @media print {
+    &.MuiSvgIcon-root {
+      display: none;
     }
   }
 }

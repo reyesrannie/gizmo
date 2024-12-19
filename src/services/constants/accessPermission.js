@@ -49,6 +49,10 @@ const accessPermission = [
         access_permission: "tagging",
         label: "Tagging",
       },
+      {
+        access_permission: "tagging_history",
+        label: "History",
+      },
     ],
   },
   {
@@ -58,6 +62,14 @@ const accessPermission = [
       {
         access_permission: "approver",
         label: "Approver",
+      },
+      {
+        access_permission: "gj_approver",
+        label: "GJ Approver",
+      },
+      {
+        access_permission: "history_approver",
+        label: "History",
       },
     ],
   },
@@ -92,6 +104,23 @@ const accessPermission = [
       {
         access_permission: "check_registry",
         label: "Check Registration",
+      },
+
+      {
+        access_permission: "check_status",
+        label: "Check Status",
+      },
+      {
+        access_permission: "debit_memo",
+        label: "Debit Memo",
+      },
+      {
+        access_permission: "offset",
+        label: "Offset",
+      },
+      {
+        access_permission: "status_graph",
+        label: "Status Graph",
       },
     ],
   },
